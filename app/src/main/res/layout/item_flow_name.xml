@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_bg_flow_item"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="12dp">
+
+        <TextView
+            android:id="@+id/tv_flow_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="当" />
+
+        <ImageButton
+            android:id="@+id/ib_invert"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_circle"
+            android:contentDescription="@{@string/add_criteria}"
+            android:src="@drawable/ic_baseline_switch_24"
+            app:layout_constraintEnd_toStartOf="@id/ib_add"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?colorPrimary" />
+
+        <ImageButton
+            android:id="@+id/ib_add"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_circle"
+            android:contentDescription="@{@string/add_criteria}"
+            android:src="@drawable/ic_baseline_add_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?colorPrimary" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

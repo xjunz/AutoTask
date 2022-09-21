@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="corner_item">8dp</dimen>
+    <dimen name="corner_bubble">12dp</dimen>
+    <dimen name="corner_btn">24dp</dimen>
+    <dimen name="corner_chip">24dp</dimen>
+    <dimen name="corner_dialog">8dp</dimen>
+    <dimen name="corner_closeup">16dp</dimen>
+    <dimen name="fab_normal">48dp</dimen>
+    <dimen name="fab_small">40dp</dimen>
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_unit">8dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="spacing_large">32dp</dimen>
+</resources>

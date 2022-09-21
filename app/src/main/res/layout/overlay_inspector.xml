@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <top.xjunz.tasker.ui.widget.LayoutInspectorView
+            android:id="@+id/inspector_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/node_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="#80000000"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_attrs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:spanCount="3" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_select"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog.Flush"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rv_attrs" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reselect"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog.Flush"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/reselect"
+                app:layout_constraintEnd_toStartOf="@id/btn_select"
+                app:layout_constraintTop_toTopOf="@id/btn_select" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dismiss"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog.Flush"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/dismiss"
+                app:layout_constraintStart_toEndOf="@id/btn_select"
+                app:layout_constraintTop_toTopOf="@id/btn_select" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+</layout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_unit">
+
+        <TextView
+            android:id="@+id/tv_attr_name"
+            style="@style/TextAppearance.MaterialComponents.Overline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Clickable" />
+
+        <TextView
+            android:id="@+id/tv_attr_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_attr_name"
+            android:layout_alignStart="@id/tv_attr_name"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="?android:textColorPrimary"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeTextType="uniform"
+            tools:text="false" />
+    </RelativeLayout>
+
+</layout>

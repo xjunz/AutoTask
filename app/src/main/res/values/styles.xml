@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TintedIcon">
+        <item name="android:padding">@dimen/spacing_small</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="tint">?colorPrimary</item>
+        <item name="backgroundTint">@color/icon_background</item>
+        <item name="android:background">@drawable/bg_circle</item>
+    </style>
+
+    <style name="TintedIcon.Main">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="BadgeText">
+        <item name="android:textAppearance">?textAppearanceLabelSmall</item>
+        <item name="android:textColor">?colorOnPrimaryContainer</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:letterSpacing">.1</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:background">@drawable/bg_badge</item>
+        <item name="android:paddingBottom">2dp</item>
+    </style>
+
+    <style name="Sade">
+        <item name="android:windowEnterAnimation">@anim/dialog_window_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_window_exit</item>
+    </style>
+
+    <style name="BottomSheetDialogStyle" parent="ThemeOverlay.Material3.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+        <item name="android:backgroundDimAmount">0.32</item>
+    </style>
+
+    <style name="BottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">
+            @style/ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet
+        </item>
+    </style>
+
+    <style name="ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet">
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+
+    <style name="BubbleButton">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="tint">?colorOnSecondary</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+    </style>
+
+</resources>

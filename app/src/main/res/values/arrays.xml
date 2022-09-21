@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="node_attr_names">
+        <item>Package</item>
+        <item>Class</item>
+        <item>Text</item>
+        <item>Desc</item>
+        <item>Id</item>
+        <item>Checked</item>
+        <item>Checkable</item>
+        <item>Clickable</item>
+        <item>Enabled</item>
+        <item>Focused</item>
+        <item>Focusable</item>
+        <item>LongClickable</item>
+        <item>Scrollable</item>
+        <item>Selected</item>
+    </string-array>
+    <string-array name="node_attr_methods">
+        <item>getPackageName</item>
+        <item>getClassName</item>
+        <item>getText</item>
+        <item>getContentDescription</item>
+        <item>getViewIdResourceName</item>
+        <item>isChecked</item>
+        <item>isCheckable</item>
+        <item>isClickable</item>
+        <item>isEnabled</item>
+        <item>isFocused</item>
+        <item>isFocusable</item>
+        <item>isLongClickable</item>
+        <item>isScrollable</item>
+        <item>isSelected</item>
+    </string-array>
+</resources>

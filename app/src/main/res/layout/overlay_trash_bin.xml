@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?colorSecondary"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:paddingVertical="@dimen/spacing_normal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ib_delete_overlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/drag_to_here_to_remove_overlay"
+            android:src="@drawable/ic_twotone_delete_forever_24"
+            android:tint="?colorOnSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:text="@string/drag_to_here_to_remove_overlay"
+            android:textColor="?colorOnSecondary" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

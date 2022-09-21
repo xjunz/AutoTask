@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?colorSurface"
+        tools:context=".ui.MainActivity">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_task_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="10" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@animator/sla_appbar"
+            app:liftOnScroll="true">
+
+            <FrameLayout
+                android:id="@+id/top_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_unit"
+                android:alpha=".9"
+                android:clickable="true"
+                tools:ignore="KeyboardInaccessibleWidget">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?actionBarSize"
+                    android:layout_marginStart="16dp"
+                    android:alpha=".8"
+                    android:gravity="center"
+                    android:text="@string/task_list"
+                    android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
+
+                <ImageButton
+                    android:id="@+id/ib_create_task"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="12dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@{@string/create_task}"
+                    android:src="@drawable/ic_baseline_add_24" />
+            </FrameLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_inspector"
+            style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/turn_on_floating_assistant"
+            app:icon="@drawable/ic_twotone_layers_24" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

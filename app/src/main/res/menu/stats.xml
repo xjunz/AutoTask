@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_sort_by"
+        android:title="@string/sort_by">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/item_by_count"
+                    android:title="@string/total_skipping_count" />
+                <item
+                    android:id="@+id/item_by_freq"
+                    android:title="@string/ave_skipping_count_per_day" />
+                <item
+                    android:id="@+id/item_by_latest_timestamp"
+                    android:title="@string/latest_timestamp" />
+                <item
+                    android:id="@+id/item_by_first_timestamp"
+                    android:title="@string/first_timestamp" />
+                <item
+                    android:id="@+id/item_by_label"
+                    android:title="@string/app_label" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/item_ascending"
+        android:checkable="true"
+        android:title="@string/ascending" />
+</menu>

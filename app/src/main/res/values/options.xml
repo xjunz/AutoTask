@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="starts_with">以指定文本开始</string>
+    <string name="not_starts_with">不以指定文本开始</string>
+    <string name="ends_with">以指定文本结束</string>
+    <string name="not_ends_with">不以指定文本结束</string>
+    <string name="matches_pattern">匹配指定正则表达式</string>
+    <string name="not_matches_pattern">不匹配指定正则表达式</string>
+    <string name="length_in_range">文本长度在指定范围</string>
+    <string name="length_not_in_range">文本长度不在指定范围</string>
+    <string name="contains_text">包含指定文本</string>
+    <string name="not_contains_text">不包含指定文本</string>
+    <string name="specify_apps">指定应用程序</string>
+    <string name="exclude_apps">排除指定应用程序</string>
+    <string name="format_range">%d至%d</string>
+    <string name="to_lower_case">将英文字母全部转为小写</string>
+    <string name="trim">去除空格</string>
+    <string name="on_package_entered">进入指定应用程序时</string>
+    <string name="on_package_exited">退出指定应用程序时</string>
+    <string name="on_content_changed">处于指定应用程序内时</string>
+    <string name="invert">取反</string>
+</resources>

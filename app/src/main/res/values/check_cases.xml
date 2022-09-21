@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="format_check_case_desc_prefix">运行测试后，%s</string>
+    <string name="case_widget_recognition">文本识别</string>
+    <string name="desc_case_widget_recognition">会提示屏幕中间的文字</string>
+    <string name="case_drag_and_drop">模拟拖放</string>
+    <string name="desc_case_drag_and_drop">会将按钮拖放到目标位置，目标位置的文字改变为按钮的文字</string>
+    <string name="case_global_action">全局动作</string>
+    <string name="desc_case_global_action">会执行以下动作：切换到最近任务，返回当前应用，下拉通知栏，关闭通知栏</string>
+</resources>

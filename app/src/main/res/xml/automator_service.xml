@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowsChanged"
+    android:accessibilityFeedbackType="feedbackAllMask"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
+    android:canPerformGestures="true"
+    android:canRequestTouchExplorationMode="true"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_summary"
+    android:notificationTimeout="100"
+    android:settingsActivity="top.xjunz.tasker.main.MainActivity" />

@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?><!--suppress AndroidUnknownAttribute -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.text.method.LinkMovementMethod" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.MainActivity">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingTop="?actionBarSize">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_option_frame"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_service_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="?android:textColorPrimary"
+                        tools:text="@string/service_not_started" />
+
+                    <TextView
+                        android:id="@+id/tv_prompt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_service_status"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:typeface="monospace"
+                        tools:text="@string/prompt_request_permission" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_run"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:insetTop="4dp"
+                        android:insetBottom="4dp"
+                        android:stateListAnimator="@null"
+                        android:textColor="@color/color_status_text"
+                        app:backgroundTint="@color/color_status_tint"
+                        app:cornerRadius="@dimen/corner_btn"
+                        app:icon="@drawable/ic_status_control"
+                        app:iconTint="@color/color_status_icon"
+                        app:rippleColor="@color/color_status_ripple"
+                        app:strokeColor="@color/color_status_stroke"
+                        tools:ignore="RelativeOverlap"
+                        tools:text="@string/run" />
+                </RelativeLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/container_operating_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_title_mode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/select_operating_mode"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="?android:textColorPrimary"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_desc_mode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_title_mode"
+                        tools:text="@string/desc_shizuku_mode" />
+
+                    <TextView
+                        android:id="@+id/tv_mode"
+                        style="@style/BadgeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/tv_title_mode"
+                        app:layout_constraintStart_toEndOf="@+id/tv_title_mode"
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_mode"
+                        tools:text="Shizuku" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <RelativeLayout
+                    android:id="@+id/container_shizuku_intro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_activate_via_shizuku"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/grant_by_shizuku"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="?android:textColorPrimary" />
+
+                    <TextView
+                        android:id="@+id/tv_intro_to_shizuku"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_activate_via_shizuku"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:movementMethod="@{LinkMovementMethod.getInstance()}"
+                        android:text="@string/intro_to_shizuku"
+                        android:typeface="monospace" />
+
+                    <Space
+                        android:id="@+id/center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_intro_to_shizuku"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_grant"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_unit"
+                            android:layout_weight="0"
+                            android:insetTop="4dp"
+                            android:insetBottom="4dp"
+                            android:stateListAnimator="@null"
+                            android:textColor="@color/color_status_text"
+                            app:icon="@drawable/ic_baseline_touch_app_24"
+                            app:iconGravity="textStart"
+                            app:iconTint="@color/color_status_icon"
+                            app:strokeColor="@color/color_status_stroke"
+                            tools:text="@string/grant" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_shizuku_action"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:insetTop="4dp"
+                            android:insetBottom="4dp"
+                            android:stateListAnimator="@null"
+                            app:icon="@drawable/ic_shizuku_action"
+                            app:iconGravity="textStart"
+                            app:strokeColor="?colorPrimary"
+                            tools:text="@string/install_shizuku" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/container_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_test"
+                        style="@style/TintedIcon.Main"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/usability_test"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_bug_report_24" />
+
+                    <TextView
+                        android:id="@+id/tv_check"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_test"
+                        android:text="@string/usability_test"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                    <TextView
+                        android:id="@+id/tv_caption_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_check"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:layout_toEndOf="@id/iv_test"
+                        android:text="@string/caption_test" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/container_custom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_custom"
+                        style="@style/TintedIcon.Main"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/custom_task"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_gesture_24" />
+
+                    <TextView
+                        android:id="@+id/tv_custom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_custom"
+                        android:text="@string/custom_task"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                    <TextView
+                        android:id="@+id/tv_cation_custom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_custom"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:layout_toEndOf="@id/iv_custom"
+                        android:text="@string/caption_custom_task" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="showRecords"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_stats"
+                        style="@style/TintedIcon.Main"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/statistics"
+                        android:src="@drawable/ic_baseline_history_24" />
+
+                    <TextView
+                        android:id="@+id/tv_stats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_stats"
+                        android:text="@string/statistics"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        tools:ignore="RelativeOverlap" />
+
+                    <TextView
+                        android:id="@+id/tv_caption_stats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_stats"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:layout_toEndOf="@id/iv_stats" />
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/enter"
+                        android:src="@drawable/ic_baseline_chevron_right_24" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/iv_config"
+                        style="@style/TintedIcon.Main"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_circle"
+                        android:contentDescription="@string/settings"
+                        android:src="@drawable/ic_baseline_settings_24" />
+
+                    <TextView
+                        android:id="@+id/tv_config"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_config"
+                        android:text="@string/settings"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        tools:ignore="RelativeOverlap" />
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/enter"
+                        android:src="@drawable/ic_baseline_chevron_right_24" />
+                </RelativeLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@animator/sla_appbar"
+            app:liftOnScroll="true">
+
+            <FrameLayout
+                android:id="@+id/top_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_unit"
+                android:alpha=".9"
+                android:clickable="true"
+                tools:ignore="KeyboardInaccessibleWidget">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?actionBarSize"
+                    android:layout_marginStart="16dp"
+                    android:alpha=".8"
+                    android:gravity="center"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
+
+                <ImageButton
+                    android:id="@+id/ib_menu"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="12dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@{@string/more}"
+                    android:src="@drawable/ic_baseline_more_vert_24" />
+            </FrameLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

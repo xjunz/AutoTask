@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <top.xjunz.tasker.ui.widget.BubbleLayout
+        android:id="@+id/bubble_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_fab"
+        android:elevation="2dp"
+        android:visibility="gone"
+        tools:layout_gravity="center">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_center"
+            style="@style/BubbleButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@{@string/inspect_layout}"
+            android:src="@drawable/ic_baseline_close_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_left"
+            style="@style/BubbleButton"
+            android:contentDescription="@{@string/find_prev}"
+            android:src="@drawable/ic_baseline_navigate_before_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_top"
+            style="@style/BubbleButton"
+            android:contentDescription="@{@string/find_parent}"
+            android:src="@drawable/ic_baseline_keyboard_arrow_up_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_right"
+            style="@style/BubbleButton"
+            android:contentDescription="@{@string/find_next}"
+            android:src="@drawable/ic_baseline_navigate_next_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_bottom"
+            style="@style/BubbleButton"
+            android:contentDescription="@{@string/find_child}"
+            android:src="@drawable/ic_baseline_keyboard_arrow_down_24" />
+
+    </top.xjunz.tasker.ui.widget.BubbleLayout>
+</layout>

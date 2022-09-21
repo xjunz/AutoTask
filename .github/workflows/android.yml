@@ -1,0 +1,48 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Generate info
+      run: |
+        cd ./app/src/main/java/top/xjunz/automator
+        touch Constants.kt
+        echo "package top.xjunz.automator" >> Constants.kt
+        echo "const val ALIPAY_DONATE_URL =\"xxx\"" >> Constants.kt
+        echo "const val EMAIL_ADDRESS = \"xxx\"" >> Constants.kt
+        echo "const val APP_DOWNLOAD_URL = \"https://github.com/xjunz/AutoSkip/releases\"" >> Constants.kt
+        echo "const val FEEDBACK_GROUP_URL = \"xxx\"" >> Constants.kt
+        cd ../../../../../../..
+        keytool -genkey -alias a -dname CN=_ -storepass passwd -keypass passwd -keyalg RSA -keystore android.keystore
+        echo keystore.alias=a >> sign.properties
+        echo keystore.keyPassword=passwd >> sign.properties
+        echo keystore.password=passwd >> sign.properties
+        echo keystore.file=$(pwd)/android.keystore >> sign.properties
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug
+
+    - name: Upload apk
+      uses: actions/upload-artifact@v2
+      with:
+        name: AutoSkip_apk_${{ github.sha }}
+        path: app/build/outputs/apk/debug/*.apk

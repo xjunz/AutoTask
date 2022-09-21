@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:state_enabled="true"
+        app:state_lifted="false">
+        <set>
+            <objectAnimator
+                android:duration="?motionDurationShort2"
+                android:propertyName="alpha"
+                android:valueTo="1"
+                android:valueType="floatType" />
+            <objectAnimator
+                android:duration="150"
+                android:propertyName="elevation"
+                android:valueTo="0dp"
+                android:valueType="floatType" />
+        </set>
+    </item>
+
+    <item
+        android:state_enabled="true"
+        app:state_lifted="true">
+        <set>
+            <objectAnimator
+                android:duration="150"
+                android:propertyName="elevation"
+                android:valueTo="0dp"
+                android:valueType="floatType" />
+            <objectAnimator
+                android:duration="150"
+                android:propertyName="alpha"
+                android:valueTo=".92"
+                android:valueType="floatType" />
+        </set>
+    </item>
+
+    <item>
+        <set>
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="alpha"
+                android:valueTo="1"
+                android:valueType="floatType" />
+
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="elevation"
+                android:valueTo="0"
+                android:valueType="floatType" />
+        </set>
+    </item>
+
+</selector>

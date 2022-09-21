@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="top.xjunz.tasker.BuildConfig" />
+
+        <import type="android.text.method.LinkMovementMethod" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_normal"
+        android:paddingBottom="@dimen/spacing_small">
+
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="@drawable/bg_circle"
+            android:outlineProvider="background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/icon" />
+
+        <TextView
+            android:id="@+id/tv_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintStart_toEndOf="@+id/iv_icon"
+            app:layout_constraintTop_toTopOf="@+id/iv_icon" />
+
+        <TextView
+            android:id="@+id/tv_version_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_icon"
+            app:layout_constraintStart_toStartOf="@+id/tv_app_name"
+            tools:text="v1.1.0.r125" />
+
+        <TextView
+            android:id="@+id/tv_license"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:movementMethod="@{LinkMovementMethod.getInstance()}"
+            android:text="@string/license"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tv_app_name"
+            app:layout_constraintTop_toBottomOf="@+id/iv_icon" />
+
+        <TextView
+            android:id="@+id/tv_cr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:text="@string/cr"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            app:layout_constraintStart_toStartOf="@+id/tv_app_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_license" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_update"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/update"
+            app:cornerRadius="@dimen/corner_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_cr"
+            app:strokeColor="@color/material_on_surface_stroke" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_donate"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:text="@string/donate"
+            app:cornerRadius="@dimen/corner_btn"
+            app:layout_constraintEnd_toStartOf="@id/btn_update"
+            app:layout_constraintTop_toTopOf="@id/btn_update" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?colorSurface">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            android:textColor="?colorOnSurface"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/format_check_case_ordinal" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?textAppearanceTitleMedium"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:text="@string/case_widget_recognition" />
+
+        <TextView
+            android:id="@+id/tv_desc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:gravity="center"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_name"
+            tools:text="@string/desc_case_widget_recognition" />
+
+        <TextView
+            android:id="@+id/tv_target"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?textAppearanceDisplaySmall"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_name"
+            app:layout_constraintVertical_bias="0.4" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_target"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/drop_target"
+            app:layout_constraintBottom_toTopOf="@+id/view_drop_target"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_desc"
+            app:strokeColor="?colorPrimary" />
+
+        <TextView
+            android:id="@+id/view_drop_target"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:background="@drawable/bg_drop_target"
+            android:gravity="center"
+            android:minWidth="200dp"
+            android:text="拖动到此处"
+            android:textColor="@color/color_drop_target_stroke_color"
+            app:layout_constraintBottom_toTopOf="@+id/btg_bottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_name"
+            app:layout_constraintVertical_bias="0.85" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/btg_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_failed"
+                style="@style/Widget.Material3.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:minWidth="120dp"
+                android:paddingVertical="16dp"
+                android:text="@string/failed"
+                app:backgroundTint="?colorError"
+                app:icon="@drawable/ic_twotone_cancel_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btn_check"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_check"
+                style="@style/Widget.Material3.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:minWidth="120dp"
+                android:paddingVertical="16dp"
+                android:text="@string/exam"
+                app:icon="@drawable/ic_baseline_touch_app_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_checked"
+                style="@style/Widget.Material3.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:minWidth="120dp"
+                android:paddingVertical="16dp"
+                android:text="@string/checked"
+                app:backgroundTint="@color/color_checked"
+                app:icon="@drawable/ic_twotone_check_circle_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btn_check" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <ImageButton
+            android:id="@+id/ib_all"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@{@string/check_case_list}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_title"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_twotone_format_list_bulleted_24" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_list"
+            style="@style/Widget.Material3.CardView.Elevated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:transitionGroup="true"
+            app:cardBackgroundColor="?colorSurface"
+            app:layout_constraintEnd_toEndOf="@+id/ib_all"
+            app:layout_constraintTop_toTopOf="@+id/ib_all"
+            tools:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_check_case"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_check_case" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <View
+            android:id="@+id/mask"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:visibility="gone" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

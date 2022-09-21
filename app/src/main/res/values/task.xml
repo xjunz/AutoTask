@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="flow_when">当</string>
+    <string name="flow_if">如果</string>
+    <string name="flow_then">然后</string>
+    <string name="flow_do">那么</string>
+    <string name="flow_and">且</string>
+    <string name="flow_or">或</string>
+    <string name="flow_ui_object">或</string>
+    <string name="format_flow_desc">已指定%s个条件</string>
+</resources>

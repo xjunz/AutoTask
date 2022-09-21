@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_normal"
+        tools:layout_gravity="center">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_app_icon"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/tv_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintStart_toEndOf="@+id/iv_app_icon"
+            app:layout_constraintTop_toTopOf="@+id/iv_app_icon"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_pkg_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_app_icon"
+            app:layout_constraintStart_toStartOf="@+id/tv_app_name"
+            tools:text="@tools:sample/lorem" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="?dividerHorizontal"
+            app:layout_constraintTop_toBottomOf="@id/iv_app_icon" />
+
+        <ImageView
+            android:id="@+id/iv_history"
+            style="@style/TintedIcon"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/iv_app_icon"
+            app:layout_constraintStart_toStartOf="@+id/divider"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:srcCompat="@drawable/ic_baseline_history_24" />
+
+        <TextView
+            android:id="@+id/tv_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/tv_app_name"
+            app:layout_constraintTop_toTopOf="@+id/iv_history"
+            tools:text="从 2021-7-16 12:35:43" />
+
+        <TextView
+            android:id="@+id/tv_end_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            app:layout_constraintStart_toStartOf="@id/tv_start_time"
+            app:layout_constraintTop_toBottomOf="@id/tv_start_time"
+            tools:text="至 2021-7-18 23:01:21" />
+
+        <TextView
+            android:id="@+id/tv_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:background="@drawable/bg_tinted_chip"
+            android:paddingHorizontal="@dimen/spacing_unit"
+            android:paddingVertical="@dimen/spacing_small"
+            android:textColor="?colorOnSecondary"
+            app:layout_constraintStart_toStartOf="@id/tv_end_time"
+            app:layout_constraintTop_toBottomOf="@id/tv_end_time"
+            tools:text="累计2天12时34分" />
+
+        <ImageView
+            android:id="@+id/iv_touch"
+            style="@style/TintedIcon"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:src="@drawable/ic_baseline_touch_app_24"
+            app:layout_constraintEnd_toEndOf="@+id/iv_history"
+            app:layout_constraintStart_toStartOf="@+id/iv_history"
+            app:layout_constraintTop_toBottomOf="@id/tv_duration" />
+
+        <TextView
+            android:id="@+id/tv_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/tv_app_name"
+            app:layout_constraintTop_toTopOf="@id/iv_touch"
+            tools:text="累计跳过12次" />
+
+        <TextView
+            android:id="@+id/tv_ave_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:background="@drawable/bg_tinted_chip"
+            android:backgroundTint="?colorSecondary"
+            android:paddingHorizontal="@dimen/spacing_unit"
+            android:paddingVertical="@dimen/spacing_small"
+            android:textColor="?colorOnSecondary"
+            app:layout_constraintStart_toStartOf="@id/tv_count"
+            app:layout_constraintTop_toBottomOf="@id/tv_count"
+            tools:text="平均3次/天" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="?dividerHorizontal"
+            app:layout_constraintTop_toBottomOf="@id/tv_ave_count" />
+
+        <ImageView
+            android:id="@+id/iv_location"
+            style="@style/TintedIcon"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:src="@drawable/ic_baseline_my_location_24"
+            app:layout_constraintEnd_toEndOf="@id/iv_touch"
+            app:layout_constraintStart_toStartOf="@id/iv_touch"
+            app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+        <FrameLayout
+            android:id="@+id/dummy_frame_closeup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_location"
+            app:layout_constraintTop_toBottomOf="@id/tv_location">
+
+            <TextView
+                android:id="@+id/dummy_target_closeup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_dummy_target"
+                android:gravity="center"
+                android:padding="4dp"
+                android:textColor="@android:color/white"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="14sp"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeTextType="uniform" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/location_demonstration"
+            app:layout_constraintStart_toStartOf="@+id/tv_pkg_name"
+            app:layout_constraintTop_toTopOf="@+id/iv_location" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

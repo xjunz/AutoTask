@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools">
+
+    <top.xjunz.tasker.ui.widget.FloatingDraggableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/bubble_wrapper"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_fab"
+        android:elevation="2dp">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ib_center"
+            style="@style/BubbleButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@{@string/inspect_layout}"
+            android:src="@drawable/ic_baseline_my_location_24"
+            tools:ignore="ContentDescription" />
+    </top.xjunz.tasker.ui.widget.FloatingDraggableLayout>
+</layout>

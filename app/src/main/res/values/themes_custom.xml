@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base" parent="AppTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:letterSpacing">.1</item>
+        <item name="android:windowLightStatusBar">?isLightTheme</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow
+        </item>
+        <item name="colorControlHighlight">@color/color_control_highlight</item>
+    </style>
+
+    <style name="Base.Scrim">
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+    <style name="Base.Fullscreen">
+        <item name="android:navigationBarColor">#00000001</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="Detail" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">70%</item>
+    </style>
+
+    <style name="Base.Dialog">
+        <item name="android:windowMinWidthMinor">85%</item>
+        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="android:backgroundDimAmount">.3</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowElevation">10dp</item>
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+    </style>
+
+    <style name="Base.FragmentDialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">?colorBackgroundFloating</item>
+        <item name="android:windowAnimationStyle">@style/Sade</item>
+    </style>
+
+    <style name="Base.FragmentDialog.Min">
+        <item name="android:backgroundDimAmount">0.32</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowMinWidthMinor">85%</item>
+        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowElevation">6dp</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+    <style name="BottomCardShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+    </style>
+    <!--Alert Dialog Body Text Style-->
+    <style name="MaterialAlertDialog.Automator.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+    </style>
+    <!--Main Shape Appearance-->
+    <style name="ShapeAppearance.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_dialog</item>
+    </style>
+
+    <style name="AlertDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/dialog_window_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_window_exit</item>
+    </style>
+</resources>
