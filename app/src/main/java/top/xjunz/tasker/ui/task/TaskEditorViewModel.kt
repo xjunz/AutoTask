@@ -14,7 +14,11 @@ class TaskEditorViewModel : ViewModel() {
 
     var flow: Flow = Flow.defaultFlow()
 
-    val selectedIndex = MutableLiveData(-1)
+    val selectedFlowIndex = MutableLiveData(-1)
 
-    val selectedItem = MutableLiveData<Applet>()
+    val selectedFlowItem = MutableLiveData<Applet>()
+
+    val panelHeights = IntArray(2)
+
+    val currentPage = MutableLiveData<Int>()
 }

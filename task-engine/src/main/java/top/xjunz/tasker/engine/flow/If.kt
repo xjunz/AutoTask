@@ -1,25 +1,15 @@
 package top.xjunz.tasker.engine.flow
 
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Transient
 import top.xjunz.tasker.engine.AppletContext
-import top.xjunz.tasker.engine.AppletResult
+import top.xjunz.tasker.engine.FlowRuntime
 import top.xjunz.tasker.util.runtimeException
 
 /**
  * @author xjunz 2022/08/11
  */
-@SerialName(If.NAME)
+@SerialName("If")
 open class If : Flow() {
-
-    companion object {
-        const val NAME = "If"
-    }
-
-    @Transient
-    override var name: String? = NAME
-
-    override val isInvertible: Boolean = true
 
     override fun checkElements() {
         super.checkElements()
@@ -28,10 +18,10 @@ open class If : Flow() {
         }
     }
 
-    override fun onPostApply(ctx: AppletContext, result: AppletResult) {
-        if (isInverted == result.isSuccessful) {
+    override fun onPostApply(ctx: AppletContext, runtime: FlowRuntime) {
+        if (isInverted == runtime.isSuccessful) {
             // The IF flow is failed.
-            stopship(ctx)
+            stopship(runtime)
         }
     }
 }

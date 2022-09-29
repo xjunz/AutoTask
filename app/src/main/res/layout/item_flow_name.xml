@@ -11,7 +11,7 @@
         android:paddingVertical="12dp">
 
         <TextView
-            android:id="@+id/tv_flow_name"
+            android:id="@+id/tv_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Build
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import top.xjunz.tasker.ui.ColorSchemes
 import java.lang.ref.WeakReference
 
 /**
@@ -14,6 +15,8 @@ import java.lang.ref.WeakReference
 val app: App get() = App.instance!!
 
 val appTheme: Resources.Theme get() = App.appThemeRef.get()!!
+
+val colorSchemes: ColorSchemes get() = App.colorSchemesRef.get()!!
 
 val isInHostProcess: Boolean get() = App.instance != null
 
@@ -26,6 +29,8 @@ class App : Application() {
         var instance: App? = null
 
         lateinit var appThemeRef: WeakReference<Resources.Theme>
+
+        lateinit var colorSchemesRef: WeakReference<ColorSchemes>
     }
 
     override fun onCreate() {

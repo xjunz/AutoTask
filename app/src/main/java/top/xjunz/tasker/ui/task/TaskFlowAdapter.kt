@@ -4,14 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import top.xjunz.tasker.colorSchemes
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.flow.Applet
 import top.xjunz.tasker.engine.flow.Flow
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.task.factory.AppletRegistry.description
-import top.xjunz.tasker.task.factory.AppletRegistry.label
-import top.xjunz.tasker.ui.ColorSchemes
 import java.util.*
 
 /**
@@ -31,9 +29,9 @@ class TaskFlowAdapter(
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         this.recyclerView = recyclerView
-        fragment.observe(viewModel.selectedIndex) {
+        fragment.observe(viewModel.selectedFlowIndex) {
             if (it in items.indices) {
-                viewModel.selectedItem.value = items[it]
+                viewModel.selectedFlowItem.value = items[it]
             }
         }
     }
@@ -61,20 +59,20 @@ class TaskFlowAdapter(
 
     override fun onBindViewHolder(holder: FlowViewHolder, position: Int) {
         val item = items[position]
-        val isSelected = position == viewModel.selectedIndex.require()
+        val isSelected = position == viewModel.selectedFlowIndex.require()
         holder.binding.let {
-            val desc = item.description
-            it.tvDesc.isVisible = desc != null
+            val desc = null
+            it.tvDesc.isVisible = false
             it.tvDesc.text = desc
             it.tvLabel.text = item.label
             it.root.isSelected = isSelected
             if (item is Flow && item.javaClass != Flow::class.java) {
                 it.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
                 it.tvDesc.isVisible = isSelected
-                it.tvLabel.setTextColor(ColorSchemes.colorPrimary)
+                it.tvLabel.setTextColor(colorSchemes.colorPrimary)
             } else {
                 it.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-                it.tvLabel.setTextColor(ColorSchemes.colorOnSurface)
+                it.tvLabel.setTextColor(colorSchemes.colorOnSurface)
             }
         }
     }
@@ -82,11 +80,11 @@ class TaskFlowAdapter(
 
     private fun notifyAppletSelected(index: Int) {
         if (index != -1) {
-            val previousIndex = viewModel.selectedIndex.require()
+            val previousIndex = viewModel.selectedFlowIndex.require()
             if (index == previousIndex) {
-                viewModel.selectedIndex.value = -1
+                viewModel.selectedFlowIndex.value = -1
             } else {
-                viewModel.selectedIndex.value = index
+                viewModel.selectedFlowIndex.value = index
             }
             if (previousIndex != -1) {
                 notifyItemChanged(previousIndex, true)
@@ -96,7 +94,7 @@ class TaskFlowAdapter(
     }
 
     fun clearSelection() {
-        notifyAppletSelected(viewModel.selectedIndex.require())
+        notifyAppletSelected(viewModel.selectedFlowIndex.require())
     }
 
     fun notifyAppletSelected(applet: Applet) {

@@ -7,7 +7,7 @@ import top.xjunz.tasker.Configurations
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
-import top.xjunz.tasker.service.controller.currentServiceController
+import top.xjunz.tasker.service.controller.serviceController
 
 /**
  * @author xjunz 2022/07/08
@@ -27,17 +27,17 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     val operatingMode: LiveData<OperatingMode> get() = _operatingMode
 
     fun setCurrentOperatingMode(mode: OperatingMode) {
-        currentServiceController.removeStateListener()
+        serviceController.removeStateListener()
         Configurations.operatingMode = mode.VALUE
-        currentServiceController.setStateListener(this)
+        serviceController.setStateListener(this)
         _operatingMode.value = mode
     }
 
     fun toggleService() {
         if (isRunning.isTrue) {
-            currentServiceController.stopService()
+            serviceController.stopService()
         } else {
-            currentServiceController.bindService()
+            serviceController.bindService()
         }
     }
 

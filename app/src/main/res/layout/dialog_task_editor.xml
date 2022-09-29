@@ -47,6 +47,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
                     android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@{@string/dismiss}"
                     android:src="@drawable/ic_baseline_close_24"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -63,6 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="3dp"
+            android:transitionGroup="true"
             app:backgroundTint="?colorSurface"
             app:behavior_draggable="true"
             app:behavior_fitToContents="true"
@@ -72,11 +74,10 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="16dp">
+                android:layout_height="match_parent">
 
                 <View
-                    android:id="@+id/tv_panel_title"
+                    android:id="@+id/tv_panel_handle"
                     android:layout_width="75dp"
                     android:layout_height="6dp"
                     android:layout_marginTop="16dp"
@@ -91,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="vertical"
-                    app:layout_constraintTop_toBottomOf="@id/tv_panel_title">
+                    app:layout_constraintTop_toBottomOf="@id/tv_panel_handle">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_add_before"
@@ -173,7 +174,6 @@
                         app:iconGravity="textStart"
                         app:iconPadding="16dp" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>

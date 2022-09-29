@@ -3,20 +3,20 @@ package top.xjunz.tasker.impl
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Point
 import android.os.PowerManager
+import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.test.uiautomator.mock.MockContext
 import androidx.test.uiautomator.mock.MockDisplay
-import androidx.test.uiautomator.mock.MockDisplayMetrics
 
 
 /**
  * @author xjunz 2022/07/23
  */
 @Suppress("DEPRECATION")
-class MockContextAdaptor(private val ctx: Context) : MockContext, MockDisplay,
-    MockDisplayMetrics(ctx.resources.displayMetrics.density) {
+class MockContextAdaptor(private val ctx: Context) : MockContext, MockDisplay {
 
     private val powerManager by lazy {
         ctx.getSystemService(PowerManager::class.java)
@@ -30,8 +30,8 @@ class MockContextAdaptor(private val ctx: Context) : MockContext, MockDisplay,
         defDisplay.getRealSize(p)
     }
 
-    override fun getRealMetrics(): MockDisplayMetrics {
-        return this
+    override fun getRealMetrics(): DisplayMetrics {
+        return Resources.getSystem().displayMetrics
     }
 
     override fun getSize(p: Point) {
@@ -58,7 +58,7 @@ class MockContextAdaptor(private val ctx: Context) : MockContext, MockDisplay,
         return this
     }
 
-    override fun getDisplayMetrics(): MockDisplayMetrics {
-        return this
+    override fun getDisplayMetrics(): DisplayMetrics {
+        return Resources.getSystem().displayMetrics
     }
 }

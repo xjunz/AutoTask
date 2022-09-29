@@ -21,11 +21,11 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.test.uiautomator.mock.MockDisplayMetrics;
 import androidx.test.uiautomator.mock.MockViewConfiguration;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class UiObject2 implements Searchable {
     private GestureController mGestureController;
     private BySelector mSelector;  // Hold this mainly for debugging
     private AccessibilityNodeInfo mCachedNode;
-    private MockDisplayMetrics mDisplayMetrics;
+    private DisplayMetrics mDisplayMetrics;
 
     // Margins
     private int mMarginLeft = 5;

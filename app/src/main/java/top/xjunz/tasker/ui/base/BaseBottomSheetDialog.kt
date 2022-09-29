@@ -28,7 +28,7 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
 
     protected lateinit var binding: T
 
-    open val bindingRequiredSuperClassDepth = 1
+    protected open val bindingRequiredSuperClassDepth = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +48,7 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         return binding.root
     }
 
-    private lateinit var bottomSheetBehaviour: BottomSheetBehavior<*>
+    protected lateinit var bottomSheetBehaviour: BottomSheetBehavior<*>
 
     @SuppressLint("RestrictedApi", "VisibleForTests")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -3,20 +3,29 @@ package top.xjunz.tasker.engine.flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import top.xjunz.tasker.engine.AppletContext
-import top.xjunz.tasker.engine.AppletResult
+import top.xjunz.tasker.engine.FlowRuntime
 
 /**
- * The base element of a [RootFlow].
+ * The base element of a [Flow].
  *
  * @author xjunz 2022/08/04
  */
 @Serializable
-abstract class Applet(
+abstract class Applet{
+
+    companion object {
+        const val NO_ID = -1
+    }
+
     /**
-     * The identifier name, can be [transient][Transient] if the applet is identifiable by its type.
+     * The id, which is useful for identifying an [Applet].
      */
-    open var name: String? = null
-) {
+    var id: Int = NO_ID
+
+    /**
+     * The human-readable label.
+     */
+    open var label: String? = null
 
     /**
      * If an applet is invertible, its execution result can be inverted to the contrary side.
@@ -40,29 +49,15 @@ abstract class Applet(
      *
      * @param context The overall context of the [Applet] providing the access to its owner flow and
      * its owner task.
-     * @param sharedResult The shared result throughout the root flow's lifecycle.
+     * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
-    abstract fun apply(context: AppletContext, sharedResult: AppletResult)
+    abstract fun apply(context: AppletContext, runtime: FlowRuntime)
 
     override fun toString(): String {
-        if (name == null) {
+        if (label == null) {
             return javaClass.simpleName
         }
-        return "${javaClass.simpleName}(name=$name)"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Applet) return false
-        if (other.javaClass != javaClass) return false
-        if (name != other.name) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        if (name == null) return javaClass.name.hashCode()
-        return name?.hashCode() ?: 0
+        return "${javaClass.simpleName}(label=$label)"
     }
 
 }

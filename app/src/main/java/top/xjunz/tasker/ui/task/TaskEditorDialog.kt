@@ -11,11 +11,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskEditorBinding
 import top.xjunz.tasker.engine.flow.Flow
-import top.xjunz.tasker.ktx.applySystemInsets
-import top.xjunz.tasker.ktx.doOnCreated
-import top.xjunz.tasker.ktx.observe
-import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.task.editor.AppletShoppingCartDialog
 
 /**
  * @author xjunz 2022/08/22
@@ -63,6 +61,9 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
         binding.scrollView.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
         }
+        binding.btnAddInside.setOnClickListener {
+            AppletShoppingCartDialog().setTitle(binding.btnAddInside.text).show(parentFragmentManager)
+        }
     }
 
     override fun onBackPressed(): Boolean {
@@ -74,17 +75,14 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
     }
 
     private fun observeLiveData() {
-        observe(viewModel.selectedIndex) {
+        observe(viewModel.selectedFlowIndex) {
             if (it == -1) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
-        observe(viewModel.selectedItem) {
-            binding.btnInvert.isEnabled = it.isInvertible
-            binding.btnDelete.isEnabled = !it.isRequired
-            binding.btnReplace.isEnabled = !it.isRequired
+        observe(viewModel.currentPage) {
         }
     }
 

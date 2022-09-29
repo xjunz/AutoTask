@@ -55,10 +55,7 @@ class FloatingDraggableLayout @JvmOverloads constructor(
      *
      * @see onTouchEvent
      */
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        if (ev == null) {
-            return super.onInterceptTouchEvent(ev)
-        }
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         val rawX = ev.rawX
         val rawY = ev.rawY
         when (ev.action) {
@@ -94,25 +91,23 @@ class FloatingDraggableLayout @JvmOverloads constructor(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event != null) {
-            val rawX = event.rawX
-            val rawY = event.rawY
-            when (event.action) {
-                MotionEvent.ACTION_MOVE -> {
-                    onDragListener?.invoke(
-                        STATE_DRAGGING, rawX - currentPoint[0], rawY - currentPoint[1]
-                    )
-                    currentPoint[0] = rawX
-                    currentPoint[1] = rawY
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val rawX = event.rawX
+        val rawY = event.rawY
+        when (event.action) {
+            MotionEvent.ACTION_MOVE -> {
+                onDragListener?.invoke(
+                    STATE_DRAGGING, rawX - currentPoint[0], rawY - currentPoint[1]
+                )
+                currentPoint[0] = rawX
+                currentPoint[1] = rawY
+            }
+            MotionEvent.ACTION_UP -> {
+                if (isDragging) {
+                    onDragListener?.invoke(STATE_DRAG_ENDED, 0F, 0F)
                 }
-                MotionEvent.ACTION_UP -> {
-                    if (isDragging) {
-                        onDragListener?.invoke(STATE_DRAG_ENDED, 0F, 0F)
-                    }
-                    isDragging = false
-                    capturedView = null
-                }
+                isDragging = false
+                capturedView = null
             }
         }
         return true

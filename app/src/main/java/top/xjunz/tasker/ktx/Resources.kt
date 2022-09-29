@@ -22,6 +22,10 @@ inline val @receiver:ArrayRes Int.array: Array<CharSequence>
 inline val @receiver:ColorRes Int.color
     get() = app.getColor(this)
 
+@get:ColorInt
+inline val @receiver:AttrRes Int.attrColor
+    get() = resolvedId.color
+
 @get:AnyRes
 inline val @receiver:AttrRes Int.resolvedId: Int
     get() {
@@ -30,8 +34,8 @@ inline val @receiver:AttrRes Int.resolvedId: Int
         return value.resourceId
     }
 
-inline val @receiver:ColorRes Int.colorStateList: ColorStateList
-    get() = app.getColorStateList(this)
+inline val @receiver:AttrRes Int.attrColorStateList: ColorStateList
+    get() = app.getColorStateList(resolvedId)
 
 fun @receiver:ColorInt Int.toColorStateList(): ColorStateList {
     return ColorStateList.valueOf(this)

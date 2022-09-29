@@ -21,7 +21,7 @@ import top.xjunz.tasker.databinding.ActivityMainBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ShizukuServiceController
-import top.xjunz.tasker.service.controller.currentServiceController
+import top.xjunz.tasker.service.controller.serviceController
 import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
 import top.xjunz.tasker.ui.task.TaskShowcaseDialog
 import top.xjunz.tasker.util.ShizukuUtil
@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         App.appThemeRef = WeakReference(theme)
+        App.colorSchemesRef = WeakReference(ColorSchemes())
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(binding.root)
         initViews()
@@ -52,8 +53,8 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     }
 
     private fun initServiceController() {
-        currentServiceController.setStateListener(viewModel)
-        currentServiceController.bindExistingServiceIfExists()
+        serviceController.setStateListener(viewModel)
+        serviceController.bindExistingServiceIfExists()
     }
 
     private val popupMenu by lazy {
@@ -79,8 +80,8 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 } else if (it.itemId == R.id.item_a11y_mode) {
                     viewModel.setCurrentOperatingMode(OperatingMode.Accessibility)
                 }
-                // some status may have changed(such as shizuku-related status), sync now
-                currentServiceController.syncStatus()
+                // Some status may have changed(such as shizuku-related status), sync now
+                serviceController.syncStatus()
                 return@setOnMenuItemClickListener true
             }
         }
@@ -88,7 +89,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
 
     override fun onResume() {
         super.onResume()
-        currentServiceController.syncStatus()
+        serviceController.syncStatus()
     }
 
     private fun observeData() {
@@ -226,7 +227,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
 
     private val updateDurationTask = object : Runnable {
         override fun run() {
-            val timestamp = currentServiceController.startTimestamp
+            val timestamp = serviceController.startTimestamp
             if (timestamp > 0) {
                 val duration = System.currentTimeMillis() - timestamp
                 binding.tvPrompt.text = R.string.format_running_duration.format(
@@ -246,7 +247,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         Shizuku.removeRequestPermissionResultListener(this)
-        currentServiceController.unbindService()
+        serviceController.unbindService()
     }
 
     override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {

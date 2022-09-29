@@ -1,5 +1,6 @@
 package top.xjunz.tasker.engine
 
+import android.app.UiAutomation
 import androidx.test.uiautomator.UiDevice
 import top.xjunz.tasker.engine.flow.Applet
 import top.xjunz.tasker.engine.flow.Flow
@@ -19,8 +20,8 @@ open class AutomatorTask(val name: String) {
 
     /**
      * Whether the task is active or not. Even if set to `false`, a task may continue executing until
-     * its latest [Applet] is completed. You can observe [OnStateChangedListener.onTaskStopped] to get notified.
-     * Inactive tasks will no longer response to any further [Event] from [onEvent].
+     * its latest [Applet] is completed. You can observe [OnStateChangedListener.onTaskStopped] to
+     * get notified. Inactive tasks will no longer response to any further [Event] from [onEvent].
      */
     var isActive = false
         private set
@@ -29,20 +30,17 @@ open class AutomatorTask(val name: String) {
 
     val id = name.hashCode()
 
-    @Event.EventType
-    val eventType: Int = Event.EVENT_UNDEFINED
-
     private var startTimestamp: Long = -1
 
-    val uiAutomation get() = uiDevice.instrumentation?.uiAutomation
+    val uiAutomation: UiAutomation get() = uiDevice.instrumentation.uiAutomation
 
     /**
      * Whether the task is traversing its [rootFlow].
      */
     private var isExecuting = false
 
-    class FlowFailureException(ctx: AppletContext) :
-        Exception("The whole flow is stopped because [${ctx.currentFlow}:${ctx.currentApplet}] failed!")
+    class FlowFailureException(runtime: FlowRuntime) :
+        Exception("The whole flow is stopped because [${runtime.currentFlow}:${runtime.currentApplet}] failed!")
 
     class TaskCancellationException(task: AutomatorTask) :
         Exception("Task '$task' is cancelled due to user request!")
@@ -54,12 +52,12 @@ open class AutomatorTask(val name: String) {
         /**
          * When the flow completes due to an unexpected error.
          */
-        fun onAppletError(ctx: AppletContext, t: Throwable) {}
+        fun onAppletError(runtime: FlowRuntime, t: Throwable) {}
 
         /**
          * When the flow completes due to an applet failure.
          */
-        fun onAppletFailure(ctx: AppletContext) {}
+        fun onAppletFailure(runtime: FlowRuntime) {}
 
         /**
          * When the task stops running.
@@ -79,26 +77,22 @@ open class AutomatorTask(val name: String) {
     }
 
     fun activate(stateListener: OnStateChangedListener) {
-        synchronized(this) {
-            if (isActive) {
-                error("Task[$name] has already been activated!")
-            }
-            listener = stateListener
-            startTimestamp = System.currentTimeMillis()
-            isActive = true
-            listener.onTaskStarted()
+        if (isActive) {
+            error("Task[$name] has already been activated!")
         }
+        listener = stateListener
+        startTimestamp = System.currentTimeMillis()
+        isActive = true
+        listener.onTaskStarted()
     }
 
     fun deactivate() {
-        synchronized(this) {
-            if (!isActive) {
-                error("The task[$name] has already been deactivated!")
-            }
-            isActive = false
-            if (!isExecuting) {
-                listener.onTaskStopped()
-            }
+        if (!isActive) {
+            error("The task[$name] has already been deactivated!")
+        }
+        isActive = false
+        if (!isExecuting) {
+            listener.onTaskStopped()
         }
     }
 
@@ -112,19 +106,17 @@ open class AutomatorTask(val name: String) {
      * @return `true` if the task is successfully executed and `false` otherwise
      */
     fun onEvent(ctx: AppletContext): Boolean {
-        if (!isActive) return false
+       if(!isActive) return false
         isExecuting = true
-        val ret = AppletResult(ctx.events)
+        val runtime = FlowRuntime(ctx.events)
         try {
-            rootFlow.apply(ctx, ret)
+            rootFlow.apply(ctx, runtime)
         } catch (t: Throwable) {
-            synchronized(this) {
-                isExecuting = false
-                when (t) {
-                    is FlowFailureException -> listener.onAppletFailure(ctx)
-                    is TaskCancellationException -> listener.onTaskStopped()
-                    else -> listener.onAppletError(ctx, t)
-                }
+            isExecuting = false
+            when (t) {
+                is FlowFailureException -> listener.onAppletFailure(runtime)
+                is TaskCancellationException -> listener.onTaskStopped()
+                else -> listener.onAppletError(runtime, t)
             }
             return false
         }

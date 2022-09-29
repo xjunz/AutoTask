@@ -2,7 +2,6 @@ package top.xjunz.tasker.engine.flow
 
 import top.xjunz.tasker.engine.Event
 import top.xjunz.tasker.engine.criterion.BaseCriterion
-import top.xjunz.tasker.engine.criterion.Criterion
 
 /**
  * @author xjunz 2022/08/13
@@ -42,7 +41,8 @@ fun <T : Any, V : Any> BaseCriterion<T, V>.Matcher(block: (T, V) -> Boolean) {
 
 @FlowDsl
 fun <T : Any, V : Any> BaseCriterion<T, V>.Value(what: V, isInverted: Boolean = false) {
-    value = Criterion.Val(what, isInverted)
+    setValue(what)
+    this.isInverted = isInverted
 }
 
 @FlowDsl

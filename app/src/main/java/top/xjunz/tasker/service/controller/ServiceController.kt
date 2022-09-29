@@ -3,8 +3,10 @@ package top.xjunz.tasker.service.controller
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.service.AutomatorService
 import top.xjunz.tasker.service.OperatingMode
+import top.xjunz.tasker.service.ShizukuAutomatorService
 import java.lang.ref.WeakReference
 
 /**
@@ -13,9 +15,14 @@ import java.lang.ref.WeakReference
  * @author xjunz 2022/07/12
  */
 
-val currentServiceController get() = OperatingMode.CURRENT.serviceController
+val serviceController get() = OperatingMode.CURRENT.serviceController
 
-val currentService get() = currentServiceController.requireService()
+val currentService: AutomatorService
+    get() = if (isInHostProcess) {
+        serviceController.requireService()
+    } else {
+        ShizukuAutomatorService.require()
+    }
 
 abstract class ServiceController : CoroutineScope {
 

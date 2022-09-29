@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="current_package_name">当前应用程序满足</string>
+    <string name="basics">基本</string>
+    <string name="accurate_match">精确匹配</string>
+    <string name="fuzzy_match">按包名匹配</string>
+
     <string name="starts_with">以指定文本开始</string>
     <string name="not_starts_with">不以指定文本开始</string>
     <string name="ends_with">以指定文本结束</string>
     <string name="not_ends_with">不以指定文本结束</string>
-    <string name="matches_pattern">匹配指定正则表达式</string>
-    <string name="not_matches_pattern">不匹配指定正则表达式</string>
+    <string name="matches_pattern">满足正则表达式</string>
+    <string name="not_matches_pattern">不满足正则表达式</string>
     <string name="length_in_range">文本长度在指定范围</string>
-    <string name="length_not_in_range">文本长度不在指定范围</string>
+    <string name="not_length_in_range">文本长度不在指定范围</string>
     <string name="contains_text">包含指定文本</string>
     <string name="not_contains_text">不包含指定文本</string>
-    <string name="specify_apps">指定应用程序</string>
-    <string name="exclude_apps">排除指定应用程序</string>
+    <string name="in_pkg_collection">指定应用程序</string>
+    <string name="not_in_pkg_collection">排除应用程序</string>
     <string name="format_range">%d至%d</string>
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
@@ -19,4 +24,35 @@
     <string name="on_package_exited">退出指定应用程序时</string>
     <string name="on_content_changed">处于指定应用程序内时</string>
     <string name="invert">取反</string>
+    <string name="is_system">是系统应用</string>
+    <string name="not_is_system">不是系统应用</string>
+    <string name="is_launcher">是桌面应用</string>
+    <string name="not_is_launcher">不是桌面应用</string>
+    <string name="in_version_range">指定版本</string>
+    <string name="not_in_version_range">排除指定版本</string>
+
+    <string name="ui_object_exists">存在UI组件满足</string>
+    <string name="is_type_of">指定控件类型</string>
+    <string name="not_is_type_of">排除控件类型</string>
+    <string name="with_text">指定文字</string>
+    <string name="content_desc">指定内容描述文字(ContentDescription)</string>
+    <string name="not_with_text">排除文字</string>
+    <string name="in_length_range">文本长度范围</string>
+    <string name="is_clickable">可点击(isClickable)</string>
+    <string name="not_is_clickable">不可点击(isClickable)</string>
+    <string name="is_long_clickable">可长按(isLongClickable)</string>
+    <string name="not_is_long_clickable">不可长按(isLongClickable)</string>
+    <string name="is_editable">可编辑(isEditable)</string>
+    <string name="not_is_editable">不可编辑(isEditable)</string>
+    <string name="is_enabled">已启用(isEnabled)</string>
+    <string name="not_is_enabled">未启用(isEnabled)</string>
+    <string name="is_checkable">可勾选(isCheckable)</string>
+    <string name="not_is_checkable">不可勾选(isCheckable)</string>
+    <string name="is_checked">已被勾选(isChecked)</string>
+    <string name="not_is_checked">未被勾选(isChecked)</string>
+    <string name="is_selected">已被选中(isSelected)</string>
+    <string name="not_is_selected">未被选中(isSelected)</string>
+    <string name="is_scrollable">可滚动(isScrollable)</string>
+    <string name="not_is_scrollable">不可滚动(isScrollable)</string>
+    <string name="is_index">位置</string>
 </resources>

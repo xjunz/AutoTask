@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.action
 
 import top.xjunz.tasker.engine.AppletContext
-import top.xjunz.tasker.engine.AppletResult
+import top.xjunz.tasker.engine.FlowRuntime
 import top.xjunz.tasker.engine.flow.Applet
 
 /**
@@ -16,8 +16,8 @@ abstract class Action : Applet() {
  */
 fun <V : Any> ProcessorAction(action: (V) -> V): Action {
     return object : Action() {
-        override fun apply(context: AppletContext, sharedResult: AppletResult) {
-            sharedResult.setValue(action(sharedResult.getValue()))
+        override fun apply(context: AppletContext, runtime: FlowRuntime) {
+            runtime.setTarget(action(runtime.getTarget()))
         }
     }
 }

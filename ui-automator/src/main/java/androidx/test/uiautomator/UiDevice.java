@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -34,7 +35,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.test.uiautomator.mock.MockDisplay;
-import androidx.test.uiautomator.mock.MockDisplayMetrics;
 import androidx.test.uiautomator.mock.MockInstrumentation;
 
 import java.io.BufferedOutputStream;
@@ -276,7 +276,7 @@ public class UiDevice implements Searchable {
         MockDisplay display = getDefaultDisplay();
         Point p = new Point();
         display.getRealSize(p);
-        MockDisplayMetrics metrics = display.getRealMetrics();
+        DisplayMetrics metrics = display.getRealMetrics();
         float dpx = p.x / metrics.density;
         float dpy = p.y / metrics.density;
         p.x = Math.round(dpx);

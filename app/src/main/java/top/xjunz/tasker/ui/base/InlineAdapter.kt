@@ -23,6 +23,14 @@ class GenericViewHolder<T : ViewBinding>(
 }
 
 inline fun <Data, Binding : ViewDataBinding> inlineAdapter(
+    data: Array<Data>, itemViewBinding: Class<Binding>,
+    noinline initializer: GenericViewHolder<Binding>.() -> Unit,
+    crossinline onBindViewHolder: (binding: Binding, index: Int, data: Data) -> Unit
+): RecyclerView.Adapter<*> {
+    return inlineAdapter(data.toList(), itemViewBinding, initializer, onBindViewHolder)
+}
+
+inline fun <Data, Binding : ViewDataBinding> inlineAdapter(
     data: List<Data>, itemViewBinding: Class<Binding>,
     noinline initializer: GenericViewHolder<Binding>.() -> Unit,
     crossinline onBindViewHolder: (binding: Binding, index: Int, data: Data) -> Unit

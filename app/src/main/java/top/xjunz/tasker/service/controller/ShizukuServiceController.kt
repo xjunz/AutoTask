@@ -123,7 +123,7 @@ object ShizukuServiceController : ServiceController() {
     }
 
     override fun unbindService() {
-        currentServiceController.removeStateListener()
+        serviceController.removeStateListener()
         binder?.unlinkToDeath(deathRecipient, 0)
         Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, false)
     }

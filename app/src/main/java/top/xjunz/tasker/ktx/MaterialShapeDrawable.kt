@@ -15,6 +15,6 @@ fun Context.createMaterialShapeDrawable(
 ): MaterialShapeDrawable {
     return MaterialShapeDrawable.createWithElevationOverlay(this, elevation).apply {
         shapeAppearanceModel = ShapeAppearanceModel.builder().setAllCornerSizes(cornerSize).build()
-        fillColor = fillColorRes.resolvedId.colorStateList
+        fillColor = fillColorRes.attrColorStateList
     }
 }

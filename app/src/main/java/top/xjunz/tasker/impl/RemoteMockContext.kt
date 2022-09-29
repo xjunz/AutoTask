@@ -2,20 +2,20 @@ package top.xjunz.tasker.impl
 
 import android.content.Context
 import android.content.pm.IPackageManager
+import android.content.res.Resources
 import android.graphics.Point
 import android.os.Parcel
+import android.util.DisplayMetrics
 import androidx.core.os.ParcelCompat
 import androidx.test.uiautomator.mock.MockContext
 import androidx.test.uiautomator.mock.MockDisplay
-import androidx.test.uiautomator.mock.MockDisplayMetrics
 import rikka.shizuku.Shizuku
 import rikka.shizuku.SystemServiceHelper
 
 /**
  * @author xjunz 2022/07/24
  */
-class RemoteMockContext(private val realSize: Point, private val size: Point, density: Float) :
-    MockContext, MockDisplay, MockDisplayMetrics(density) {
+class RemoteMockContext(private val realSize: Point, private val size: Point) : MockContext, MockDisplay {
 
     override fun isInteractive(): Boolean {
         val data = SystemServiceHelper.obtainParcel(
@@ -41,16 +41,16 @@ class RemoteMockContext(private val realSize: Point, private val size: Point, de
         return this
     }
 
-    override fun getDisplayMetrics(): MockDisplayMetrics {
-        return this
+    override fun getDisplayMetrics(): DisplayMetrics {
+        return Resources.getSystem().displayMetrics
     }
 
     override fun getRealSize(p: Point) {
         p.set(realSize.x, realSize.y)
     }
 
-    override fun getRealMetrics(): MockDisplayMetrics {
-        return this
+    override fun getRealMetrics(): DisplayMetrics {
+        return Resources.getSystem().displayMetrics
     }
 
     override fun getSize(p: Point) {

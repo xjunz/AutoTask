@@ -26,9 +26,21 @@ import top.xjunz.tasker.impl.RemoteMockContext
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
 import top.xjunz.tasker.trace.logcat
+import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
 class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
+
+    companion object {
+
+        private var instanceRef: WeakReference<ShizukuAutomatorService>? = null
+
+        fun require(): ShizukuAutomatorService {
+            return requireNotNull(instanceRef?.get()) {
+                "The ShizukuAutomatorService is not yet started or has dead!"
+            }
+        }
+    }
 
     private lateinit var delegate: IAutomatorConnection
 
@@ -59,6 +71,7 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
         logcat("Hello from the remote service! My uid is ${Os.getuid()} and my pid is ${Os.getpid()}")
         handlerThread.isDaemon = false
         handlerThread.start()
+        instanceRef = WeakReference(this)
     }
 
     @Local
@@ -87,7 +100,7 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
     override fun initAutomatorContext(
         realSize: Point, size: Point, density: Float, scaledMinimumFlingVelocity: Int
     ) {
-        mockContext = RemoteMockContext(realSize, size, density)
+        mockContext = RemoteMockContext(realSize, size)
         mockViewConfiguration = MockViewConfiguration(scaledMinimumFlingVelocity)
     }
 

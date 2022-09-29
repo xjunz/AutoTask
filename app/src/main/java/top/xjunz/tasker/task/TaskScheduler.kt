@@ -7,12 +7,11 @@ import android.os.Looper
 import android.os.Message
 import android.system.Os
 import rikka.shizuku.SystemServiceHelper
-import top.xjunz.shared.ktx.unsafeCast
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.app
-import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.Event
+import top.xjunz.tasker.engine.FlowRuntime
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.service.AutomatorService
 
@@ -26,7 +25,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
 
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            val ctx = msg.obj.unsafeCast<AppletContext>()
+            val ctx = msg.obj as FlowRuntime
             try {
                 ctx.task.onEvent(ctx)
             } finally {
@@ -39,7 +38,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
 
     }
 
-    private fun getApplicationInfo(packageName: String): ApplicationInfo {
+    private fun getPackageInfo(packageName: String): ApplicationInfo {
         return if (isInHostProcess) {
             app.packageManager.getApplicationInfo(packageName, 0)
         } else {
@@ -53,7 +52,6 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      */
     fun scheduleTasks() {
         var previousPackage: String? = null
-        var applicationInfo: ApplicationInfo? = null
         service.uiAutomation.setOnAccessibilityEventListener listener@{
             try {
                 val currentPackage = it.packageName?.toString() ?: return@listener
@@ -63,7 +61,6 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                 }
                 val events: Array<Event>
                 if (currentPackage != previousPackage) {
-                    applicationInfo = getApplicationInfo(currentPackage)
                     events = arrayOf(
                         Event.obtain(Event.EVENT_ON_PACKAGE_ENTERED, currentPackage),
                         Event.obtain(Event.EVENT_ON_PACKAGE_EXITED, previousPackage!!)
@@ -73,7 +70,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                     events = arrayOf(Event.obtain(Event.EVENT_ON_CONTENT_CHANGED, currentPackage))
                 }
                 TaskManager.getActiveTasks().forEach { task ->
-                    val ctx = AppletContext(task, events, applicationInfo!!)
+                    val ctx = FlowRuntime(task, events)
                     handler.obtainMessage(task.id, ctx).sendToTarget()
                 }
             } finally {

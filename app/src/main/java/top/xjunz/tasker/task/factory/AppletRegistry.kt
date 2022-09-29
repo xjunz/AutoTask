@@ -1,57 +1,34 @@
 package top.xjunz.tasker.task.factory
 
 import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
-import top.xjunz.tasker.util.runtimeException
 
 
 /**
- * The registry storing all of the registered [Applet]. Registered criteria can be `serialized`
- * and `deserialized` via a unique name.
+ * The registry storing all of the registered [Applet], which can be created by a unique id.
  *
  * @author xjunz 2022/08/09
  */
-object AppletRegistry {
+class AppletRegistry {
 
-    private val ALL_FACTORIES = arrayOf(FlowFactory, EventFilterFactory, PackageCriterionFactory)
-
-    private fun throwIfNameNotFound(name: String): Nothing {
-        runtimeException("Cannot find any applet with name '$name'!")
+    companion object {
+        const val ID_EVENT_FILTER_FACTORY = 0
+        const val ID_PKG_APPLET_FACTORY = 1
     }
 
-    val Applet.description: CharSequence?
-        get() {
-            if (name == null) return null
-            ALL_FACTORIES.forEach {
-                if (it.supportedNames.contains(name)) {
-                    return it.getDescriptionOf(this)
-                }
-            }
-            throwIfNameNotFound(name!!)
-        }
+    val allFactories = arrayOf(PackageCriteriaFactory())
 
-    val Applet.label: CharSequence?
-        get() {
-            if (name == null) return null
-            ALL_FACTORIES.forEach {
-                if (it.supportedNames.contains(name)) {
-                    return it.getLabelOf(name!!)
-                }
-            }
-            throwIfNameNotFound(name!!)
-        }
+    private inline val Applet.factoryId get() = id ushr 16
 
-    fun createAppletByName(name: String): Applet {
-        ALL_FACTORIES.forEach {
-            if (it.supportedNames.contains(name)) {
-                return it.createApplet(name)
-            }
-        }
-        throwIfNameNotFound(name)
-    }
+    private inline val Applet.appletId get() = id and 0xFFFF
 
-    fun Flow.getFactory(): AppletFactory {
-        TODO()
+    fun createAppletById(id: Int, isInverted: Boolean): Applet {
+        val factoryId = id ushr 16
+        val appletId = id and 0xFFFF
+        return allFactories.single {
+            it.id == factoryId
+        }.createApplet(appletId).also {
+            it.isInverted = isInverted
+        }
     }
 }
 

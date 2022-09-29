@@ -135,8 +135,6 @@
     <string name="add_inside">在内部添加</string>
     <string name="add_after">在后面添加</string>
     <string name="add_before">在前面添加</string>
-    <string name="target_package_name">应用程序</string>
-    <string name="preprocess">预处理</string>
-    <string name="package_name">包名</string>
+    <string name="back">返回</string>
 
 </resources>
