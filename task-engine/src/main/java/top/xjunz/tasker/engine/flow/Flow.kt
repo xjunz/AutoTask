@@ -39,16 +39,12 @@ open class Flow : Applet() {
 
     val applets: MutableList<Applet> = ArrayList(1)
 
-    protected fun traverseApplets(context: AppletContext, runtime: FlowRuntime) {
+    protected open fun doApply(context: AppletContext, runtime: FlowRuntime) {
         applets.forEachIndexed { _, applet ->
             context.task.ensureActive()
             runtime.currentApplet = applet
             applet.apply(context, runtime)
         }
-    }
-
-    protected open fun doApply(context: AppletContext, runtime: FlowRuntime) {
-        traverseApplets(context, runtime)
     }
 
     override fun apply(context: AppletContext, runtime: FlowRuntime) {

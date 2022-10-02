@@ -1,10 +1,11 @@
-package top.xjunz.tasker.engine.flow
+package top.xjunz.tasker.task.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import kotlinx.serialization.SerialName
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.FlowRuntime
+import top.xjunz.tasker.engine.flow.Flow
 
 /**
  * @author xjunz 2022/08/25
@@ -13,15 +14,17 @@ import top.xjunz.tasker.engine.FlowRuntime
 class UiObjectFlow : Flow() {
 
     override fun doApply(context: AppletContext, runtime: FlowRuntime) {
-        val node = runtime.getArgument(id) {
+        val uiObjectContext = UiObjectContext()
+        runtime.setTarget(uiObjectContext)
+        val node = context.getOrPutArgument(id) {
             context.task.uiAutomation.rootInActiveWindow
         }.findFirst {
-            runtime.setTarget(it)
-            traverseApplets(context, runtime)
+            uiObjectContext.source = it
+            super.doApply(context, runtime)
             runtime.isSuccessful
         }
         if (node != null) {
-            if (isReferred) runtime.resultRegistry[remark!!] = node
+            if (isReferred) runtime.registerResult(remark!!, node)
             runtime.isSuccessful = true
         } else {
             runtime.isSuccessful = false

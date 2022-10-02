@@ -33,8 +33,7 @@ import android.view.MotionEvent.PointerProperties;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
-import androidx.test.uiautomator.mock.MockContext;
-import androidx.test.uiautomator.mock.MockInstrumentation;
+import androidx.test.uiautomator.bridge.UiAutomatorBridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public class InteractionController {
     private final KeyCharacterMap mKeyCharacterMap =
             KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
-    private final MockInstrumentation mInstrumentation;
+    private final UiAutomatorBridge mInstrumentation;
 
     private static final long REGULAR_CLICK_LENGTH = 100;
 
@@ -66,7 +65,7 @@ public class InteractionController {
     // Inserted after each motion event injection.
     private static final int MOTION_EVENT_INJECTION_DELAY_MILLIS = 5;
 
-    public InteractionController(MockInstrumentation instrumentation) {
+    public InteractionController(UiAutomatorBridge instrumentation) {
         mInstrumentation = instrumentation;
     }
 
@@ -693,7 +692,7 @@ public class InteractionController {
      * @return true if the screen is ON else false
      */
     public boolean isScreenOn() {
-        return getContext().isInteractive();
+        return getInstrumentation().isScreenOn();
     }
 
     private boolean injectEventSync(InputEvent event) {
@@ -757,7 +756,7 @@ public class InteractionController {
         MotionEvent event;
         event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN, 1,
                 properties, pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
-        ret &= injectEventSync(event);
+        ret = injectEventSync(event);
 
         for (int x = 1; x < touches.length; x++) {
             event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(),
@@ -857,14 +856,10 @@ public class InteractionController {
     }
 
     UiAutomation getUiAutomation() {
-        return UiDevice.getUiAutomation(getInstrumentation());
+        return getInstrumentation().getUiAutomation();
     }
 
-    MockContext getContext() {
-        return getInstrumentation().getContext();
-    }
-
-    MockInstrumentation getInstrumentation() {
+    UiAutomatorBridge getInstrumentation() {
         return mInstrumentation;
     }
 }

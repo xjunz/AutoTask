@@ -1,11 +1,8 @@
 package top.xjunz.tasker.task.factory
 
 import android.annotation.SuppressLint
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import androidx.annotation.IntRange
 import top.xjunz.tasker.app
-import top.xjunz.tasker.colorSchemes
 import top.xjunz.tasker.engine.flow.Applet
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.util.unsupportedOperation
@@ -30,7 +27,7 @@ abstract class AppletOption(
         get() = categoryId ushr 8
 
     val label: CharSequence? by lazy {
-        if (labelRes == AppletFactory.LABEL_NONE) null else makeSpannedLabel(labelRes.text)
+        if (labelRes == AppletFactory.LABEL_NONE) null else labelRes.text
     }
 
     val invertedLabel: CharSequence? by lazy {
@@ -40,23 +37,11 @@ abstract class AppletOption(
                 val invertedResName = "not_" + app.resources.getResourceEntryName(labelRes)
                 val id = app.resources.getIdentifier(invertedResName, "string", app.packageName)
                 check(id != 0) { "Resource id 'R.string.$invertedResName' not found!" }
-                makeSpannedLabel(id.text)
+                id.text
             }
             AppletFactory.LABEL_NONE -> null
-            else -> makeSpannedLabel(invertedLabelRes.text)
+            else -> invertedLabelRes.text
         }
-    }
-
-    private fun makeSpannedLabel(label: CharSequence): CharSequence {
-        val index = label.indexOf('(')
-        if (index > -1) {
-            return SpannableStringBuilder().append(label.substring(0, index)).append(
-                label.substring(index),
-                ForegroundColorSpan(colorSchemes.textColorSecondaryNoDisable),
-                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-        return label
     }
 
     fun toggleInverted() {

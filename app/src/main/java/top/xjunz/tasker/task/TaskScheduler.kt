@@ -1,18 +1,12 @@
 package top.xjunz.tasker.task
 
-import android.content.pm.ApplicationInfo
-import android.content.pm.IPackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.system.Os
-import rikka.shizuku.SystemServiceHelper
 import top.xjunz.tasker.annotation.LocalAndRemote
-import top.xjunz.tasker.app
+import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.Event
-import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.service.AutomatorService
 
 /**
@@ -25,7 +19,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
 
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            val ctx = msg.obj as FlowRuntime
+            val ctx = msg.obj as AppletContext
             try {
                 ctx.task.onEvent(ctx)
             } finally {
@@ -35,16 +29,6 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                 }
             }
         }
-
-    }
-
-    private fun getPackageInfo(packageName: String): ApplicationInfo {
-        return if (isInHostProcess) {
-            app.packageManager.getApplicationInfo(packageName, 0)
-        } else {
-            IPackageManager.Stub.asInterface(SystemServiceHelper.getSystemService("package"))
-                .getApplicationInfo(packageName, 0, Os.getuid())
-        }
     }
 
     /**
@@ -52,7 +36,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      */
     fun scheduleTasks() {
         var previousPackage: String? = null
-        service.uiAutomation.setOnAccessibilityEventListener listener@{
+        service.uiAutomatorBridge.uiAutomation.setOnAccessibilityEventListener listener@{
             try {
                 val currentPackage = it.packageName?.toString() ?: return@listener
                 if (previousPackage == null) {
@@ -70,10 +54,11 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                     events = arrayOf(Event.obtain(Event.EVENT_ON_CONTENT_CHANGED, currentPackage))
                 }
                 TaskManager.getActiveTasks().forEach { task ->
-                    val ctx = FlowRuntime(task, events)
+                    val ctx = AppletContext(task, events, currentPackage)
                     handler.obtainMessage(task.id, ctx).sendToTarget()
                 }
             } finally {
+                @Suppress("DEPRECATION")
                 it.recycle()
             }
         }
@@ -88,7 +73,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
     fun destroy() {
-        service.uiAutomation.setOnAccessibilityEventListener(null)
+        service.uiAutomatorBridge.uiAutomation.setOnAccessibilityEventListener(null)
         handler.removeCallbacksAndMessages(null)
     }
 

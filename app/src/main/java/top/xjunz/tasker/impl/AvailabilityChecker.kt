@@ -23,8 +23,10 @@ class AvailabilityChecker(
 
     private val dropTargetId = "view_drop_target"
 
+    private val bridge get() = service.uiAutomatorBridge
+
     private val uiDevice by lazy {
-        UiDevice.getInstance(service)
+        UiDevice.getInstance(bridge)
     }
 
     private val handler by lazy {
@@ -59,13 +61,13 @@ class AvailabilityChecker(
                 )
             }
             R.string.case_global_action -> {
-                service.interactionController.toggleRecentApps()
+                bridge.interactionController.toggleRecentApps()
                 SystemClock.sleep(1000)
-                service.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                bridge.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
                 SystemClock.sleep(1000)
-                service.interactionController.openNotification()
+                bridge.interactionController.openNotification()
                 SystemClock.sleep(1000)
-                service.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                bridge.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
                 listener.onCompleted(null)
             }
             R.string.case_drag_and_drop -> {

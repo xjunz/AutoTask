@@ -11,16 +11,13 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
-import android.view.ViewConfiguration
 import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.MutableLiveData
-import androidx.test.uiautomator.GestureController
-import androidx.test.uiautomator.InteractionController
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.mock.MockContext
-import androidx.test.uiautomator.mock.MockViewConfiguration
+import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.unsafeCast
-import top.xjunz.tasker.impl.*
+import top.xjunz.tasker.impl.A11yUiAutomatorBridge
+import top.xjunz.tasker.impl.AvailabilityChecker
+import top.xjunz.tasker.impl.IAvailabilityChecker
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import top.xjunz.tasker.util.unsupportedOperation
@@ -33,9 +30,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     companion object {
 
-        val ERROR = MutableLiveData<Throwable>()
+        val error = MutableLiveData<Throwable>()
 
-        val RUNNING = MutableLiveData<Boolean>()
+        val isRunning = MutableLiveData<Boolean>()
 
         private var instanceRef: WeakReference<A11yAutomatorService>? = null
 
@@ -45,9 +42,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             checkNotNull(get()) { "The A11yAutomatorService is not yet started or is dead!" }
     }
 
-    override val isRunning get() = RUNNING.isTrue
+    override val isRunning get() = Companion.isRunning.isTrue
 
-    private var _startTimestamp: Long = -1
+    private var startTimestamp: Long = -1
 
     private var callbacks: AccessibilityServiceHidden.Callbacks? = null
 
@@ -57,16 +54,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         uiAutomationHidden.unsafeCast()
     }
 
-    private val interactionController by lazy {
-        A11yInteractionController(this)
-    }
-
-    private val mockContext by lazy {
-        MockContextAdaptor(applicationContext)
-    }
-
-    private val mockViewConfig by lazy {
-        MockViewConfiguration(ViewConfiguration.get(this).scaledMinimumFlingVelocity)
+    override val uiAutomatorBridge: UiAutomatorBridge by lazy {
+        A11yUiAutomatorBridge(this, _uiAutomation)
     }
 
     override fun onServiceConnected() {
@@ -75,11 +64,11 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             uiAutomationHidden = UiAutomationHidden(mainLooper, this)
             uiAutomationHidden.connect()
             instanceRef = WeakReference(this)
-            _startTimestamp = System.currentTimeMillis()
-            RUNNING.value = true
+            startTimestamp = System.currentTimeMillis()
+            Companion.isRunning.value = true
         } catch (t: Throwable) {
             t.printStackTrace()
-            ERROR.value = t
+            error.value = t
             destroy()
         }
     }
@@ -95,7 +84,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     override fun onDestroy() {
         super.onDestroy()
         instanceRef?.clear()
-        RUNNING.value = false
+        Companion.isRunning.value = false
     }
 
     /**
@@ -122,7 +111,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun getStartTimestamp(): Long {
-        return _startTimestamp
+        return startTimestamp
     }
 
     override fun createAvailabilityChecker(): IAvailabilityChecker {
@@ -147,30 +136,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun shutdown() {
         destroy()
-    }
-
-    override fun getUiAutomation(): UiAutomation {
-        return _uiAutomation
-    }
-
-    override fun getUiAutomation(flags: Int): UiAutomation {
-        return _uiAutomation
-    }
-
-    override fun getContext(): MockContext {
-        return mockContext
-    }
-
-    override fun getInteractionController(): InteractionController {
-        return interactionController
-    }
-
-    override fun getGestureController(device: UiDevice): GestureController {
-        return A11yGestureController(this, device)
-    }
-
-    override fun getViewConfiguration(): MockViewConfiguration {
-        return mockViewConfig
     }
 
     override fun asBinder(): IBinder {

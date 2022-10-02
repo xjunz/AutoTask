@@ -3,6 +3,7 @@ package top.xjunz.tasker.impl
 import android.graphics.Point
 import android.view.MotionEvent
 import androidx.test.uiautomator.InteractionController
+import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.util.GestureGenerator
 import top.xjunz.tasker.util.unsupportedOperation
@@ -10,8 +11,9 @@ import top.xjunz.tasker.util.unsupportedOperation
 /**
  * @author xjunz 2022/07/21
  */
-class A11yInteractionController(private val service: A11yAutomatorService) :
-    InteractionController(service) {
+class A11yInteractionController(
+    private val service: A11yAutomatorService, bridge: UiAutomatorBridge
+) : InteractionController(bridge) {
 
     override fun clickNoSync(x: Int, y: Int): Boolean {
         unsupportedOperation("Non-sync click is not implemented. Used sync method instead!")

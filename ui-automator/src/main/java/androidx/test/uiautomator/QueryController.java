@@ -22,21 +22,19 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.test.uiautomator.mock.MockInstrumentation;
-
-import java.util.concurrent.TimeoutException;
+import androidx.test.uiautomator.bridge.UiAutomatorBridge;
 
 /**
  * The QueryController main purpose is to translate a {@link UiSelector} selectors to
  * {@link AccessibilityNodeInfo}. This is all this controller does.
  */
-class QueryController {
+public class QueryController {
 
-   /**
-    * This value has the greatest bearing on the appearance of test execution speeds.
-    * This value is used as the minimum time to wait before considering the UI idle after
-    * each action.
-    */
+    /**
+     * This value has the greatest bearing on the appearance of test execution speeds.
+     * This value is used as the minimum time to wait before considering the UI idle after
+     * each action.
+     */
     private static final long QUIET_TIME_TO_BE_CONSIDERED_IDLE_STATE = 500;//ms
 
     private static final String LOG_TAG = QueryController.class.getSimpleName();
@@ -44,7 +42,7 @@ class QueryController {
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final boolean VERBOSE = Log.isLoggable(LOG_TAG, Log.VERBOSE);
 
-    private final MockInstrumentation mInstrumentation;
+    private final UiAutomatorBridge mUiAutomatorBridge;
 
     private final Object mLock = new Object();
 
@@ -64,22 +62,22 @@ class QueryController {
 
     private String mLastTraversedText = "";
 
-    private OnAccessibilityEventListener mEventListener = new OnAccessibilityEventListener() {
+    private final OnAccessibilityEventListener mEventListener = new OnAccessibilityEventListener() {
         @Override
         public void onAccessibilityEvent(AccessibilityEvent event) {
             synchronized (mLock) {
-                switch(event.getEventType()) {
+                switch (event.getEventType()) {
                     case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                         // don't trust event.getText(), check for nulls
                         if (event.getText() != null && event.getText().size() > 0) {
-                            if(event.getText().get(0) != null)
+                            if (event.getText().get(0) != null)
                                 mLastActivityName = event.getText().get(0).toString();
                         }
-                       break;
+                        break;
                     case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
                         // don't trust event.getText(), check for nulls
                         if (event.getText() != null && event.getText().size() > 0)
-                            if(event.getText().get(0) != null)
+                            if (event.getText().get(0) != null)
                                 mLastTraversedText = event.getText().get(0).toString();
                         if (DEBUG)
                             Log.d(LOG_TAG, "Last text selection reported: " +
@@ -91,9 +89,9 @@ class QueryController {
         }
     };
 
-    public QueryController(MockInstrumentation instrumentation) {
-        mInstrumentation = instrumentation;
-        UiDevice.getUiAutomation(instrumentation).setOnAccessibilityEventListener(mEventListener);
+    public QueryController(UiAutomatorBridge instrumentation) {
+        mUiAutomatorBridge = instrumentation;
+        instrumentation.getUiAutomation().setOnAccessibilityEventListener(mEventListener);
     }
 
     /**
@@ -134,6 +132,7 @@ class QueryController {
      * format: [container_selector, PATTERN=[INSTANCE=x, PATTERN=[the_pattern]]
      * where the container_selector is used to find the containment region to search for patterns
      * and the INSTANCE=x is the instance of the_pattern to return.
+     *
      * @param selector
      * @return number of pattern matches. Returns 0 for all other cases.
      */
@@ -144,6 +143,7 @@ class QueryController {
 
     /**
      * Main search method for translating By selectors to AccessibilityInfoNodes
+     *
      * @param selector
      * @return AccessibilityNodeInfo
      */
@@ -152,7 +152,7 @@ class QueryController {
     }
 
     protected AccessibilityNodeInfo findAccessibilityNodeInfo(UiSelector selector,
-            boolean isCounting) {
+                                                              boolean isCounting) {
         waitForIdle();
         initializeNewSearch();
 
@@ -173,6 +173,7 @@ class QueryController {
     /**
      * Gets the root node from accessibility and if it fails to get one it will
      * retry every 250ms for up to 1000ms.
+     *
      * @return null if no root node is obtained
      */
     AccessibilityNodeInfo getRootNode() {
@@ -180,7 +181,7 @@ class QueryController {
         long waitInterval = 250;
         AccessibilityNodeInfo rootNode;
         for (int x = 0; x < maxRetry; x++) {
-            rootNode = UiDevice.getUiAutomation(getInstrumentation()).getRootInActiveWindow();
+            rootNode = getInstrumentation().getUiAutomation().getRootInActiveWindow();
             if (rootNode != null) {
                 return rootNode;
             }
@@ -219,20 +220,21 @@ class QueryController {
      * directly treated as regular_selector. So the presence of a CONTAINER and PATTERN within
      * a selector simply dictates that the selector matching will be constraint to the sub tree
      * node where the CONTAINER and its child PATTERN have identified.
+     *
      * @param selector
      * @param fromNode
      * @param isCounting
      * @return AccessibilityNodeInfo
      */
     private AccessibilityNodeInfo translateCompoundSelector(UiSelector selector,
-            AccessibilityNodeInfo fromNode, boolean isCounting) {
+                                                            AccessibilityNodeInfo fromNode, boolean isCounting) {
 
         // Start translating compound selectors by translating the regular_selector first
         // The regular_selector is then used as a container for any optional pattern_selectors
         // that may or may not be specified.
-        if(selector.hasContainerSelector())
+        if (selector.hasContainerSelector())
             // nested pattern selectors
-            if(selector.getContainerSelector().hasContainerSelector()) {
+            if (selector.getContainerSelector().hasContainerSelector()) {
                 fromNode = translateCompoundSelector(
                         selector.getContainerSelector(), fromNode, false);
                 initializeNewSearch();
@@ -241,13 +243,13 @@ class QueryController {
         else
             fromNode = translateReqularSelector(selector, fromNode);
 
-        if(fromNode == null) {
+        if (fromNode == null) {
             if (DEBUG)
                 Log.d(LOG_TAG, "Container selector not found: " + selector.dumpToString(false));
             return null;
         }
 
-        if(selector.hasPatternSelector()) {
+        if (selector.hasPatternSelector()) {
             fromNode = translatePatternSelector(selector.getPatternSelector(),
                     fromNode, isCounting);
 
@@ -256,7 +258,7 @@ class QueryController {
                         "Counted %d instances of: %s", mPatternCounter, selector));
                 return null;
             } else {
-                if(fromNode == null) {
+                if (fromNode == null) {
                     if (DEBUG)
                         Log.d(LOG_TAG, "Pattern selector not found: " +
                                 selector.dumpToString(false));
@@ -267,12 +269,12 @@ class QueryController {
 
         // translate any additions to the selector that may have been added by tests
         // with getChild(By selector) after a container and pattern selectors
-        if(selector.hasContainerSelector() || selector.hasPatternSelector()) {
-            if(selector.hasChildSelector() || selector.hasParentSelector())
+        if (selector.hasContainerSelector() || selector.hasPatternSelector()) {
+            if (selector.hasChildSelector() || selector.hasParentSelector())
                 fromNode = translateReqularSelector(selector, fromNode);
         }
 
-        if(fromNode == null) {
+        if (fromNode == null) {
             if (DEBUG)
                 Log.d(LOG_TAG, "Object Not Found for selector " + selector);
             return null;
@@ -290,45 +292,46 @@ class QueryController {
      * regular_selectors are the most common form of selectors and the search for them
      * is straightforward. This method will only look for CHILD or PARENT sub selectors.
      * <p/>
+     *
      * @param selector
      * @param fromNode
      * @return AccessibilityNodeInfo if found else null
      */
     private AccessibilityNodeInfo translateReqularSelector(UiSelector selector,
-            AccessibilityNodeInfo fromNode) {
+                                                           AccessibilityNodeInfo fromNode) {
 
         return findNodeRegularRecursive(selector, fromNode, 0);
     }
 
     private AccessibilityNodeInfo findNodeRegularRecursive(UiSelector subSelector,
-            AccessibilityNodeInfo fromNode, int index) {
+                                                           AccessibilityNodeInfo fromNode, int index) {
 
         if (subSelector.isMatchFor(fromNode, index)) {
             if (DEBUG) {
                 Log.d(LOG_TAG, formatLog(String.format("%s",
                         subSelector.dumpToString(false))));
             }
-            if(subSelector.isLeaf()) {
+            if (subSelector.isLeaf()) {
                 return fromNode;
             }
-            if(subSelector.hasChildSelector()) {
+            if (subSelector.hasChildSelector()) {
                 mLogIndent++; // next selector
                 subSelector = subSelector.getChildSelector();
-                if(subSelector == null) {
+                if (subSelector == null) {
                     Log.e(LOG_TAG, "Error: A child selector without content");
                     return null; // there is an implementation fault
                 }
-            } else if(subSelector.hasParentSelector()) {
+            } else if (subSelector.hasParentSelector()) {
                 mLogIndent++; // next selector
                 subSelector = subSelector.getParentSelector();
-                if(subSelector == null) {
+                if (subSelector == null) {
                     Log.e(LOG_TAG, "Error: A parent selector without content");
                     return null; // there is an implementation fault
                 }
                 // the selector requested we start at this level from
                 // the parent node from the one we just matched
                 fromNode = fromNode.getParent();
-                if(fromNode == null)
+                if (fromNode == null)
                     return null;
             }
         }
@@ -375,6 +378,7 @@ class QueryController {
      * as a pattern_search however we're not looking to match an instance of the pattern but
      * rather continuously walking the accessibility node hierarchy while counting patterns
      * until the end of the tree.
+     *
      * @param subSelector
      * @param fromNode
      * @param isCounting
@@ -382,12 +386,12 @@ class QueryController {
      * See {@link #translateCompoundSelector(UiSelector, AccessibilityNodeInfo, boolean)}
      */
     private AccessibilityNodeInfo translatePatternSelector(UiSelector subSelector,
-            AccessibilityNodeInfo fromNode, boolean isCounting) {
+                                                           AccessibilityNodeInfo fromNode, boolean isCounting) {
 
-        if(subSelector.hasPatternSelector()) {
+        if (subSelector.hasPatternSelector()) {
             // Since pattern_selectors are also the type of selectors used when counting,
             // we check if this is a counting run or an indexing run
-            if(isCounting)
+            if (isCounting)
                 //since we're counting, we reset the indexer so to terminates the search when
                 // the end of tree is reached. The count will be in mPatternCount
                 mPatternIndexer = -1;
@@ -397,7 +401,7 @@ class QueryController {
 
             // A pattern is wrapped in a PATTERN[instance=x PATTERN[the_pattern]]
             subSelector = subSelector.getPatternSelector();
-            if(subSelector == null) {
+            if (subSelector == null) {
                 Log.e(LOG_TAG, "Pattern portion of the selector is null or not defined");
                 return null; // there is an implementation fault
             }
@@ -416,8 +420,8 @@ class QueryController {
             UiSelector originalPattern) {
 
         if (subSelector.isMatchFor(fromNode, index)) {
-            if(subSelector.isLeaf()) {
-                if(mPatternIndexer == 0) {
+            if (subSelector.isLeaf()) {
+                if (mPatternIndexer == 0) {
                     if (DEBUG)
                         Log.d(LOG_TAG, formatLog(
                                 String.format("%s", subSelector.dumpToString(false))));
@@ -442,22 +446,22 @@ class QueryController {
                     Log.d(LOG_TAG, formatLog(
                             String.format("%s", subSelector.dumpToString(false))));
 
-                if(subSelector.hasChildSelector()) {
+                if (subSelector.hasChildSelector()) {
                     mLogIndent++; // next selector
                     subSelector = subSelector.getChildSelector();
-                    if(subSelector == null) {
+                    if (subSelector == null) {
                         Log.e(LOG_TAG, "Error: A child selector without content");
                         return null;
                     }
-                } else if(subSelector.hasParentSelector()) {
+                } else if (subSelector.hasParentSelector()) {
                     mLogIndent++; // next selector
                     subSelector = subSelector.getParentSelector();
-                    if(subSelector == null) {
+                    if (subSelector == null) {
                         Log.e(LOG_TAG, "Error: A parent selector without content");
                         return null;
                     }
                     fromNode = fromNode.getParent();
-                    if(fromNode == null)
+                    if (fromNode == null)
                         return null;
                 }
             }
@@ -479,7 +483,7 @@ class QueryController {
             if (!childNode.isVisibleToUser()) {
                 if (DEBUG)
                     Log.d(LOG_TAG,
-                        String.format("Skipping invisible child: %s", childNode.toString()));
+                            String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
             }
             AccessibilityNodeInfo retNode = findNodePatternRecursive(
@@ -493,8 +497,9 @@ class QueryController {
 
     /**
      * Last activity to report accessibility events.
-     * @deprecated The results returned should be considered unreliable
+     *
      * @return String name of activity
+     * @deprecated The results returned should be considered unreliable
      */
     @Deprecated
     public String getCurrentActivityName() {
@@ -506,6 +511,7 @@ class QueryController {
 
     /**
      * Last package to report accessibility events
+     *
      * @return String name of package
      */
     public String getCurrentPackageName() {
@@ -521,34 +527,21 @@ class QueryController {
      * Default wait timeout is 10 seconds
      */
     public void waitForIdle() {
-        waitForIdle(Configurator.getInstance().getWaitForIdleTimeout());
-    }
-
-    /**
-     * Waits for the current application to idle.
-     * @param timeout in milliseconds
-     */
-    public void waitForIdle(long timeout) {
-        try {
-            UiDevice.getUiAutomation(getInstrumentation())
-                    .waitForIdle(QUIET_TIME_TO_BE_CONSIDERED_IDLE_STATE, timeout);
-        } catch (TimeoutException e) {
-            Log.w(LOG_TAG, "Could not detect idle state.");
-        }
+        mUiAutomatorBridge.waitForIdle();
     }
 
     private String formatLog(String str) {
         StringBuilder l = new StringBuilder();
-        for(int space = 0; space < mLogIndent; space++)
+        for (int space = 0; space < mLogIndent; space++)
             l.append(". . ");
-        if(mLogIndent > 0)
+        if (mLogIndent > 0)
             l.append(String.format(". . [%d]: %s", mPatternCounter, str));
         else
             l.append(String.format(". . [%d]: %s", mPatternCounter, str));
         return l.toString();
     }
 
-    private MockInstrumentation getInstrumentation() {
-        return mInstrumentation;
+    private UiAutomatorBridge getInstrumentation() {
+        return mUiAutomatorBridge;
     }
 }

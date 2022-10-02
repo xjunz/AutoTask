@@ -28,14 +28,14 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
-import androidx.test.uiautomator.mock.MockDisplay;
-import androidx.test.uiautomator.mock.MockInstrumentation;
+import androidx.test.uiautomator.bridge.UiAutomatorBridge;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -66,8 +66,8 @@ public class UiDevice implements Searchable {
     private static final long KEY_PRESS_EVENT_TIMEOUT = 1000;
 
     // store for registered UiWatchers
-    private final HashMap<String, UiWatcher> mWatchers = new HashMap<String, UiWatcher>();
-    private final List<String> mWatchersTriggers = new ArrayList<String>();
+    private final HashMap<String, UiWatcher> mWatchers = new HashMap<>();
+    private final List<String> mWatchersTriggers = new ArrayList<>();
 
     // remember if we're executing in the context of a UiWatcher
     private boolean mInWatcherContext = false;
@@ -75,7 +75,7 @@ public class UiDevice implements Searchable {
     /**
      * keep a reference of {@link Instrumentation} instance
      */
-    private final MockInstrumentation mInstrumentation;
+    private final UiAutomatorBridge mInstrumentation;
     private final QueryController mQueryController;
     private final InteractionController mInteractionController;
 
@@ -96,9 +96,9 @@ public class UiDevice implements Searchable {
             + ("REL".equals(Build.VERSION.CODENAME) ? 0 : 1);
 
     /**
-     * Private constructor. Clients should use {@link UiDevice#getInstance(MockInstrumentation)}.
+     * Private constructor. Clients should use {@link UiDevice#getInstance(UiAutomatorBridge)}.
      */
-    UiDevice(MockInstrumentation instrumentation) {
+    UiDevice(UiAutomatorBridge instrumentation) {
         mInstrumentation = instrumentation;
         mQueryController = new QueryController(instrumentation);
         mInteractionController = instrumentation.getInteractionController();
@@ -240,7 +240,7 @@ public class UiDevice implements Searchable {
      *
      * @return UiDevice instance
      * @since API Level 16
-     * @deprecated Should use {@link #getInstance(MockInstrumentation)} instead. This version hides
+     * @deprecated Should use {@link #getInstance(UiAutomatorBridge)} instead. This version hides
      * UiDevice's dependency on having an Instrumentation reference and is prone to misuse.
      */
     @Deprecated
@@ -256,7 +256,7 @@ public class UiDevice implements Searchable {
      *
      * @return UiDevice instance
      */
-    public static UiDevice getInstance(MockInstrumentation instrumentation) {
+    public static UiDevice getInstance(UiAutomatorBridge instrumentation) {
         if (sInstance == null || instrumentation != sInstance.getInstrumentation()) {
             sInstance = new UiDevice(instrumentation);
         }
@@ -273,10 +273,11 @@ public class UiDevice implements Searchable {
      */
     public Point getDisplaySizeDp() {
         Tracer.trace();
-        MockDisplay display = getDefaultDisplay();
+        Display display = getDefaultDisplay();
         Point p = new Point();
         display.getRealSize(p);
-        DisplayMetrics metrics = display.getRealMetrics();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getRealMetrics(metrics);
         float dpx = p.x / metrics.density;
         float dpy = p.y / metrics.density;
         p.x = Math.round(dpx);
@@ -535,7 +536,7 @@ public class UiDevice implements Searchable {
      */
     public int getDisplayWidth() {
         Tracer.trace();
-        MockDisplay display = getDefaultDisplay();
+        Display display = getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         return p.x;
@@ -550,7 +551,7 @@ public class UiDevice implements Searchable {
      */
     public int getDisplayHeight() {
         Tracer.trace();
-        MockDisplay display = getDefaultDisplay();
+        Display display = getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         return p.y;
@@ -641,7 +642,7 @@ public class UiDevice implements Searchable {
      */
     public void waitForIdle(long timeout) {
         Tracer.trace(timeout);
-        getQueryController().waitForIdle(timeout);
+        getInstrumentation().waitForIdle(timeout);
     }
 
     /**
@@ -1040,24 +1041,14 @@ public class UiDevice implements Searchable {
         if (screenshot == null) {
             return false;
         }
-        BufferedOutputStream bos = null;
-        try {
-            bos = new BufferedOutputStream(new FileOutputStream(storePath));
-            if (bos != null) {
-                screenshot.compress(Bitmap.CompressFormat.PNG, quality, bos);
-                bos.flush();
-            }
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(storePath))) {
+            screenshot.compress(Bitmap.CompressFormat.PNG, quality, bos);
+            bos.flush();
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "failed to save screen shot to file", ioe);
             return false;
         } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException ioe) {
-                    // Ignore
-                }
-            }
+            // Ignore
             screenshot.recycle();
         }
         return true;
@@ -1069,7 +1060,7 @@ public class UiDevice implements Searchable {
      * @return package name of the default launcher
      */
     public String getLauncherPackageName() {
-        return mInstrumentation.getContext().getLauncherPackageName();
+        return mInstrumentation.getLauncherPackageName();
     }
 
     /**
@@ -1090,7 +1081,7 @@ public class UiDevice implements Searchable {
         byte[] buf = new byte[512];
         int bytesRead;
         FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-        StringBuffer stdout = new StringBuffer();
+        StringBuilder stdout = new StringBuilder();
         while ((bytesRead = fis.read(buf)) != -1) {
             stdout.append(new String(buf, 0, bytesRead));
         }
@@ -1098,8 +1089,8 @@ public class UiDevice implements Searchable {
         return stdout.toString();
     }
 
-    private MockDisplay getDefaultDisplay() {
-        return mInstrumentation.getContext().getDefaultDisplay();
+    private Display getDefaultDisplay() {
+        return mInstrumentation.getDefaultDisplay();
     }
 
 
@@ -1109,7 +1100,7 @@ public class UiDevice implements Searchable {
     AccessibilityNodeInfo[] getWindowRoots() {
         waitForIdle();
 
-        Set<AccessibilityNodeInfo> roots = new HashSet();
+        Set<AccessibilityNodeInfo> roots = new HashSet<>();
 
         // Start with the active window, which seems to sometimes be missing from the list returned
         // by the UiAutomation.
@@ -1124,30 +1115,17 @@ public class UiDevice implements Searchable {
                 AccessibilityNodeInfo root = window.getRoot();
                 if (root == null) {
                     Log.w(LOG_TAG, String.format("Skipping null root node for window: %s",
-                            window.toString()));
+                            window));
                     continue;
                 }
                 roots.add(root);
             }
         }
-        return roots.toArray(new AccessibilityNodeInfo[roots.size()]);
+        return roots.toArray(new AccessibilityNodeInfo[0]);
     }
 
-    public MockInstrumentation getInstrumentation() {
+    public UiAutomatorBridge getInstrumentation() {
         return mInstrumentation;
-    }
-
-    static UiAutomation getUiAutomation(final MockInstrumentation instrumentation) {
-        int flags = Configurator.getInstance().getUiAutomationFlags();
-        if (UiDevice.API_LEVEL_ACTUAL > Build.VERSION_CODES.M) {
-            return instrumentation.getUiAutomation(flags);
-        } else {
-            // Custom flags not supported prior to N.
-            if (flags != Configurator.DEFAULT_UIAUTOMATION_FLAGS) {
-                Log.w(LOG_TAG, "UiAutomation flags not supported prior to N - ignoring.");
-            }
-            return instrumentation.getUiAutomation();
-        }
     }
 
     UiAutomation getUiAutomation() {

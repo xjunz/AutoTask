@@ -136,5 +136,7 @@
     <string name="add_after">在后面添加</string>
     <string name="add_before">在前面添加</string>
     <string name="back">返回</string>
+    <string name="property">属性</string>
+    <string name="time_matches">当前时间满足</string>
 
 </resources>

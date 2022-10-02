@@ -8,8 +8,8 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.launchIntentSafely
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.service.A11yAutomatorService.Companion.ERROR
-import top.xjunz.tasker.service.A11yAutomatorService.Companion.RUNNING
+import top.xjunz.tasker.service.A11yAutomatorService.Companion.error
+import top.xjunz.tasker.service.A11yAutomatorService.Companion.isRunning
 
 /**
  * @author xjunz 2022/07/23
@@ -29,7 +29,7 @@ object A11yServiceController : ServiceController() {
     private val errorObserver = Observer<Throwable> {
         if (it != null) {
             listener?.onError(it)
-            ERROR.value = null
+            error.value = null
         }
     }
 
@@ -52,17 +52,17 @@ object A11yServiceController : ServiceController() {
 
     override fun setStateListener(listener: ServiceStateListener) {
         super.setStateListener(listener)
-        RUNNING.observeForever(statusObserver)
-        ERROR.observeForever(errorObserver)
+        isRunning.observeForever(statusObserver)
+        error.observeForever(errorObserver)
     }
 
     override fun removeStateListener() {
         super.removeStateListener()
-        RUNNING.removeObserver(statusObserver)
-        ERROR.removeObserver(errorObserver)
+        isRunning.removeObserver(statusObserver)
+        error.removeObserver(errorObserver)
     }
 
     override fun syncStatus() {
-        RUNNING.value = A11yAutomatorService.get() != null
+        isRunning.value = A11yAutomatorService.get() != null
     }
 }

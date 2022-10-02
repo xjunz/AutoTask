@@ -20,6 +20,8 @@ public interface IPackageManager extends IInterface {
 
     ApplicationInfo getApplicationInfo(String packageName, long flags, int userId);
 
+    PackageInfo getPackageInfo(String packageName, long flags, int userId);
+
     abstract class Stub {
 
         public static IPackageManager asInterface(IBinder obj) {

@@ -29,6 +29,7 @@ data class Distance(
 
     companion object {
 
+        const val SCOPE_NONE = -1
         const val SCOPE_SCREEN = 0
         const val SCOPE_PARENT = 1
 

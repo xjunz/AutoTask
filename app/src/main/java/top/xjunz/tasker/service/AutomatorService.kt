@@ -1,6 +1,6 @@
 package top.xjunz.tasker.service
 
-import androidx.test.uiautomator.mock.MockInstrumentation
+import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.tasker.impl.IAvailabilityChecker
 
 /**
@@ -8,9 +8,11 @@ import top.xjunz.tasker.impl.IAvailabilityChecker
  *
  * @author xjunz 2022/07/21
  */
-interface AutomatorService : MockInstrumentation {
+interface AutomatorService {
 
     val isRunning: Boolean
+
+    val uiAutomatorBridge: UiAutomatorBridge
 
     fun destroy()
 

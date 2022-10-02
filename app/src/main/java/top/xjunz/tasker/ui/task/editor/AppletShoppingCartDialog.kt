@@ -2,14 +2,15 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.view.View
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import top.xjunz.tasker.colorSchemes
 import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
@@ -18,6 +19,7 @@ import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.task.factory.AppletOption
 import top.xjunz.tasker.task.factory.AppletRegistry
+import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.base.inlineAdapter
 
@@ -60,6 +62,18 @@ class AppletShoppingCartDialog : BaseBottomSheetDialog<DialogAppletShoppingCartB
         }
     }
 
+    private fun makeSpannedLabel(label: CharSequence): CharSequence {
+        val index = label.indexOf('(')
+        if (index > -1) {
+            return SpannableStringBuilder().append(label.substring(0, index)).append(
+                label.substring(index),
+                ForegroundColorSpan(ColorSchemes.textColorDisabled),
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        return label
+    }
+
     private val rightAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(viewModel.options, ItemAppletOptionBinding::class.java, {
             itemView.setOnClickListener {
@@ -70,15 +84,16 @@ class AppletShoppingCartDialog : BaseBottomSheetDialog<DialogAppletShoppingCartB
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, _, data ->
-            binding.tvLabel.text = if (data.isInverted) data.invertedLabel else data.label
+            val label = if (data.isInverted) data.invertedLabel else data.label
+            binding.tvLabel.text = if (label != null) makeSpannedLabel(label) else label
             //binding.ibAdd.isVisible = data.isValid
-            binding.ibInvert.isVisible = data.isInvertible
+            binding.ibInvert.isInvisible = !data.isInvertible
             if (!data.isValid) {
                 binding.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-                binding.tvLabel.setTextColor(colorSchemes.colorPrimary)
+                binding.tvLabel.setTextColor(ColorSchemes.colorPrimary)
             } else {
                 binding.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-                binding.tvLabel.setTextColor(colorSchemes.colorOnSurface)
+                binding.tvLabel.setTextColor(ColorSchemes.colorOnSurface)
             }
         }
     }

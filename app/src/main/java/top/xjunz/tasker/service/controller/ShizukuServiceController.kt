@@ -2,10 +2,8 @@ package top.xjunz.tasker.service.controller
 
 import android.content.ComponentName
 import android.content.ServiceConnection
-import android.graphics.Point
 import android.os.IBinder
 import android.util.Log
-import android.view.ViewConfiguration
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -13,8 +11,6 @@ import kotlinx.coroutines.delay
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.IAutomatorConnection
-import top.xjunz.tasker.app
-import top.xjunz.tasker.impl.MockContextAdaptor
 import top.xjunz.tasker.service.AutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.util.ShizukuUtil
@@ -58,15 +54,7 @@ object ShizukuServiceController : ServiceController() {
     private val userServiceConnection = object : ServiceConnection {
 
         private fun initAutomatorContext(connection: IAutomatorConnection) {
-            val adaptor = MockContextAdaptor(app)
-            val realSize = Point()
-            val size = Point()
-            adaptor.getRealSize(realSize)
-            adaptor.getSize(size)
-            connection.initAutomatorContext(
-                realSize, size, adaptor.density,
-                ViewConfiguration.get(app).scaledMinimumFlingVelocity
-            )
+
         }
 
         override fun onServiceConnected(name: ComponentName?, iBinder: IBinder?) {

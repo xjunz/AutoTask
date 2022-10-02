@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.Event
 import top.xjunz.tasker.engine.criterion.EventFilter
-import top.xjunz.tasker.engine.flow.Applet
 import top.xjunz.tasker.task.anno.AppletCategory
 
 /**
@@ -35,17 +34,5 @@ class EventFilterFactory : AppletFactory(AppletRegistry.ID_EVENT_FILTER_FACTORY)
     override val name: String = "EventCriterionFactory"
 
     override val categoryNames: IntArray = intArrayOf(LABEL_NONE)
-
-    override fun getDescriptionOf(applet: Applet): CharSequence? {
-        return null
-    }
-
-    override fun getPromptOf(appletName: String): CharSequence {
-        TODO("Not yet implemented")
-    }
-
-    override fun getLabelOf(appletName: String, isInverted: Boolean): CharSequence? {
-        TODO("Not yet implemented")
-    }
 
 }

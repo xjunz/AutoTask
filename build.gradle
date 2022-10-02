@@ -11,6 +11,7 @@ buildscript {
         ktor_version = '2.1.1'
         appcompat_version= "1.5.1"
         coroutine_version = "1.6.4"
+        serialization_version = '1.6.21'
     }
 
     repositories {

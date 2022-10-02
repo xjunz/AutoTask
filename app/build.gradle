@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dev.rikka.tools.refine'
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$serialization_version"
 }
 
 android {
@@ -67,9 +68,9 @@ dependencies {
     implementation "dev.rikka.shizuku:api:$shizuku_version"
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     // ktx
-    implementation 'androidx.core:core-ktx:1.9.0' //1.8.0
-    implementation 'androidx.activity:activity-ktx:1.6.0-rc02' //1.6.0-alpha05
-    implementation 'androidx.fragment:fragment-ktx:1.5.2'
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.activity:activity-ktx:1.6.0'
+    implementation 'androidx.fragment:fragment-ktx:1.5.3'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design

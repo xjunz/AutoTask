@@ -4,12 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import top.xjunz.tasker.colorSchemes
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.flow.Applet
 import top.xjunz.tasker.engine.flow.Flow
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ui.ColorSchemes
 import java.util.*
 
 /**
@@ -69,10 +69,10 @@ class TaskFlowAdapter(
             if (item is Flow && item.javaClass != Flow::class.java) {
                 it.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
                 it.tvDesc.isVisible = isSelected
-                it.tvLabel.setTextColor(colorSchemes.colorPrimary)
+                it.tvLabel.setTextColor(ColorSchemes.colorPrimary)
             } else {
                 it.tvLabel.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-                it.tvLabel.setTextColor(colorSchemes.colorOnSurface)
+                it.tvLabel.setTextColor(ColorSchemes.colorOnSurface)
             }
         }
     }

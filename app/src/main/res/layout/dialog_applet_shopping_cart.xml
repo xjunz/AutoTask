@@ -13,6 +13,7 @@
 
             <TextView
                 android:id="@+id/tv_title"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -25,6 +26,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_left"
                 android:layout_width="0dp"
+                android:nestedScrollingEnabled="false"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
@@ -38,9 +40,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_right"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:minHeight="500dp"
-                android:nestedScrollingEnabled="true"
+                android:layout_height="500dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_weight=".7"

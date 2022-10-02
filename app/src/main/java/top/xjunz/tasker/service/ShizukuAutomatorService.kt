@@ -4,17 +4,12 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.UiAutomation
 import android.app.UiAutomationConnection
 import android.app.UiAutomationHidden
-import android.graphics.Point
 import android.os.Binder
 import android.os.Handler
 import android.os.HandlerThread
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
-import androidx.test.uiautomator.GestureController
-import androidx.test.uiautomator.InteractionController
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.mock.MockContext
-import androidx.test.uiautomator.mock.MockViewConfiguration
+import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.unsafeCast
 import top.xjunz.tasker.IAutomatorConnection
 import top.xjunz.tasker.annotation.Local
@@ -22,7 +17,7 @@ import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.Remote
 import top.xjunz.tasker.impl.AvailabilityChecker
 import top.xjunz.tasker.impl.IAvailabilityChecker
-import top.xjunz.tasker.impl.RemoteMockContext
+import top.xjunz.tasker.impl.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
 import top.xjunz.tasker.trace.logcat
@@ -52,19 +47,11 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     private val looper get() = handlerThread.looper
 
-    private lateinit var mockContext: MockContext
-
-    private lateinit var mockViewConfiguration: MockViewConfiguration
-
-    private val _interactionController by lazy {
-        InteractionController(this)
-    }
-
-    private val _uiAutomation: UiAutomation by lazy {
+    private val uiAutomation: UiAutomation by lazy {
         uiAutomationHidden.unsafeCast()
     }
 
-    private var _startTimestamp: Long = -1
+    private var startTimestamp: Long = -1
 
     @Remote
     constructor() {
@@ -83,9 +70,13 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
     override val isRunning: Boolean
         get() = delegate.asBinder().pingBinder() && delegate.asBinder().isBinderAlive
 
+    override val uiAutomatorBridge: UiAutomatorBridge by lazy {
+        ShizukuUiAutomatorBridge(uiAutomation)
+    }
+
     @LocalAndRemote
     override fun getStartTimestamp(): Long {
-        return if (isInRemoteProcess) _startTimestamp else delegate.startTimestamp
+        return if (isInRemoteProcess) startTimestamp else delegate.startTimestamp
     }
 
     @LocalAndRemote
@@ -97,15 +88,8 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
         }
     }
 
-    override fun initAutomatorContext(
-        realSize: Point, size: Point, density: Float, scaledMinimumFlingVelocity: Int
-    ) {
-        mockContext = RemoteMockContext(realSize, size)
-        mockViewConfiguration = MockViewConfiguration(scaledMinimumFlingVelocity)
-    }
-
     override fun isConnected(): Boolean {
-        return _startTimestamp != -1L
+        return startTimestamp != -1L
     }
 
     override fun connect() {
@@ -120,34 +104,10 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
                 flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                         AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
             }
-            _startTimestamp = System.currentTimeMillis()
+            startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             error(t)
         }
-    }
-
-    override fun getUiAutomation(): UiAutomation {
-        return _uiAutomation
-    }
-
-    override fun getUiAutomation(flags: Int): UiAutomation {
-        return _uiAutomation
-    }
-
-    override fun getContext(): MockContext {
-        return mockContext
-    }
-
-    override fun getInteractionController(): InteractionController {
-        return _interactionController
-    }
-
-    override fun getGestureController(device: UiDevice?): GestureController {
-        return GestureController(device)
-    }
-
-    override fun getViewConfiguration(): MockViewConfiguration {
-        return mockViewConfiguration
     }
 
     @LocalAndRemote

@@ -16,8 +16,6 @@ interface IAutomatorConnection {
 
     boolean isConnected() = 4;
 
-    void initAutomatorContext(in Point realSize, in Point size, float density, int scaledMinimumFlingVelocity) = 5;
-
     IAvailabilityChecker createAvailabilityChecker() = 6;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server

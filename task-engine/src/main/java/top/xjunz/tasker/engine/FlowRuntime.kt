@@ -13,14 +13,9 @@ import top.xjunz.tasker.engine.flow.Flow
 class FlowRuntime(events: Array<Event>) {
 
     /**
-     * All applets with same id share the same argument.
-     */
-    val argumentRegistry = mutableMapOf<Int, Any>()
-
-    /**
      * Values are keyed by remarks.
      */
-    val resultRegistry = mutableMapOf<String, Any>()
+    private val resultRegistry = mutableMapOf<String, Any>()
 
     /**
      * Whether the applying of current applet is successful.
@@ -33,11 +28,12 @@ class FlowRuntime(events: Array<Event>) {
 
     lateinit var currentFlow: Flow
 
-    /**
-     * Get the argument from the registry or initialize the argument and store it.
-     */
-    inline fun <T : Any> getArgument(id: Int, defValue: () -> T): T {
-        return argumentRegistry.getOrPut(id, defValue).unsafeCast()
+    fun registerResult(key: String, result: Any) {
+        resultRegistry[key] = result
+    }
+
+    fun <R> getResult(key: String): R {
+        return resultRegistry[key]!!.unsafeCast()
     }
 
     /**

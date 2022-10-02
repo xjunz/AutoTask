@@ -32,7 +32,7 @@ object InspectorController {
     }
 
     fun canRetrieveWindowRoot(): Boolean {
-        return A11yAutomatorService.RUNNING.isTrue
+        return A11yAutomatorService.isRunning.isTrue
     }
 
     fun isReady(): Boolean {

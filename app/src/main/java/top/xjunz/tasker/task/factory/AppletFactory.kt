@@ -40,7 +40,9 @@ abstract class AppletFactory(val id: Int) {
         var previousCategory = -1
         appletOptions.forEach {
             if (it.categoryIndex != previousCategory) {
-                ret.add(AppletCategoryOption(categoryNames[it.categoryIndex]))
+                if (categoryNames[it.categoryIndex] != LABEL_NONE) {
+                    ret.add(AppletCategoryOption(categoryNames[it.categoryIndex]))
+                }
             }
             ret.add(it)
             previousCategory = it.categoryIndex

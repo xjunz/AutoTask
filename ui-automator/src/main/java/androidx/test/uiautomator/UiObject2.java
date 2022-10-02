@@ -26,8 +26,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.test.uiautomator.mock.MockViewConfiguration;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,12 +39,12 @@ public class UiObject2 implements Searchable {
 
     private static final String TAG = UiObject2.class.getSimpleName();
 
-    private UiDevice mDevice;
-    private Gestures mGestures;
-    private GestureController mGestureController;
-    private BySelector mSelector;  // Hold this mainly for debugging
+    private final UiDevice mDevice;
+    private final Gestures mGestures;
+    private final GestureController mGestureController;
+    private final BySelector mSelector;  // Hold this mainly for debugging
     private AccessibilityNodeInfo mCachedNode;
-    private DisplayMetrics mDisplayMetrics;
+    private final DisplayMetrics mDisplayMetrics;
 
     // Margins
     private int mMarginLeft = 5;
@@ -66,7 +64,7 @@ public class UiObject2 implements Searchable {
     private final long FLING_TIMEOUT = 5000;
 
     // Get wait functionality from a mixin
-    private WaitMixin<UiObject2> mWaitMixin = new WaitMixin<UiObject2>(this);
+    private final WaitMixin<UiObject2> mWaitMixin = new WaitMixin<UiObject2>(this);
 
 
     /**
@@ -76,9 +74,9 @@ public class UiObject2 implements Searchable {
         mDevice = device;
         mSelector = selector;
         mCachedNode = cachedNode;
-        mGestures = Gestures.getInstance(device);
+        mGestures = Gestures.getInstance();
         mGestureController = GestureController.getInstance(device);
-        mDisplayMetrics = mDevice.getInstrumentation().getContext().getDisplayMetrics();
+        mDisplayMetrics = mDevice.getInstrumentation().getDisplayMetrics();
     }
 
     /**
@@ -573,7 +571,7 @@ public class UiObject2 implements Searchable {
         // Scroll by performing repeated swipes
         Rect bounds = getVisibleBoundsForGestures();
         for (; percent > 0.0f; percent -= 1.0f) {
-            float segment = percent > 1.0f ? 1.0f : percent;
+            float segment = Math.min(percent, 1.0f);
             PointerGesture swipe =
                     mGestures.swipeRect(bounds, swipeDirection, segment, speed).pause(250);
 
@@ -605,8 +603,8 @@ public class UiObject2 implements Searchable {
      * @return Whether the object can still scroll in the given direction.
      */
     public boolean fling(final Direction direction, final int speed) {
-        MockViewConfiguration vc = mDevice.getInstrumentation().getViewConfiguration();
-        if (speed < vc.getScaledMinimumFlingVelocity()) {
+        ;
+        if (speed < mDevice.getInstrumentation().getScaledMinimumFlingVelocity()) {
             throw new IllegalArgumentException("Speed is less than the minimum fling velocity");
         }
 
@@ -624,7 +622,6 @@ public class UiObject2 implements Searchable {
     /**
      * Set the text content by sending individual key codes.
      *
-     * @hide
      */
     public void legacySetText(String text) {
         AccessibilityNodeInfo node = getAccessibilityNodeInfo();
@@ -675,7 +672,7 @@ public class UiObject2 implements Searchable {
             }
         } else {
             CharSequence currentText = node.getText();
-            if (!text.equals(currentText)) {
+            if (!text.contentEquals(currentText)) {
                 // Give focus to the object. Expect this to fail if the object already has focus.
                 if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS) && !node.isFocused()) {
                     // TODO: Decide if we should throw here
@@ -685,8 +682,7 @@ public class UiObject2 implements Searchable {
                 Bundle args = new Bundle();
                 args.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 0);
                 args.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, text.length());
-                if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, args) &&
-                        currentText != null && currentText.length() > 0) {
+                if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, args) && currentText.length() > 0) {
                     // TODO: Decide if we should throw here
                     Log.w(TAG, "AccessibilityNodeInfo#performAction(ACTION_SET_SELECTION) failed");
                 }

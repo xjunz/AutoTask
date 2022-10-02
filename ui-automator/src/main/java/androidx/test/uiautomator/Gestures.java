@@ -19,8 +19,7 @@ package androidx.test.uiautomator;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-
-import androidx.test.uiautomator.mock.MockViewConfiguration;
+import android.view.ViewConfiguration;
 
 /**
  * The {@link Gestures} class provides factory methods for constructing common
@@ -37,19 +36,19 @@ class Gestures {
     private static final int INNER_MARGIN = 5;
 
     // Keep a handle to the ViewConfiguration
-    private MockViewConfiguration mViewConfig;
+    private final long mLongPressTimeout;
 
     // Private constructor.
-    private Gestures(MockViewConfiguration config) {
-        mViewConfig = config;
+    private Gestures(long longPressTimeout) {
+        mLongPressTimeout = longPressTimeout;
     }
 
     /**
      * Returns the {@link Gestures} instance for the given {@link Context}.
      */
-    public static Gestures getInstance(UiDevice device) {
+    public static Gestures getInstance() {
         if (sInstance == null) {
-            sInstance = new Gestures(device.getInstrumentation().getViewConfiguration());
+            sInstance = new Gestures(ViewConfiguration.getLongPressTimeout());
         }
 
         return sInstance;
@@ -81,7 +80,7 @@ class Gestures {
      */
     public PointerGesture longClick(Point point) {
         // A long click is a click with a duration that exceeds a certain threshold.
-        return click(point, mViewConfig.getLongPressTimeout());
+        return click(point,mLongPressTimeout);
     }
 
     /**

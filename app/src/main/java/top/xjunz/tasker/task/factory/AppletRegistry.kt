@@ -13,9 +13,11 @@ class AppletRegistry {
     companion object {
         const val ID_EVENT_FILTER_FACTORY = 0
         const val ID_PKG_APPLET_FACTORY = 1
+        const val ID_UI_OBJECT_FACTORY = 2
+        const val ID_TIME_FACTORY = 3
     }
 
-    val allFactories = arrayOf(PackageCriteriaFactory())
+    val allFactories = arrayOf(PackageCriteriaFactory(), UiObjectCriteriaFactory(),TimeCriteriaFactory())
 
     private inline val Applet.factoryId get() = id ushr 16
 

@@ -2,24 +2,28 @@ package top.xjunz.tasker.ui
 
 import androidx.annotation.ColorInt
 import top.xjunz.tasker.ktx.attrColor
+import top.xjunz.tasker.ktx.attrColorStateList
 
 /**
  * @author xjunz 2022/09/10
  */
-class ColorSchemes {
+object ColorSchemes {
 
     @get:ColorInt
-    val textColorSecondaryNoDisable: Int by lazy {
-        android.R.attr.textColorSecondaryNoDisable.attrColor
-    }
+    val textColorDisabled: Int
+        get() = android.R.attr.textColorTertiary.attrColorStateList.getColorForState(
+            intArrayOf(-android.R.attr.state_enabled), -1
+        )
 
     @get:ColorInt
-    val colorPrimary: Int by lazy {
-        com.google.android.material.R.attr.colorPrimary.attrColor
-    }
+    val colorPrimary: Int
+        get() = com.google.android.material.R.attr.colorPrimary.attrColor
 
     @get:ColorInt
-    val colorOnSurface by lazy {
-        com.google.android.material.R.attr.colorOnSurface.attrColor
-    }
+    val colorOnSurface: Int
+        get() = com.google.android.material.R.attr.colorOnSurface.attrColor
+
+    @get:ColorInt
+    val colorPrimaryContainer
+        get() = com.google.android.material.R.attr.colorPrimaryContainer.attrColor
 }

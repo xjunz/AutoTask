@@ -35,7 +35,9 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
 
     private val viewModel by viewModels<MainViewModel>()
 
-    private val handler by lazy { Handler(mainLooper) }
+    private val handler by lazy {
+        Handler(mainLooper)
+    }
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -44,7 +46,6 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         App.appThemeRef = WeakReference(theme)
-        App.colorSchemesRef = WeakReference(ColorSchemes())
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(binding.root)
         initViews()
