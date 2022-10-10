@@ -1,7 +1,6 @@
 package top.xjunz.tasker.service
 
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.tasker.impl.IAvailabilityChecker
 
 /**
  * A service defines the common abstractions of [A11yAutomatorService] and [ShizukuAutomatorService].

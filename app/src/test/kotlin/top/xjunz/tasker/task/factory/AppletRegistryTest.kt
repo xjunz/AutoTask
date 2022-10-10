@@ -9,7 +9,7 @@ internal class AppletRegistryTest {
 
     @Test
     fun testAppletFactory() {
-        val options = PackageCriteriaFactory().categorizedAppletOptions
+        val options = PackageAppletFactory().categorizedOptions
         assert(options.size == 3)
     }
 

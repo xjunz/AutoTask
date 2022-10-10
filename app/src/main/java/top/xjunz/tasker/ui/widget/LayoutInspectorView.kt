@@ -4,13 +4,15 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import top.xjunz.tasker.ktx.dp
 import top.xjunz.tasker.ktx.dpFloat
-import top.xjunz.tasker.task.core.StableNode
+import top.xjunz.tasker.task.inspector.StableNode
 import kotlin.math.hypot
 
 
@@ -37,7 +39,7 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     private val emphaticPaint = Paint(boundsPaint).apply {
         color = Color.YELLOW
-        strokeWidth = 3.dpFloat
+        // strokeWidth = 2.dpFloat
     }
 
     private var actionDownX = 0F
@@ -45,6 +47,8 @@ class LayoutInspectorView @JvmOverloads constructor(
     private var actionDownY = 0F
 
     private var isOverSlop = false
+
+    private val visibleBounds = Rect()
 
     /**
      * The listener to be notified when a node is selected by the user.
@@ -55,6 +59,11 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     private fun requireEmphaticNode() =
         requireNotNull(emphaticNode) { "There is no emphatic node!" }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        getWindowVisibleDisplayFrame(visibleBounds)
+    }
 
     fun clearNode() {
         rootNode = null
@@ -124,13 +133,18 @@ class LayoutInspectorView @JvmOverloads constructor(
     }
 
     private fun drawEmphaticBounds(canvas: Canvas, node: StableNode) {
-        canvas.drawRect(node.bounds, emphaticPaint)
+        val newBounds = Rect(node.getVisibleBoundsIn(visibleBounds))
+        newBounds.inset(1.dp, 1.dp)
+        canvas.drawRect(newBounds, emphaticPaint)
     }
 
     private fun drawNormalNode(canvas: Canvas, node: StableNode) {
         var child = node.child
+        val newBounds = Rect()
         while (child != null) {
-            canvas.drawRect(child.bounds, boundsPaint)
+            newBounds.set(child.getVisibleBoundsIn(visibleBounds))
+            newBounds.inset(1.dp, 1.dp)
+            canvas.drawRect(newBounds, boundsPaint)
             drawNormalNode(canvas, child)
             child = child.next
         }
@@ -138,7 +152,7 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (rootNode != null ) {
+        if (rootNode != null) {
             drawNormalNode(canvas, requireRootNode())
         }
         if (emphaticNode != null) {

@@ -19,8 +19,14 @@ import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
  */
 open class BaseFragment<T : ViewBinding> : Fragment(), HasDefaultViewModelProviderFactory {
 
+    open val bindingRequiredSuperClassDepth = 1
+
     protected val binding: T by lazy {
-        javaClass.superClassFirstParameterizedType().getDeclaredMethod(
+        var superClass: Class<*> = javaClass
+        for (i in 1 until bindingRequiredSuperClassDepth) {
+            superClass = superClass.superclass
+        }
+        superClass.superClassFirstParameterizedType().getDeclaredMethod(
             "inflate", LayoutInflater::class.java
         ).invoke(null, layoutInflater)!!.unsafeCast()
     }

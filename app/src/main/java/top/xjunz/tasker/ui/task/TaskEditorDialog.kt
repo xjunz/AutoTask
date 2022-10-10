@@ -1,9 +1,7 @@
 package top.xjunz.tasker.ui.task
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
@@ -13,7 +11,7 @@ import top.xjunz.tasker.databinding.DialogTaskEditorBinding
 import top.xjunz.tasker.engine.flow.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.ui.task.editor.AppletShoppingCartDialog
+import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 
 /**
  * @author xjunz 2022/08/22
@@ -32,7 +30,6 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
         observeLiveData()
     }
 
-    @SuppressLint("RestrictedApi", "VisibleForTests")
     private fun initViews() {
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
@@ -47,8 +44,7 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
         } else {
             binding.tvTitle.text = R.string.edit_task.text
         }
-        bottomSheetBehavior =
-            (binding.scrollView.layoutParams as CoordinatorLayout.LayoutParams).behavior as BottomSheetBehavior<*>
+        bottomSheetBehavior = binding.scrollView.disableBottomSheetShapeAnimation()
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -57,12 +53,12 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
-        bottomSheetBehavior.disableShapeAnimations()
         binding.scrollView.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
         }
         binding.btnAddInside.setOnClickListener {
-            AppletShoppingCartDialog().setTitle(binding.btnAddInside.text).show(parentFragmentManager)
+            FlowEditorDialog().setTitle(binding.btnAddInside.text)
+                .show(parentFragmentManager)
         }
     }
 

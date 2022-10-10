@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/drag_to_here_to_remove_overlay"
-            android:src="@drawable/ic_twotone_delete_forever_24"
+            android:src="@drawable/ic_outline_delete_forever_24"
             android:tint="?colorOnSecondary" />
 
         <TextView

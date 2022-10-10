@@ -6,11 +6,11 @@
                 android:width="1dp"
                 android:color="@color/material_on_surface_stroke" />
             <corners android:radius="16dp" />
-            <solid android:color="?android:colorBackground" />
+            <solid android:color="?colorSurface" />
         </shape>
     </item>
     <item>
-        <ripple android:color="?android:colorControlHighlight">
+        <ripple android:color="@color/color_control_highlight">
             <item android:id="@android:id/mask">
                 <shape>
                     <corners android:radius="16dp" />

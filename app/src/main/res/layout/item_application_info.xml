@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_bg_flow_item"
+        android:paddingVertical="16dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tv_application_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toTopOf="@+id/tv_pkg_name"
+            app:layout_constraintEnd_toStartOf="@+id/tv_badge"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@+id/iv_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/full_names" />
+
+
+        <TextView
+            android:id="@+id/tv_extra_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_application_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="@+id/tv_application_name"
+            tools:text="2020-9-1" />
+
+        <TextView
+            android:id="@+id/tv_pkg_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_more"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/tv_application_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_application_name"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_badge"
+            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+            android:textColor="?colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_application_name"
+            app:layout_constraintEnd_toStartOf="@+id/iv_more"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/tv_application_name"
+            app:layout_constraintTop_toTopOf="@+id/tv_application_name"
+            tools:text="1" />
+
+        <ImageView
+            android:id="@+id/iv_more"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@null"
+            android:contentDescription="@{@string/more}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_chevron_right_24" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

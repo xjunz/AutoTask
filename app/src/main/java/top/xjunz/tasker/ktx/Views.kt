@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ktx
 
+import android.graphics.Bitmap
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
@@ -11,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.graphics.Insets
+import androidx.core.graphics.applyCanvas
 import androidx.core.view.WindowInsetsCompat
+import androidx.viewpager2.widget.ViewPager2
 import top.xjunz.tasker.util.Motions
 
 /**
@@ -26,6 +29,33 @@ inline fun <T : View> T.applySystemInsets(
         block(this, sysInsets.getInsets(type))
         return@setOnApplyWindowInsetsListener windowInsets
     }
+}
+
+fun View.drawToBitmapUnsafe(config: Bitmap.Config = Bitmap.Config.ARGB_8888): Bitmap {
+    return Bitmap.createBitmap(width, height, config).applyCanvas {
+        translate(-scrollX.toFloat(), -scrollY.toFloat())
+        draw(this)
+    }
+}
+
+inline fun View.doOnDetachNotSticky(crossinline action: (view: View) -> Unit) {
+    addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(view: View) {}
+
+        override fun onViewDetachedFromWindow(view: View) {
+            removeOnAttachStateChangeListener(this)
+            action(view)
+        }
+    })
+}
+
+inline fun ViewPager2.doOnItemSelected(crossinline block: (Int) -> Unit) {
+    registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            super.onPageSelected(position)
+            block(position)
+        }
+    })
 }
 
 inline fun <T : View> T.oneShotApplySystemInsets(

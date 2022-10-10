@@ -48,7 +48,7 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         return binding.root
     }
 
-    protected lateinit var bottomSheetBehaviour: BottomSheetBehavior<*>
+    private lateinit var bottomSheetBehaviour: BottomSheetBehavior<*>
 
     @SuppressLint("RestrictedApi", "VisibleForTests")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

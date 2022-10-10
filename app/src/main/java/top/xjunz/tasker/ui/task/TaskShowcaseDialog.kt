@@ -14,7 +14,7 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.ktx.applySystemInsets
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.toast
-import top.xjunz.tasker.task.core.InspectorController
+import top.xjunz.tasker.task.inspector.InspectorController
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 
 /**

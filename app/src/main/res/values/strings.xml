@@ -98,7 +98,7 @@
     <string name="prompt_switch_mode">当前服务正在启动或运行中，无法切换工作模式</string>
     <string name="prompt">提示</string>
     <string name="prompt_shizuku_time_out">启动超时，请尝试重试。若重试后仍然超时，可尝试重新授权Shizuku权限。</string>
-    <string name="pls_start_a11y_service_manually">请在设置中手动启用[自动任务]的辅助功能服务</string>
+    <string name="pls_start_a11y_service_manually">请在设置中手动启用【自动任务】的辅助功能服务</string>
     <string name="prompt_stop_service">你确定要停止服务吗？</string>
     <string name="preload">预置</string>
     <string name="custom">自定义</string>
@@ -136,7 +136,27 @@
     <string name="add_after">在后面添加</string>
     <string name="add_before">在前面添加</string>
     <string name="back">返回</string>
-    <string name="property">属性</string>
-    <string name="time_matches">当前时间满足</string>
-
+    <string name="complete">完成</string>
+    <string name="format_applet_count">已指定%d条规则</string>
+    <string name="expand_more">展开</string>
+    <string name="unfold_less">收起</string>
+    <string name="sort_by_app_name">按应用名称</string>
+    <string name="sort_by_suspicion">智能排序</string>
+    <string name="sort_by_apk_size">按应用体积</string>
+    <string name="sort_by_install_time">按首次安装时间</string>
+    <string name="reverse_order">倒序</string>
+    <string name="show_system_apps">显示系统应用</string>
+    <string name="launch_activity">启动页</string>
+    <string name="tip_enable_floating_comp_inspector">使用<b>悬浮助手</b>帮助您快速选择应用程序和页面</string>
+    <string name="tip_enable_floating_ui_inspector">使用<b>悬浮助手</b>帮助您快速选择UI组件</string>
+    <string name="enable_floating_inspector">启用悬浮助手</string>
+    <string name="enable">开启</string>
+    <string name="goto_grant">去授权</string>
+    <string name="overlay_permission">悬浮窗权限</string>
+    <string name="grant_failed">授权失败</string>
+    <string name="prompt_start_shizuku_service">请先启动Shizuku服务</string>
+    <string name="prompt_install_shizuku">请先下载并安装Shizuku</string>
+    <string name="pls_wait">请稍等…</string>
+    <string name="inspect_failed">未捕获到窗口，请尝试重试</string>
+    <string name="launch_failed">启动失败</string>
 </resources>

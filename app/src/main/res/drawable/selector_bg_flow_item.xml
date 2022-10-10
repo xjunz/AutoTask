@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="8dp"
-    android:insetTop="2dp"
-    android:insetRight="8dp"
-    android:insetBottom="2dp">
-    <ripple android:color="?colorControlHighlight">
+    xmlns:tools="http://schemas.android.com/tools">
+    <ripple
+        android:color="@color/color_control_highlight"
+        android:effectColor="?colorPrimary"
+        tools:ignore="UnusedAttribute">
         <item android:id="@android:id/mask">
-            <shape android:shape="rectangle">
-                <corners android:radius="8dp" />
-                <solid android:color="@android:color/white" />
-            </shape>
+            <inset
+                android:insetLeft="8dp"
+                android:insetTop="2dp"
+                android:insetRight="8dp"
+                android:insetBottom="2dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="8dp" />
+                    <solid android:color="@android:color/white" />
+                </shape>
+            </inset>
         </item>
         <item>
-            <selector
-                android:enterFadeDuration="@integer/material_motion_duration_short_2"
-                android:exitFadeDuration="@integer/material_motion_duration_short_2">
-                <item android:state_selected="true">
-                    <shape android:shape="rectangle">
-                        <stroke
-                            android:width="1.5dp"
-                            android:color="?colorPrimary"
-                            android:dashWidth="6dp"
-                            android:dashGap="4dp" />
-                        <corners android:radius="8dp" />
-                    </shape>
-                </item>
-                <item android:state_selected="false">
-                    <shape android:shape="rectangle">
-                        <corners android:radius="8dp" />
-                    </shape>
-                </item>
-            </selector>
+            <inset
+                android:insetLeft="8dp"
+                android:insetTop="2dp"
+                android:insetRight="8dp"
+                android:insetBottom="2dp">
+                <selector
+                    android:enterFadeDuration="@integer/material_motion_duration_short_2"
+                    android:exitFadeDuration="@integer/material_motion_duration_short_2">
+                    <item android:state_selected="true">
+                        <shape android:shape="rectangle">
+                            <stroke
+                                android:width="1.5dp"
+                                android:color="?colorPrimary"
+                                android:dashWidth="6dp"
+                                android:dashGap="4dp" />
+                            <corners android:radius="8dp" />
+                        </shape>
+                    </item>
+                    <item android:state_selected="false">
+                        <shape android:shape="rectangle">
+                            <corners android:radius="8dp" />
+                        </shape>
+                    </item>
+                </selector>
+            </inset>
         </item>
     </ripple>
 </inset>

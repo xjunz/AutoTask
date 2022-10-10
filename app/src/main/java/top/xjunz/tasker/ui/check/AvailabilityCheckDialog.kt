@@ -24,9 +24,9 @@ import kotlinx.coroutines.withContext
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogAvailabilityCheckBinding
 import top.xjunz.tasker.databinding.ItemCheckCaseBinding
-import top.xjunz.tasker.impl.IAvailabilityCheckerCallback
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.controller.currentService
+import top.xjunz.tasker.service.IAvailabilityCheckerCallback
+import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter

@@ -11,36 +11,33 @@ import top.xjunz.tasker.task.anno.AppletCategory
  */
 abstract class AppletFactory(val id: Int) {
 
-    companion object {
-        const val LABEL_AUTO_INVERTED = 0
-        const val LABEL_NONE = -1
-    }
-
     @get:StringRes
-    abstract val label: Int
-
-    abstract val name: String
+    abstract val title: Int
 
     abstract val categoryNames: IntArray
 
-    val appletOptions: List<AppletOption> by lazy {
+    fun findAppletOptionById(id: Int): AppletOption {
+        return options.first { it.appletId == id }
+    }
+
+    val options: List<AppletOption> by lazy {
         javaClass.declaredFields.mapNotNull m@{
             val anno = it.getDeclaredAnnotation(AppletCategory::class.java) ?: return@m null
             it.isAccessible = true
             val option = it.get(this) as AppletOption
-            option.factoryId = this.id
+            option.factoryId = id
             option.categoryId = anno.categoryId
             it.isAccessible = false
             return@m option
         }.sorted()
     }
 
-    val categorizedAppletOptions: List<AppletOption> by lazy {
+    val categorizedOptions: List<AppletOption> by lazy {
         val ret = ArrayList<AppletOption>()
         var previousCategory = -1
-        appletOptions.forEach {
+        options.forEach {
             if (it.categoryIndex != previousCategory) {
-                if (categoryNames[it.categoryIndex] != LABEL_NONE) {
+                if (categoryNames[it.categoryIndex] != AppletOption.TITLE_NONE) {
                     ret.add(AppletCategoryOption(categoryNames[it.categoryIndex]))
                 }
             }
@@ -53,8 +50,7 @@ abstract class AppletFactory(val id: Int) {
     /**
      * Create an [Applet] from an [id].
      */
-    fun createApplet(id: Int): Applet {
-        return appletOptions.first { it.appletId == id }.createApplet()
+    fun createAppletFromId(id: Int): Applet {
+        return options.first { it.appletId == id }.createApplet()
     }
-
 }

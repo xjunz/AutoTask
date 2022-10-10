@@ -18,7 +18,8 @@ class AppletContext(
      * Events that are received by the task.
      */
     val events: Array<Event>,
-    val currentPackageName: String
+    val currentPackageName: String,
+    val currentActivityName: String
 ) {
 
     /**

@@ -1,4 +1,4 @@
-package top.xjunz.tasker.trace
+package top.xjunz.shared.trace
 
 import android.util.Log
 

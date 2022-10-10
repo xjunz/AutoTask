@@ -7,7 +7,7 @@ package top.xjunz.tasker.annotation
 /**
  * The annotation indicating that its targets are used in both local and remote processes.
  *
- * @see Remote
+ * @see RemoteOnly
  *
  * @author xjunz 2022/04/30
  */

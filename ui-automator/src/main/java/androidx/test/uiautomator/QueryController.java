@@ -16,7 +16,6 @@
 
 package androidx.test.uiautomator;
 
-import android.app.UiAutomation.OnAccessibilityEventListener;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -62,9 +61,9 @@ public class QueryController {
 
     private String mLastTraversedText = "";
 
-    private final OnAccessibilityEventListener mEventListener = new OnAccessibilityEventListener() {
-        @Override
-        public void onAccessibilityEvent(AccessibilityEvent event) {
+    public QueryController(UiAutomatorBridge instrumentation) {
+        mUiAutomatorBridge = instrumentation;
+        instrumentation.addOnAccessibilityEventListener(event -> {
             synchronized (mLock) {
                 switch (event.getEventType()) {
                     case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
@@ -86,12 +85,7 @@ public class QueryController {
                 }
                 mLock.notifyAll();
             }
-        }
-    };
-
-    public QueryController(UiAutomatorBridge instrumentation) {
-        mUiAutomatorBridge = instrumentation;
-        instrumentation.getUiAutomation().setOnAccessibilityEventListener(mEventListener);
+        });
     }
 
     /**

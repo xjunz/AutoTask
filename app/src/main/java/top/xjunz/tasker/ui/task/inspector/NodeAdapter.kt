@@ -7,7 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
-import top.xjunz.tasker.task.core.StableNode
+import top.xjunz.tasker.task.inspector.StableNode
 
 /**
  * @author xjunz 2021/9/22

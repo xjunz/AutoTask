@@ -4,9 +4,9 @@ import androidx.annotation.StringRes
 import top.xjunz.tasker.Configurations
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.str
-import top.xjunz.tasker.service.controller.A11yServiceController
+import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.service.controller.ServiceController
-import top.xjunz.tasker.service.controller.ShizukuServiceController
+import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.util.runtimeException
 
 /**
@@ -22,16 +22,14 @@ sealed class OperatingMode(
 
     val description get() = descRes.str
 
-    abstract val serviceController: ServiceController
+    abstract val serviceController: ServiceController<out AutomatorService>
 
     object Shizuku : OperatingMode(0, R.string.shizuku, R.string.desc_shizuku_mode) {
-        override val serviceController: ServiceController
-            get() = ShizukuServiceController
+        override val serviceController = ShizukuAutomatorServiceController
     }
 
     object Accessibility : OperatingMode(1, R.string.a11y_service, R.string.desc_a11y_mode) {
-        override val serviceController: ServiceController
-            get() = A11yServiceController
+        override val serviceController = A11yAutomatorServiceController
     }
 
     companion object {

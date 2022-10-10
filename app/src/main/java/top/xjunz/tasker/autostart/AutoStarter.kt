@@ -6,7 +6,7 @@ import android.content.Intent
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.Configurations
 import top.xjunz.tasker.service.OperatingMode
-import top.xjunz.tasker.service.controller.ShizukuServiceController
+import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.util.ShizukuUtil
 
 /**
@@ -18,7 +18,7 @@ class AutoStarter : BroadcastReceiver() {
         override fun onBinderReceived() {
             if (ShizukuUtil.isShizukuAvailable) {
                 // TODO: Show countdown as a notification
-                ShizukuServiceController.bindService()
+                ShizukuAutomatorServiceController.bindService()
             }
             Shizuku.removeBinderReceivedListener(this)
         }

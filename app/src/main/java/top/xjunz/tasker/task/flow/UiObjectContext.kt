@@ -2,7 +2,7 @@ package top.xjunz.tasker.task.flow
 
 import android.view.Surface
 import android.view.accessibility.AccessibilityNodeInfo
-import top.xjunz.tasker.service.controller.currentService
+import top.xjunz.tasker.service.currentService
 
 /**
  * @author xjunz 2022/10/01

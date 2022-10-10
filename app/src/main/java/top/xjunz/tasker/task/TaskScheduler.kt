@@ -3,6 +3,7 @@ package top.xjunz.tasker.task
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.accessibility.AccessibilityEvent
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.AutomatorTask
@@ -36,8 +37,13 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      */
     fun scheduleTasks() {
         var previousPackage: String? = null
-        service.uiAutomatorBridge.uiAutomation.setOnAccessibilityEventListener listener@{
+        var currentActivityName: String? = null
+        service.uiAutomatorBridge.addOnAccessibilityEventListener listener@{
             try {
+                if (it.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+                    currentActivityName = it.className?.toString()
+                    if (currentActivityName == null) return@listener
+                }
                 val currentPackage = it.packageName?.toString() ?: return@listener
                 if (previousPackage == null) {
                     previousPackage = currentPackage
@@ -54,7 +60,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                     events = arrayOf(Event.obtain(Event.EVENT_ON_CONTENT_CHANGED, currentPackage))
                 }
                 TaskManager.getActiveTasks().forEach { task ->
-                    val ctx = AppletContext(task, events, currentPackage)
+                    val ctx = AppletContext(task, events, currentPackage, currentActivityName!!)
                     handler.obtainMessage(task.id, ctx).sendToTarget()
                 }
             } finally {
@@ -62,6 +68,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                 it.recycle()
             }
         }
+        service.uiAutomatorBridge.startReceivingEvents()
     }
 
     fun stopTask(task: AutomatorTask) {
@@ -73,7 +80,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
     fun destroy() {
-        service.uiAutomatorBridge.uiAutomation.setOnAccessibilityEventListener(null)
+        service.uiAutomatorBridge.stopReceivingEvents()
         handler.removeCallbacksAndMessages(null)
     }
 

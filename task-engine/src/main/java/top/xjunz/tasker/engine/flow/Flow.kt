@@ -1,5 +1,6 @@
 package top.xjunz.tasker.engine.flow
 
+import androidx.annotation.CallSuper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -10,7 +11,7 @@ import top.xjunz.tasker.engine.FlowRuntime
 import top.xjunz.tasker.util.runtimeException
 
 /**
- * A flow is a set of [applets][Applet].
+ * A flow is a set of [applets][Applet] but is also a special applet.
  *
  * @author xjunz 2022/08/04
  */
@@ -39,27 +40,31 @@ open class Flow : Applet() {
 
     val applets: MutableList<Applet> = ArrayList(1)
 
+    @CallSuper
     protected open fun doApply(context: AppletContext, runtime: FlowRuntime) {
-        applets.forEachIndexed { _, applet ->
+        for ((index, applet) in applets.withIndex()) {
             context.task.ensureActive()
+            if (applet.relation == RELATION_AND && !runtime.isSuccessful) continue
+            if (applet.relation == RELATION_OR && runtime.isSuccessful) continue
             runtime.currentApplet = applet
+            runtime.moveTo(index)
             applet.apply(context, runtime)
         }
     }
 
     override fun apply(context: AppletContext, runtime: FlowRuntime) {
-        if (shouldDropFlow(context, runtime)) return
         onPreApply(context, runtime)
         // Backup the argument, because processor actions in this flow may change the value, we don't
         // want the processed value to fall through.
         val argument = runtime.getRawTarget()
-        runtime.depth++
         runtime.currentFlow = this
+        runtime.jumpIn()
+        checkElements()
         onPrepare(context, runtime)
         doApply(context, runtime)
         // Restore the argument
         runtime.setTarget(argument)
-        runtime.depth--
+        runtime.jumpOut()
         onPostApply(context, runtime)
     }
 

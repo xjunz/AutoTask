@@ -4,49 +4,99 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/root_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="?colorSurface">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <TextView
+            <top.xjunz.tasker.ui.widget.LeftCorneredTextView
                 android:id="@+id/tv_title"
-
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:paddingVertical="16dp"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="UnusedAttribute"
                 tools:text="在内部添加" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:visibility="gone"
+                app:dividerColor="@color/material_on_surface_stroke"
+                app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_left"
                 android:layout_width="0dp"
-                android:nestedScrollingEnabled="false"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:nestedScrollingEnabled="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toStartOf="@+id/rv_right"
                 app:layout_constraintHorizontal_weight=".3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                tools:listitem="@layout/item_applet_factory" />
+                app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                app:dividerColor="@color/material_on_surface_stroke"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/rv_left"
+                app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cv_header"
+                style="@style/Widget.Material3.CardView.Elevated"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                app:rippleColor="?colorControlHighlight"
+                app:cardBackgroundColor="?colorTertiaryContainer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/rv_left"
+                app:layout_constraintTop_toBottomOf="@id/tv_title">
+
+                <TextView
+                    android:id="@+id/tv_header"
+                    android:paddingVertical="16dp"
+                    android:textColor="?colorTertiary"
+                    android:paddingHorizontal="8dp"
+                    android:drawablePadding="8dp"
+                    tools:text="@string/tip_enable_floating_comp_inspector"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:drawableStartCompat="@drawable/ic_twotone_layers_24"
+                    app:drawableTint="?colorTertiary"
+                    app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24" />
+            </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_right"
+                android:transitionGroup="true"
                 android:layout_width="0dp"
-                android:layout_height="500dp"
+                android:layout_height="0dp"
+                android:clipToPadding="false"
+                android:paddingTop="8dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_weight=".7"
                 app:layout_constraintStart_toEndOf="@+id/rv_left"
-                app:layout_constraintTop_toTopOf="@+id/rv_left"
+                app:layout_constraintTop_toBottomOf="@id/cv_header"
                 tools:listitem="@layout/item_applet_option" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <include
+            android:id="@+id/shopping_cart"
+            layout="@layout/layout_shopping_cart" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

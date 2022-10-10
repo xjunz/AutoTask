@@ -3,10 +3,7 @@ package top.xjunz.tasker.service.controller
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.service.AutomatorService
-import top.xjunz.tasker.service.OperatingMode
-import top.xjunz.tasker.service.ShizukuAutomatorService
 import java.lang.ref.WeakReference
 
 /**
@@ -14,19 +11,9 @@ import java.lang.ref.WeakReference
  *
  * @author xjunz 2022/07/12
  */
+abstract class ServiceController<S : Any> : CoroutineScope {
 
-val serviceController get() = OperatingMode.CURRENT.serviceController
-
-val currentService: AutomatorService
-    get() = if (isInHostProcess) {
-        serviceController.requireService()
-    } else {
-        ShizukuAutomatorService.require()
-    }
-
-abstract class ServiceController : CoroutineScope {
-
-    abstract val service: AutomatorService?
+    abstract val service: S?
 
     /**
      * Start the service if not running and bind to it.
@@ -49,7 +36,9 @@ abstract class ServiceController : CoroutineScope {
     /**
      * Synchronize the service status manually. This is usually called in `Activity.onResume()`.
      */
-    abstract fun syncStatus()
+    open fun syncStatus() {
+        /* no-op */
+    }
 
     /**
      * The service state listener.
@@ -63,15 +52,15 @@ abstract class ServiceController : CoroutineScope {
         fun onServiceDisconnected()
     }
 
-    private val isServiceRunning get() = service?.isRunning == true
+    abstract val isServiceRunning: Boolean
+
+    abstract val startTimestamp: Long
 
     private var listenerRef: WeakReference<ServiceStateListener>? = null
 
     protected val listener get() = listenerRef?.get()
 
-    val startTimestamp: Long get() = doWhenRunning { it.getStartTimestamp() } ?: -1L
-
-    fun requireService(): AutomatorService {
+    fun requireService(): S {
         return requireNotNull(service) { "The service is not yet started or is dead!" }
     }
 
@@ -84,7 +73,7 @@ abstract class ServiceController : CoroutineScope {
         listenerRef = null
     }
 
-    private inline fun <R> doWhenRunning(block: (AutomatorService) -> R): R? {
+    protected inline fun <R> doWhenRunning(block: (S) -> R): R? {
         if (isServiceRunning) {
             return block(service!!)
         }

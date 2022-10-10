@@ -16,8 +16,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.unsafeCast
 import top.xjunz.tasker.impl.A11yUiAutomatorBridge
-import top.xjunz.tasker.impl.AvailabilityChecker
-import top.xjunz.tasker.impl.IAvailabilityChecker
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import top.xjunz.tasker.util.unsupportedOperation
@@ -30,19 +28,20 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     companion object {
 
-        val error = MutableLiveData<Throwable>()
+        val ERROR = MutableLiveData<Throwable>()
 
-        val isRunning = MutableLiveData<Boolean>()
+        val IS_RUNNING = MutableLiveData<Boolean>()
 
         private var instanceRef: WeakReference<A11yAutomatorService>? = null
 
         fun get() = instanceRef?.get()
 
-        fun require() =
-            checkNotNull(get()) { "The A11yAutomatorService is not yet started or is dead!" }
+        fun require() = checkNotNull(get()) {
+            "The A11yAutomatorService is not yet started or is dead!"
+        }
     }
 
-    override val isRunning get() = Companion.isRunning.isTrue
+    override val isRunning get() = IS_RUNNING.isTrue
 
     private var startTimestamp: Long = -1
 
@@ -50,12 +49,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
 
-    private val _uiAutomation: UiAutomation by lazy {
-        uiAutomationHidden.unsafeCast()
-    }
+    private val uiAutomation: UiAutomation get() = uiAutomationHidden.unsafeCast()
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        A11yUiAutomatorBridge(this, _uiAutomation)
+        A11yUiAutomatorBridge(this, uiAutomation)
     }
 
     override fun onServiceConnected() {
@@ -65,10 +62,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             uiAutomationHidden.connect()
             instanceRef = WeakReference(this)
             startTimestamp = System.currentTimeMillis()
-            Companion.isRunning.value = true
+            IS_RUNNING.value = true
         } catch (t: Throwable) {
             t.printStackTrace()
-            error.value = t
+            ERROR.value = t
             destroy()
         }
     }
@@ -78,13 +75,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun onInterrupt() {
-        TODO("interrupted!")
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
         instanceRef?.clear()
-        Companion.isRunning.value = false
+        IS_RUNNING.value = false
     }
 
     /**

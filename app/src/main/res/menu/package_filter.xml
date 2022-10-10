@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_sort_by"
+        android:title="@string/sort_by">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/item_sort_by_sus"
+                    android:title="@string/sort_by_suspicion" />
+                <item
+                    android:id="@+id/item_sort_by_name"
+                    android:title="@string/sort_by_app_name" />
+                <item
+                    android:id="@+id/item_sort_by_size"
+                    android:title="@string/sort_by_apk_size" />
+                <item
+                    android:id="@+id/item_sort_by_install_time"
+                    android:title="@string/sort_by_install_time" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/item_reverse_order"
+        android:checkable="true"
+        android:title="@string/reverse_order" />
+    <item
+        android:id="@+id/item_show_system_app"
+        android:checkable="true"
+        android:title="@string/show_system_apps" />
+</menu>

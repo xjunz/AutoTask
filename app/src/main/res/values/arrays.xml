@@ -32,4 +32,8 @@
         <item>isScrollable</item>
         <item>isSelected</item>
     </string-array>
+    <string-array name="applet_relations">
+        <item>且</item>
+        <item>或</item>
+    </string-array>
 </resources>

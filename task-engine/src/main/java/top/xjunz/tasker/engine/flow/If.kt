@@ -13,7 +13,7 @@ open class If : Flow() {
 
     override fun checkElements() {
         super.checkElements()
-        if (applets.size >= 1 && (applets[0] is And || applets[0] is Or)) {
+        if (applets.size >= 1 && (applets[0].relation != RELATION_NONE)) {
             runtimeException("The first element or [If] must not be an [And] or an [Or].")
         }
     }

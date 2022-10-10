@@ -6,7 +6,7 @@
     tools:ignore="UnusedAttribute">
     <item android:id="@android:id/mask">
         <shape android:shape="oval">
-            <solid android:color="?colorPrimaryContainer" />
+            <solid android:color="@android:color/white" />
         </shape>
     </item>
     <item>

@@ -10,10 +10,10 @@ import top.xjunz.tasker.task.anno.AppletCategory
 /**
  * @author xjunz 2022/08/12
  */
-class EventFilterFactory : AppletFactory(AppletRegistry.ID_EVENT_FILTER_FACTORY) {
+class EventFilterFactory(id: Int) : AppletFactory(id) {
 
     private fun EventFilterOption(@Event.EventType event: Int, @StringRes label: Int) =
-        AppletOption(event, label, LABEL_NONE) {
+        AppletOption(event, label, AppletOption.TITLE_NONE) {
             EventFilter(event)
         }
 
@@ -29,10 +29,7 @@ class EventFilterFactory : AppletFactory(AppletRegistry.ID_EVENT_FILTER_FACTORY)
     private val contentChanged =
         EventFilterOption(Event.EVENT_ON_CONTENT_CHANGED, R.string.on_content_changed)
 
-    override val label: Int = LABEL_NONE
+    override val title: Int = AppletOption.TITLE_NONE
 
-    override val name: String = "EventCriterionFactory"
-
-    override val categoryNames: IntArray = intArrayOf(LABEL_NONE)
-
+    override val categoryNames: IntArray = intArrayOf(AppletOption.TITLE_NONE)
 }

@@ -31,6 +31,8 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
 
     open val isFullScreen = true
 
+    open val decorFitsSystemWindows = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(
@@ -39,7 +41,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
         )
     }
 
-    protected open fun onBackPressed(): Boolean {
+    open fun onBackPressed(): Boolean {
         return false
     }
 
@@ -59,7 +61,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val window = dialog!!.window!!
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, decorFitsSystemWindows)
         if (!isFullScreen) {
             val decorView = window.peekDecorView()
             // Set the background as a [MaterialAlertDialog]'s

@@ -16,12 +16,24 @@ object ColorSchemes {
         )
 
     @get:ColorInt
+    val textColorTertiary: Int
+        get() = android.R.attr.textColorTertiary.attrColorStateList.defaultColor
+
+    @get:ColorInt
+    val colorTextLink: Int
+        get() = android.R.attr.textColorLink.attrColorStateList.defaultColor
+
+    @get:ColorInt
     val colorPrimary: Int
         get() = com.google.android.material.R.attr.colorPrimary.attrColor
 
     @get:ColorInt
     val colorOnSurface: Int
         get() = com.google.android.material.R.attr.colorOnSurface.attrColor
+
+    @get:ColorInt
+    val colorSurface: Int
+        get() = com.google.android.material.R.attr.colorSurface.attrColor
 
     @get:ColorInt
     val colorPrimaryContainer

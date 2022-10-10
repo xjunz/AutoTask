@@ -3,79 +3,62 @@ package top.xjunz.tasker.service.controller
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.os.IInterface
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import rikka.shizuku.Shizuku
-import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.IAutomatorConnection
-import top.xjunz.tasker.service.AutomatorService
-import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.util.ShizukuUtil
 import top.xjunz.tasker.util.runtimeException
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
 
-
 /**
- * @author xjunz 2021/6/26
+ * @author xjunz 2022/10/10
  */
-object ShizukuServiceController : ServiceController() {
+abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
-    private const val tag = "Automator"
-
-    private const val BINDING_SERVICE_TIMEOUT_MILLS = 5000L
-
-    private const val SERVICE_NAME_SUFFIX = "service"
-
-    private var binder: IBinder? = null
-
-    private val userServiceStandaloneProcessArgs by lazy {
-        Shizuku.UserServiceArgs(
-            ComponentName(
-                BuildConfig.APPLICATION_ID, ShizukuAutomatorService::class.java.name
-            )
-        ).processNameSuffix(SERVICE_NAME_SUFFIX).debuggable(BuildConfig.DEBUG)
-            .version(BuildConfig.VERSION_CODE)
+    companion object {
+        private const val BINDING_SERVICE_TIMEOUT_MILLS = 5000L
     }
+
+    protected abstract val tag: String
+
+    protected abstract val userServiceStandaloneProcessArgs: Shizuku.UserServiceArgs
+
+    protected abstract fun asInterface(binder: IBinder): IInterface
+
+    protected abstract fun doOnConnected(serviceInterface: IInterface)
+
+    private var bindingJob: Job? = null
+
+    protected var serviceInterface: IInterface? = null
 
     private val deathRecipient: IBinder.DeathRecipient by lazy {
         IBinder.DeathRecipient {
             Log.w(tag, "The remote service is dead!")
             listener?.onServiceDisconnected()
-            binder?.unlinkToDeath(deathRecipient, 0)
+            serviceInterface?.asBinder()?.unlinkToDeath(deathRecipient, 0)
         }
     }
 
-    private var bindingJob: Job? = null
-
     private val userServiceConnection = object : ServiceConnection {
 
-        private fun initAutomatorContext(connection: IAutomatorConnection) {
-
-        }
-
-        override fun onServiceConnected(name: ComponentName?, iBinder: IBinder?) {
+        override fun onServiceConnected(name: ComponentName?, ibinder: IBinder?) {
             try {
-                if (iBinder == null || !iBinder.pingBinder()) {
+                if (ibinder == null || !ibinder.pingBinder()) {
                     runtimeException("Got an invalid binder!")
                 } else {
-                    iBinder.linkToDeath(deathRecipient, 0)
-                    IAutomatorConnection.Stub.asInterface(iBinder).also {
-                        service = ShizukuAutomatorService(it)
-                        if (!it.isConnected) {
-                            it.connect()
-                            initAutomatorContext(it)
-                        }
+                    ibinder.linkToDeath(deathRecipient, 0)
+                    asInterface(ibinder).also {
+                        serviceInterface = it
+                        doOnConnected(it)
                     }
-                    binder = iBinder
                     listener?.onServiceBound()
                 }
             } catch (t: Throwable) {
                 listener?.onError(t)
-                service?.destroy()
             } finally {
                 bindingJob?.cancel()
             }
@@ -84,36 +67,31 @@ object ShizukuServiceController : ServiceController() {
         override fun onServiceDisconnected(name: ComponentName?) {}
     }
 
-    val isShizukuInstalled = MutableLiveData<Boolean>()
-
-    val isShizukuGranted = MutableLiveData<Boolean>()
-
-    override var service: AutomatorService? = null
-
     override fun bindService() {
-        listener?.onStartBinding()
-        bindingJob = async {
-            Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            delay(BINDING_SERVICE_TIMEOUT_MILLS)
-            throw TimeoutException()
-        }
-        bindingJob?.invokeOnCompletion {
-            if (it != null && it !is CancellationException) {
-                listener?.onError(it)
+        ShizukuUtil.ensureShizukuEnv {
+            listener?.onStartBinding()
+            bindingJob = async {
+                Shizuku.bindUserService(
+                    userServiceStandaloneProcessArgs,
+                    userServiceConnection
+                )
+                delay(BINDING_SERVICE_TIMEOUT_MILLS)
+                throw TimeoutException()
             }
-            bindingJob = null
+            bindingJob?.invokeOnCompletion {
+                if (it != null && it !is CancellationException) {
+                    listener?.onError(it)
+                }
+                bindingJob = null
+            }
         }
     }
 
     override fun stopService() {
-        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
-        service = null
-    }
-
-    override fun unbindService() {
-        serviceController.removeStateListener()
-        binder?.unlinkToDeath(deathRecipient, 0)
-        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, false)
+        Shizuku.unbindUserService(
+            userServiceStandaloneProcessArgs, userServiceConnection, true
+        )
+        serviceInterface = null
     }
 
     override fun bindExistingServiceIfExists() {
@@ -124,8 +102,12 @@ object ShizukuServiceController : ServiceController() {
         }
     }
 
-    override fun syncStatus() {
-        isShizukuInstalled.value = ShizukuUtil.isShizukuInstalled
-        isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
+    override fun unbindService() {
+        removeStateListener()
+        serviceInterface?.asBinder()?.unlinkToDeath(deathRecipient, 0)
+        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, false)
     }
+
+    override val isServiceRunning: Boolean
+        get() = serviceInterface != null && serviceInterface?.asBinder()?.pingBinder() == true
 }

@@ -24,7 +24,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    namespace 'android_libs.ub_uiautomator'
+    namespace 'androidx.test.uiautomator'
 }
 
 dependencies {

@@ -19,7 +19,7 @@ import top.xjunz.tasker.util.illegalArgument
 @Serializable
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
-   private companion object {
+    private companion object {
         const val TYPE_STRING = 0
         const val TYPE_INT = 1
         const val TYPE_FLOAT = 2
@@ -49,7 +49,7 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         return real
     }
 
-    fun setValue(value:Any){
+    fun setValue(value: Any) {
         real = value.unsafeCast()
         literal = value.toString()
         type = when (value) {

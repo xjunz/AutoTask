@@ -89,7 +89,7 @@
                 android:layout_weight="1"
                 android:checkable="@{false}"
                 android:text="@string/delete"
-                app:icon="@drawable/ic_twotone_delete_forever_24"
+                app:icon="@drawable/ic_outline_delete_forever_24"
                 app:iconGravity="textStart"
                 app:iconPadding="16dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>

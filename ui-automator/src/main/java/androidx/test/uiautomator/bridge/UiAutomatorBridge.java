@@ -7,7 +7,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputEvent;
-import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.uiautomator.GestureController;
 import androidx.test.uiautomator.InteractionController;
@@ -17,6 +16,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -43,6 +44,24 @@ public abstract class UiAutomatorBridge {
     private final UiAutomation mUiAutomation;
 
     private DisplayMetrics mDefaultDisplayMetrics;
+
+    private final List<UiAutomation.OnAccessibilityEventListener> mEventListeners = new ArrayList<>(2);
+
+    private final UiAutomation.OnAccessibilityEventListener mEventListener = event -> {
+        synchronized (mEventListeners) {
+            for (UiAutomation.OnAccessibilityEventListener listener : mEventListeners) {
+                listener.onAccessibilityEvent(event);
+            }
+        }
+    };
+
+    public void startReceivingEvents() {
+        mUiAutomation.setOnAccessibilityEventListener(mEventListener);
+    }
+
+    public void stopReceivingEvents() {
+        mUiAutomation.setOnAccessibilityEventListener(null);
+    }
 
     public UiAutomatorBridge(UiAutomation uiAutomation) {
         mUiAutomation = uiAutomation;
@@ -93,10 +112,10 @@ public abstract class UiAutomatorBridge {
         }
     }
 
-    public AccessibilityEvent executeCommandAndWaitForAccessibilityEvent(Runnable command,
-                                                                         UiAutomation.AccessibilityEventFilter filter, long timeoutMillis) throws TimeoutException {
-        return mUiAutomation.executeAndWaitForEvent(command,
-                filter, timeoutMillis);
+    public void addOnAccessibilityEventListener(UiAutomation.OnAccessibilityEventListener listener) {
+        synchronized (mEventListeners) {
+            mEventListeners.add(listener);
+        }
     }
 
     public boolean takeScreenshot(File storePath, int quality) {

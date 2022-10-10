@@ -7,7 +7,7 @@ import top.xjunz.tasker.Configurations
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
-import top.xjunz.tasker.service.controller.serviceController
+import top.xjunz.tasker.service.serviceController
 
 /**
  * @author xjunz 2022/07/08

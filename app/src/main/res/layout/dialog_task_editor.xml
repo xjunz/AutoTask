@@ -61,6 +61,7 @@
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scroll_view"
+            android:paddingHorizontal="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="3dp"
@@ -78,7 +79,7 @@
 
                 <View
                     android:id="@+id/tv_panel_handle"
-                    android:layout_width="75dp"
+                    android:layout_width="50dp"
                     android:layout_height="6dp"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_bottom_sheet_handler"
@@ -170,7 +171,7 @@
                         android:layout_weight="1"
                         android:checkable="@{false}"
                         android:text="@string/delete"
-                        app:icon="@drawable/ic_twotone_delete_forever_24"
+                        app:icon="@drawable/ic_outline_delete_forever_24"
                         app:iconGravity="textStart"
                         app:iconPadding="16dp" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>

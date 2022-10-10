@@ -11,26 +11,54 @@ import top.xjunz.tasker.engine.flow.Applet
 class AppletRegistry {
 
     companion object {
-        const val ID_EVENT_FILTER_FACTORY = 0
-        const val ID_PKG_APPLET_FACTORY = 1
-        const val ID_UI_OBJECT_FACTORY = 2
-        const val ID_TIME_FACTORY = 3
+
+        inline val Applet.factoryId get() = id ushr 16
+
+        inline val Applet.appletId get() = id and 0xFFFF
+
     }
 
-    val allFactories = arrayOf(PackageCriteriaFactory(), UiObjectCriteriaFactory(),TimeCriteriaFactory())
+    val flowFactory = FlowFactory()
 
-    private inline val Applet.factoryId get() = id ushr 16
+    private val eventFilterFactory = EventFilterFactory(FlowFactory.ID_EVENT_FILTER_FACTORY)
 
-    private inline val Applet.appletId get() = id and 0xFFFF
+    private val packageAppletFactory = PackageAppletFactory(FlowFactory.ID_PKG_APPLET_FACTORY)
+
+    private val uiObjectAppletFactory =
+        UiObjectAppletFactory(FlowFactory.ID_UI_OBJECT_APPLET_FACTORY)
+
+    private val timeAppletFactory = TimeAppletFactory(FlowFactory.ID_TIME_APPLET_FACTORY)
+
+    val allFactories = arrayOf(
+        flowFactory,
+        eventFilterFactory,
+        packageAppletFactory,
+        uiObjectAppletFactory,
+        timeAppletFactory
+    )
+
+    val appletFactories = arrayOf(
+        eventFilterFactory, packageAppletFactory, uiObjectAppletFactory, timeAppletFactory
+    )
+
+    fun findOption(applet: Applet): AppletOption {
+        return findFactoryById(applet.factoryId).findAppletOptionById(applet.appletId)
+    }
 
     fun createAppletById(id: Int, isInverted: Boolean): Applet {
         val factoryId = id ushr 16
         val appletId = id and 0xFFFF
-        return allFactories.single {
-            it.id == factoryId
-        }.createApplet(appletId).also {
+        return findFactoryById(factoryId).createAppletFromId(appletId).also {
             it.isInverted = isInverted
         }
+    }
+
+    fun findFlowOption(factoryId: Int): AppletOption {
+        return flowFactory.findAppletOptionById(factoryId)
+    }
+
+    fun findFactoryById(factoryId: Int): AppletFactory {
+        return allFactories.first { it.id == factoryId }
     }
 }
 

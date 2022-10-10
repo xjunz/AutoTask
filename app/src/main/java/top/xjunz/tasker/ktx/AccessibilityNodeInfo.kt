@@ -1,12 +1,15 @@
 package top.xjunz.tasker.ktx
 
+import android.annotation.SuppressLint
 import android.graphics.Rect
+import android.os.Build
 import android.view.accessibility.AccessibilityNodeInfo
 
 /**
  * @author xjunz 2022/07/31
  */
-fun AccessibilityNodeInfo.getVisibleBounds(bounds: Rect): Rect {
+@SuppressLint("CheckResult")
+fun AccessibilityNodeInfo.getVisibleBoundsIn(bounds: Rect): Rect {
     val nodeRect: Rect = getVisibleBoundsInScreen(bounds)
 
     // is the targeted node within a scrollable container?
@@ -20,6 +23,7 @@ fun AccessibilityNodeInfo.getVisibleBounds(bounds: Rect): Rect {
     return nodeRect
 }
 
+@SuppressLint("CheckResult")
 private fun AccessibilityNodeInfo.getVisibleBoundsInScreen(bounds: Rect): Rect {
     val nodeRect = Rect()
     getBoundsInScreen(nodeRect)
@@ -27,6 +31,15 @@ private fun AccessibilityNodeInfo.getVisibleBoundsInScreen(bounds: Rect): Rect {
     nodeRect.offset(-bounds.left, -bounds.top)
     nodeRect.intersect(displayRect)
     return nodeRect
+}
+
+fun initAccessibilityNodeInfo(source: AccessibilityNodeInfo): AccessibilityNodeInfo {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        AccessibilityNodeInfo(source)
+    } else {
+        @Suppress("DEPRECATION")
+        AccessibilityNodeInfo.obtain(source)
+    }
 }
 
 private fun AccessibilityNodeInfo.getScrollableParent(): AccessibilityNodeInfo? {

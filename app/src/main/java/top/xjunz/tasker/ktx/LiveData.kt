@@ -41,6 +41,14 @@ fun MutableLiveData<Boolean>.toggle(): Boolean {
     return value!!
 }
 
+fun <T : Any> MutableLiveData<T>.notifySelfChanged(post: Boolean = false) {
+    if (post) {
+        postValue(value)
+    } else {
+        value = value
+    }
+}
+
 inline val LiveData<Boolean>.isTrue get() = value == true
 
 inline val LiveData<Boolean>.isNotTrue get() = value != true

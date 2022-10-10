@@ -9,18 +9,18 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
+import androidx.annotation.Keep
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
+import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.unsafeCast
-import top.xjunz.tasker.IAutomatorConnection
-import top.xjunz.tasker.annotation.Local
+import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.annotation.LocalAndRemote
-import top.xjunz.tasker.annotation.Remote
-import top.xjunz.tasker.impl.AvailabilityChecker
-import top.xjunz.tasker.impl.IAvailabilityChecker
+import top.xjunz.tasker.annotation.LocalOnly
+import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.impl.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
-import top.xjunz.tasker.trace.logcat
+import top.xjunz.tasker.util.unsupportedOperation
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
@@ -53,7 +53,8 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     private var startTimestamp: Long = -1
 
-    @Remote
+    @RemoteOnly
+    @Keep
     constructor() {
         logcat("Hello from the remote service! My uid is ${Os.getuid()} and my pid is ${Os.getpid()}")
         handlerThread.isDaemon = false
@@ -61,17 +62,22 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
         instanceRef = WeakReference(this)
     }
 
-    @Local
+    @LocalOnly
     constructor(connection: IAutomatorConnection) {
         delegate = connection
     }
 
-    @Local
+    @LocalOnly
     override val isRunning: Boolean
         get() = delegate.asBinder().pingBinder() && delegate.asBinder().isBinderAlive
 
+    @RemoteOnly
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        ShizukuUiAutomatorBridge(uiAutomation)
+        if (isInHostProcess) {
+            unsupportedOperation("UiAutomationBridge is not accessible from local process!")
+        } else {
+            ShizukuUiAutomatorBridge(uiAutomation)
+        }
     }
 
     @LocalAndRemote
@@ -88,13 +94,24 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
         }
     }
 
+    private val shConsole by lazy {
+        Shell.SH.getConsole()
+    }
+
+    override fun executeShellCmd(cmd: String) {
+        val ret = shConsole.run(cmd)
+        if (!ret.isSuccessful) {
+            error(ret.getStderr())
+        }
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
 
     override fun connect() {
-        Binder.clearCallingIdentity()
         try {
+            Binder.clearCallingIdentity()
             uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
@@ -102,7 +119,8 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
                         AccessibilityEvent.TYPE_WINDOWS_CHANGED
                 notificationTimeout = 100
                 flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
-                        AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+                        AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS and
+                        AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {

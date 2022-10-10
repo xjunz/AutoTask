@@ -20,8 +20,8 @@ import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.databinding.ActivityMainBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.OperatingMode
-import top.xjunz.tasker.service.controller.ShizukuServiceController
-import top.xjunz.tasker.service.controller.serviceController
+import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
+import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
 import top.xjunz.tasker.ui.task.TaskShowcaseDialog
 import top.xjunz.tasker.util.ShizukuUtil
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 binding.tvPrompt.setText(R.string.prompt_start_service)
             }
         }
-        observe(ShizukuServiceController.isShizukuInstalled) {
+        observe(ShizukuAutomatorServiceController.isShizukuInstalled) {
             binding.btnShizukuAction.isActivated = it
             if (it) {
                 binding.btnShizukuAction.setText(R.string.launch_shizuku_manager)
@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 binding.btnShizukuAction.setText(R.string.install_shizuku)
             }
         }
-        observe(ShizukuServiceController.isShizukuGranted) {
+        observe(ShizukuAutomatorServiceController.isShizukuGranted) {
             binding.btnGrant.isEnabled = Shizuku.pingBinder() && !it
             binding.btnRun.isEnabled = it
             if (it) {
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             }
         }
         binding.btnShizukuAction.setOnClickListener {
-            if (ShizukuServiceController.isShizukuInstalled.isTrue) {
+            if (ShizukuAutomatorServiceController.isShizukuInstalled.isTrue) {
                 ShizukuUtil.launchShizukuManager()
             } else {
                 viewUrlSafely("https://www.coolapk.com/apk/moe.shizuku.privileged.api")
@@ -191,7 +191,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                     Shizuku.addRequestPermissionResultListener(this)
                     Shizuku.requestPermission(1)
                 } else {
-                    ShizukuServiceController.isShizukuGranted.value = true
+                    ShizukuAutomatorServiceController.isShizukuGranted.value = true
                 }
             }
         }
@@ -252,6 +252,6 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     }
 
     override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-        ShizukuServiceController.isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
+        ShizukuAutomatorServiceController.isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
     }
 }
