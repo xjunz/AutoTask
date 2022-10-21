@@ -319,7 +319,7 @@
                         android:id="@+id/iv_config"
                         style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
-                        android:background="@drawable/bg_circle"
+                        android:background="@drawable/bg_tinted_selectable_circle"
                         android:contentDescription="@string/settings"
                         android:src="@drawable/ic_baseline_settings_24" />
 

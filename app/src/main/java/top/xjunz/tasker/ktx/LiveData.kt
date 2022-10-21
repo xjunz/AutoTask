@@ -23,6 +23,10 @@ infix fun <T> LiveData<T>.eq(value: T?): Boolean {
     return this.value == value
 }
 
+fun LiveData<*>.isNull(): Boolean {
+    return value == null
+}
+
 fun MutableLiveData<Int>.dec(post: Boolean = false) {
     if (post) {
         postValue((value ?: 0) - 1)
@@ -46,6 +50,15 @@ fun <T : Any> MutableLiveData<T>.notifySelfChanged(post: Boolean = false) {
         postValue(value)
     } else {
         value = value
+    }
+}
+
+fun <T> MutableLiveData<T>.setWhenDistinct(newValue: T?, post: Boolean = false) {
+    if (value == newValue) return
+    if (post) {
+        postValue(newValue)
+    } else {
+        value = newValue
     }
 }
 

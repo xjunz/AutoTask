@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.accessibility.AccessibilityEvent
-import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.Event
@@ -13,7 +12,6 @@ import top.xjunz.tasker.service.AutomatorService
 /**
  * @author xjunz 2022/08/05
  */
-@LocalAndRemote
 class TaskScheduler(private val service: AutomatorService, private val looper: Looper) {
 
     private val handler = object : Handler(looper) {

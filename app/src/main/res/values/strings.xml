@@ -125,7 +125,7 @@
     <string name="find_prev">查找下一个</string>
     <string name="find_child">查找子节点</string>
     <string name="find_parent">查找父节点</string>
-    <string name="drag_to_here_to_remove_overlay">移动到此处关闭悬浮助手</string>
+    <string name="drag_to_here_to_remove_overlay">拖动到此处关闭悬浮助手</string>
     <string name="pls_enable_overlay_manually">请在设置中允许本应用的悬浮窗权限</string>
     <string name="edit_task">编辑任务</string>
     <string name="add_criteria">添加条件</string>
@@ -137,7 +137,7 @@
     <string name="add_before">在前面添加</string>
     <string name="back">返回</string>
     <string name="complete">完成</string>
-    <string name="format_applet_count">已指定%d条规则</string>
+    <string name="format_applet_count">清空%d条规则</string>
     <string name="expand_more">展开</string>
     <string name="unfold_less">收起</string>
     <string name="sort_by_app_name">按应用名称</string>
@@ -159,4 +159,31 @@
     <string name="pls_wait">请稍等…</string>
     <string name="inspect_failed">未捕获到窗口，请尝试重试</string>
     <string name="launch_failed">启动失败</string>
+    <string name="mode_comp_selector">选择应用和页面</string>
+    <string name="mode_ui_object_selector">选择UI组件</string>
+    <string name="mode_coor_selector">选择坐标点</string>
+    <string name="screenshot_fixed">已固定当前页面截图</string>
+    <string name="pointer_controller_enabled">已启用指针控制盘</string>
+    <string name="format_screenshot_failed">截图失败(%d)</string>
+    <string name="pin_screenshot">固定屏幕截图</string>
+    <string name="cancel_pin_screenshot">取消固定屏幕截图</string>
+    <string name="show_node_bounds">显示布局边界</string>
+    <string name="cancel_show_node_bounds">取消显示布局边界</string>
+    <string name="container">容器</string>
+    <string name="button">按钮</string>
+    <string name="list">列表</string>
+    <string name="image_button">图标按钮</string>
+    <string name="image">图片</string>
+    <string name="custom_view">视图</string>
+    <string name="navigated_to_selected_node">已定位到所选节点</string>
+    <string name="_true">是</string>
+    <string name="_false">否</string>
+    <string name="format_px">%d像素</string>
+    <string name="no_node_selected">未选中任何节点</string>
+    <string name="node_info_overlay_subtitle">请勾选想要指定的条件</string>
+    <string name="node_info_overlay_title">节点属性</string>
+    <string name="child_node">子节点</string>
+    <string name="seekbar">拖动条</string>
+    <string name="tip_floating_inspector_enabled">悬浮助手已启用。点击悬浮图标，可选择当前屏幕上的内容</string>
+
 </resources>

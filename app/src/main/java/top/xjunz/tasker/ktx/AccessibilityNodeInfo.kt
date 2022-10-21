@@ -33,12 +33,12 @@ private fun AccessibilityNodeInfo.getVisibleBoundsInScreen(bounds: Rect): Rect {
     return nodeRect
 }
 
-fun initAccessibilityNodeInfo(source: AccessibilityNodeInfo): AccessibilityNodeInfo {
+fun AccessibilityNodeInfo.dup(): AccessibilityNodeInfo {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        AccessibilityNodeInfo(source)
+        AccessibilityNodeInfo(this)
     } else {
         @Suppress("DEPRECATION")
-        AccessibilityNodeInfo.obtain(source)
+        AccessibilityNodeInfo.obtain(this)
     }
 }
 

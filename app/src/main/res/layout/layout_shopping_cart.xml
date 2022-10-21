@@ -14,9 +14,9 @@
             app:backgroundTint="?colorSurface"
             app:behavior_draggable="true"
             app:behavior_fitToContents="true"
-            tools:behavior_peekHeight="?actionBarSize"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet">
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet"
+            tools:behavior_peekHeight="?actionBarSize">
 
             <View
                 android:id="@+id/tv_panel_handle"
@@ -63,12 +63,13 @@
                     android:insetTop="6dp"
                     android:insetBottom="6dp"
                     android:paddingHorizontal="16dp"
-                    android:textColor="?colorPrimary"
+                    android:textColor="?colorError"
                     app:icon="@drawable/ic_outline_delete_forever_24"
                     app:iconGravity="start"
-                    app:iconTint="?colorPrimary"
-                    app:strokeColor="?colorPrimary"
-                    tools:text="已指定100条规则" />
+                    app:iconTint="?colorError"
+                    app:rippleColor="?colorControlHighlight"
+                    app:strokeColor="?colorError"
+                    tools:text="清空100条规则" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_complete"
@@ -89,8 +90,8 @@
                 android:id="@+id/rv_bottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
                 android:alpha="0"
                 android:fadingEdge="vertical"
                 android:fadingEdgeLength="32dp"
@@ -102,7 +103,7 @@
                 app:layout_constraintHeight_min="200dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btn_group"
-                tools:listitem="@layout/item_applet_in_shop_cart" />
+                tools:listitem="@layout/item_applet_candidate" />
 
             <ImageButton
                 android:id="@+id/ib_expand"

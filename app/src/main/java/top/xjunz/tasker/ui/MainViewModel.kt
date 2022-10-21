@@ -1,6 +1,5 @@
 package top.xjunz.tasker.ui
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.Configurations
@@ -14,6 +13,8 @@ import top.xjunz.tasker.service.serviceController
  */
 class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
+    val onRequestRoute = MutableLiveData<String>()
+
     val stopConfirmation = MutableLiveData<Boolean>()
 
     val isRunning = MutableLiveData(false)
@@ -22,15 +23,13 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val bindingError = MutableLiveData<Throwable>()
 
-    private val _operatingMode = MutableLiveData(OperatingMode.CURRENT)
-
-    val operatingMode: LiveData<OperatingMode> get() = _operatingMode
+    val operatingMode = MutableLiveData(OperatingMode.CURRENT)
 
     fun setCurrentOperatingMode(mode: OperatingMode) {
         serviceController.removeStateListener()
         Configurations.operatingMode = mode.VALUE
         serviceController.setStateListener(this)
-        _operatingMode.value = mode
+        operatingMode.value = mode
     }
 
     fun toggleService() {

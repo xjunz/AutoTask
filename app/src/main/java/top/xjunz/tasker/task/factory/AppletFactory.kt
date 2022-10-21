@@ -1,7 +1,7 @@
 package top.xjunz.tasker.task.factory
 
 import androidx.annotation.StringRes
-import top.xjunz.tasker.engine.flow.Applet
+import top.xjunz.tasker.engine.base.Applet
 import top.xjunz.tasker.task.anno.AppletCategory
 
 /**
@@ -16,20 +16,21 @@ abstract class AppletFactory(val id: Int) {
 
     abstract val categoryNames: IntArray
 
-    fun findAppletOptionById(id: Int): AppletOption {
-        return options.first { it.appletId == id }
-    }
-
-    val options: List<AppletOption> by lazy {
-        javaClass.declaredFields.mapNotNull m@{
+    private fun parseDeclaredOptions(): List<AppletOption> {
+        return javaClass.declaredFields.mapNotNull m@{
             val anno = it.getDeclaredAnnotation(AppletCategory::class.java) ?: return@m null
+            val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
             option.factoryId = id
             option.categoryId = anno.categoryId
-            it.isAccessible = false
+            it.isAccessible = accessible
             return@m option
         }.sorted()
+    }
+
+    val options: List<AppletOption> by lazy {
+        parseDeclaredOptions()
     }
 
     val categorizedOptions: List<AppletOption> by lazy {
@@ -48,9 +49,25 @@ abstract class AppletFactory(val id: Int) {
     }
 
     /**
-     * Create an [Applet] from an [id].
+     * Brand all options with my factory id. If you access options via [AppletFactory.options] or
+     * [AppletFactory.categorizedOptions], calling this method is not necessary.
      */
+    fun brandAll() {
+        for (field in javaClass.declaredFields) {
+            field.getDeclaredAnnotation(AppletCategory::class.java) ?: continue
+            val accessible = field.isAccessible
+            field.isAccessible = true
+            val option = field.get(this) as AppletOption
+            option.factoryId = id
+            field.isAccessible = accessible
+        }
+    }
+
     fun createAppletFromId(id: Int): Applet {
         return options.first { it.appletId == id }.createApplet()
+    }
+
+    fun findAppletOptionById(id: Int): AppletOption {
+        return options.first { it.appletId == id }
     }
 }

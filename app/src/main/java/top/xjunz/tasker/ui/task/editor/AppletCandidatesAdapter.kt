@@ -12,11 +12,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import top.xjunz.tasker.R
-import top.xjunz.tasker.databinding.ItemAppletInShopCartBinding
+import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
+import top.xjunz.tasker.engine.base.Applet
+import top.xjunz.tasker.engine.base.Flow
 import top.xjunz.tasker.engine.criterion.Criterion
 import top.xjunz.tasker.engine.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.task.factory.AppletRegistry
 import top.xjunz.tasker.ui.ColorSchemes
@@ -56,12 +56,11 @@ class AppletCandidatesAdapter(private val appletRegistry: AppletRegistry) :
         DiffUtil.calculateDiff(diffCallback).dispatchUpdatesTo(this)
     }
 
-
-    inner class AppletViewHolder(val binding: ItemAppletInShopCartBinding) :
+    inner class AppletViewHolder(val binding: ItemAppletCandidateBinding) :
         ViewHolder(binding.root) {
         init {
             binding.tvTitle.setOnClickListener {
-                applets[adapterPosition].switchRelation()
+                applets[adapterPosition].toggleRelation()
                 notifyItemChanged(adapterPosition, true)
             }
         }
@@ -69,15 +68,14 @@ class AppletCandidatesAdapter(private val appletRegistry: AppletRegistry) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppletViewHolder {
         return AppletViewHolder(
-            ItemAppletInShopCartBinding.inflate(
+            ItemAppletCandidateBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
     }
 
-    private fun makeRelationSpan(origin: CharSequence, relation: Int): CharSequence {
-        val relationText =
-            if (relation == Applet.RELATION_OR) R.string.flow_or.text else R.string.flow_and.text
+    private fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
+        val relationText = if (isAnd) R.string.flow_and.text else R.string.flow_or.text
         return SpannableStringBuilder().append(
             relationText,
             ForegroundColorSpan(ColorSchemes.colorTextLink),
@@ -101,8 +99,8 @@ class AppletCandidatesAdapter(private val appletRegistry: AppletRegistry) :
             val showRelation = position != 0 && applets[position - 1] !is Flow
             val option = appletRegistry.findOption(applet)
             val originTitle = option.currentTitle
-            if (originTitle != null && showRelation && applet.relation != Applet.RELATION_NONE) {
-                it.tvTitle.text = makeRelationSpan(originTitle, applet.relation)
+            if (originTitle != null && showRelation) {
+                it.tvTitle.text = makeRelationSpan(originTitle, applet.isAnd)
             } else {
                 it.tvTitle.text = originTitle
             }
@@ -117,7 +115,7 @@ class AppletCandidatesAdapter(private val appletRegistry: AppletRegistry) :
                 it.tvTitle.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
                 it.tvTitle.setTextColor(ColorSchemes.textColorTertiary)
                 if (applet is Criterion<*, *>) {
-                    it.tvDesc.text = option.getDescription(applet.requireValue())
+                    it.tvDesc.text = option.describe(applet.value)
                 }
             }
         }

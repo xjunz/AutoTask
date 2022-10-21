@@ -14,7 +14,7 @@ import top.xjunz.tasker.ktx.dp
  */
 object Icons {
 
-    fun loadIcon(requireAppInfo: ApplicationInfo): Bitmap? {
+    fun loadIcon(requireAppInfo: ApplicationInfo): Bitmap {
         return iconLoader.loadIcon(requireAppInfo)
     }
 
@@ -26,9 +26,11 @@ object Icons {
         iconLoader.loadIcon(app.applicationInfo)
     }
 
+    val desaturatedColorFilter = ColorMatrixColorFilter(ColorMatrix().also { it.setSaturation(0F) })
+
     val desaturatedMyIcon by lazy {
         BitmapDrawable(app.resources, myIcon).apply {
-            colorFilter = ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(0F) })
+            colorFilter = desaturatedColorFilter
         }
     }
 }

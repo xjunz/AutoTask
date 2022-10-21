@@ -4,7 +4,7 @@ import org.junit.Test
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.Event
 import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.engine.flow.*
+import top.xjunz.tasker.engine.base.*
 
 
 /**

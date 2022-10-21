@@ -1,4 +1,4 @@
-package top.xjunz.tasker.engine.flow
+package top.xjunz.tasker.engine.base
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -6,18 +6,14 @@ import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.FlowRuntime
 
 /**
- * @author xjunz 2022/08/11
+ * @author xjunz 2022/08/10
  */
 @Serializable
-@SerialName(And.NAME)
-class And : Flow() {
-
-    companion object {
-        const val NAME = "And"
-    }
+@SerialName("Or")
+class Or : Flow() {
 
     override fun shouldDropFlow(ctx: AppletContext, runtime: FlowRuntime): Boolean {
-        // If the previous result is false, drop this flow
-        return !runtime.isSuccessful
+        // When the previous result is true, drop this flow
+        return runtime.isSuccessful
     }
 }

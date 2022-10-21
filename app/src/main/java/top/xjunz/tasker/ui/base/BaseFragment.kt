@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.viewbinding.ViewBinding
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
 
 /**
@@ -28,7 +28,7 @@ open class BaseFragment<T : ViewBinding> : Fragment(), HasDefaultViewModelProvid
         }
         superClass.superClassFirstParameterizedType().getDeclaredMethod(
             "inflate", LayoutInflater::class.java
-        ).invoke(null, layoutInflater)!!.unsafeCast()
+        ).invoke(null, layoutInflater)!!.casted()
     }
 
     override fun onCreateView(

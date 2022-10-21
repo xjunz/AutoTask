@@ -25,26 +25,35 @@ class PackageAppletFactory(id: Int) : AppletFactory(id) {
     }
 
     @AppletCategory(0x00_00)
-    private val pkgCollection = AppletOption(APPLET_PKG_COLLECTION, R.string.in_pkg_collection) {
+    val pkgCollection = AppletOption(APPLET_PKG_COLLECTION, R.string.in_pkg_collection) {
         CollectionCriterion<PackageInfoContext, String> {
             it.packageName
         }
     }.withDescriber<Collection<String>> {
-        R.string.format_pkg_collection_desc.format(
-            it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name
-            }.joinToString("、"), it.size
-        )
+        if (it.size == 1) {
+            val first = it.first()
+            PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first
+        } else {
+            R.string.format_pkg_collection_desc.format(
+                it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
+                    PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name
+                }.joinToString("、"), it.size
+            )
+        }
     }
 
     @AppletCategory(0x00_01)
-    private val activityCollection =
+    val activityCollection =
         AppletOption(APPLET_ACT_COLLECTION, R.string.in_activity_collection) {
             CollectionCriterion<PackageInfoContext, String> {
                 it.activityName
             }
         }.withDescriber<Collection<String>> {
-            R.string.format_act_collection_desc.format(it.size)
+            if (it.size == 1) {
+                it.first()
+            } else {
+                R.string.format_act_collection_desc.format(it.size)
+            }
         }
 
 

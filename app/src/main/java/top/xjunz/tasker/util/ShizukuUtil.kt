@@ -35,7 +35,7 @@ object ShizukuUtil {
             // Shizuku is prepared!
             onPrepared()
         } else if (Shizuku.pingBinder()) {
-            // Shizuku service is started but we do not have permission
+            // Shizuku service is started but we do not have the permission
             if (Shizuku.shouldShowRequestPermissionRationale()) {
                 // and we should show rationale
                 toast(R.string.pls_grant_manually)

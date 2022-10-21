@@ -1,6 +1,6 @@
 package top.xjunz.tasker.engine.criterion
 
-import kotlinx.serialization.Serializable
+import top.xjunz.tasker.engine.valt.Distance
 
 /**
  * @author xjunz 2022/09/27
@@ -16,29 +16,4 @@ fun <T : Any> BoundsCriterion(bounds: (target: T, scope: Int, unit: Int, portion
                     && (value.rangeEnd == Distance.NO_LIMIT || distance <= value.rangeEnd)
         }
     }
-}
-
-@Serializable
-data class Distance(
-    val scope: Int,
-    val unit: Int,
-    val portionScope: Int,
-    val rangeStart: Float,
-    val rangeEnd: Float
-) {
-
-    companion object {
-
-        const val SCOPE_NONE = -1
-        const val SCOPE_SCREEN = 0
-        const val SCOPE_PARENT = 1
-
-        const val UNIT_PX = 0
-        const val UNIT_DP = 1
-        const val UNIT_PORTION = 2
-
-        const val NO_LIMIT = -1F
-
-    }
-
 }

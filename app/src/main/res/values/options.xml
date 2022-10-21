@@ -31,8 +31,7 @@
     <string name="not_in_version_range">排除指定版本</string>
 
     <string name="ui_object_exists">存在UI组件满足</string>
-    <string name="is_type_of">指定控件类型</string>
-    <string name="not_is_type_of">排除控件类型</string>
+    <string name="with_type">控件类型为</string>
     <string name="with_text">指定文本内容</string>
     <string name="not_with_text">排除文本内容</string>
     <string name="in_length_range">文本长度范围</string>
@@ -58,8 +57,12 @@
     <string name="right_margin">右边距</string>
     <string name="top_margin">上边距</string>
     <string name="bottom_margin">下边距</string>
-    <string name="type">类型</string>
+    <string name="type">标识</string>
     <string name="position">位置</string>
+    <string name="node_depth">在布局树中的深度</string>
+    <string name="node_index_in_tree">在布局树中的位置</string>
+    <string name="node_index_in_parent">在父布局中的位置</string>
+    <string name="with_id">控件ID为</string>
 
     <string name="time_range">指定时间范围</string>
     <string name="in_months">指定月份</string>

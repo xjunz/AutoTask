@@ -6,7 +6,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector_bg_flow_item"
+        android:background="@drawable/selector_bg_selectable_item"
         android:padding="16dp">
 
         <TextView

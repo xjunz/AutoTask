@@ -66,6 +66,10 @@ fun Context.launchIntentSafely(intent: Intent) {
     }
 }
 
+fun Context.pressHome() {
+    startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME))
+}
+
 fun Context.sendMailTo(log: Uri?) {
     val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).putExtra(
         Intent.EXTRA_SUBJECT, R.string.mail_subject.format(formatCurrentTime())

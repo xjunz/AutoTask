@@ -266,7 +266,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
     }
 
     override fun onBackPressed(): Boolean {
-        if (viewModel.currentItem.value == 1) {
+        if (viewModel.currentItem eq 1) {
             binding.viewPager.currentItem = 0
             return true
         }

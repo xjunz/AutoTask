@@ -42,6 +42,9 @@ class PackageInfoWrapper(val source: PackageInfo) {
         File(source.applicationInfo.sourceDir).length()
     }
 
+    /**
+     * You sussy baka!
+     */
     fun loadSuspicion(): Long {
         if (suspicion != -1L) {
             return suspicion

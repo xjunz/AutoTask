@@ -6,6 +6,6 @@ package top.xjunz.shared.ktx
 
 @Throws(ClassCastException::class)
 @Suppress("UNCHECKED_CAST")
-fun <T> Any.unsafeCast(): T {
+fun <T> Any.casted(): T {
     return this as T
 }

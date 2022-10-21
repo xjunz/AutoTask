@@ -142,6 +142,9 @@ public abstract class UiAutomatorBridge {
 
     public abstract int getScaledMinimumFlingVelocity();
 
+    /**
+     * Only for density purpose, may not accurate for screen width and screen height.
+     */
     public DisplayMetrics getDisplayMetrics() {
         if (mDefaultDisplayMetrics == null) {
             mDefaultDisplayMetrics = new DisplayMetrics();

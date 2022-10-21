@@ -1,28 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?colorSecondary"
-        android:elevation="4dp"
-        android:gravity="center"
-        android:paddingVertical="@dimen/spacing_normal">
+        android:alpha="0"
+        android:background="@drawable/bg_floating_inspector_trash_bin"
+        android:paddingBottom="16dp"
+        android:visibility="gone">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ib_delete_overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             android:contentDescription="@string/drag_to_here_to_remove_overlay"
-            android:src="@drawable/ic_outline_delete_forever_24"
-            android:tint="?colorOnSecondary" />
+            android:src="@drawable/ic_baseline_close_24"
+            android:tint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_hint"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/tv_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginStart="8dp"
             android:text="@string/drag_to_here_to_remove_overlay"
-            android:textColor="?colorOnSecondary" />
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/ib_delete_overlay"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ib_delete_overlay"
+            app:layout_constraintTop_toTopOf="@+id/ib_delete_overlay" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

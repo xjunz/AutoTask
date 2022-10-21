@@ -8,7 +8,7 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskEditorBinding
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog

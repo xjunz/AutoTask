@@ -13,7 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.viewbinding.ViewBinding
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.createMaterialShapeDrawable
 import top.xjunz.tasker.ktx.dpFloat
@@ -54,7 +54,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
         }
         binding = superClass.superClassFirstParameterizedType().getDeclaredMethod(
             "inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java
-        ).invoke(null, layoutInflater, container, false)!!.unsafeCast()
+        ).invoke(null, layoutInflater, container, false)!!.casted()
         return binding.root
     }
 

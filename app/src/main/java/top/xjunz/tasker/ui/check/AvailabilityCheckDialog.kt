@@ -126,7 +126,7 @@ class AvailabilityCheckDialog : BaseDialogFragment<DialogAvailabilityCheckBindin
             }) { binding, index, data ->
             binding.tvName.text = data.label
             binding.ivState.setImageResource(data.stateImageRes)
-            binding.root.isSelected = index == viewModel.currentIndex.require()
+            binding.root.isSelected = viewModel.currentIndex eq index
         }
         binding.ibAll.setOnClickListener {
             viewModel.showList.toggle()

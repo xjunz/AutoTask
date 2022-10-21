@@ -64,7 +64,10 @@ inline fun <V> LifecycleOwner.observeTransient(
     }
 }
 
-fun <V> LifecycleOwner.observeNotNull(ld: MutableLiveData<V>, observer: (V) -> Unit) {
+inline fun <V> LifecycleOwner.observeNotNull(
+    ld: MutableLiveData<V>,
+    crossinline observer: (V & Any) -> Unit
+) {
     ld.observe(this) {
         if (it != null) observer.invoke(it)
     }

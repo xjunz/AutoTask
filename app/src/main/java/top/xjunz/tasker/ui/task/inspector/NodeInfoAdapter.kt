@@ -7,12 +7,12 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
-import top.xjunz.tasker.task.inspector.StableNode
+import top.xjunz.tasker.task.inspector.StableNodeInfo
 
 /**
  * @author xjunz 2021/9/22
  */
-class NodeAdapter : RecyclerView.Adapter<NodeAdapter.NodeViewHolder>() {
+class NodeInfoAdapter : RecyclerView.Adapter<NodeInfoAdapter.NodeViewHolder>() {
 
     private val attrNames by lazy {
         themedContext.resources.getStringArray(R.array.node_attr_names)
@@ -22,7 +22,7 @@ class NodeAdapter : RecyclerView.Adapter<NodeAdapter.NodeViewHolder>() {
     }
     private lateinit var themedContext: Context
 
-    fun setNode(node: StableNode) {
+    fun setNode(node: StableNodeInfo) {
         this.node = node
         notifyItemRangeChanged(0, itemCount)
     }
@@ -32,7 +32,7 @@ class NodeAdapter : RecyclerView.Adapter<NodeAdapter.NodeViewHolder>() {
         themedContext = recyclerView.context
     }
 
-    private var node: StableNode? = null
+    private var node: StableNodeInfo? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NodeViewHolder {
         return NodeViewHolder(ItemNodeInfoBinding.inflate(LayoutInflater.from(themedContext)))

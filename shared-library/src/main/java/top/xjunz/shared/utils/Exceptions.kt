@@ -19,6 +19,6 @@ fun illegalArgument(name: String, value: Any): Nothing {
     throw IllegalArgumentException("Unrecognized $name: $value!")
 }
 
-fun illegalArgument(msg: String): Nothing {
+fun illegalArgument(msg: String? = null): Nothing {
     throw IllegalArgumentException(msg)
 }

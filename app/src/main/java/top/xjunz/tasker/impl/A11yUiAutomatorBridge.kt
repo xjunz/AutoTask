@@ -4,6 +4,8 @@ import android.app.UiAutomation
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ResolveInfoFlags
+import android.os.Build
 import android.os.PowerManager
 import android.view.Display
 import android.view.ViewConfiguration
@@ -31,7 +33,7 @@ class A11yUiAutomatorBridge(
     }
 
     override fun getInteractionController(): InteractionController {
-        return  A11yInteractionController(A11yAutomatorService.require(), this)
+        return A11yInteractionController(A11yAutomatorService.require(), this)
     }
 
     override fun getRotation(): Int {
@@ -43,14 +45,23 @@ class A11yUiAutomatorBridge(
     }
 
     override fun getDefaultDisplay(): Display {
+        @Suppress("DEPRECATION")
         return ctx.getSystemService(WindowManager::class.java).defaultDisplay
     }
 
     override fun getLauncherPackageName(): String? {
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_HOME)
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
         val pm: PackageManager = ctx.packageManager
-        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val resolveInfo =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.resolveActivity(
+                    intent,
+                    ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            }
         return resolveInfo?.activityInfo?.packageName
     }
 

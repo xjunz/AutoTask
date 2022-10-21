@@ -1,9 +1,9 @@
 package top.xjunz.tasker.engine
 
 import androidx.annotation.IntRange
-import top.xjunz.shared.ktx.unsafeCast
-import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.shared.ktx.casted
+import top.xjunz.tasker.engine.base.Applet
+import top.xjunz.tasker.engine.base.Flow
 
 
 /**
@@ -11,7 +11,12 @@ import top.xjunz.tasker.engine.flow.Flow
  *
  * @author xjunz 2022/08/09
  */
-class FlowRuntime(private var argument: Any) {
+class FlowRuntime(
+    /**
+     * Target is for applet to use in runtime via [FlowRuntime.getTarget].
+     */
+    private var target: Any
+) {
 
     /**
      * Values are keyed by applets' remarks.
@@ -19,8 +24,8 @@ class FlowRuntime(private var argument: Any) {
     private val resultRegistry = mutableMapOf<String, Any>()
 
     /**
-     * The depth of currently executed applet. When the flow is not yet started or has been completed,
-     * the depth is -1.
+     * The depth of currently executed applet starting from 0. When the flow is not yet started or has
+     * been completed, the depth is -1.
      */
     private var depth = -1
 
@@ -39,22 +44,30 @@ class FlowRuntime(private var argument: Any) {
     var isSuccessful = true
 
     fun moveTo(@IntRange(from = 0, to = Applet.MAX_FLOW_CHILD_COUNT - 1L) index: Int) {
-        check(index in 0 until Applet.MAX_FLOW_CHILD_COUNT) { "Too many children!" }
-        check(depth >= 0) { "Try to track an applet when not even entering any flow!" }
-        check(depth <= Applet.MAX_FLOW_NESTED_DEPTH - 1) { "Try to track a too deeply nested applet!" }
+        check(index in 0 until Applet.MAX_FLOW_CHILD_COUNT) {
+            "Too many children!"
+        }
+        check(depth >= 0) {
+            "Not in a flow!"
+        }
+        check(depth < Applet.MAX_FLOW_NESTED_DEPTH) {
+            "Too deeply nested!"
+        }
         sequence = index.toLong() shl (depth * Applet.FLOW_CHILD_COUNT_BITS) or sequence
     }
 
     fun jumpIn() {
-        check(depth + 1 <= Applet.MAX_FLOW_NESTED_DEPTH) { "Too deeply nested!" }
+        check(depth < Applet.MAX_FLOW_NESTED_DEPTH) { "Too deeply nested!" }
         depth++
     }
 
     fun jumpOut() {
-        check(depth - 1 >= -1) { "The depth goes down to the void!" }
+        check(depth >= 0) {
+            "Cannot jump out of the void!"
+        }
         // Bit clear the tracked index in this depth
-        sequence =
-            sequence and ((Applet.MAX_FLOW_CHILD_COUNT - 1L) shl (depth * Applet.FLOW_CHILD_COUNT_BITS)).inv()
+        sequence = sequence and ((Applet.MAX_FLOW_CHILD_COUNT - 1L) shl
+                (depth * Applet.FLOW_CHILD_COUNT_BITS)).inv()
         depth--
     }
 
@@ -62,8 +75,8 @@ class FlowRuntime(private var argument: Any) {
         resultRegistry[key] = result
     }
 
-    fun <R> getResult(key: String): R {
-        return resultRegistry[key]!!.unsafeCast()
+    fun <R> requireResult(key: String): R {
+        return resultRegistry[key]!!.casted()
     }
 
     fun parseSequence(): IntArray {
@@ -81,14 +94,14 @@ class FlowRuntime(private var argument: Any) {
     }
 
     fun setTarget(any: Any) {
-        argument = any
+        target = any
     }
 
     fun getRawTarget(): Any {
-        return argument
+        return target
     }
 
     fun <T> getTarget(): T {
-        return argument.unsafeCast()
+        return target.casted()
     }
 }

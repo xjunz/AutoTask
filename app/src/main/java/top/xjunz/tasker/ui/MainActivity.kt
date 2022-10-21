@@ -1,6 +1,7 @@
 package top.xjunz.tasker.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -13,7 +14,6 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import rikka.shizuku.Shizuku
-import top.xjunz.tasker.App
 import top.xjunz.tasker.FEEDBACK_GROUP_URL
 import top.xjunz.tasker.R
 import top.xjunz.tasker.autostart.AutoStartUtil
@@ -25,7 +25,6 @@ import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
 import top.xjunz.tasker.ui.task.TaskShowcaseDialog
 import top.xjunz.tasker.util.ShizukuUtil
-import java.lang.ref.WeakReference
 import java.util.concurrent.TimeoutException
 
 /**
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        App.appThemeRef = WeakReference(theme)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(binding.root)
         initViews()
@@ -237,6 +235,11 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             }
             handler.postDelayed(this, 1000)
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        viewModel.onRequestRoute.value = intent.data?.host
     }
 
     override fun onBackPressed() {

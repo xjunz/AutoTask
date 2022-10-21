@@ -71,10 +71,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
         ShizukuUtil.ensureShizukuEnv {
             listener?.onStartBinding()
             bindingJob = async {
-                Shizuku.bindUserService(
-                    userServiceStandaloneProcessArgs,
-                    userServiceConnection
-                )
+                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
                 delay(BINDING_SERVICE_TIMEOUT_MILLS)
                 throw TimeoutException()
             }

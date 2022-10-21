@@ -4,7 +4,7 @@
     <dimen name="corner_bubble">12dp</dimen>
     <dimen name="corner_btn">24dp</dimen>
     <dimen name="corner_chip">24dp</dimen>
-    <dimen name="corner_dialog">8dp</dimen>
+    <dimen name="corner_dialog">16dp</dimen>
     <dimen name="corner_closeup">16dp</dimen>
     <dimen name="fab_normal">48dp</dimen>
     <dimen name="fab_small">40dp</dimen>

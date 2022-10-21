@@ -3,8 +3,8 @@ package top.xjunz.tasker.engine
 import android.app.UiAutomation
 import androidx.test.uiautomator.UiDevice
 import top.xjunz.shared.trace.logcat
-import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Applet
+import top.xjunz.tasker.engine.base.Flow
 
 /**
  * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [rootFlow] are

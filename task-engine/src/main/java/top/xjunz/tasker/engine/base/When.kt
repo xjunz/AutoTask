@@ -1,4 +1,4 @@
-package top.xjunz.tasker.engine.flow
+package top.xjunz.tasker.engine.base
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

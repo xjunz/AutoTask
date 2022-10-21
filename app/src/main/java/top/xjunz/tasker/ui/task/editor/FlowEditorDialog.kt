@@ -6,6 +6,7 @@ import android.transition.ChangeBounds
 import android.transition.TransitionSet
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.activity.viewModels
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
@@ -21,17 +22,18 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.factory.AppletOption
 import top.xjunz.tasker.task.factory.AppletRegistry
-import top.xjunz.tasker.task.factory.AppletRegistry.Companion.appletId
 import top.xjunz.tasker.task.factory.FlowFactory
-import top.xjunz.tasker.task.inspector.InspectorController
+import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
+import top.xjunz.tasker.util.Router
 
 /**
  * @author xjunz 2022/09/26
@@ -59,7 +61,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
         lateinit var title: CharSequence
 
         fun singleSelectFactory(index: Int) {
-            if (selectedFactory.value == index) return
+            if (selectedFactory eq index) return
             options.clear()
             options.addAll(
                 appletRegistry.findFactoryById(
@@ -85,6 +87,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
 
     private val viewModel by viewModels<InnerViewModel>()
 
+    private lateinit var mainViewModel: MainViewModel
+
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
             viewModel.appletRegistry.flowFactory.options,
@@ -94,7 +98,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 }
             }) { binding, index, data ->
             binding.tvLabel.text = data.title
-            binding.tvLabel.isSelected = index == viewModel.selectedFactory.require()
+            binding.tvLabel.isSelected = viewModel.selectedFactory eq index
         }
     }
 
@@ -149,9 +153,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (viewModel.selectedFactory.value == null) {
+        if (viewModel.selectedFactory.isNull()) {
             viewModel.singleSelectFactory(0)
         }
+        mainViewModel = requireActivity().viewModels<MainViewModel>().value
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
@@ -178,6 +183,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
             } else {
                 viewModel.shouldAnimateItem = true
                 rightAdapter.notifyDataSetChanged()
+                binding.rvRight.scrollToPosition(0)
             }
             binding.rootView.beginAutoTransition(transition)
             when (viewModel.appletRegistry.flowFactory.options[it].appletId) {
@@ -194,17 +200,20 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 }
             }
             binding.cvHeader.setOnClickListener {
-                if (InspectorController.isReady()) {
-                    InspectorController.showInspector()
-                } else {
-                    FloatingInspectorDialog().show(parentFragmentManager)
-                }
+                FloatingInspectorDialog().show(parentFragmentManager)
             }
         }
         observe(viewModel.candidates) { list ->
             bottomAdapter.updateApplets(list)
             binding.shoppingCart.btnCount.text =
                 R.string.format_applet_count.format(list.sumOf { it.applets.size })
+        }
+        observeTransient(mainViewModel.onRequestRoute) { host ->
+            if (host == Router.HOST_ACCEPT_NODE_INFO_FROM_INSPECTOR) {
+                FloatingInspector.require().acceptUiObjectOptions().forEach {
+                    viewModel.appendApplet(it)
+                }
+            }
         }
     }
 }

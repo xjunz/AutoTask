@@ -1,8 +1,10 @@
-package top.xjunz.tasker.engine.flow
+package top.xjunz.tasker.engine.base
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import kotlinx.serialization.*
 import top.xjunz.tasker.engine.AppletContext
+import top.xjunz.tasker.engine.AppletValueSerializer.deserialize
+import top.xjunz.tasker.engine.AppletValueSerializer.judgeValueType
+import top.xjunz.tasker.engine.AppletValueSerializer.serialize
 import top.xjunz.tasker.engine.FlowRuntime
 
 /**
@@ -16,30 +18,6 @@ abstract class Applet {
     companion object {
 
         const val NO_ID = -1
-
-        /**
-         * The `AND` relation. Any applet with this relation will not be executed if its previous
-         * applet fails.
-         *
-         * @see Applet.relation
-         */
-        const val RELATION_AND = 1
-
-        /**
-         * The `OR` relation. Any applet with this relation will not be executed if its previous
-         * applet succeeded.
-         *
-         * @see Applet.relation
-         */
-        const val RELATION_OR = 2
-
-        /**
-         * Not specifying any relation, only available for the first applet in a flow. The applet will
-         * be executed anyway.
-         *
-         * @see Applet.relation
-         */
-        const val RELATION_NONE = 0
 
         /**
          * The bit count used to store the applet index in a flow. We use a `LONG` to track depths
@@ -64,18 +42,19 @@ abstract class Applet {
     }
 
     /**
-     * The logical relation to its previous peer applet. Hence, if an applet is the first element in
-     * a flow, its relation should be [NONE][RELATION_NONE].
-     *
-     * @see RELATION_NONE
-     * @see RELATION_AND
-     * @see RELATION_OR
+     * The logical relation to its previous peer applet. If true, representing `AND` relation and
+     * this applet will not be executed when its previous peer fails, otherwise representing `OR`
+     * relation and this applet will not be executed when its previous peer succeeds. If this applet
+     * is the first element of a flow, this field will be ignored.
      */
-    var relation: Int = RELATION_NONE
+    @SerialName("a")
+    var isAnd: Boolean = true
 
     /**
-     * The id, which is useful for identifying a class of applet. Note that this is not designed to
-     * distinguish an specific applet between different instances (with different hash codes).
+     * The id identifying an applet's factory and type.
+     *
+     * @see appletId
+     * @see factoryId
      */
     var id: Int = NO_ID
 
@@ -98,9 +77,55 @@ abstract class Applet {
     open val isRequired = false
 
     /**
-     * Whether the result is inverted, only takes effect when the applet [is invertible][isInvertible].
+     * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
      */
+    @SerialName("i")
     var isInverted = false
+
+    /**
+     * The masked type of value for `serialization`.
+     */
+    @SerialName("t")
+    var valueType = 0
+
+    /**
+     * The literal value for `serialization` and `deserialization`.
+     */
+    @SerialName("l")
+    protected lateinit var literal: String
+
+    /**
+     * The real value in runtime.
+     */
+    @Transient
+    private var real: Any? = null
+
+    /**
+     * Get the id of the factory where the applet is created.
+     */
+    inline val factoryId get() = id ushr 16
+
+    /**
+     * Get the type id of this applet.
+     */
+    inline val appletId get() = id and 0xFFFF
+
+    fun parseValue() {
+        check(::literal.isInitialized) {
+            "Nothing to parse!"
+        }
+        real = deserialize(literal)
+    }
+
+    var value: Any
+        get() = checkNotNull(real) {
+            "The value is not yet set or parsed!"
+        }
+        set(value) {
+            valueType = judgeValueType(value)
+            literal = serialize(value)
+            real = value
+        }
 
     /**
      * Execute the applet.
@@ -111,12 +136,8 @@ abstract class Applet {
      */
     abstract fun apply(context: AppletContext, runtime: FlowRuntime)
 
-    fun switchRelation() {
-        if (relation == RELATION_OR) {
-            relation = RELATION_AND
-        } else if (relation == RELATION_AND) {
-            relation = RELATION_OR
-        }
+    fun toggleRelation() {
+        isAnd = !isAnd
     }
 
     override fun toString(): String {

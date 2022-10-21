@@ -8,7 +8,6 @@ import android.content.res.ColorStateList
 import android.util.TypedValue
 import androidx.annotation.*
 import top.xjunz.tasker.app
-import top.xjunz.tasker.appTheme
 import java.io.InputStream
 
 inline val @receiver:StringRes Int.text get() = app.getText(this)
@@ -30,7 +29,7 @@ inline val @receiver:AttrRes Int.attrColor
 inline val @receiver:AttrRes Int.resolvedId: Int
     get() {
         val value = TypedValue()
-        appTheme.resolveAttribute(this, value, true)
+        app.appTheme.resolveAttribute(this, value, true)
         return value.resourceId
     }
 

@@ -1,6 +1,6 @@
 package top.xjunz.tasker.util
 
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import java.lang.reflect.ParameterizedType
 
 /**
@@ -11,10 +11,10 @@ object ReflectionUtil {
     fun <T : Any> Any.requireFieldFromSuperClass(fieldName: String): T {
         return javaClass.superclass.getDeclaredField(fieldName).apply {
             isAccessible = true
-        }.get(this)!!.unsafeCast()
+        }.get(this)!!.casted()
     }
 
     fun Class<*>.superClassFirstParameterizedType(): Class<*> {
-        return (genericSuperclass as ParameterizedType).actualTypeArguments.first().unsafeCast()
+        return (genericSuperclass as ParameterizedType).actualTypeArguments.first().casted()
     }
 }

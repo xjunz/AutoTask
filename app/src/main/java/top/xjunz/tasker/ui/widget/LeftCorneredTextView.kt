@@ -23,7 +23,7 @@ class LeftCorneredTextView @JvmOverloads constructor(
             color = context.getColor(com.google.android.material.R.color.material_on_surface_stroke)
             isAntiAlias = true
             style = Paint.Style.STROKE
-            strokeWidth = 2.dpFloat
+            strokeWidth = 1.dpFloat
         }
     }
 
@@ -55,9 +55,9 @@ class LeftCorneredTextView @JvmOverloads constructor(
         super.onDraw(canvas)
         val h = height.toFloat()
         val w = width.toFloat()
-        canvas.drawLine(w, h , radius, h , paint)
+        canvas.drawLine(w, h - paint.strokeWidth / 2, radius, h - paint.strokeWidth / 2, paint)
         canvas.drawArc(
-            0F, h - 2 * radius, 2 * radius, h ,
+            0F, h - 2 * radius - paint.strokeWidth / 2, 2 * radius, h- paint.strokeWidth / 2,
             90F, 90F, false, paint
         )
     }

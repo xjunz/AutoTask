@@ -2,7 +2,7 @@ package top.xjunz.tasker.engine.action
 
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.engine.flow.Applet
+import top.xjunz.tasker.engine.base.Applet
 
 /**
  * @author xjunz 2022/08/11

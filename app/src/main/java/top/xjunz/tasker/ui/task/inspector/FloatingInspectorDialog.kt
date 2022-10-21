@@ -1,11 +1,13 @@
 package top.xjunz.tasker.ui.task.inspector
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -23,11 +25,11 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.DialogFloatingInspectorBinding
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.service.controller.ServiceController
-import top.xjunz.tasker.service.controller.ShizukuA11yEnablerController
-import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
-import top.xjunz.tasker.task.inspector.InspectorController
+import top.xjunz.tasker.service.controller.ShizukuA11yServiceEnabler
+import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 
@@ -42,7 +44,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     private class InnerViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
-        val enabler = ShizukuA11yEnablerController()
+        val enabler = ShizukuA11yServiceEnabler()
 
         var checkedViewId: Int = R.id.rb_mode_shizuku
 
@@ -56,6 +58,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
         override fun onError(t: Throwable) {
             onError.postValue(t)
+            isBinding.postValue(false)
         }
 
         override fun onServiceBound() {
@@ -77,7 +80,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         private fun enableA11yService() {
             viewModelScope.launch(Dispatchers.Default) {
                 try {
-                    enabler.enableA11yService(!ShizukuAutomatorServiceController.isServiceRunning)
+                    enabler.enableA11yService(true)
                     // Delay 500ms to wait for the a11y service to be pulled up
                     delay(500)
                 } catch (t: Throwable) {
@@ -102,21 +105,32 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         mainViewModel = requireActivity().viewModels<MainViewModel>().value
     }
 
+    private fun showInspectorAndDismissSelf() {
+        toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
+        A11yAutomatorService.require().showFloatingInspector()
+        dismiss()
+        requireActivity().pressHome()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (FloatingInspector.isReady()) {
+            showInspectorAndDismissSelf()
+            return
+        }
         overlaySettingLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 updateOverlayGrantButton()
-                if (InspectorController.isReady()) {
-                    InspectorController.showInspector()
+                if (FloatingInspector.isReady()) {
+                    showInspectorAndDismissSelf()
                 } else {
                     toast(R.string.grant_failed)
                 }
             }
         accessibilitySettingsLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (InspectorController.isReady()) {
-                    InspectorController.showInspector()
+                if (FloatingInspector.isReady()) {
+                    showInspectorAndDismissSelf()
                 } else {
                     toast(R.string.grant_failed)
                 }
@@ -159,6 +173,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = true
         updateOverlayGrantButton()
         binding.btnCancel.setOnClickListener {
             dismiss()
@@ -191,14 +206,20 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                 if (A11yAutomatorServiceController.isServiceRunning) {
                     // Successfully enabled
                     viewModel.isBinding.value = null
-                    if (InspectorController.isReady()) {
-                        InspectorController.showInspector()
-                        dismiss()
+                    if (FloatingInspector.isReady()) {
+                        showInspectorAndDismissSelf()
                         return@observeNotNull
                     }
                 }
                 toast(R.string.launch_failed)
             }
+        }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        if (A11yAutomatorService.get()?.isInspectorShown() != true) {
+            A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
         }
     }
 }

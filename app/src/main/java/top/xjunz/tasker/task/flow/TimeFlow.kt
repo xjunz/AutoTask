@@ -2,7 +2,7 @@ package top.xjunz.tasker.task.flow
 
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Flow
 import java.util.*
 
 /**

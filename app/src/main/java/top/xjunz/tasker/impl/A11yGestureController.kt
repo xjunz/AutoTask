@@ -6,7 +6,7 @@ import android.view.MotionEvent
 import androidx.test.uiautomator.GestureController
 import androidx.test.uiautomator.PointerGesture
 import androidx.test.uiautomator.UiDevice
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.util.GestureGenerator.convertToStrokes
 import kotlin.math.ceil
@@ -40,7 +40,7 @@ class A11yGestureController(private val service: A11yAutomatorService, device: U
             }
             pointerCoordsSeries[index] = pointerCoordsSerial
         }
-        return pointerCoordsSeries.unsafeCast()
+        return pointerCoordsSeries.casted()
     }
 
     override fun performGesture(vararg gestures: PointerGesture) {

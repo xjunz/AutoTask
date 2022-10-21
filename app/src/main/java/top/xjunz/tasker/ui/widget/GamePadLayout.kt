@@ -1,21 +1,21 @@
 package top.xjunz.tasker.ui.widget
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.core.view.children
-import kotlin.math.hypot
+import androidx.core.view.get
+import kotlin.math.sqrt
 
 
 /**
  * @author xjunz 2021/9/24
  */
-class BubbleLayout @JvmOverloads constructor(
+class GamePadLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
 
@@ -31,18 +31,6 @@ class BubbleLayout @JvmOverloads constructor(
     }
 
     private var isCollapsed = false
-
-    private var downPoint = FloatArray(2)
-
-    private var currentPoint = FloatArray(2)
-
-    private var capturedView: View? = null
-
-    private val touchSlop by lazy {
-        ViewConfiguration.get(context).scaledTouchSlop
-    }
-
-    var onDragListener: ((offsetX: Float, offsetY: Float) -> Unit)? = null
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         check(childCount == ChildIndex.REQUIRED_CHILD_COUNT) { "having exactly 5 children is a must" }
@@ -101,8 +89,7 @@ class BubbleLayout @JvmOverloads constructor(
                     val left =
                         centerLeft + centerChild.measuredWidth + lp.leftMargin + centerLp.rightMargin
                     child.layout(
-                        left,
-                        measuredHeight / 2 - child.measuredHeight / 2,
+                        left, measuredHeight / 2 - child.measuredHeight / 2,
                         left + child.measuredWidth,
                         measuredHeight / 2 - child.measuredHeight / 2 + child.measuredHeight
                     )
@@ -118,8 +105,7 @@ class BubbleLayout @JvmOverloads constructor(
                     val top =
                         centerTop + centerChild.measuredHeight + lp.topMargin + centerLp.bottomMargin
                     child.layout(
-                        measuredWidth / 2 - child.measuredWidth / 2,
-                        top,
+                        measuredWidth / 2 - child.measuredWidth / 2, top,
                         measuredWidth / 2 - child.measuredWidth / 2 + child.measuredWidth,
                         top + child.measuredHeight
                     )
@@ -147,70 +133,50 @@ class BubbleLayout @JvmOverloads constructor(
         constructor(width: Int, height: Int) : super(width, height)
     }
 
-    private fun findTopChildUnder(x: Float, y: Float): View? {
-        val childCount: Int = childCount
-        for (i in childCount - 1 downTo 0) {
-            val child: View = getChildAt(i)
-            if (x >= child.left && x < child.right && y >= child.top && y < child.bottom) {
-                return child
-            }
-        }
-        return null
+    private val paint = Paint().apply {
+        color = Color.BLACK
+        isAntiAlias = true
+        style = Paint.Style.STROKE
+        strokeWidth = 3F
+        alpha = (.21F * 0xFF).toInt()
     }
 
-    /**
-     * Intercept the touch event when the child underneath is not going to handle the event, i.e. its
-     * [View.onTouchEvent] returns false, or when the [MotionEvent] has moved an as enough long distance
-     * as the [touchSlop]. When the touch event is intercepted, we will drag this view as the finger
-     * moves.
-     *
-     * @see onTouchEvent
-     */
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        val rawX = ev.rawX
-        val rawY = ev.rawY
-        when (ev.action) {
-            MotionEvent.ACTION_DOWN -> {
-                downPoint[0] = rawX
-                downPoint[1] = rawY
-                currentPoint[0] = rawX
-                currentPoint[1] = rawY
-                findTopChildUnder(ev.x, ev.y)?.let {
-                    if (it.onTouchEvent(ev)) {
-                        // captured an clickable child, let it handle the event temporarily
-                        capturedView = it
-                        return false
-                    }
-                }
-                // otherwise let me handle the event
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val view = findTopChildUnder(ev.x, ev.y)
-                if (capturedView != null && capturedView == view) {
-                    if (hypot(rawX - downPoint[0], rawY - downPoint[1]) < touchSlop) {
-                        return false
-                    }
-                }
-                // start drag myself
-                return true
-            }
-        }
-        return super.onInterceptTouchEvent(ev)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val rawX = event.rawX
-        val rawY = event.rawY
-        when (event.action) {
-            MotionEvent.ACTION_MOVE -> {
-                onDragListener?.invoke(rawX - currentPoint[0], rawY - currentPoint[1])
-                currentPoint[0] = rawX
-                currentPoint[1] = rawY
-            }
-            MotionEvent.ACTION_UP -> capturedView = null
-        }
-        return true
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val radius = this[ChildIndex.CENTER].width / 1.75F
+        val centerX = width / 2F
+        val centerY = height / 2F
+        val sqrt2 = sqrt(2F)
+        val minOffset = radius / sqrt2
+        val maxOffset = width / 2 / sqrt2
+        paint.strokeWidth = 4F
+        canvas.drawCircle(centerX, centerY, radius, paint)
+        paint.strokeWidth = 3F
+        // horizontal
+        canvas.drawLine(
+            centerX - minOffset,
+            centerY - minOffset,
+            centerX - maxOffset,
+            centerY - maxOffset, paint
+        )
+        canvas.drawLine(
+            centerX + minOffset,
+            centerY - minOffset,
+            centerX + maxOffset,
+            centerY - maxOffset, paint
+        )
+        // vertical
+        canvas.drawLine(
+            centerX - minOffset,
+            centerY + minOffset,
+            centerX - maxOffset,
+            centerY + maxOffset, paint
+        )
+        canvas.drawLine(
+            centerX + minOffset,
+            centerY + minOffset,
+            centerX + maxOffset,
+            centerY + maxOffset, paint
+        )
     }
 }

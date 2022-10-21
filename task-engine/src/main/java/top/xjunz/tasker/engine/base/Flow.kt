@@ -1,4 +1,4 @@
-package top.xjunz.tasker.engine.flow
+package top.xjunz.tasker.engine.base
 
 import androidx.annotation.CallSuper
 import kotlinx.serialization.SerialName
@@ -44,8 +44,10 @@ open class Flow : Applet() {
     protected open fun doApply(context: AppletContext, runtime: FlowRuntime) {
         for ((index, applet) in applets.withIndex()) {
             context.task.ensureActive()
-            if (applet.relation == RELATION_AND && !runtime.isSuccessful) continue
-            if (applet.relation == RELATION_OR && runtime.isSuccessful) continue
+            // Always execute the first applet in a flow and skip an applet if its relation to
+            // previous peer applet does not meet the previous execution result.
+            if (index != 0 && applet.isAnd != runtime.isSuccessful)
+                continue
             runtime.currentApplet = applet
             runtime.moveTo(index)
             applet.apply(context, runtime)
@@ -54,16 +56,16 @@ open class Flow : Applet() {
 
     override fun apply(context: AppletContext, runtime: FlowRuntime) {
         onPreApply(context, runtime)
-        // Backup the argument, because processor actions in this flow may change the value, we don't
-        // want the processed value to fall through.
-        val argument = runtime.getRawTarget()
         runtime.currentFlow = this
         runtime.jumpIn()
         checkElements()
+        // Backup the target, because sub-flows may change the target, we don't want the changed
+        // value to fall through.
+        val backup = runtime.getRawTarget()
         onPrepare(context, runtime)
         doApply(context, runtime)
-        // Restore the argument
-        runtime.setTarget(argument)
+        // restore the target
+        runtime.setTarget(backup)
         runtime.jumpOut()
         onPostApply(context, runtime)
     }

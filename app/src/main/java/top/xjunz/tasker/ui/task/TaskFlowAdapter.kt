@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
-import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Applet
+import top.xjunz.tasker.engine.base.Flow
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ui.ColorSchemes

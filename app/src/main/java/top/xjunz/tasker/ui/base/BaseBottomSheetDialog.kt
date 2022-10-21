@@ -16,7 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.MaterialShapeDrawable
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
 
@@ -44,7 +44,7 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         }
         binding = superClass.superClassFirstParameterizedType().getDeclaredMethod(
             "inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java
-        ).invoke(null, layoutInflater, container, false)!!.unsafeCast()
+        ).invoke(null, layoutInflater, container, false)!!.casted()
         return binding.root
     }
 

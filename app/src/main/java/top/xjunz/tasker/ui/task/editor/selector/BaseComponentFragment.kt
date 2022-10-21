@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.databinding.FragmentComponentSelectorBinding
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.observeTransient
@@ -19,7 +19,7 @@ abstract class BaseComponentFragment : BaseFragment<FragmentComponentSelectorBin
 
     protected lateinit var viewModel: ComponentSelectorViewModel
 
-    protected val parentFragment: ComponentSelectorDialog get() = requireParentFragment().unsafeCast()
+    protected val parentFragment: ComponentSelectorDialog get() = requireParentFragment().casted()
 
     abstract val index: Int
 

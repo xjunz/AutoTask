@@ -1,5 +1,6 @@
 package top.xjunz.tasker.task.flow
 
+import android.graphics.Point
 import android.view.Surface
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.tasker.service.currentService
@@ -18,13 +19,16 @@ class UiObjectContext {
     private val isNaturalOrientation =
         rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
-    val screenWidthPixels by lazy {
-        val displayMetrics = currentService.uiAutomatorBridge.displayMetrics
-        if (isNaturalOrientation) displayMetrics.widthPixels else displayMetrics.heightPixels
+    private val realSize by lazy {
+        val point = Point()
+        @Suppress("DEPRECATION")
+        currentService.uiAutomatorBridge.defaultDisplay.getRealSize(point)
+        point
     }
 
-    val screenHeightPixels by lazy {
-        val displayMetrics = currentService.uiAutomatorBridge.displayMetrics
-        if (isNaturalOrientation) displayMetrics.heightPixels else displayMetrics.widthPixels
-    }
+    val isPortrait get() = realSize.x <= realSize.y
+
+    val screenWidthPixels get() = realSize.x
+
+    val screenHeightPixels get() = realSize.y
 }

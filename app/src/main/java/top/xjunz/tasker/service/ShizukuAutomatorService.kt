@@ -12,7 +12,7 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.Keep
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.LocalOnly
@@ -43,12 +43,14 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     private val handlerThread = HandlerThread("ShizukuAutomatorThread")
 
-    private val handler by lazy { Handler(looper) }
+    private val handler by lazy {
+        Handler(looper)
+    }
 
     private val looper get() = handlerThread.looper
 
     private val uiAutomation: UiAutomation by lazy {
-        uiAutomationHidden.unsafeCast()
+        uiAutomationHidden.casted()
     }
 
     private var startTimestamp: Long = -1

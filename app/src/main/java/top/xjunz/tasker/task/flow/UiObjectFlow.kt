@@ -5,7 +5,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import kotlinx.serialization.SerialName
 import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Flow
 
 /**
  * @author xjunz 2022/08/25
@@ -34,6 +34,8 @@ class UiObjectFlow : Flow() {
     private fun AccessibilityNodeInfo.findFirst(condition: (AccessibilityNodeInfo) -> Boolean): AccessibilityNodeInfo? {
         for (i in 0 until childCount) {
             val child = getChild(i) ?: continue
+            // Need this?
+            if (!child.isVisibleToUser) continue
             return try {
                 if (condition(child)) child else child.findFirst(condition)
             } finally {

@@ -12,7 +12,7 @@ import top.xjunz.tasker.service.ShizukuAutomatorService
 /**
  * @author xjunz 2022/10/10
  */
-class ShizukuA11yEnablerController : ShizukuServiceController<IAutomatorConnection>() {
+class ShizukuA11yServiceEnabler : ShizukuServiceController<IAutomatorConnection>() {
 
     override val tag: String = "ShizukuA11yEnabler"
 

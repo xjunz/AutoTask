@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 
 /**
  * @author xjunz 2022/04/23
@@ -50,7 +50,7 @@ inline fun <Data, Binding : ViewDataBinding> inlineAdapter(
         ): GenericViewHolder<Binding> {
             val binding: Binding = itemViewBinding.getDeclaredMethod(
                 "inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java
-            ).invoke(null, layoutInflater, parent, false)!!.unsafeCast()
+            ).invoke(null, layoutInflater, parent, false)!!.casted()
             return GenericViewHolder(binding, initializer)
         }
 

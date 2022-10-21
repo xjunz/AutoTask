@@ -6,17 +6,24 @@ import android.app.IUiAutomationConnection
 import android.app.UiAutomation
 import android.app.UiAutomationHidden
 import android.app.accessibilityservice.AccessibilityServiceHidden
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
 import android.view.accessibility.AccessibilityEvent
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.impl.A11yUiAutomatorBridge
 import top.xjunz.tasker.ktx.isTrue
+import top.xjunz.tasker.task.inspector.ComponentInfo
+import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorViewModel
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import top.xjunz.tasker.util.unsupportedOperation
 import java.lang.ref.WeakReference
@@ -24,13 +31,16 @@ import java.lang.ref.WeakReference
 /**
  * @author xjunz 2022/07/12
  */
-class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutomationConnection {
+class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutomationConnection,
+    LifecycleOwner {
 
     companion object {
 
-        val ERROR = MutableLiveData<Throwable>()
+        var FLAG_REQUEST_INSPECTOR_MODE: Boolean = false
 
-        val IS_RUNNING = MutableLiveData<Boolean>()
+        val launchError = MutableLiveData<Throwable>()
+
+        val runningState = MutableLiveData<Boolean>()
 
         private var instanceRef: WeakReference<A11yAutomatorService>? = null
 
@@ -41,7 +51,11 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    override val isRunning get() = IS_RUNNING.isTrue
+    private val lifecycleRegistry = LifecycleRegistry(this)
+
+    private lateinit var inspectorViewModel: InspectorViewModel
+
+    override val isRunning get() = runningState.isTrue
 
     private var startTimestamp: Long = -1
 
@@ -49,28 +63,80 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
 
-    private val uiAutomation: UiAutomation get() = uiAutomationHidden.unsafeCast()
+    private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
+
+    lateinit var inspector: FloatingInspector
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
         A11yUiAutomatorBridge(this, uiAutomation)
     }
 
+    private var launchedInInspectorMode = false
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         try {
-            uiAutomationHidden = UiAutomationHidden(mainLooper, this)
-            uiAutomationHidden.connect()
+            launchedInInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
+            if (!launchedInInspectorMode) {
+                uiAutomationHidden = UiAutomationHidden(mainLooper, this)
+                uiAutomationHidden.connect()
+            }
             instanceRef = WeakReference(this)
+            runningState.value = true
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
             startTimestamp = System.currentTimeMillis()
-            IS_RUNNING.value = true
         } catch (t: Throwable) {
             t.printStackTrace()
-            ERROR.value = t
+            launchError.value = t
             destroy()
         }
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+    fun destroyFloatingInspector() {
+        inspector.dismiss()
+        if (launchedInInspectorMode) {
+            disableSelf()
+        }
+    }
+
+    fun isInspectorShown(): Boolean {
+        return ::inspector.isInitialized && inspector.isShown
+    }
+
+    fun showFloatingInspector() {
+        if (isInspectorShown()) return
+        inspectorViewModel = InspectorViewModel()
+        inspector = FloatingInspector(this, inspectorViewModel)
+        inspector.show()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (isInspectorShown()) {
+            // recreate the inspector
+            inspector.dismiss()
+            inspectorViewModel.onConfigurationChanged()
+            inspector = FloatingInspector(this, inspectorViewModel)
+            inspector.show()
+        }
+    }
+
+    private var prevComp: ComponentInfo? = null
+
+    override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        if (isInspectorShown() && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val actName = event.className?.toString() ?: return
+            val pkgName = event.packageName.toString()
+            var actLabel: String? = null
+            if (event.text.size > 0) {
+                if (event.text[0] != null) actLabel = event.text[0].toString()
+            }
+            val currentComp = ComponentInfo(actLabel, pkgName, actName)
+            if (currentComp != prevComp && currentComp.isActivity()) {
+                inspectorViewModel.currentComp.value = currentComp
+                prevComp = currentComp
+            }
+        }
         callbacks?.onAccessibilityEvent(event)
     }
 
@@ -80,8 +146,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
+        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         instanceRef?.clear()
-        IS_RUNNING.value = false
+        runningState.value = false
+        if (isInspectorShown()) inspector.dismiss()
     }
 
     /**
@@ -103,7 +171,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun destroy() {
-        if (isRunning) uiAutomationHidden.disconnect()
+        if (isRunning && !launchedInInspectorMode) {
+            uiAutomationHidden.disconnect()
+        }
         disableSelf()
     }
 
@@ -145,5 +215,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun syncInputTransactions() {
         unsupportedOperation()
+    }
+
+    override fun getLifecycle(): Lifecycle {
+        return lifecycleRegistry
     }
 }

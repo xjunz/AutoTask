@@ -7,7 +7,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="tint">?colorPrimary</item>
         <item name="backgroundTint">@color/icon_background</item>
-        <item name="android:background">@drawable/bg_circle</item>
+        <item name="android:background">@drawable/bg_tinted_selectable_circle</item>
     </style>
 
     <style name="TintedIcon.Main">
@@ -52,8 +52,15 @@
     <style name="BubbleButton">
         <item name="android:layout_width">32dp</item>
         <item name="android:layout_height">32dp</item>
-        <item name="tint">?colorOnSecondary</item>
-        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="tint">@color/color_control_on_primary</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="FloatingControllerImageButton">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="tint">@color/color_control_on_primary</item>
+        <item name="android:background">?selectableItemBackground</item>
     </style>
 
 </resources>

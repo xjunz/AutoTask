@@ -2,8 +2,8 @@ package top.xjunz.tasker.ui.task
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import top.xjunz.tasker.engine.flow.Applet
-import top.xjunz.tasker.engine.flow.Flow
+import top.xjunz.tasker.engine.base.Applet
+import top.xjunz.tasker.engine.base.Flow
 
 /**
  * @author xjunz 2022/09/10

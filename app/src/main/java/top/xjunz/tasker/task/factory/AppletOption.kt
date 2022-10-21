@@ -3,9 +3,10 @@ package top.xjunz.tasker.task.factory
 import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import top.xjunz.shared.ktx.unsafeCast
+import top.xjunz.shared.ktx.casted
+import top.xjunz.tasker.R
 import top.xjunz.tasker.app
-import top.xjunz.tasker.engine.flow.Applet
+import top.xjunz.tasker.engine.base.Applet
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.util.unsupportedOperation
@@ -31,7 +32,11 @@ abstract class AppletOption(
         const val TITLE_NONE = -1
 
         private val DEFAULT_DESCRIBER: (Any) -> CharSequence = {
-            it.toString()
+            if (it is Boolean) {
+                if (it) R.string._true.text else R.string._false.text
+            } else {
+                it.toString()
+            }
         }
     }
 
@@ -63,6 +68,11 @@ abstract class AppletOption(
      * As per [Applet.isInvertible].
      */
     val isInvertible get() = invertedTitleRes != TITLE_NONE
+
+    /**
+     * As per [Applet.real].
+     */
+    var value: Any? = null
 
     /**
      * The index in all categories.
@@ -105,9 +115,20 @@ abstract class AppletOption(
         return label
     }
 
-    fun getDescription(value: Any): CharSequence {
+    fun withValue(value: Any): AppletOption {
+        this.value = value
+        return this
+    }
+
+    fun describe(value: Any): CharSequence {
         return describer(value)
     }
+
+    val description: CharSequence?
+        get() {
+            if (value == null) return null
+            return describe(value!!)
+        }
 
     fun toggleInverted() {
         isInverted = !isInverted
@@ -117,12 +138,12 @@ abstract class AppletOption(
         return rawCreateApplet().also {
             it.id = factoryId shl 16 or appletId
             it.isInverted = isInverted
-            it.relation = Applet.RELATION_AND
+            if (value != null) it.value = value!!
         }
     }
 
     fun <T : Any> withDescriber(block: (T) -> CharSequence): AppletOption {
-        describer = { block(it.unsafeCast()) }
+        describer = { block(it.casted()) }
         return this
     }
 

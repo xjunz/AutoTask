@@ -26,9 +26,9 @@ class FloatingDraggableLayout @JvmOverloads constructor(
         const val STATE_DRAG_ENDED = 2
     }
 
-    private var downPoint = FloatArray(2)
+    private val downPoint = FloatArray(2)
 
-    private var currentPoint = FloatArray(2)
+    private val currentPoint = FloatArray(2)
 
     private var capturedView: View? = null
 
@@ -48,10 +48,9 @@ class FloatingDraggableLayout @JvmOverloads constructor(
     }
 
     /**
-     * Intercept the touch event when the child underneath is not going to handle the event, i.e., its
+     * Intercept the touch event when the child underneath is not going to handle the event, e.g., its
      * [View.onTouchEvent] returns false, or when the [MotionEvent] has moved an as enough long distance
-     * as the [touchSlop]. When the touch event is intercepted, we will drag this view as the finger
-     * moves.
+     * as the [touchSlop]. When the touch event is intercepted, we will call drag events via [onDragListener].
      *
      * @see onTouchEvent
      */
@@ -64,14 +63,8 @@ class FloatingDraggableLayout @JvmOverloads constructor(
                 downPoint[1] = rawY
                 currentPoint[0] = rawX
                 currentPoint[1] = rawY
-                findTopChildUnder(ev.x, ev.y)?.also {
-                    if (it.onTouchEvent(ev)) {
-                        // captured an clickable child, let it handle the event temporarily
-                        capturedView = it
-                        return false
-                    }
-                }
-                return true
+                capturedView = findTopChildUnder(ev.x, ev.y)
+                return capturedView == null
             }
             MotionEvent.ACTION_MOVE -> {
                 val view = findTopChildUnder(ev.x, ev.y)

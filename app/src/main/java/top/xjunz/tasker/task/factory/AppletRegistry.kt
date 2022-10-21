@@ -1,6 +1,6 @@
 package top.xjunz.tasker.task.factory
 
-import top.xjunz.tasker.engine.flow.Applet
+import top.xjunz.tasker.engine.base.Applet
 
 
 /**
@@ -9,14 +9,6 @@ import top.xjunz.tasker.engine.flow.Applet
  * @author xjunz 2022/08/09
  */
 class AppletRegistry {
-
-    companion object {
-
-        inline val Applet.factoryId get() = id ushr 16
-
-        inline val Applet.appletId get() = id and 0xFFFF
-
-    }
 
     val flowFactory = FlowFactory()
 
@@ -29,7 +21,7 @@ class AppletRegistry {
 
     private val timeAppletFactory = TimeAppletFactory(FlowFactory.ID_TIME_APPLET_FACTORY)
 
-    val allFactories = arrayOf(
+    private val allFactories = arrayOf(
         flowFactory,
         eventFilterFactory,
         packageAppletFactory,
