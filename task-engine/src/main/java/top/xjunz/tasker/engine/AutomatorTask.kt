@@ -3,8 +3,10 @@ package top.xjunz.tasker.engine
 import android.app.UiAutomation
 import androidx.test.uiautomator.UiDevice
 import top.xjunz.shared.trace.logcat
-import top.xjunz.tasker.engine.base.Applet
-import top.xjunz.tasker.engine.base.Flow
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskContext
 
 /**
  * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [rootFlow] are
@@ -71,9 +73,8 @@ open class AutomatorTask(val name: String) {
      * Throws a [TaskCancellationException] if the task is not [active][isActive] at the moment.
      */
     fun ensureActive() {
-        if (!isActive) {
+        if (!isActive)
             throw TaskCancellationException(this)
-        }
     }
 
     fun activate(stateListener: OnStateChangedListener) {
@@ -105,8 +106,8 @@ open class AutomatorTask(val name: String) {
      *
      * @return `true` if the task is successfully executed and `false` otherwise
      */
-    fun onEvent(ctx: AppletContext): Boolean {
-       if(!isActive) return false
+    fun onEvent(ctx: TaskContext): Boolean {
+        if (!isActive) return false
         isExecuting = true
         val runtime = FlowRuntime(ctx.events)
         try {

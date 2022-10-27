@@ -6,9 +6,12 @@ import android.app.IUiAutomationConnection
 import android.app.UiAutomation
 import android.app.UiAutomationHidden
 import android.app.accessibilityservice.AccessibilityServiceHidden
+import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
@@ -19,6 +22,7 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
+import top.xjunz.tasker.app
 import top.xjunz.tasker.impl.A11yUiAutomatorBridge
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.inspector.ComponentInfo
@@ -121,21 +125,35 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    private var prevComp: ComponentInfo? = null
+    private val currentComp = ComponentInfo()
+    private val prevComp = ComponentInfo()
+
+    fun isActivity(pkgName: String?, actName: String?): Boolean {
+        if (pkgName == null || actName == null) return false
+        return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                app.packageManager.getActivityInfo(
+                    ComponentName(pkgName, actName),
+                    PackageManager.ComponentInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                app.packageManager.getActivityInfo(ComponentName(pkgName, actName), 0)
+            }
+        }.isSuccess
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (isInspectorShown() && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val pkgName = event.packageName?.toString() ?: return
             val actName = event.className?.toString() ?: return
-            val pkgName = event.packageName.toString()
-            var actLabel: String? = null
-            if (event.text.size > 0) {
-                if (event.text[0] != null) actLabel = event.text[0].toString()
-            }
-            val currentComp = ComponentInfo(actLabel, pkgName, actName)
-            if (currentComp != prevComp && currentComp.isActivity()) {
-                inspectorViewModel.currentComp.value = currentComp
-                prevComp = currentComp
-            }
+            if (!isActivity(pkgName, actName)) return
+            val actLabel = event.text.getOrNull(0)?.toString()
+            currentComp.pkgName = pkgName
+            currentComp.actName = actName
+            currentComp.actLabel = actLabel
+            prevComp.copyFrom(currentComp)
+            inspectorViewModel.currentComp.value = currentComp
         }
         callbacks?.onAccessibilityEvent(event)
     }

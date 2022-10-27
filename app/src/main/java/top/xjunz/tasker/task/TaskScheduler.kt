@@ -4,9 +4,9 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.accessibility.AccessibilityEvent
-import top.xjunz.tasker.engine.AppletContext
 import top.xjunz.tasker.engine.AutomatorTask
-import top.xjunz.tasker.engine.Event
+import top.xjunz.tasker.engine.runtime.TaskContext
+import top.xjunz.tasker.engine.value.Event
 import top.xjunz.tasker.service.AutomatorService
 
 /**
@@ -18,7 +18,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
 
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            val ctx = msg.obj as AppletContext
+            val ctx = msg.obj as TaskContext
             try {
                 ctx.task.onEvent(ctx)
             } finally {
@@ -58,7 +58,7 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
                     events = arrayOf(Event.obtain(Event.EVENT_ON_CONTENT_CHANGED, currentPackage))
                 }
                 TaskManager.getActiveTasks().forEach { task ->
-                    val ctx = AppletContext(task, events, currentPackage, currentActivityName!!)
+                    val ctx = TaskContext(task, events, currentPackage, currentActivityName!!)
                     handler.obtainMessage(task.id, ctx).sendToTarget()
                 }
             } finally {

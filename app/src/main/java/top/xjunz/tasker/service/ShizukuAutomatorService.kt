@@ -102,9 +102,8 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     override fun executeShellCmd(cmd: String) {
         val ret = shConsole.run(cmd)
-        if (!ret.isSuccessful) {
+        if (!ret.isSuccessful)
             error(ret.getStderr())
-        }
     }
 
     override fun isConnected(): Boolean {
@@ -136,12 +135,12 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
             delegate.destroy()
         } else try {
             handler.removeCallbacksAndMessages(null)
-            if (::uiAutomationHidden.isInitialized) {
+            if (::uiAutomationHidden.isInitialized)
                 uiAutomationHidden.disconnect()
-            }
-            if (handlerThread.isAlive) {
+
+            if (handlerThread.isAlive)
                 handlerThread.quitSafely()
-            }
+
         } catch (t: Throwable) {
             t.printStackTrace()
         } finally {

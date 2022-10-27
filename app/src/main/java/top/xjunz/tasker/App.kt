@@ -11,22 +11,23 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 /**
  * @author xjunz 2021/6/25
  */
-val app: App get() = App.INSTANCE!!
-
-val isInHostProcess: Boolean get() = App.INSTANCE != null
+val isInHostProcess: Boolean get() = App.instance != null
 
 val isInRemoteProcess: Boolean get() = !isInHostProcess
 
+val app: App get() = requireNotNull(App.instance)
+
 class App : Application() {
-
-    companion object {
-
-        var INSTANCE: App? = null
-
-    }
 
     lateinit var appTheme: Theme
         private set
+
+    companion object {
+
+        var instance: App? = null
+            private set
+
+    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -39,10 +40,10 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.addHiddenApiExemptions("")
         }
-        INSTANCE = this
         generateAppTheme()
     }
 

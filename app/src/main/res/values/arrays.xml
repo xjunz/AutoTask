@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="a11y_class_names">
+        <item>按钮(Button)</item>
+        <item>图片按钮(ImageButton)</item>
+        <item>文本(TextView)</item>
+        <item>图片(ImageView)</item>
+        <item>多选按钮(CheckBox)</item>
+        <item>单选按钮(RadioButton)</item>
+        <item>开关(Switch)</item>
+        <item>普通视图(View)</item>
+        <item>视图容器(ViewGroup)</item>
+        <item>列表(RecyclerView)</item>
+        <item>ListView</item>
+        <item>ScrollView</item>
+        <item>FrameLayout</item>
+        <item>LinearLayout</item>
+        <item>RelativeLayout</item>
+    </string-array>
+    <string-array name="a11y_class_full_names">
+        <item>android.widget.Button</item>
+        <item>android.widget.ImageButton</item>
+        <item>android.widget.TextView</item>
+        <item>android.widget.ImageView</item>
+        <item>android.widget.CheckBox</item>
+        <item>android.widget.RadioButton</item>
+        <item>android.widget.Switch</item>
+        <item>android.view.View</item>
+        <item>android.view.ViewGroup</item>
+        <item>androidx.recyclerview.widget.RecyclerView</item>
+        <item>android.widget.ListView</item>
+        <item>android.widget.ScrollView</item>
+        <item>android.widget.FrameLayout</item>
+        <item>android.widget.LinearLayout</item>
+        <item>android.widget.RelativeLayout</item>
+    </string-array>
     <string-array name="node_attr_names">
         <item>Package</item>
         <item>Class</item>
@@ -35,5 +69,43 @@
     <string-array name="applet_relations">
         <item>且</item>
         <item>或</item>
+    </string-array>
+    <string-array name="directions">
+        <item>左</item>
+        <item>上</item>
+        <item>右</item>
+        <item>下</item>
+    </string-array>
+    <string-array name="distance_units">
+        <item>@string/px</item>
+        <item>@string/dip</item>
+        <item>@string/screen_width</item>
+        <item>@string/screen_height</item>
+        <item>@string/parent_width</item>
+        <item>@string/parent_height</item>
+    </string-array>
+
+    <string-array name="months">
+        <item>一月</item>
+        <item>二月</item>
+        <item>三月</item>
+        <item>四月</item>
+        <item>五月</item>
+        <item>六月</item>
+        <item>七月</item>
+        <item>八月</item>
+        <item>九月</item>
+        <item>十月</item>
+        <item>十一月</item>
+        <item>十二月</item>
+    </string-array>
+    <string-array name="days_in_week">
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+        <item>周日</item>
     </string-array>
 </resources>

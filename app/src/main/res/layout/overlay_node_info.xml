@@ -31,7 +31,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_subtitle"
+                android:id="@+id/tv_subtitle_max"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -49,12 +49,13 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_option_frame"
                 android:fadingEdgeLength="16dp"
+                android:overScrollMode="never"
                 android:requiresFadingEdge="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toTopOf="@+id/btn_complete"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle"
+                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_max"
                 tools:listitem="@layout/item_node_info" />
 
             <com.google.android.material.button.MaterialButton

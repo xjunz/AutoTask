@@ -16,7 +16,7 @@
     <string name="not_contains_text">不包含指定文本</string>
     <string name="in_pkg_collection">指定应用程序</string>
     <string name="not_in_pkg_collection">排除应用程序</string>
-    <string name="format_range">%d至%d</string>
+    <string name="format_range">%s至%s</string>
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
     <string name="on_package_entered">进入指定应用程序时</string>
@@ -27,8 +27,8 @@
     <string name="not_is_system">不是系统应用</string>
     <string name="is_launcher">是桌面应用</string>
     <string name="not_is_launcher">不是桌面应用</string>
-    <string name="in_version_range">指定版本</string>
-    <string name="not_in_version_range">排除指定版本</string>
+    <string name="in_version_range">指定版本号</string>
+    <string name="not_in_version_range">排除指定版本号</string>
 
     <string name="ui_object_exists">存在UI组件满足</string>
     <string name="with_type">控件类型为</string>
@@ -67,8 +67,8 @@
     <string name="time_range">指定时间范围</string>
     <string name="in_months">指定月份</string>
     <string name="not_in_months">排除月份</string>
-    <string name="in_day_of_month">指定几号</string>
-    <string name="not_in_day_of_month">排除几号</string>
+    <string name="in_day_of_month">指定日期</string>
+    <string name="not_in_day_of_month">排除日期</string>
     <string name="in_day_of_week">指定星期几</string>
     <string name="not_in_day_of_week">排除星期几</string>
     <string name="in_hour_min_sec_range">指定时分秒</string>

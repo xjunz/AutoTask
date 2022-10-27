@@ -137,7 +137,7 @@
     <string name="add_before">在前面添加</string>
     <string name="back">返回</string>
     <string name="complete">完成</string>
-    <string name="format_applet_count">清空%d条规则</string>
+    <string name="format_applet_count">清空共%d条规则</string>
     <string name="expand_more">展开</string>
     <string name="unfold_less">收起</string>
     <string name="sort_by_app_name">按应用名称</string>
@@ -180,10 +180,48 @@
     <string name="_false">否</string>
     <string name="format_px">%d像素</string>
     <string name="no_node_selected">未选中任何节点</string>
-    <string name="node_info_overlay_subtitle">请勾选想要指定的条件</string>
+    <string name="node_info_overlay_subtitle">请勾选想要指定的规则</string>
     <string name="node_info_overlay_title">节点属性</string>
     <string name="child_node">子节点</string>
     <string name="seekbar">拖动条</string>
     <string name="tip_floating_inspector_enabled">悬浮助手已启用。点击悬浮图标，可选择当前屏幕上的内容</string>
-
+    <string name="options_from_inspector_added">已添加%d条规则</string>
+    <string name="prompt_clear_all_options">确定要清空所有规则吗？</string>
+    <string name="format_applet_is_removed">已移除%d条规则</string>
+    <string name="reset">重置</string>
+    <string name="empty_input_not_allowed">输入不能为空</string>
+    <string name="minimum">最小值</string>
+    <string name="maximum">最大值</string>
+    <string name="no_limit">无限制</string>
+    <string name="unit">单位</string>
+    <string name="relative_to">相对于</string>
+    <string name="screen">屏幕</string>
+    <string name="parent_node">父节点</string>
+    <string name="px">像素</string>
+    <string name="dip">dp</string>
+    <string name="screen_width">屏幕宽度</string>
+    <string name="screen_height">屏幕高度</string>
+    <string name="help">帮助</string>
+    <string name="help_distance_unit"><b>像素</b>: 屏幕上的最小显示单元
+        \n<b>dp</b>: 设备无关像素，可在不同屏幕上显示相同的大小，是安卓APP中最常用的显示单位
+    \n<b>屏幕高度/宽度: </b>取值范围之间为0~1，代表多少比例的屏幕的宽度/高度
+    \n<b>父节点高度/宽度: </b>取值范围之间为0~1，代表多少比例的父节点的宽度/高度
+    </string>
+    <string name="format_scoped_distance_name">到%s%s边缘的距离</string>
+    <string name="format_error_min_greater_than_max">%1$s不能小于%2$s</string>
+    <string name="format_error_min_max_not_in_scope">当前选中单位为\"%s\"，最大值和最小值范围为0到1</string>
+    <string name="format_less_than">小于等于%s</string>
+    <string name="format_larger_than">大于等于%s</string>
+    <string name="parent_width">父节点宽度</string>
+    <string name="parent_height">父节点高度</string>
+    <string name="format_error_no_limit">未指定%1$s或%2$s</string>
+    <string name="screenshot_failed">截图失败，可尝试重试</string>
+    <string name="clear_all">清空</string>
+    <string name="error_mal_format">格式错误，请重新输入</string>
+    <string name="start_time">起始时间</string>
+    <string name="end_time">结束时间</string>
+    <string name="error_no_selection">未选中任何项目</string>
+    <string name="format_day_in_month">%d号</string>
+    <string name="format_before">%s之前</string>
+    <string name="format_after">%s之后</string>
 </resources>

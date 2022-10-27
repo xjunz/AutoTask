@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        viewModel.onRequestRoute.value = intent.data?.host
+        viewModel.onRequestRoute.setValueIfObserved(intent.data?.host)
     }
 
     override fun onBackPressed() {

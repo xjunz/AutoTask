@@ -44,11 +44,12 @@ class InspectorViewModel {
 
     var bubbleY: Int = 0
 
-    fun makeToast(any: Any?) {
+    fun makeToast(any: Any?, post: Boolean = false) {
         when (any) {
             is Int -> toastText.value = any.text
             is CharSequence -> toastText.value = any
-            else -> toastText.value = any.toString()
+            else -> if (post) toastText.postValue(any.toString()) else toastText.value =
+                any.toString()
         }
     }
 

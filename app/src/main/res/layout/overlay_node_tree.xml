@@ -55,6 +55,7 @@
                 android:background="@drawable/bg_option_frame"
                 android:clipToPadding="false"
                 android:fadingEdgeLength="16dp"
+                android:overScrollMode="never"
                 android:requiresFadingEdge="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toTopOf="@id/ib_close"

@@ -20,8 +20,8 @@ object ColorSchemes {
         get() = android.R.attr.textColorTertiary.attrColorStateList.defaultColor
 
     @get:ColorInt
-    val colorTextLink: Int
-        get() = android.R.attr.textColorLink.attrColorStateList.defaultColor
+    val colorTertiary: Int
+        get() = com.google.android.material.R.attr.colorTertiary.attrColor
 
     @get:ColorInt
     val colorPrimary: Int

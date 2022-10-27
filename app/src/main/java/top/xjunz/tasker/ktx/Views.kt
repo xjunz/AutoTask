@@ -4,12 +4,16 @@
 
 package top.xjunz.tasker.ktx
 
+import android.animation.ObjectAnimator
 import android.graphics.Bitmap
+import android.text.InputFilter
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import androidx.core.graphics.Insets
 import androidx.core.graphics.applyCanvas
@@ -72,11 +76,52 @@ inline fun <T : View> T.oneShotApplySystemInsets(
 
 inline val EditText.textString get() = text.toString()
 
+fun EditText.setMaxLength(len: Int) {
+    filters += InputFilter.LengthFilter(len)
+}
+
+fun View.beginAutoTransition(target: View, transition: Transition = AutoTransition()) {
+    this as ViewGroup
+    TransitionManager.beginDelayedTransition(
+        this, transition.setInterpolator(Motions.EASING_EMPHASIZED).addTarget(target)
+    )
+}
+
+fun View.beginMyselfAutoTransition(transition: Transition = AutoTransition()) {
+    rootView.beginAutoTransition(this, transition)
+}
 
 fun View.beginAutoTransition(transition: Transition = AutoTransition()) {
     this as ViewGroup
     TransitionManager.beginDelayedTransition(
         this, transition.setInterpolator(Motions.EASING_EMPHASIZED)
     )
+}
+
+fun AutoCompleteTextView.setEntries(
+    arrayRes: Int,
+    setFirstAsText: Boolean = false,
+    onItemClicked: ((position: Int) -> Unit)? = null
+) {
+    val array = arrayRes.array
+    setAdapter(
+        ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, array)
+    )
+    if (onItemClicked != null) {
+        setOnItemClickListener { _, _, position, _ ->
+            onItemClicked(position)
+        }
+    }
+    if (setFirstAsText) {
+        threshold = Int.MAX_VALUE
+        setText(array[0].toString())
+    }
+}
+
+fun View.shake() {
+    ObjectAnimator.ofFloat(
+        this, View.TRANSLATION_X,
+        0F, 20F, -20F, 15F, -15F, 10F, -10F, 5F, -5F, 0F
+    ).start()
 }
 

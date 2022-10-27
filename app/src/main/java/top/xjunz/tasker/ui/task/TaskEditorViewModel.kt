@@ -2,8 +2,8 @@ package top.xjunz.tasker.ui.task
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import top.xjunz.tasker.engine.base.Applet
-import top.xjunz.tasker.engine.base.Flow
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.Flow
 
 /**
  * @author xjunz 2022/09/10
@@ -17,8 +17,6 @@ class TaskEditorViewModel : ViewModel() {
     val selectedFlowIndex = MutableLiveData(-1)
 
     val selectedFlowItem = MutableLiveData<Applet>()
-
-    val panelHeights = IntArray(2)
 
     val currentPage = MutableLiveData<Int>()
 }

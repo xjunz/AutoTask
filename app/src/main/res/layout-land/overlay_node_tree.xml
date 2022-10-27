@@ -55,6 +55,7 @@
                 android:background="@drawable/bg_option_frame"
                 android:clipToPadding="false"
                 android:fadingEdgeLength="16dp"
+                android:overScrollMode="never"
                 android:requiresFadingEdge="vertical"
                 app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
                 app:layout_constraintBottom_toTopOf="@id/ib_close"
@@ -71,11 +72,11 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/dismiss"
-                app:rippleColor="?colorErrorContainer"
                 android:textColor="?colorError"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:rippleColor="?colorErrorContainer"
                 app:strokeColor="?colorError" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

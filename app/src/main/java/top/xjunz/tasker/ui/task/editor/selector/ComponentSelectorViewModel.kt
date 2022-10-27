@@ -2,18 +2,19 @@ package top.xjunz.tasker.ui.task.editor.selector
 
 import android.content.ComponentName
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.util.ApplicationIconLoader
 import top.xjunz.tasker.util.PackageInfoLoader
 
 /**
  * @author xjunz 2022/10/09
  */
-class ComponentSelectorViewModel : ViewModel() {
+class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(states) {
 
     var mode = ComponentSelectorDialog.MODE_PACKAGE
 

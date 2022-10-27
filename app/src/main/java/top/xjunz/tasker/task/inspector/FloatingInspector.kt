@@ -9,7 +9,8 @@ import androidx.lifecycle.LifecycleRegistry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.task.factory.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.inspector.overlay.*
 
 /**
  * @author xjunz 2021/9/21
@@ -48,7 +49,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     private val nodeInfo = NodeInfoOverlay(this)
 
-    private val overlays: Array<BaseOverlay<*>> = arrayOf(
+    private val overlays: Array<FloatingInspectorOverlay<*>> = arrayOf(
         trashBin,
         inspectorView,
         componentOverlay,
@@ -77,7 +78,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
-    fun acceptUiObjectOptions(): List<AppletOption> {
+    fun getSelectedOptions(): List<AppletOption> {
         return nodeInfo.getCheckedOptions()
     }
 

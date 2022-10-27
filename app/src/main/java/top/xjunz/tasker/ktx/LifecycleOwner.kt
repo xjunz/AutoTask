@@ -24,7 +24,7 @@ import top.xjunz.tasker.databinding.LayoutProgressBinding
 /**
  * @author xjunz 2022/05/09
  */
-private fun LifecycleOwner.peekContext(): Context {
+fun LifecycleOwner.peekContext(): Context {
     if (this is Activity) return this
     if (this is Fragment) return requireContext()
     error("This LifecycleOwner is not an Activity or a Fragment!")
@@ -88,10 +88,11 @@ inline fun <V> LifecycleOwner.observeDialog(
     }
 }
 
-fun LifecycleOwner.observePrompt(ld: MutableLiveData<*>, @StringRes promptTextRes: Int) {
-    ld.observe(this) {
-        if (it == null) return@observe
-        if (it is Boolean && !it) return@observe
+fun LifecycleOwner.observePrompt(
+    ld: MutableLiveData<*>,
+    @StringRes promptTextRes: Int
+) {
+    observeDialog(ld) {
         peekContext().makeSimplePromptDialog(msg = promptTextRes).setOnDismissListener {
             ld.value = null
         }.show()
@@ -107,10 +108,10 @@ fun <V : Throwable> LifecycleOwner.observeError(ld: MutableLiveData<V>) {
     }
 }
 
-fun LifecycleOwner.observeConfirmation(
+inline fun LifecycleOwner.observeConfirmation(
     ld: MutableLiveData<*>,
     @StringRes promptTextRes: Int,
-    onConfirmed: () -> Unit
+    crossinline onConfirmed: () -> Unit
 ) {
     ld.observe(this) {
         if (it == null) return@observe

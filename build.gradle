@@ -5,7 +5,7 @@ buildscript {
         compile_sdk_version =33
         min_sdk_version =24
         target_sdk_version =33
-        kotlin_version = "1.7.10"
+        kotlin_version = "1.7.20"
         refine_version = "3.1.1"
         shizuku_version = '12.1.0'
         ktor_version = '2.1.1'

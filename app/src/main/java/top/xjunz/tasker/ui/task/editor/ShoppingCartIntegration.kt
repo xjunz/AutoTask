@@ -11,6 +11,7 @@ import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.circularreveal.CircularRevealCompat
@@ -19,13 +20,16 @@ import top.xjunz.tasker.databinding.LayoutShoppingCartBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.util.Motions
 
 /**
  * @author xjunz 2022/10/08
  */
 class ShoppingCartIntegration(
-    private val binding: LayoutShoppingCartBinding, private val toFitPaddingBottom: View
+    private val binding: LayoutShoppingCartBinding,
+    private val viewModel: SavedStateViewModel,
+    private val viewToFitBottom: View
 ) {
 
     private val bottomSheet = binding.root
@@ -38,16 +42,34 @@ class ShoppingCartIntegration(
 
     private val ibExpand = binding.ibExpand
 
-    fun init(fragment: BaseDialogFragment<*>){
-        val behavior = binding.root.disableBottomSheetShapeAnimation()
+    private lateinit var behavior: BottomSheetBehavior<*>
+
+    fun expand() {
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
+    fun collapse() {
         behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+    }
+
+    fun init(fragment: BaseDialogFragment<*>) {
+        behavior = binding.root.disableBottomSheetShapeAnimation()
         behavior.isHideable = false
-        circularRevealContainer.applySystemInsets { _, insets ->
-            circularRevealContainer.doOnPreDraw {
+        val key = "peekHeight"
+        fragment.observe(viewModel.get<Int>(key)) {
+            viewToFitBottom.updatePadding(bottom = it)
+        }
+        circularRevealContainer.oneShotApplySystemInsets { container, insets ->
+            container.doOnPreDraw {
                 behavior.peekHeight = it.height + insets.bottom
-                toFitPaddingBottom.updatePadding(bottom = it.height + insets.bottom)
+                viewModel.setValue(key, behavior.peekHeight)
             }
             binding.rvBottom.updatePadding(bottom = insets.bottom)
+            binding.root.doOnPreDraw {
+                it.updateLayoutParams {
+                    height = it.height - insets.top
+                }
+            }
         }
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {

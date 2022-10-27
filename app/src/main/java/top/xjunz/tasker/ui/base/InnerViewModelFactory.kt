@@ -21,13 +21,13 @@ object InnerViewModelFactory : AbstractSavedStateViewModelFactory() {
         handle: SavedStateHandle
     ): T {
         runCatching {
-            val constructor = modelClass.getDeclaredConstructor(SavedStateHandle::class.java)
-            constructor.isAccessible = true
-            return constructor.newInstance(handle)
-        }.onFailure {
             val constructor = modelClass.getDeclaredConstructor()
             constructor.isAccessible = true
             return constructor.newInstance()
+        }.onFailure {
+            val constructor = modelClass.getDeclaredConstructor(SavedStateHandle::class.java)
+            constructor.isAccessible = true
+            return constructor.newInstance(handle)
         }
         throw RuntimeException("No suitable constructor!")
     }

@@ -8,8 +8,5 @@ import android.graphics.Rect
  */
 
 fun Bitmap.clip(bounds: Rect): Bitmap {
-    val clipped =
-        Bitmap.createBitmap(this, bounds.left, bounds.top, bounds.width(), bounds.height())
-    recycle()
-    return clipped
+    return Bitmap.createBitmap(this, bounds.left, bounds.top, bounds.width(), bounds.height())
 }

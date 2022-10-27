@@ -17,6 +17,8 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.createMaterialShapeDrawable
 import top.xjunz.tasker.ktx.dpFloat
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
 
 /**
@@ -76,6 +78,11 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
             }
             return@setOnKeyListener false
         }
+    }
+
+    fun toastAndShake(any: Any?) {
+        toast(any)
+        binding.root.rootView.shake()
     }
 
     override fun getDefaultViewModelProviderFactory() = InnerViewModelFactory

@@ -31,6 +31,9 @@ class StableNodeInfo constructor(val source: AccessibilityNodeInfo) {
             val children = ArrayList<StableNodeInfo>(childCount)
             for (i in (0 until childCount)) {
                 val child = getChild(i) ?: continue
+                if (!child.isVisibleToUser) continue
+                // This may happen
+                if (child.className == null) continue
                 // Skip WebView
                 if (child.className == WebView::class.java.name) continue
                 val current = child.freeze()
@@ -57,8 +60,8 @@ class StableNodeInfo constructor(val source: AccessibilityNodeInfo) {
 
     private lateinit var bounds: Rect
 
-    val shortClassName: String by lazy {
-        source.className.toString().substringAfterLast('.')
+    val shortClassName: String? by lazy {
+        source.className?.toString()?.substringAfterLast('.')
     }
 
     fun isChildOf(node: StableNodeInfo): Boolean {
@@ -75,7 +78,9 @@ class StableNodeInfo constructor(val source: AccessibilityNodeInfo) {
         }
     }
 
+    // TODO: Extract
     val name: String? by lazy {
+        if (source.className == null) return@lazy null
         val clsName = source.className.toString()
         if (clsName.endsWith("TextView")) {
             return@lazy R.string.text.str

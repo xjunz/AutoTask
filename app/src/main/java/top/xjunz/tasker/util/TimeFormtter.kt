@@ -11,6 +11,6 @@ private val dateFormat by lazy {
     SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 }
 
-fun formatTime(timestamp: Long): String = dateFormat.format(Date(timestamp))
+fun Long.formatTime(): String = dateFormat.format(Date(this))
 
 fun formatCurrentTime(): String = dateFormat.format(Date(System.currentTimeMillis()))

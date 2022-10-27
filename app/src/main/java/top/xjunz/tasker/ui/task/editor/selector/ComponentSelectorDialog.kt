@@ -39,36 +39,24 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
 
     val appBar get() = binding.appBar
 
-    fun setMode(mode: Int): ComponentSelectorDialog {
-        doOnCreated {
-            viewModel.mode = mode
-        }
-        return this
+    fun setMode(mode: Int): ComponentSelectorDialog = doWhenCreated {
+        viewModel.mode = mode
     }
 
-    fun setSelectedPackages(selected: List<String>): ComponentSelectorDialog {
-        doOnCreated {
-            viewModel.selectedPackages.addAll(selected)
-            viewModel.selectedCount.value = selected.size
-        }
-        return this
+    fun setSelectedPackages(selected: List<String>) = doWhenCreated {
+        viewModel.selectedPackages.addAll(selected)
+        viewModel.selectedCount.value = selected.size
     }
 
-    fun setSelectedActivities(selected: List<String>): ComponentSelectorDialog {
-        doOnCreated {
-            viewModel.selectedActivities.addAll(selected.map {
-                ComponentName.unflattenFromString(it)!!
-            })
-            viewModel.selectedCount.value = selected.size
-        }
-        return this
+    fun setSelectedActivities(selected: List<String>) = doWhenCreated {
+        viewModel.selectedActivities.addAll(selected.map {
+            ComponentName.unflattenFromString(it)!!
+        })
+        viewModel.selectedCount.value = selected.size
     }
 
-    fun setTitle(title: CharSequence): ComponentSelectorDialog {
-        doOnCreated {
-            viewModel.title = title
-        }
-        return this
+    fun setTitle(title: CharSequence) = doWhenCreated {
+        viewModel.title = title
     }
 
     private val bottomPkgAdapter by lazy {
@@ -125,7 +113,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
     }
 
     private val shoppingCartIntegration by lazy {
-        ShoppingCartIntegration(binding.shoppingCart, binding.viewPager)
+        ShoppingCartIntegration(binding.shoppingCart, viewModel, binding.viewPager)
     }
 
     private val popupMenu by lazy {

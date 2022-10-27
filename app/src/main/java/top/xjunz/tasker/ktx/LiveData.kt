@@ -45,6 +45,10 @@ fun MutableLiveData<Boolean>.toggle(): Boolean {
     return value!!
 }
 
+/**
+ * Reassign the value to itself, useful when the value is a instance reference and you want to
+ * notify its changes.
+ */
 fun <T : Any> MutableLiveData<T>.notifySelfChanged(post: Boolean = false) {
     if (post) {
         postValue(value)
@@ -53,7 +57,22 @@ fun <T : Any> MutableLiveData<T>.notifySelfChanged(post: Boolean = false) {
     }
 }
 
-fun <T> MutableLiveData<T>.setWhenDistinct(newValue: T?, post: Boolean = false) {
+/**
+ * Only set value when the livedata has active observers, useful for non-sticky scenarios.
+ */
+fun <T> MutableLiveData<T>.setValueIfObserved(newValue: T?, post: Boolean = false) {
+    if (!hasActiveObservers()) return
+    if (post) {
+        postValue(newValue)
+    } else {
+        value = newValue
+    }
+}
+
+/**
+ * Only set value when new value does not equal to the old value.
+ */
+fun <T> MutableLiveData<T>.setValueIfDistinct(newValue: T?, post: Boolean = false) {
     if (value == newValue) return
     if (post) {
         postValue(newValue)

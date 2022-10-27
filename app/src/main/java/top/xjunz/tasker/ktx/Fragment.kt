@@ -15,10 +15,11 @@ import kotlinx.coroutines.launch
 /**
  * @author xjunz 2022/05/18
  */
-fun Fragment.doOnCreated(block: CoroutineScope.() -> Unit) {
+fun <T : Fragment> T.doWhenCreated(block: CoroutineScope.() -> Unit): T {
     lifecycleScope.launch {
         lifecycle.whenCreated(block)
     }
+    return this
 }
 
 fun DialogFragment.show(fm: FragmentManager) {

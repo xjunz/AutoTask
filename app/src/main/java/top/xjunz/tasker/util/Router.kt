@@ -11,7 +11,7 @@ import top.xjunz.tasker.ktx.viewUrlSafely
 object Router {
 
     const val SCHEME = "automator"
-    const val HOST_ACCEPT_NODE_INFO_FROM_INSPECTOR = "node-info"
+    const val HOST_ACCEPT_OPTIONS_FROM_INSPECTOR = "options-from-inspector"
 
     fun Context.routeTo(host: String) {
         viewUrlSafely("$SCHEME://$host")

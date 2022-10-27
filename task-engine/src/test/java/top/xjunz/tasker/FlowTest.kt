@@ -2,9 +2,9 @@ package top.xjunz.tasker
 
 import org.junit.Test
 import top.xjunz.tasker.engine.AutomatorTask
-import top.xjunz.tasker.engine.Event
-import top.xjunz.tasker.engine.FlowRuntime
-import top.xjunz.tasker.engine.base.*
+import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.value.Event
 
 
 /**

@@ -21,7 +21,7 @@ sealed class CheckCase(
 
     val stateImageRes
         get() = when (isChecked) {
-            null -> R.drawable.ic_twotone_help_24
+            null -> R.drawable.ic_baseline_help_outline_24
             true -> R.drawable.ic_twotone_check_circle_24
             false -> R.drawable.ic_twotone_cancel_24
         }
