@@ -1,6 +1,7 @@
 package top.xjunz.tasker.task.inspector.overlay
 
 import android.view.WindowManager
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import top.xjunz.tasker.databinding.OverlayTrashBinBinding
 import top.xjunz.tasker.ktx.doWhenEnd
@@ -21,8 +22,10 @@ class TrashBinOverlay(inspector: FloatingInspector) :
     }
 
     fun layout() {
-        layoutParams.y = vm.windowHeight / 2 - rootView.height / 2
-        updateViewLayout()
+        rootView.doOnPreDraw {
+            layoutParams.y = vm.windowHeight / 2 - it.height / 2
+            updateViewLayout()
+        }
     }
 
     fun fadeIn() {

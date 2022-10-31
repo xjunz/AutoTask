@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Test
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.serialization.SerializableApplet.Companion.toSerializable
-import top.xjunz.tasker.engine.value.Event
+import top.xjunz.tasker.engine.runtime.Event
 
 /**
  * @author xjunz 2022/10/28

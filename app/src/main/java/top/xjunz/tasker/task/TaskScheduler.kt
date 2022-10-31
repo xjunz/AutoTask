@@ -1,77 +1,27 @@
 package top.xjunz.tasker.task
 
-import android.os.Handler
 import android.os.Looper
-import android.os.Message
-import android.view.accessibility.AccessibilityEvent
-import top.xjunz.tasker.engine.AutomatorTask
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskContext
-import top.xjunz.tasker.engine.value.Event
 import top.xjunz.tasker.service.AutomatorService
+import top.xjunz.tasker.task.event.TaskEventDispatcher
 
 /**
  * @author xjunz 2022/08/05
  */
-class TaskScheduler(private val service: AutomatorService, private val looper: Looper) {
+class TaskScheduler(private val service: AutomatorService, private val looper: Looper) :
+    TaskEventDispatcher.Callback {
 
-    private val handler = object : Handler(looper) {
-
-        override fun handleMessage(msg: Message) {
-            super.handleMessage(msg)
-            val ctx = msg.obj as TaskContext
-            try {
-                ctx.task.onEvent(ctx)
-            } finally {
-                msg.recycle()
-                for (event in ctx.events) {
-                    event.recycle()
-                }
-            }
-        }
-    }
+    private val dispatcher = TaskEventDispatcher(looper, this)
 
     /**
      * Schedule all active tasks, all of which are running in the thread that owns the [looper].
      */
     fun scheduleTasks() {
-        var previousPackage: String? = null
-        var currentActivityName: String? = null
-        service.uiAutomatorBridge.addOnAccessibilityEventListener listener@{
-            try {
-                if (it.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
-                    currentActivityName = it.className?.toString()
-                    if (currentActivityName == null) return@listener
-                }
-                val currentPackage = it.packageName?.toString() ?: return@listener
-                if (previousPackage == null) {
-                    previousPackage = currentPackage
-                    return@listener
-                }
-                val events: Array<Event>
-                if (currentPackage != previousPackage) {
-                    events = arrayOf(
-                        Event.obtain(Event.EVENT_ON_PACKAGE_ENTERED, currentPackage),
-                        Event.obtain(Event.EVENT_ON_PACKAGE_EXITED, previousPackage!!)
-                    )
-                    previousPackage = currentPackage
-                } else {
-                    events = arrayOf(Event.obtain(Event.EVENT_ON_CONTENT_CHANGED, currentPackage))
-                }
-                TaskManager.getActiveTasks().forEach { task ->
-                    val ctx = TaskContext(task, events, currentPackage, currentActivityName!!)
-                    handler.obtainMessage(task.id, ctx).sendToTarget()
-                }
-            } finally {
-                @Suppress("DEPRECATION")
-                it.recycle()
-            }
+        service.uiAutomatorBridge.addOnAccessibilityEventListener {
+            dispatcher.processAccessibilityEvent(it)
         }
         service.uiAutomatorBridge.startReceivingEvents()
-    }
-
-    fun stopTask(task: AutomatorTask) {
-        handler.removeMessages(task.id)
-        task.deactivate()
     }
 
     /**
@@ -79,7 +29,19 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
      */
     fun destroy() {
         service.uiAutomatorBridge.stopReceivingEvents()
-        handler.removeCallbacksAndMessages(null)
+        dispatcher.removePendingEvents()
     }
 
+    override fun onEvent(events: Array<Event>) {
+        for (task in TaskManager.getActiveTasks()) {
+            if (!task.isActive) continue
+            val ctx = TaskContext(task, events)
+            try {
+                task.onEvent(ctx)
+            } finally {
+                for (event in events)
+                    event.recycle()
+            }
+        }
+    }
 }

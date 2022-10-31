@@ -3,8 +3,8 @@ package top.xjunz.tasker
 import org.junit.Test
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.FlowRuntime
-import top.xjunz.tasker.engine.value.Event
 
 
 /**
@@ -76,10 +76,10 @@ internal class FlowTest {
             }
         })
         val events = arrayOf(
-            Event.obtain(Event.EVENT_ON_PACKAGE_ENTERED, "top.xjunz.tasker"),
-            Event.obtain(Event.EVENT_ON_PACKAGE_EXITED, "com.tencent.mm")
+            Event.obtain(Event.EVENT_ON_PACKAGE_ENTERED, pkgName = "top.xjunz.tasker"),
+            Event.obtain(Event.EVENT_ON_PACKAGE_EXITED, pkgName = "com.tencent.mm")
         )
         MockTask.rootFlow = rootFlow
-      //  assert(MockTask.onEvent(events))
+        //  assert(MockTask.onEvent(events))
     }
 }

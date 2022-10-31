@@ -2,8 +2,8 @@ package top.xjunz.tasker.task.applet.option.registry
 
 
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.criterion.EventFilter
-import top.xjunz.tasker.engine.value.Event
+import top.xjunz.tasker.engine.applet.criterion.EventCriterion
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
 
@@ -14,7 +14,7 @@ class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun EventFilterOption(@Event.EventType event: Int, label: Int) =
         AppletOption(event, label, AppletOption.TITLE_NONE) {
-            EventFilter(event)
+            EventCriterion(event)
         }
 
     @AppletCategory(0)
@@ -23,7 +23,7 @@ class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(1)
     private val pkgExited =
-        EventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_exited)
+        EventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_left)
 
     @AppletCategory(2)
     private val contentChanged =

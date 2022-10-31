@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         }
         binding.containerOperatingMode.setOnClickListener {
             if (viewModel.isBinding.isTrue || viewModel.isRunning.isTrue) {
-                toast(R.string.prompt_switch_mode)
+                toast(R.string.prompt_unable_to_switch_mode)
                 return@setOnClickListener
             }
             if (viewModel.operatingMode eq OperatingMode.Shizuku) {

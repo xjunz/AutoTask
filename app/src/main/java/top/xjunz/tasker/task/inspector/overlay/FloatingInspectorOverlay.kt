@@ -3,7 +3,10 @@ package top.xjunz.tasker.task.inspector.overlay
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
+import android.view.View.AccessibilityDelegate
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
 import androidx.core.math.MathUtils
 import androidx.core.view.isVisible
 import androidx.databinding.ViewDataBinding
@@ -16,7 +19,8 @@ import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
 /**
  * @author xjunz 2022/10/16
  */
-abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: FloatingInspector) {
+abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: FloatingInspector) :
+    AccessibilityDelegate() {
 
     protected val context get() = inspector.context
 
@@ -61,9 +65,7 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
             }
     }
 
-    protected val windowManager: WindowManager by lazy {
-        context.getSystemService(WindowManager::class.java)
-    }
+    protected val windowManager get() = inspector.windowManager
 
     private val layoutInflater = LayoutInflater.from(context)
 
@@ -89,8 +91,13 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
 
     val layoutParams: WindowManager.LayoutParams = baseLayoutParams
 
+    override fun onInitializeAccessibilityEvent(host: View, event: AccessibilityEvent) {
+        super.onInitializeAccessibilityEvent(host, event)
+        event.className = inspector.getOverlayAccessibilityEventName()
+    }
+
     open fun onOverlayInflated() {
-        /* no-op */
+        rootView.accessibilityDelegate = this
     }
 
     open fun modifyLayoutParams(base: WindowManager.LayoutParams) {

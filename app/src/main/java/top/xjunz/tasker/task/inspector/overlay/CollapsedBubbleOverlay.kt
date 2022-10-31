@@ -2,14 +2,19 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.view.WindowManager
 import androidx.core.view.isVisible
+import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayBubbleCollapsedBinding
 import top.xjunz.tasker.ktx.doWhenEnd
+import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.toggle
-import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
 import top.xjunz.tasker.util.Icons
+import top.xjunz.tasker.util.Router
+import top.xjunz.tasker.util.Router.routeTo
 
 /**
  * @author xjunz 2022/10/17
@@ -55,7 +60,7 @@ class CollapsedBubbleOverlay(
                 FloatingDraggableLayout.STATE_DRAG_ENDED -> {
                     if (trashBinOverlay.isInside(this)) {
                         rootView.animate().alpha(0F).doWhenEnd {
-                            A11yAutomatorService.require().destroyFloatingInspector()
+                            a11yAutomatorService.destroyFloatingInspector()
                         }.start()
                     }
                     trashBinOverlay.fadeOut()
@@ -63,15 +68,26 @@ class CollapsedBubbleOverlay(
             }
         }
         binding.ibCenter.setOnClickListener {
-            vm.isCollapsed.toggle()
+            if (vm.currentMode eq InspectorMode.COMPONENT) {
+                if (vm.currentComp eq null) {
+                    vm.makeToast(R.string.no_comp_detected)
+                } else {
+                    vm.showNodeInfo.value = true
+                }
+            } else {
+                vm.isCollapsed.toggle()
+            }
+        }
+        binding.ibCenter.setOnLongClickListener {
+            context.routeTo(Router.HOST_NONE)
+            return@setOnLongClickListener true
         }
         inspector.observe(vm.isCollapsed) {
             if (it) {
                 layoutParams.x = vm.bubbleX
                 layoutParams.y = vm.bubbleY
-                if (rootView.isAttachedToWindow) windowManager.updateViewLayout(
-                    rootView, layoutParams
-                )
+                if (rootView.isAttachedToWindow)
+                    windowManager.updateViewLayout(rootView, layoutParams)
             }
             rootView.isVisible = it
         }

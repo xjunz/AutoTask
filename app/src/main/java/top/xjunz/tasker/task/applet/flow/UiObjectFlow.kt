@@ -1,4 +1,4 @@
-package top.xjunz.tasker.task.flow
+package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat

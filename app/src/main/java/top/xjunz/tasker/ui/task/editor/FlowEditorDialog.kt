@@ -7,6 +7,7 @@ import android.transition.TransitionSet
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.activity.viewModels
+import androidx.core.text.parseAsHtml
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -19,12 +20,16 @@ import com.google.android.material.R.style.TextAppearance_Material3_TitleMedium
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.option.registry.FlowOptionRegistry
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -156,18 +161,32 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
             binding.rootView.beginAutoTransition(transition)
             when (viewModel.appletOptionFactory.flowFactory.options[it].appletId) {
                 FlowOptionRegistry.ID_PKG_APPLET_FACTORY -> {
+                    binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
-                    binding.tvHeader.text = R.string.tip_enable_floating_comp_inspector.text
+                    binding.tvHeader.text =
+                        R.string.format_enable_floating_inspector.format(InspectorMode.COMPONENT.label)
+                            .parseAsHtml()
                 }
                 FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY -> {
+                    binding.cvHeader.tag = InspectorMode.UI_OBJECT
                     binding.cvHeader.isVisible = true
-                    binding.tvHeader.text = R.string.tip_enable_floating_ui_inspector.text
+                    binding.tvHeader.text =
+                        R.string.format_enable_floating_inspector.format(InspectorMode.UI_OBJECT.label)
+                            .parseAsHtml()
                 }
                 else -> binding.cvHeader.isVisible = false
 
             }
-            binding.cvHeader.setOnClickListener {
-                FloatingInspectorDialog().show(parentFragmentManager)
+            binding.cvHeader.setOnClickListener { v ->
+                val mode = v.tag.casted<InspectorMode>()
+                if (isFloatingInspectorShown) {
+                    if (floatingInspector.mode != mode) {
+                        floatingInspector.mode = mode
+                        toast(R.string.format_switch_mode.format(mode.label))
+                    }
+                } else {
+                    FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
+                }
             }
         }
         observe(viewModel.candidates) { list ->

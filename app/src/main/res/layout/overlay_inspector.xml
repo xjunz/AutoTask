@@ -5,13 +5,14 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layerType="hardware">
 
         <top.xjunz.tasker.ui.widget.LayoutInspectorView
             android:id="@+id/inspector_view"
-            android:layerType="hardware"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layerType="hardware" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/node_panel"

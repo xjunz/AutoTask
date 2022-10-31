@@ -26,10 +26,13 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.DialogFloatingInspectorBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.controller.ShizukuA11yServiceEnabler
+import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 
@@ -51,6 +54,8 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         val isBinding = MutableLiveData<Boolean>()
 
         val onError = MutableLiveData<Throwable>()
+
+        var mode = InspectorMode.COMPONENT
 
         override fun onStartBinding() {
             isBinding.postValue(true)
@@ -106,10 +111,9 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
     }
 
     private fun showInspectorAndDismissSelf() {
-        toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
-        A11yAutomatorService.require().showFloatingInspector()
+        a11yAutomatorService.showFloatingInspector(viewModel.mode)
         dismiss()
-        requireActivity().pressHome()
+        toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,6 +139,10 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                     toast(R.string.grant_failed)
                 }
             }
+    }
+
+    fun setMode(mode: InspectorMode) = doWhenCreated {
+        viewModel.mode = mode
     }
 
     private fun <T> launchIntentSafely(launcher: ActivityResultLauncher<T>, param: T) =
@@ -218,7 +226,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        if (A11yAutomatorService.get()?.isInspectorShown() != true) {
+        if (!isFloatingInspectorShown) {
             A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
         }
     }

@@ -3,11 +3,11 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.flow.PackageFlow
+import top.xjunz.tasker.task.applet.flow.TimeFlow
+import top.xjunz.tasker.task.applet.flow.UiObjectFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
-import top.xjunz.tasker.task.flow.PackageFlow
-import top.xjunz.tasker.task.flow.TimeFlow
-import top.xjunz.tasker.task.flow.UiObjectFlow
 
 class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_FACTORY) {
 

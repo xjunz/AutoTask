@@ -1,4 +1,4 @@
-package top.xjunz.tasker.task.flow
+package top.xjunz.tasker.task.applet.flow
 
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.runtime.FlowRuntime

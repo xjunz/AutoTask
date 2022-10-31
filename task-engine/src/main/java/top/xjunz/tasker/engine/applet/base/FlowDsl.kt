@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.tasker.engine.applet.criterion.DslCriterion
-import top.xjunz.tasker.engine.value.Event
+import top.xjunz.tasker.engine.runtime.Event
 
 /**
  * @author xjunz 2022/08/13

@@ -6,12 +6,9 @@ import android.app.IUiAutomationConnection
 import android.app.UiAutomation
 import android.app.UiAutomationHidden
 import android.app.accessibilityservice.AccessibilityServiceHidden
-import android.content.ComponentName
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
@@ -22,11 +19,14 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.app
+import top.xjunz.shared.trace.logcat
+import top.xjunz.tasker.engine.runtime.ComponentInfo
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.impl.A11yUiAutomatorBridge
 import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.task.inspector.ComponentInfo
+import top.xjunz.tasker.task.event.TaskEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import top.xjunz.tasker.util.unsupportedOperation
@@ -107,11 +107,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         return ::inspector.isInitialized && inspector.isShown
     }
 
-    fun showFloatingInspector() {
+    fun showFloatingInspector(mode: InspectorMode) {
         if (isInspectorShown()) return
         inspectorViewModel = InspectorViewModel()
+        inspectorViewModel.currentMode.value = mode
         inspector = FloatingInspector(this, inspectorViewModel)
         inspector.show()
+        performGlobalAction(GLOBAL_ACTION_HOME)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -125,35 +127,28 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    private val currentComp = ComponentInfo()
-    private val prevComp = ComponentInfo()
+    private val componentInfo = ComponentInfo()
 
-    fun isActivity(pkgName: String?, actName: String?): Boolean {
-        if (pkgName == null || actName == null) return false
-        return runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                app.packageManager.getActivityInfo(
-                    ComponentName(pkgName, actName),
-                    PackageManager.ComponentInfoFlags.of(0)
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                app.packageManager.getActivityInfo(ComponentName(pkgName, actName), 0)
+    private val taskEventDispatcher: TaskEventDispatcher by lazy {
+        TaskEventDispatcher(mainLooper) { events ->
+            val event = events.find {
+                it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
             }
-        }.isSuccess
+            if (event != null && componentInfo != event.componentInfo) {
+                componentInfo.copyFrom(event.componentInfo)
+                inspectorViewModel.currentComp.value = componentInfo
+            }
+
+            events.forEach {
+                logcat(it)
+                it.recycle()
+            }
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (isInspectorShown() && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val pkgName = event.packageName?.toString() ?: return
-            val actName = event.className?.toString() ?: return
-            if (!isActivity(pkgName, actName)) return
-            val actLabel = event.text.getOrNull(0)?.toString()
-            currentComp.pkgName = pkgName
-            currentComp.actName = actName
-            currentComp.actLabel = actLabel
-            prevComp.copyFrom(currentComp)
-            inspectorViewModel.currentComp.value = currentComp
+        if (isInspectorShown()) {
+            taskEventDispatcher.processAccessibilityEvent(event)
         }
         callbacks?.onAccessibilityEvent(event)
     }

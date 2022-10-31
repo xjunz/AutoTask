@@ -1,6 +1,7 @@
 package top.xjunz.tasker.task.inspector
 
 import androidx.lifecycle.MutableLiveData
+import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.ktx.text
 
 /**
@@ -14,7 +15,7 @@ class InspectorViewModel {
 
     val currentComp = MutableLiveData<ComponentInfo>()
 
-    val currentMode = MutableLiveData(FloatingInspector.MODE_UI_OBJECT)
+    val currentMode = MutableLiveData<InspectorMode>()
 
     val onKeyUpOrCancelled = MutableLiveData<Int>()
 
@@ -48,8 +49,8 @@ class InspectorViewModel {
         when (any) {
             is Int -> toastText.value = any.text
             is CharSequence -> toastText.value = any
-            else -> if (post) toastText.postValue(any.toString()) else toastText.value =
-                any.toString()
+            else -> if (post) toastText.postValue(any.toString())
+            else toastText.value = any.toString()
         }
     }
 

@@ -48,10 +48,12 @@ public abstract class UiAutomatorBridge {
     private final List<UiAutomation.OnAccessibilityEventListener> mEventListeners = new ArrayList<>(2);
 
     private final UiAutomation.OnAccessibilityEventListener mEventListener = event -> {
-        synchronized (mEventListeners) {
+        try {
             for (UiAutomation.OnAccessibilityEventListener listener : mEventListeners) {
                 listener.onAccessibilityEvent(event);
             }
+        } finally {
+            event.recycle();
         }
     };
 

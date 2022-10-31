@@ -2,7 +2,7 @@
 <resources>
     <string name="current_package_matches">当前应用程序满足</string>
     <string name="match_package_name">匹配包名</string>
-    <string name="component_name">程序和页面</string>
+    <string name="component_info">程序和页面</string>
 
     <string name="starts_with">以指定文本开始</string>
     <string name="not_starts_with">不以指定文本开始</string>
@@ -20,7 +20,7 @@
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
     <string name="on_package_entered">进入指定应用程序时</string>
-    <string name="on_package_exited">退出指定应用程序时</string>
+    <string name="on_package_left">离开指定应用程序时</string>
     <string name="on_content_changed">处于指定应用程序内时</string>
     <string name="invert">取反</string>
     <string name="is_system">是系统应用</string>

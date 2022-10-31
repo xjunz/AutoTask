@@ -14,7 +14,7 @@ import androidx.test.uiautomator.GestureController
 import androidx.test.uiautomator.InteractionController
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.a11yAutomatorService
 
 
 /**
@@ -33,7 +33,7 @@ class A11yUiAutomatorBridge(
     }
 
     override fun getInteractionController(): InteractionController {
-        return A11yInteractionController(A11yAutomatorService.require(), this)
+        return A11yInteractionController(a11yAutomatorService, this)
     }
 
     override fun getRotation(): Int {
@@ -70,6 +70,6 @@ class A11yUiAutomatorBridge(
     }
 
     override fun getGestureController(device: UiDevice): GestureController {
-        return A11yGestureController(A11yAutomatorService.require(), device)
+        return A11yGestureController(a11yAutomatorService, device)
     }
 }

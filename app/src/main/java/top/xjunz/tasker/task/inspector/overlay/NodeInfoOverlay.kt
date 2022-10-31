@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.view.WindowManager
 import androidx.recyclerview.widget.RecyclerView
+import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
 import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
 import top.xjunz.tasker.engine.value.Distance
@@ -13,6 +14,7 @@ import top.xjunz.tasker.task.applet.option.registry.FlowOptionRegistry
 import top.xjunz.tasker.task.applet.option.registry.PackageOptionRegistry
 import top.xjunz.tasker.task.applet.option.registry.UiObjectOptionRegistry
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.RealDisplay
 import top.xjunz.tasker.util.Router
@@ -27,7 +29,8 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val uncheckedOptions = mutableSetOf<AppletOption>()
 
-    private val uiObjectFactory = UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY)
+    private val uiObjectFactory =
+        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY)
 
     private val pkgFactory = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_APPLET_FACTORY)
 
@@ -59,14 +62,19 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         }
     }
 
+
     private fun collectProperties() {
-        val node = vm.emphaticNode.require().source
+
         vm.currentComp.value?.let {
             options.add(pkgFactory.pkgCollection.withValue(Collections.singleton(it.pkgName)))
             if (it.actName != null)
                 options.add(pkgFactory.activityCollection.withValue(Collections.singleton(it.actName)))
+            if (it.paneTitle != null)
+                options.add(pkgFactory.paneTitle.withValue(it.paneTitle))
         }
+        if (vm.currentMode eq InspectorMode.COMPONENT) return
 
+        val node = vm.emphaticNode.require().source
         if (node.className != null)
             options.add(uiObjectFactory.isType.withValue(node.className))
 
@@ -156,8 +164,10 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
                 options.clear()
                 uncheckedOptions.clear()
             } else {
-                animateShow()
+                binding.tvTitle.text =
+                    R.string.format_current.format(vm.currentMode.require().label)
                 collectProperties()
+                animateShow()
                 if (binding.rvInfo.adapter == null) {
                     binding.rvInfo.adapter = adapter
                 } else {

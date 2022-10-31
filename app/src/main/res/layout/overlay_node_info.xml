@@ -23,7 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/node_info_overlay_title"
+                android:text="@string/ui_object"
                 android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
                 android:textColor="?colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"

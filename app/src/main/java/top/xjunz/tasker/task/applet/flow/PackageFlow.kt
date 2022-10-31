@@ -1,4 +1,4 @@
-package top.xjunz.tasker.task.flow
+package top.xjunz.tasker.task.applet.flow
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,7 +16,8 @@ class PackageFlow : If() {
     override fun onPrepare(ctx: TaskContext, runtime: FlowRuntime) {
         super.onPreApply(ctx, runtime)
         val info = ctx.getOrPutArgument(id) {
-            PackageInfoContext(ctx.currentPackageName, ctx.currentActivityName)
+            val comp = ctx.hitEvent.componentInfo
+            PackageInfoContext(comp.pkgName, comp.actName, comp.paneTitle)
         }
         runtime.setTarget(info)
     }

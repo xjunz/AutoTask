@@ -8,17 +8,17 @@ import top.xjunz.tasker.engine.runtime.TaskContext
 /**
  * @author xjunz 2022/08/25
  */
-class EventFilter(private val eventType: Int) : Applet() {
+class EventCriterion(private val eventType: Int) : Applet() {
 
     override val valueType: Int = AppletValues.VAL_TYPE_INT
 
     override fun apply(context: TaskContext, runtime: FlowRuntime) {
-        val hit = context.events.find { it.eventType == eventType }
+        val hit = context.events.find { it.type == eventType }
         if (hit == null) {
             runtime.isSuccessful = false
         } else {
             runtime.isSuccessful = true
-            runtime.setTarget(hit.targetPackage)
+            context.hitEvent = hit
         }
     }
 

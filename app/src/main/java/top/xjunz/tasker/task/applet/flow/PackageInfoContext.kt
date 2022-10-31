@@ -1,4 +1,4 @@
-package top.xjunz.tasker.task.flow
+package top.xjunz.tasker.task.applet.flow
 
 import android.content.pm.IPackageManager
 import android.content.pm.PackageInfo
@@ -12,7 +12,11 @@ import top.xjunz.tasker.isInHostProcess
 /**
  * @author xjunz 2022/10/02
  */
-class PackageInfoContext(val packageName: String, val activityName: String) {
+class PackageInfoContext(
+    val packageName: String,
+    val activityName: String?,
+    val panelTitle: String?
+) {
 
     val packageInfo: PackageInfo by lazy {
         getPackageInfo(packageName)

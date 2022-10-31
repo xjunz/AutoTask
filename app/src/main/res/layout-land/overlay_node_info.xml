@@ -22,22 +22,20 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/node_info_overlay_title"
+                android:text="@string/ui_object"
                 android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
                 android:textColor="?colorPrimary"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_subtitle_max"
+                android:id="@+id/tv_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="@string/node_info_overlay_subtitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_title"
                 app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -45,48 +43,44 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_option_frame"
                 android:fadingEdgeLength="16dp"
                 android:requiresFadingEdge="vertical"
                 app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-                app:layout_constraintBottom_toTopOf="@+id/btn_complete"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_max"
+                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle"
                 app:spanCount="2"
                 tools:listitem="@layout/item_node_info" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_complete"
                 style="@style/Widget.Material3.Button"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="5dp"
                 android:insetTop="6dp"
                 android:insetBottom="6dp"
                 android:text="@string/complete"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_subtitle"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/btn_cancel" />
+                app:layout_constraintTop_toTopOf="@+id/tv_title" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_cancel"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
                 android:layout_marginEnd="8dp"
                 android:insetTop="6dp"
                 android:insetBottom="6dp"
                 android:text="@android:string/cancel"
                 app:layout_constraintBottom_toBottomOf="@+id/btn_complete"
                 app:layout_constraintEnd_toStartOf="@+id/btn_complete"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/btn_complete"
                 app:strokeColor="?colorPrimary" />
         </androidx.constraintlayout.widget.ConstraintLayout>

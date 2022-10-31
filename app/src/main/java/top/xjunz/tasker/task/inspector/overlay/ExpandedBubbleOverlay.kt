@@ -11,6 +11,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayBubbleExpandedBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 
 /**
  * @author xjunz 2022/10/17
@@ -98,22 +99,22 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     ibShowGrid.setImageResource(R.drawable.ic_baseline_grid_off_24)
                 }
             }
-            inspector.observe(vm.currentMode) {
+            inspector.observeNotNull(vm.currentMode) {
                 when (it) {
-                    FloatingInspector.MODE_UI_OBJECT -> {
+                    InspectorMode.UI_OBJECT -> {
                         ibPinScreenshot.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
                         ibLayers.isVisible = true
                         ibGamePad.isVisible = true
                         ibShowGrid.isVisible = true
                     }
-                    FloatingInspector.MODE_COMPONENT -> {
+                    InspectorMode.COMPONENT -> {
                         ibPinScreenshot.isVisible = false
                         ibGamePad.isVisible = false
                         vm.showGamePad.value = false
                         ibLayers.isVisible = false
                         ibShowGrid.isVisible = false
                     }
-                    FloatingInspector.MODE_COORDINATE -> {
+                    InspectorMode.COORDS -> {
                         ibPinScreenshot.isVisible = false
                         ibGamePad.isVisible = true
                         ibLayers.isVisible = false

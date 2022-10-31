@@ -5,6 +5,7 @@ import androidx.core.view.isVisible
 import top.xjunz.tasker.databinding.OverlayComponentBinding
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
 
 /**
@@ -25,8 +26,8 @@ class ComponentOverlay(inspector: FloatingInspector) :
             updateViewLayout()
         }
         inspector.observe(vm.currentComp) {
-            binding.tvTitle.text = it.actLabel
-            if (it.actLabel != null) {
+            binding.tvTitle.text = it.paneTitle
+            if (it.paneTitle != null) {
                 binding.tvTitle.append("\n")
             }
             binding.tvTitle.append(it.pkgName)
@@ -36,7 +37,7 @@ class ComponentOverlay(inspector: FloatingInspector) :
             }
         }
         inspector.observe(vm.currentMode) {
-            rootView.isVisible = it == FloatingInspector.MODE_COMPONENT
+            rootView.isVisible = it == InspectorMode.COMPONENT
         }
     }
 }

@@ -1,9 +1,9 @@
 package top.xjunz.tasker.engine.applet.base
 
-import top.xjunz.tasker.engine.applet.criterion.EventFilter
+import top.xjunz.tasker.engine.applet.criterion.EventCriterion
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.FlowRuntime
 import top.xjunz.tasker.engine.runtime.TaskContext
-import top.xjunz.tasker.engine.value.Event
 
 /**
  * @author xjunz 2022/08/11
@@ -19,9 +19,9 @@ class When : Flow() {
         fun ofEvent(@Event.EventType event: Int): When {
             return When().apply {
                 if (elements.isEmpty()) {
-                    elements.add(EventFilter(event))
+                    elements.add(EventCriterion(event))
                 } else {
-                    elements[0] = EventFilter(event)
+                    elements[0] = EventCriterion(event)
                 }
             }
         }

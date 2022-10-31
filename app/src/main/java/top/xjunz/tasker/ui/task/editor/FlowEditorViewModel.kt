@@ -9,9 +9,9 @@ import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 
 /**
@@ -95,7 +95,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : SavedStateViewModel(states
     }
 
     fun acceptAppletsFromInspector() {
-        val options = FloatingInspector.require().getSelectedOptions()
+        val options = floatingInspector.getSelectedOptions()
         val flowOption = appletOptionFactory.findFlowOption(options.first().factoryId)
         val initialIndex = _candidates.size
         _candidates.add(flowOption.yieldApplet() as Flow)

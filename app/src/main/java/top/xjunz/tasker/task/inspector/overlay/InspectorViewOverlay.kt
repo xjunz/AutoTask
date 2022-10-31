@@ -15,8 +15,9 @@ import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayInspectorBinding
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.task.inspector.StableNodeInfo.Companion.freeze
 
@@ -37,10 +38,6 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
 
     override fun onOverlayInflated() {
         binding.apply {
-            inspectorView.doOnPreDraw {
-                vm.windowWidth = it.width
-                vm.windowHeight = it.height
-            }
             btnDismiss.setOnClickListener {
                 nodePanel.isVisible = false
             }
@@ -57,8 +54,6 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                 inspectorView.onKeyUp(it, null)
             }
             inspector.observe(vm.pinScreenShot) {
-                // show rootView after screenshot
-                rootView.isVisible = true
                 if (it) {
                     if (screenshot != null) {
                         inspectorView.background = BitmapDrawable(context.resources, screenshot)
@@ -88,9 +83,8 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                     inspectorView.background = null
                 } else {
                     rootView.isVisible = true
-                    if (vm.currentMode eq FloatingInspector.MODE_UI_OBJECT) {
+                    if (vm.currentMode eq InspectorMode.UI_OBJECT)
                         captureWindowSnapshot()
-                    }
                 }
             }
             inspector.observe(vm.emphaticNode) {
@@ -98,14 +92,14 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                 inspectorView.invalidate()
             }
             inspector.observe(vm.currentMode) {
-                inspectorView.isVisible = it != FloatingInspector.MODE_COMPONENT
+                inspectorView.isVisible = it != InspectorMode.COMPONENT
             }
         }
     }
 
 
     private fun captureWindowSnapshot() {
-        val windowRoot = A11yAutomatorService.require().rootInActiveWindow
+        val windowRoot = a11yAutomatorService.rootInActiveWindow
         if (windowRoot == null) {
             toast(R.string.inspect_failed.text)
             vm.isCollapsed.value = true
@@ -117,32 +111,36 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             rootView.isVisible = false
-            rootView.post {
-                A11yAutomatorService.require().takeScreenshot(
-                    Display.DEFAULT_DISPLAY, Dispatchers.IO.asExecutor(),
-                    object : AccessibilityService.TakeScreenshotCallback {
-                        override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
-                            try {
-                                result.hardwareBuffer.use {
-                                    val raw = Bitmap.wrapHardwareBuffer(
-                                        it, result.colorSpace
-                                    )
-                                    screenshot = raw?.clip(binding.inspectorView.visibleBounds)
-                                    vm.pinScreenShot.notifySelfChanged(true)
+            rootView.doOnPreDraw {
+                rootView.post {
+                    a11yAutomatorService.takeScreenshot(
+                        Display.DEFAULT_DISPLAY, Dispatchers.IO.asExecutor(),
+                        object : AccessibilityService.TakeScreenshotCallback {
+                            override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
+                                try {
+                                    result.hardwareBuffer.use {
+                                        val raw = Bitmap.wrapHardwareBuffer(
+                                            it, result.colorSpace
+                                        )
+                                        screenshot =
+                                            raw?.clip(binding.inspectorView.visibleBounds)
+                                        vm.pinScreenShot.notifySelfChanged(true)
+                                    }
+                                } catch (t: Throwable) {
+                                    t.printStackTrace()
+                                    vm.toastText.postValue(R.string.screenshot_failed.str)
                                 }
-                            } catch (t: Throwable) {
-                                t.printStackTrace()
-                                vm.toastText.postValue(R.string.screenshot_failed.str)
                             }
-                        }
 
-                        override fun onFailure(errorCode: Int) {
-                            vm.toastText.postValue(
-                                R.string.format_screenshot_failed.format(errorCode)
-                            )
-                            vm.pinScreenShot.notifySelfChanged(true)
-                        }
-                    })
+                            override fun onFailure(errorCode: Int) {
+                                vm.toastText.postValue(
+                                    R.string.format_screenshot_failed.format(errorCode)
+                                )
+                                vm.pinScreenShot.notifySelfChanged(true)
+                            }
+                        })
+                    rootView.isVisible = true
+                }
             }
         }
     }

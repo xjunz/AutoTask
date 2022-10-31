@@ -11,8 +11,9 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.flow.PackageInfoContext
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.flow.PackageInfoContext
+import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
 import top.xjunz.tasker.ui.task.editor.selector.PackageInfoWrapper.Companion.wrapped
 import top.xjunz.tasker.util.PackageInfoLoader
 
@@ -53,6 +54,12 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
             }
         }
 
+    @AppletCategory(0x00_02)
+    val paneTitle = NotInvertibleAppletOption(0x02, R.string.with_pane_title) {
+        Criterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+            t.panelTitle == v
+        }
+    }
 
     @AppletCategory(0x01_00)
     private val isSystem = AppletOption(0x10, R.string.is_system) {
@@ -106,6 +113,6 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     override val title: Int = R.string.current_package_matches
 
     override val categoryNames: IntArray =
-        intArrayOf(R.string.component_name, R.string.property, R.string.match_package_name)
+        intArrayOf(R.string.component_info, R.string.property, R.string.match_package_name)
 
 }

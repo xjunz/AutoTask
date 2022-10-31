@@ -14,9 +14,9 @@ import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.flow.UiObjectContext
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
-import top.xjunz.tasker.task.flow.UiObjectContext
 import top.xjunz.tasker.util.illegalArgument
 
 /**

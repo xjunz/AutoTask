@@ -35,7 +35,8 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
     private val breadCrumbAdapter by lazy {
         inlineAdapter(nodeBreadCrumbs, ItemBreadCrumbsBinding::class.java, {
             binding.root.setOnClickListener {
-                vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
+                if (nodeBreadCrumbs.isNotEmpty())
+                    vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
             }
         }) { b, p, n ->
             b.tvTitle.text = n.shortClassName

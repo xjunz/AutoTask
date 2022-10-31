@@ -95,7 +95,7 @@
     <string name="a11y_service">辅助功能</string>
     <string name="desc_shizuku_mode">Shizuku模式下，可使用全部功能，推荐使用该模式</string>
     <string name="desc_a11y_mode">辅助功能模式下，部分功能将受限</string>
-    <string name="prompt_switch_mode">当前服务正在启动或运行中，无法切换工作模式</string>
+    <string name="prompt_unable_to_switch_mode">当前服务正在启动或运行中，无法切换工作模式</string>
     <string name="prompt">提示</string>
     <string name="prompt_shizuku_time_out">启动超时，请尝试重试。若重试后仍然超时，可尝试重新授权Shizuku权限。</string>
     <string name="pls_start_a11y_service_manually">请在设置中手动启用【自动任务】的辅助功能服务</string>
@@ -147,8 +147,7 @@
     <string name="reverse_order">倒序</string>
     <string name="show_system_apps">显示系统应用</string>
     <string name="launch_activity">启动页</string>
-    <string name="tip_enable_floating_comp_inspector">使用<b>悬浮助手</b>帮助您快速选择应用程序和页面</string>
-    <string name="tip_enable_floating_ui_inspector">使用<b>悬浮助手</b>帮助您快速选择UI组件</string>
+    <string name="format_enable_floating_inspector"><![CDATA[使用<b>悬浮助手</b>帮助您快速选择%s]]></string>
     <string name="enable_floating_inspector">启用悬浮助手</string>
     <string name="enable">开启</string>
     <string name="goto_grant">去授权</string>
@@ -159,9 +158,6 @@
     <string name="pls_wait">请稍等…</string>
     <string name="inspect_failed">未捕获到窗口，请尝试重试</string>
     <string name="launch_failed">启动失败</string>
-    <string name="mode_comp_selector">选择应用和页面</string>
-    <string name="mode_ui_object_selector">选择UI组件</string>
-    <string name="mode_coor_selector">选择坐标点</string>
     <string name="screenshot_fixed">已固定当前页面截图</string>
     <string name="pointer_controller_enabled">已启用指针控制盘</string>
     <string name="format_screenshot_failed">截图失败(%d)</string>
@@ -181,10 +177,10 @@
     <string name="format_px">%d像素</string>
     <string name="no_node_selected">未选中任何节点</string>
     <string name="node_info_overlay_subtitle">请勾选想要指定的规则</string>
-    <string name="node_info_overlay_title">节点属性</string>
+    <string name="ui_object">UI组件</string>
     <string name="child_node">子节点</string>
     <string name="seekbar">拖动条</string>
-    <string name="tip_floating_inspector_enabled">悬浮助手已启用。点击悬浮图标，可选择当前屏幕上的内容</string>
+    <string name="tip_floating_inspector_enabled">悬浮助手已启用，点击悬浮图标，即可选择屏幕上的内容。</string>
     <string name="options_from_inspector_added">已添加%d条规则</string>
     <string name="prompt_clear_all_options">确定要清空所有规则吗？</string>
     <string name="format_applet_is_removed">已移除%d条规则</string>
@@ -224,4 +220,9 @@
     <string name="format_day_in_month">%d号</string>
     <string name="format_before">%s之前</string>
     <string name="format_after">%s之后</string>
+    <string name="with_pane_title">页面标题为</string>
+    <string name="no_comp_detected">暂未检测到任何程序和页面</string>
+    <string name="format_switch_mode">已切换到%s模式</string>
+    <string name="coords">坐标点</string>
+    <string name="format_current">当前%s</string>
 </resources>
