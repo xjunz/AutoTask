@@ -23,6 +23,10 @@ infix fun <T> LiveData<T>.eq(value: T?): Boolean {
     return this.value == value
 }
 
+infix fun <T> LiveData<T>.notEq(value: T?): Boolean {
+    return this.value != value
+}
+
 fun LiveData<*>.isNull(): Boolean {
     return value == null
 }

@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogComponentSelectorBinding
 import top.xjunz.tasker.databinding.ItemActivityInfoBinding
@@ -21,7 +22,6 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.editor.ShoppingCartIntegration
-import top.xjunz.tasker.util.illegalArgument
 
 /**
  * @author xjunz 2022/10/07
@@ -43,12 +43,16 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         viewModel.mode = mode
     }
 
-    fun setSelectedPackages(selected: List<String>) = doWhenCreated {
+    fun setSelectedPackages(selected: Collection<String>) = doWhenCreated {
         viewModel.selectedPackages.addAll(selected)
         viewModel.selectedCount.value = selected.size
     }
 
-    fun setSelectedActivities(selected: List<String>) = doWhenCreated {
+    fun doOnCompleted(block: (Collection<String>) -> Unit) = doWhenCreated {
+        viewModel.onCompleted = block
+    }
+
+    fun setSelectedActivities(selected: Collection<String>) = doWhenCreated {
         viewModel.selectedActivities.addAll(selected.map {
             ComponentName.unflattenFromString(it)!!
         })
@@ -172,9 +176,6 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         if (viewModel.mode == MODE_PACKAGE) {
             binding.shoppingCart.rvBottom.layoutManager =
                 StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            binding.shoppingCart.rvBottom.adapter = bottomPkgAdapter
-        } else {
-            binding.shoppingCart.rvBottom.adapter = bottomActAdapter
         }
         binding.ibSortBy.setOnTouchListener(popupMenu.dragToOpenListener)
         binding.ibSortBy.setOnClickListener {
@@ -186,6 +187,17 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.doOnItemSelected {
             viewModel.currentItem.value = it
+        }
+        binding.shoppingCart.btnCount.setOnClickListener {
+            if (viewModel.selectedCount notEq 0)
+                viewModel.showClearAllDialog.value = true
+        }
+        binding.shoppingCart.btnComplete.setOnClickListener {
+            if (viewModel.complete()) {
+                dismiss()
+            } else {
+                toast(R.string.nothing_selected)
+            }
         }
         observeLiveData()
     }
@@ -223,9 +235,9 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         val transition = ChangeBounds().addTarget(binding.shoppingCart.root)
         observe(viewModel.selectedCount) {
             binding.shoppingCart.btnCount.text = if (viewModel.mode == MODE_PACKAGE) {
-                R.string.format_selected_pkg_count.format(it)
+                R.string.format_clear_selected_pkg.format(it)
             } else {
-                R.string.format_selected_act_count.format(it)
+                R.string.format_clear_selected_act.format(it)
             }
         }
         observeTransient(viewModel.addedItem) {
@@ -238,7 +250,6 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             }
             binding.shoppingCart.rvBottom.scrollToPosition(0)
             viewModel.selectedCount.inc()
-            binding.root.rootView.beginAutoTransition(transition)
         }
         observeTransient(viewModel.removedItem) {
             if (viewModel.mode == MODE_PACKAGE) {
@@ -249,7 +260,26 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 bottomActAdapter.notifyItemRemoved(viewModel.selectedActivities.lastIndex - index)
             }
             viewModel.selectedCount.dec()
-            binding.root.rootView.beginAutoTransition(transition)
+        }
+        observeConfirmation(viewModel.showClearAllDialog, R.string.prompt_clear_all) {
+            if (viewModel.mode == MODE_ACTIVITY) {
+                val prevSize = viewModel.selectedActivities.size
+                viewModel.selectedActivities.clear()
+                bottomActAdapter.notifyItemRangeRemoved(0, prevSize)
+            } else {
+                val prevSize = viewModel.selectedPackages.size
+                viewModel.selectedPackages.clear()
+                bottomPkgAdapter.notifyItemRangeRemoved(0, prevSize)
+            }
+            viewModel.selectedCount.value = 0
+            shoppingCartIntegration.collapse()
+            viewModel.onSelectionCleared.value = true
+        }
+        observeOnce(viewModel.currentPackages) {
+            if (viewModel.mode == MODE_ACTIVITY)
+                binding.shoppingCart.rvBottom.adapter = bottomActAdapter
+            else
+                binding.shoppingCart.rvBottom.adapter = bottomPkgAdapter
         }
     }
 

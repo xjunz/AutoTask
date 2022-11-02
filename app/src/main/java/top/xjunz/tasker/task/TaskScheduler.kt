@@ -2,7 +2,7 @@ package top.xjunz.tasker.task
 
 import android.os.Looper
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.TaskContext
+import top.xjunz.tasker.engine.runtime.FlowRuntime
 import top.xjunz.tasker.service.AutomatorService
 import top.xjunz.tasker.task.event.TaskEventDispatcher
 
@@ -30,14 +30,14 @@ class TaskScheduler(private val service: AutomatorService, private val looper: L
     fun destroy() {
         service.uiAutomatorBridge.stopReceivingEvents()
         dispatcher.removePendingEvents()
+        FlowRuntime.drainPool()
     }
 
     override fun onEvent(events: Array<Event>) {
         for (task in TaskManager.getActiveTasks()) {
             if (!task.isActive) continue
-            val ctx = TaskContext(task, events)
             try {
-                task.onEvent(ctx)
+                task.launch(events)
             } finally {
                 for (event in events)
                     event.recycle()

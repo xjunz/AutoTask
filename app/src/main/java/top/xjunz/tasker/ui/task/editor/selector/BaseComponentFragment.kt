@@ -41,6 +41,11 @@ abstract class BaseComponentFragment : BaseFragment<FragmentComponentSelectorBin
                     (binding.rvList.canScrollVertically(-1) || binding.rvList.scrollY > 0)
             }
         }
+        observeTransient(viewModel.onSelectionCleared) {
+            binding.rvList.adapter?.notifyItemRangeChanged(
+                0, binding.rvList.adapter!!.itemCount, true
+            )
+        }
         observeTransient(viewModel.addedItem) {
             notifyItemChanged(it)
         }

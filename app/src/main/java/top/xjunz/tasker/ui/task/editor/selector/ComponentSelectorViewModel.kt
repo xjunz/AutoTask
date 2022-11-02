@@ -36,9 +36,15 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
 
     val removedItem = MutableLiveData<Any>()
 
+    val onSelectionCleared = MutableLiveData<Boolean>()
+
+    val showClearAllDialog = MutableLiveData<Boolean>()
+
     val currentPackages = MutableLiveData<List<PackageInfoWrapper>>()
 
     var title: CharSequence? = null
+
+    lateinit var onCompleted: (Collection<String>) -> Unit
 
     private lateinit var allPackages: MutableList<PackageInfoWrapper>
 
@@ -107,5 +113,16 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
             currentPackages.postValue(allPackages.filter { !it.isSystemApp() })
         }
         showSystemApps = show
+    }
+
+    fun complete(): Boolean {
+        val collection = if (mode == ComponentSelectorDialog.MODE_ACTIVITY) selectedActivities.map {
+            it.flattenToShortString()
+        } else selectedPackages
+        if (collection.isNotEmpty()) {
+            onCompleted(collection)
+            return true
+        }
+        return false
     }
 }

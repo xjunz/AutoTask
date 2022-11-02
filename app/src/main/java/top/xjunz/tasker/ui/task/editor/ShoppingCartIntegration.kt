@@ -53,13 +53,15 @@ class ShoppingCartIntegration(
     }
 
     fun init(fragment: BaseDialogFragment<*>) {
-        behavior = binding.root.disableBottomSheetShapeAnimation()
+        behavior = binding.root.requireBottomSheetBehavior()
         behavior.isHideable = false
         val key = "peekHeight"
         fragment.observe(viewModel.get<Int>(key)) {
             viewToFitBottom.updatePadding(bottom = it)
         }
+        var insetTop = 0
         circularRevealContainer.oneShotApplySystemInsets { container, insets ->
+            insetTop = insets.top - 8.dp
             container.doOnPreDraw {
                 behavior.peekHeight = it.height + insets.bottom
                 viewModel.setValue(key, behavior.peekHeight)
@@ -67,7 +69,7 @@ class ShoppingCartIntegration(
             binding.rvBottom.updatePadding(bottom = insets.bottom)
             binding.root.doOnPreDraw {
                 it.updateLayoutParams {
-                    height = it.height - insets.top
+                    //height = it.height - insets.top
                 }
             }
         }
@@ -84,6 +86,8 @@ class ShoppingCartIntegration(
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 binding.rvBottom.alpha = slideOffset
+                if (insetTop != 0)
+                    binding.root.updatePadding(top = (slideOffset * insetTop).toInt())
             }
 
         })
@@ -134,9 +138,9 @@ class ShoppingCartIntegration(
             bottomSheet.width / 2F - view.width / 2,
             bottomSheet.top.toFloat()
         )
-        if (addBackground) {
+        if (addBackground)
             mockView.background = context.createMaterialShapeDrawable(cornerSize = 8.dpFloat)
-        }
+
         mockView.layout(left, top, left + view.width, top + view.height)
         mockView.measure(
             View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
@@ -166,9 +170,7 @@ class ShoppingCartIntegration(
                 circularRevealContainer.height / 2F,
                 circularRevealContainer.width / 2F
             )
-        ).with(
-            ObjectAnimator.ofFloat(circularRevealContainer, View.ALPHA, 1F, 0F)
-        )
+        ).with(ObjectAnimator.ofFloat(circularRevealContainer, View.ALPHA, 1F, 0F))
         animator.addListener(
             CircularRevealCompat.createCircularRevealListener(
                 circularRevealContainer

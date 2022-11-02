@@ -100,12 +100,12 @@
         <item>十二月</item>
     </string-array>
     <string-array name="days_in_week">
+        <item>周日</item>
         <item>周一</item>
         <item>周二</item>
         <item>周三</item>
         <item>周四</item>
         <item>周五</item>
         <item>周六</item>
-        <item>周日</item>
     </string-array>
 </resources>

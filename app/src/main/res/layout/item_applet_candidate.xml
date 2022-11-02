@@ -11,22 +11,65 @@
         android:paddingVertical="8dp">
 
         <TextView
+            android:id="@+id/tv_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="2"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Overline"
+            android:textColor="?colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="123" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="tv_number,divider_bott,divider_top"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="8dp" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider_top"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="2dp"
+            app:dividerColor="@color/material_on_surface_stroke"
+            app:layout_constraintBottom_toTopOf="@id/tv_number"
+            app:layout_constraintEnd_toEndOf="@id/tv_number"
+            app:layout_constraintStart_toStartOf="@id/tv_number"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider_bott"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            app:dividerColor="@color/material_on_surface_stroke"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/tv_number"
+            app:layout_constraintStart_toStartOf="@id/tv_number"
+            app:layout_constraintTop_toBottomOf="@id/tv_number" />
+
+        <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:background="?selectableItemBackground"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toTopOf="@+id/tv_desc"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_number"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_goneMarginTop="0dp"
-            tools:text="Hello" />
+            tools:text="Hello"
+            tools:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         <TextView
             android:id="@+id/tv_desc"

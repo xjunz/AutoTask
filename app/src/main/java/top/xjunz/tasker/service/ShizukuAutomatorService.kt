@@ -14,13 +14,13 @@ import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.LocalOnly
 import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.impl.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
-import top.xjunz.tasker.util.unsupportedOperation
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 

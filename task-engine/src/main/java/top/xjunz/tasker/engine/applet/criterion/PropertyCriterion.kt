@@ -8,7 +8,7 @@ import top.xjunz.tasker.engine.applet.serialization.AppletValues
 class PropertyCriterion<T : Any>(private inline val matcher: (target: T) -> Boolean) :
     Criterion<T, Boolean>() {
 
-    override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
+    override var valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
 
     override var defaultValue: Boolean = true
 

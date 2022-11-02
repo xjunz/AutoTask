@@ -112,15 +112,15 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             rootView.isVisible = false
             rootView.doOnPreDraw {
-                rootView.post {
+                it.post {
                     a11yAutomatorService.takeScreenshot(
                         Display.DEFAULT_DISPLAY, Dispatchers.IO.asExecutor(),
                         object : AccessibilityService.TakeScreenshotCallback {
                             override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
                                 try {
-                                    result.hardwareBuffer.use {
+                                    result.hardwareBuffer.use { buffer ->
                                         val raw = Bitmap.wrapHardwareBuffer(
-                                            it, result.colorSpace
+                                            buffer, result.colorSpace
                                         )
                                         screenshot =
                                             raw?.clip(binding.inspectorView.visibleBounds)

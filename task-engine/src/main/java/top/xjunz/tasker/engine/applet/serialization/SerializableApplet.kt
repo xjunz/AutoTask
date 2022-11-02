@@ -20,8 +20,12 @@ class SerializableApplet(
     @SerialName("i")
     private val isInverted: Boolean = false,
     @SerialName("v")
-    private val literal: String? = null
+    private val literal: String? = null,
+    @SerialName("t")
+    private val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT,
 ) {
+    @SerialName("r")
+    private var remark: String? = null
 
     @SerialName("e")
     private var elements: Array<SerializableApplet>? = null
@@ -31,11 +35,12 @@ class SerializableApplet(
          * Convert an normal applet to a serializable applet.
          */
         fun Applet.toSerializable(): SerializableApplet {
-            val sa = SerializableApplet(id, isAnd, isInverted, serializeValue(value))
+            val sa = SerializableApplet(id, isAnd, isInverted, serializeValue(value), valueType)
             if (this is Flow) {
                 check(count != 0) {
                     "No element!"
                 }
+                sa.remark = remark
                 sa.elements = Array(count) {
                     elements[it].toSerializable()
                 }
@@ -48,7 +53,9 @@ class SerializableApplet(
         val prototype = registry.createAppletById(id)
         prototype.isAnd = isAnd
         prototype.isInverted = isInverted
+        prototype.valueType = valueType
         if (prototype is Flow) {
+            prototype.remark = remark
             elements?.forEach {
                 prototype.elements.add(it.toApplet(registry))
             }

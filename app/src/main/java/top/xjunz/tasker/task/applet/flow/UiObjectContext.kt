@@ -10,6 +10,10 @@ import top.xjunz.tasker.service.currentService
  */
 class UiObjectContext {
 
+    var depth: Int = 0
+
+    var index: Int = 0
+
     lateinit var source: AccessibilityNodeInfo
 
     val density: Float = currentService.uiAutomatorBridge.displayMetrics.density

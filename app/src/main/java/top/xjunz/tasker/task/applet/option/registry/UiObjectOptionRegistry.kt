@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.view.Gravity
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.GravityInt
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.engine.applet.criterion.Criterion
@@ -17,7 +18,6 @@ import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.UiObjectContext
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
-import top.xjunz.tasker.util.illegalArgument
 
 /**
  * @author xjunz 2022/09/27

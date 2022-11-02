@@ -3,9 +3,9 @@ package top.xjunz.tasker.engine.applet.serialization
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.value.Distance
-import top.xjunz.tasker.util.illegalArgument
 
 /**
  * A helper class for serializing and deserializing an [Applet]'s value. Note there is no `boolean`
@@ -19,7 +19,7 @@ object AppletValues {
     const val VAL_TYPE_TEXT = 1
 
     @Deprecated("Unsupported! Use [Applet.isInverted] to control boolean value.")
-    const val VAL_TYPE_BOOL = 2
+    const val VAL_TYPE_BOOL = VAL_TYPE_IRRELEVANT
     const val VAL_TYPE_INT = 3
     const val VAL_TYPE_FLOAT = 4
     const val VAL_TYPE_LONG = 5
@@ -34,7 +34,7 @@ object AppletValues {
      */
     internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
 
-    private val SEPARATOR = Char(0).toString()
+    private const val SEPARATOR = ","
 
     /**
      * Whether its value is a [Collection].
@@ -50,7 +50,7 @@ object AppletValues {
     val Applet.rawType: Int
         get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
 
-    internal fun Applet.judgeType(value: Any, knownCollection: Boolean = false): Int {
+    private fun Applet.judgeType(value: Any, knownCollection: Boolean = false): Int {
         return when (value) {
             is CharSequence -> VAL_TYPE_TEXT
             is Int -> VAL_TYPE_INT
@@ -85,7 +85,7 @@ object AppletValues {
             isValueCollection -> {
                 value as Collection<*>
                 value.joinToString(SEPARATOR) {
-                    serialize(rawType, value)
+                    serialize(rawType, it!!)
                 }
             }
             else -> serialize(rawType, value)

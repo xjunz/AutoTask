@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.criterion
 
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.value.NumberRangeUtil
+import top.xjunz.tasker.engine.util.NumberRangeUtil
 
 /**
  * @author xjunz 2022/08/14

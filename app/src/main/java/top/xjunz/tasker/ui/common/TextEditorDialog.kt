@@ -8,14 +8,11 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
 import top.xjunz.tasker.ktx.doWhenCreated
-import top.xjunz.tasker.ktx.shake
 import top.xjunz.tasker.ktx.textString
-import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 
 /**
@@ -29,9 +26,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
         lateinit var title: CharSequence
 
-        lateinit var currentText: CharSequence
-
-        lateinit var defText: CharSequence
+        var defText: CharSequence? = null
 
         var dropDownNames: Array<CharSequence>? = null
 
@@ -48,14 +43,12 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
     private val viewModel by viewModels<InnerViewModel>()
 
     fun setArguments(
-        title: CharSequence, defText: String = "", onConfirmed: (CharSequence) -> String?
+        title: CharSequence, defText: String? = null, onConfirmed: (CharSequence) -> String?
     ) = doWhenCreated {
         viewModel.title = title
-        viewModel.currentText = defText
         viewModel.defText = defText
         viewModel.onConfirmed = onConfirmed
     }
-
 
     fun configEditText(config: (EditText) -> Unit) = doWhenCreated {
         viewModel.editTextConfig = config
@@ -77,18 +70,18 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             tvTitle.text = viewModel.title
             viewModel.editTextConfig?.invoke(etInput)
             btnPositive.setOnClickListener {
-                val error = viewModel.onConfirmed(viewModel.currentText)
+                val error = viewModel.onConfirmed(binding.etInput.textString)
                 if (error == null) {
                     dismiss()
                 } else {
-                    tilInput.shake()
-                    toast(error)
+                    toastAndShake(error)
                 }
             }
             if (viewModel.dropDownNames != null) {
                 etInput.setAdapter(
                     DropdownArrayAdapter(
-                        requireContext(), viewModel.dropDownNames!!.toMutableList()
+                        requireContext(),
+                        viewModel.dropDownNames!!.toMutableList()
                     )
                 )
                 etInput.setOnItemClickListener { _, _, position, _ ->
@@ -102,12 +95,11 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     etInput.setSelection(etInput.textString.length)
                 }
             }
-            etInput.setText(viewModel.currentText)
-            etInput.setSelection(viewModel.currentText.length)
+            if (savedInstanceState == null)
+                etInput.setText(viewModel.defText)
+
+            etInput.setSelection(etInput.textString.length)
             etInput.requestFocus()
-            etInput.doAfterTextChanged {
-                viewModel.currentText = it!!.toString()
-            }
             btnNegative.setOnClickListener {
                 etInput.setText(viewModel.defText)
             }

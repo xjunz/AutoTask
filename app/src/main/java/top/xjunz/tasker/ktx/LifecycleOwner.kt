@@ -47,6 +47,17 @@ fun <V> LifecycleOwner.observe(ld: LiveData<V>, observer: Observer<V>) {
     ld.observe(this, observer)
 }
 
+inline fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, crossinline observer: (V) -> Unit) {
+    observe(ld, object : Observer<V> {
+        override fun onChanged(t: V) {
+            if (t != null) {
+                ld.removeObserver(this)
+                observer(t)
+            }
+        }
+    })
+}
+
 /**
  * Observe a [MutableLiveData] as transient (non-sticky), whose value will be set to `null` once the
  * [observer] is triggered and the observer will not response to a `null` value.
@@ -113,11 +124,18 @@ inline fun LifecycleOwner.observeConfirmation(
     @StringRes promptTextRes: Int,
     crossinline onConfirmed: () -> Unit
 ) {
+    observeConfirmation(ld, promptTextRes.text, onConfirmed)
+}
+
+inline fun LifecycleOwner.observeConfirmation(
+    ld: MutableLiveData<*>,
+    promptText: CharSequence,
+    crossinline onConfirmed: () -> Unit
+) {
     ld.observe(this) {
-        if (it == null) return@observe
-        if (it is Boolean && !it) return@observe
+        if (it == null || it == false) return@observe
         peekContext().makeSimplePromptDialog(
-            msg = promptTextRes, positiveAction = onConfirmed
+            msg = promptText, positiveAction = onConfirmed
         ).setOnDismissListener {
             ld.value = null
         }.show()

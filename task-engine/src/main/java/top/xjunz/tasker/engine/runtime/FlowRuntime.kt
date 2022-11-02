@@ -1,6 +1,6 @@
 package top.xjunz.tasker.engine.runtime
 
-import androidx.annotation.IntRange
+import androidx.core.util.Pools.SimplePool
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
@@ -11,28 +11,69 @@ import top.xjunz.tasker.engine.applet.base.Flow
  *
  * @author xjunz 2022/08/09
  */
-class FlowRuntime(
+class FlowRuntime private constructor() {
+
+    private object Pool : SimplePool<FlowRuntime>(25)
+
+    interface Observer {
+
+        fun onStarted(victim: Applet, runtime: FlowRuntime) {}
+
+        fun onTerminated(victim: Applet, runtime: FlowRuntime) {}
+
+        fun onSkipped(victim: Applet, runtime: FlowRuntime) {}
+    }
+
+    companion object {
+
+        fun obtain(events: Array<Event>): FlowRuntime {
+            val instance = Pool.acquire() ?: FlowRuntime()
+            instance.events = events
+            instance.target = events
+            return instance
+        }
+
+        fun drainPool() {
+            while (Pool.acquire() != null) {
+                /* no-op */
+            }
+        }
+    }
+
+    lateinit var events: Array<Event>
+
     /**
      * Target is for applet to use in runtime via [FlowRuntime.getTarget].
      */
-    private var target: Any
-) {
+    private lateinit var target: Any
+
+    val tracker = AppletTracker()
+
+    var observer: Observer? = null
+
+    lateinit var hitEvent: Event
+
+    /**
+     * All applets with same id share the same argument.
+     */
+    val arguments = mutableMapOf<Int, Any>()
+
+    /**
+     * Get the argument from the registry or initialize the argument and store it.
+     */
+    inline fun <T : Any> getOrPutArgument(id: Int, defValue: () -> T): T {
+        var arg = arguments[id]
+        if (arg == null) {
+            arg = defValue()
+            arguments.put(id, arg)
+        }
+        return arg.casted()
+    }
 
     /**
      * Values are keyed by applets' remarks.
      */
-    private val resultRegistry = mutableMapOf<String, Any>()
-
-    /**
-     * The depth of currently executed applet starting from 0. When the flow is not yet started or has
-     * been completed, the depth is -1.
-     */
-    private var depth = -1
-
-    /**
-     * The executing sequence which helps us tracking the exact position of the running track.
-     */
-    private var sequence: Long = 0
+    private val results = mutableMapOf<String, Any>()
 
     lateinit var currentApplet: Applet
 
@@ -43,54 +84,12 @@ class FlowRuntime(
      */
     var isSuccessful = true
 
-    fun moveTo(@IntRange(from = 0, to = Applet.MAX_FLOW_CHILD_COUNT - 1L) index: Int) {
-        check(index in 0 until Applet.MAX_FLOW_CHILD_COUNT) {
-            "Too many children!"
-        }
-        check(depth >= 0) {
-            "Not in a flow!"
-        }
-        check(depth < Applet.MAX_FLOW_NESTED_DEPTH) {
-            "Too deeply nested!"
-        }
-        sequence = index.toLong() shl (depth * Applet.FLOW_CHILD_COUNT_BITS) or sequence
-    }
-
-    fun jumpIn() {
-        check(depth < Applet.MAX_FLOW_NESTED_DEPTH) { "Too deeply nested!" }
-        depth++
-    }
-
-    fun jumpOut() {
-        check(depth >= 0) {
-            "Cannot jump out of the void!"
-        }
-        // Bit clear the tracked index in this depth
-        sequence = sequence and ((Applet.MAX_FLOW_CHILD_COUNT - 1L) shl
-                (depth * Applet.FLOW_CHILD_COUNT_BITS)).inv()
-        depth--
-    }
-
     fun registerResult(key: String, result: Any) {
-        resultRegistry[key] = result
+        results[key] = result
     }
 
     fun <R> requireResult(key: String): R {
-        return resultRegistry[key]!!.casted()
-    }
-
-    fun parseSequence(): IntArray {
-        check(depth >= -1)
-        return IntArray(depth + 1) {
-            (sequence ushr depth * Applet.FLOW_CHILD_COUNT_BITS and (Applet.MAX_FLOW_CHILD_COUNT - 1L)).toInt()
-        }
-    }
-
-    fun printSequence(): String {
-        if (depth < 0) {
-            return "-"
-        }
-        return parseSequence().joinToString(">")
+        return results[key]!!.casted()
     }
 
     fun setTarget(any: Any) {
@@ -103,5 +102,13 @@ class FlowRuntime(
 
     fun <T> getTarget(): T {
         return target.casted()
+    }
+
+    fun recycle() {
+        results.clear()
+        arguments.clear()
+        tracker.reset()
+        observer = null
+        Pool.release(this)
     }
 }

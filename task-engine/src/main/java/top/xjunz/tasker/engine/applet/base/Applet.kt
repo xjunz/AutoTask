@@ -1,8 +1,8 @@
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.engine.runtime.FlowRuntime
-import top.xjunz.tasker.engine.runtime.TaskContext
 
 /**
  * The base executable element of a [Flow].
@@ -76,7 +76,8 @@ abstract class Applet {
     /**
      * The masked type of value for `serialization`.
      */
-    abstract val valueType: Int
+    abstract var valueType: Int
+        internal set
 
     /**
      * Get the id of the factory where the applet is created.
@@ -97,11 +98,10 @@ abstract class Applet {
     /**
      * Execute the applet.
      *
-     * @param context The overall context of the [Applet] providing the access to its owner flow,
-     * its owner task or some environment variables.
+     * @param task The owner task
      * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
-    abstract fun apply(context: TaskContext, runtime: FlowRuntime)
+    abstract fun apply(task: AutomatorTask, runtime: FlowRuntime)
 
     fun toggleRelation() {
         isAnd = !isAnd

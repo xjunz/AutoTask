@@ -2,8 +2,8 @@ package top.xjunz.tasker.engine.applet.criterion
 
 import kotlinx.serialization.Transient
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.util.NumberRangeUtil
 import top.xjunz.tasker.engine.value.Distance
-import top.xjunz.tasker.engine.value.NumberRangeUtil
 
 /**
  * @author xjunz 2022/09/27

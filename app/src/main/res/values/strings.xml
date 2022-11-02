@@ -225,4 +225,7 @@
     <string name="format_switch_mode">已切换到%s模式</string>
     <string name="coords">坐标点</string>
     <string name="format_current">当前%s</string>
+    <string name="nothing_selected">未选择任何项目</string>
+    <string name="prompt_clear_all">你确定要清空吗？</string>
+    <string name="collapse_all_to_drag">折叠全部规则才能进行拖动哦</string>
 </resources>

@@ -110,7 +110,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
         }
     }
 
-    private val bottomAdapter by lazy { AppletCandidatesAdapter(viewModel) }
+    private val bottomAdapter by lazy {
+        AppletCandidatesAdapter(viewModel, onOptionClickListener)
+    }
 
     fun setTitle(title: CharSequence) = doWhenCreated {
         viewModel.title = title
@@ -135,6 +137,17 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 viewModel.showClearDialog.value = true
         }
         binding.shoppingCart.btnComplete.setOnClickListener {
+        }
+        binding.cvHeader.setOnClickListener { v ->
+            val mode = v.tag.casted<InspectorMode>()
+            if (isFloatingInspectorShown) {
+                if (floatingInspector.mode != mode) {
+                    floatingInspector.mode = mode
+                    toast(R.string.format_switch_mode.format(mode.label))
+                }
+            } else {
+                FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
+            }
         }
         observeLiveData()
     }
@@ -175,18 +188,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                             .parseAsHtml()
                 }
                 else -> binding.cvHeader.isVisible = false
-
-            }
-            binding.cvHeader.setOnClickListener { v ->
-                val mode = v.tag.casted<InspectorMode>()
-                if (isFloatingInspectorShown) {
-                    if (floatingInspector.mode != mode) {
-                        floatingInspector.mode = mode
-                        toast(R.string.format_switch_mode.format(mode.label))
-                    }
-                } else {
-                    FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
-                }
             }
         }
         observe(viewModel.candidates) { list ->
@@ -194,11 +195,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 bottomAdapter.setFlows(list)
                 rvBottom.adapter = bottomAdapter
             } else {
-                if (list.isEmpty()) {
+                if (list.isEmpty())
                     shopCartIntegration.collapse()
-                } else {
-                    binding.shoppingCart.root.beginMyselfAutoTransition()
-                }
                 bottomAdapter.updateFlows(list)
             }
             binding.shoppingCart.btnCount.text =

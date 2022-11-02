@@ -1,4 +1,4 @@
-package top.xjunz.tasker.util
+package top.xjunz.shared.utils
 
 /**
  * @author xjunz 2022/07/21

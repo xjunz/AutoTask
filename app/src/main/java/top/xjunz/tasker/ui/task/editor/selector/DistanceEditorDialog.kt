@@ -8,13 +8,13 @@ import androidx.annotation.GravityInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.RealDisplay
-import top.xjunz.tasker.util.illegalArgument
 
 /**
  * @author xjunz 2022/10/24
@@ -101,8 +101,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             if (viewModel.unit >= 2
                 && (min != null && min !in 0F..1F || (max != null && max !in 0F..1F))
             ) {
-                binding.root.rootView.shake()
-                toast(R.string.format_error_min_max_not_in_scope.format(binding.menuUnit.text))
+                toastAndShake(R.string.format_error_min_max_not_in_scope.format(binding.menuUnit.text))
                 return@setOnClickListener
             }
             viewModel.distance.let {
@@ -158,8 +157,9 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
         }
     }
 
-    fun setInitialDistance(distance: Distance) = doWhenCreated {
-        viewModel.distance = distance
+    fun setDistance(distance: Distance?) = doWhenCreated {
+        if (distance != null)
+            viewModel.distance = distance
     }
 
     fun setArguments(title: CharSequence?, block: (Distance) -> Unit) = doWhenCreated {

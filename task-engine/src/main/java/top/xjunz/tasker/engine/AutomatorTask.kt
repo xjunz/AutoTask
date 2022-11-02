@@ -1,12 +1,15 @@
 package top.xjunz.tasker.engine
 
 import android.app.UiAutomation
+import androidx.annotation.MainThread
 import androidx.test.uiautomator.UiDevice
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.FlowRuntime
-import top.xjunz.tasker.engine.runtime.TaskContext
 
 /**
  * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [rootFlow] are
@@ -14,24 +17,35 @@ import top.xjunz.tasker.engine.runtime.TaskContext
  *
  * @author xjunz 2022/07/12
  */
+@Serializable
 open class AutomatorTask(val name: String) {
 
-    lateinit var uiDevice: UiDevice
-
+    @Transient
     lateinit var rootFlow: Flow
 
+    var label: String? = null
+
+    lateinit var flowPath: String
+
+    @Transient
+    lateinit var uiDevice: UiDevice
+
     /**
-     * Whether the task is active or not. Even if set to `false`, a task may continue executing until
+     * Whether the task is active or not. Even if set to `false`, the task may continue executing until
      * its latest [Applet] is completed. You can observe [OnStateChangedListener.onTaskStopped] to
-     * get notified. Inactive tasks will no longer response to any further [Event] from [onEvent].
+     * get notified. Inactive tasks will no longer response to any further [Event] from [launch].
      */
+    @Transient
     var isActive = false
         private set
 
-    private var listener: OnStateChangedListener = OnStateChangedListener.NoOp
+    @Transient
+    var onStateChangedListener: OnStateChangedListener = OnStateChangedListener.NoOp
 
+    @Transient
     val id = name.hashCode()
 
+    @Transient
     private var startTimestamp: Long = -1
 
     val uiAutomation: UiAutomation get() = uiDevice.instrumentation.uiAutomation
@@ -39,6 +53,7 @@ open class AutomatorTask(val name: String) {
     /**
      * Whether the task is traversing its [rootFlow].
      */
+    @Transient
     private var isExecuting = false
 
     class FlowFailureException(runtime: FlowRuntime) :
@@ -81,10 +96,10 @@ open class AutomatorTask(val name: String) {
         if (isActive) {
             error("Task[$name] has already been activated!")
         }
-        listener = stateListener
+        onStateChangedListener = stateListener
         startTimestamp = System.currentTimeMillis()
         isActive = true
-        listener.onTaskStarted()
+        onStateChangedListener.onTaskStarted()
     }
 
     fun deactivate() {
@@ -93,33 +108,39 @@ open class AutomatorTask(val name: String) {
         }
         isActive = false
         if (!isExecuting) {
-            listener.onTaskStopped()
+            onStateChangedListener.onTaskStopped()
         }
     }
+
 
     private fun trace(any: Any) {
         logcat(any, tag = "AutomatorTask")
     }
 
     /**
-     * Called when an [Event] is received.
+     * Called when an event is received.
      *
      * @return `true` if the task is successfully executed and `false` otherwise
      */
-    fun onEvent(ctx: TaskContext): Boolean {
+    @MainThread
+    fun launch(events: Array<Event>, observer: FlowRuntime.Observer? = null): Boolean {
         if (!isActive) return false
         isExecuting = true
-        val runtime = FlowRuntime(ctx.events)
+        val runtime = FlowRuntime.obtain(events)
+        if (observer != null)
+            runtime.observer = observer
         try {
-            rootFlow.apply(ctx, runtime)
+            rootFlow.apply(this, runtime)
         } catch (t: Throwable) {
             isExecuting = false
             when (t) {
-                is FlowFailureException -> listener.onAppletFailure(runtime)
-                is TaskCancellationException -> listener.onTaskStopped()
-                else -> listener.onAppletError(runtime, t)
+                is FlowFailureException -> onStateChangedListener.onAppletFailure(runtime)
+                is TaskCancellationException -> onStateChangedListener.onTaskStopped()
+                else -> onStateChangedListener.onAppletError(runtime, t)
             }
             return false
+        } finally {
+            runtime.recycle()
         }
         return true
     }

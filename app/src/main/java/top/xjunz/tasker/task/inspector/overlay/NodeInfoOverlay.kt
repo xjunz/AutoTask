@@ -1,6 +1,7 @@
 package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.graphics.Rect
 import android.view.WindowManager
 import androidx.recyclerview.widget.RecyclerView
@@ -64,11 +65,14 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
 
     private fun collectProperties() {
-
         vm.currentComp.value?.let {
             options.add(pkgFactory.pkgCollection.withValue(Collections.singleton(it.pkgName)))
-            if (it.actName != null)
-                options.add(pkgFactory.activityCollection.withValue(Collections.singleton(it.actName)))
+
+            if (it.actName != null) {
+                val compName = ComponentName(it.pkgName, it.actName!!).flattenToShortString()
+                options.add(pkgFactory.activityCollection.withValue(Collections.singleton(compName)))
+            }
+
             if (it.paneTitle != null)
                 options.add(pkgFactory.paneTitle.withValue(it.paneTitle))
         }
@@ -115,29 +119,14 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
         val rScreen = Rect()
         node.getBoundsInScreen(rScreen)
-        val rParent = Rect()
-        val parent = node.parent
-        parent?.getBoundsInScreen(rParent)
 
         options.add(uiObjectFactory.left.withValue(Distance.exactPxInScreen(rScreen.left)))
-        var v = (rScreen.left - rParent.left) / RealDisplay.density
-        if (parent != null && v % 1F == 0F)
-            options.add(uiObjectFactory.left.cloned().withValue(Distance.exactDpInParent(v)))
 
         options.add(uiObjectFactory.right.withValue(Distance.exactPxInScreen(RealDisplay.size.x - rScreen.right)))
-        v = (rParent.right - rScreen.right) / RealDisplay.density
-        if (parent != null && v % 1F == 0F)
-            options.add(uiObjectFactory.right.cloned().withValue(Distance.exactDpInParent(v)))
 
         options.add(uiObjectFactory.top.withValue(Distance.exactPxInScreen(rScreen.top)))
-        v = (rScreen.top - rParent.top) / RealDisplay.density
-        if (parent != null && v % 1F == 0F)
-            options.add(uiObjectFactory.top.cloned().withValue(Distance.exactDpInParent(v)))
 
         options.add(uiObjectFactory.bottom.withValue(Distance.exactPxInScreen(RealDisplay.size.y - rScreen.bottom)))
-        v = (rParent.bottom - rScreen.bottom) / RealDisplay.density
-        if (parent != null && v % 1F == 0F)
-            options.add(uiObjectFactory.bottom.cloned().withValue(Distance.exactDpInParent(v)))
 
         options.add(uiObjectFactory.width.withValue(Distance.exactPx(rScreen.width())))
         options.add(uiObjectFactory.height.withValue(Distance.exactPx(rScreen.height())))

@@ -13,6 +13,7 @@ import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.base.SavedStateViewModel
+import java.util.*
 
 /**
  * @author xjunz 2022/10/22
@@ -115,4 +116,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : SavedStateViewModel(states
         candidates.notifySelfChanged()
     }
 
+    fun swapFlows(from: Flow, to: Flow) {
+        Collections.swap(_candidates, _candidates.indexOf(from), _candidates.indexOf(to))
+    }
 }

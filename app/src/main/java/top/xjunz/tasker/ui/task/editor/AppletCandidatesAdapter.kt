@@ -1,5 +1,6 @@
 package top.xjunz.tasker.ui.task.editor
 
+import android.annotation.SuppressLint
 import android.graphics.Canvas
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
@@ -7,7 +8,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -22,6 +22,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.criterion.Criterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
+import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorSchemes
 import java.util.*
@@ -29,13 +30,17 @@ import java.util.*
 /**
  * @author xjunz 2022/10/03
  */
-class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
-    RecyclerView.Adapter<AppletCandidatesAdapter.AppletViewHolder>() {
+class AppletCandidatesAdapter(
+    private val viewModel: FlowEditorViewModel,
+    private val onClickListener: AppletOptionOnClickListener
+) : RecyclerView.Adapter<AppletCandidatesAdapter.AppletViewHolder>() {
 
     private val applets = mutableListOf<Applet>()
 
+    private var removedApplet: Applet? = null
+
     private val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-        0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
     ) {
 
         override fun onChildDraw(
@@ -52,9 +57,9 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
             val applet = applets[viewHolder.adapterPosition]
             if (applet is Flow && !viewModel.isCollapsed(applet)) {
                 for (i in 1..applet.count) {
-                    val itemView =
-                        recyclerView.findViewHolderForAdapterPosition(viewHolder.layoutPosition + i)?.itemView
-                            ?: break
+                    val itemView = recyclerView.findViewHolderForAdapterPosition(
+                        viewHolder.layoutPosition + i
+                    )?.itemView ?: break
                     itemView.translationX = dX
                 }
             }
@@ -65,6 +70,47 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
             viewHolder: ViewHolder,
             target: ViewHolder
         ): Boolean {
+            val from = viewHolder.adapterPosition
+            val to = target.adapterPosition
+            val fromApplet = applets[from]
+            if (fromApplet is Flow) {
+                val toFlow = applets[to] as Flow
+                viewModel.swapFlows(fromApplet, toFlow)
+                viewModel.candidates.notifySelfChanged()
+            } else {
+                val parent = fromApplet.parent!!
+                Collections.swap(parent.elements, fromApplet.index, fromApplet.index + (to - from))
+                parent.elements.forEachIndexed { index, applet ->
+                    applet.index = index
+                }
+                Collections.swap(applets, from, to)
+                notifyItemMoved(from, to)
+            }
+            return true
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            val adapterPosition = viewHolder.adapterPosition
+            if (adapterPosition == RecyclerView.NO_POSITION) return
+            val target = applets[adapterPosition]
+            if (target is Flow) return
+            val parent = target.parent!!
+            notifyItemRangeChanged(
+                adapterPosition - target.index, parent.count, true
+            )
+        }
+
+        override fun canDropOver(
+            recyclerView: RecyclerView,
+            current: ViewHolder,
+            target: ViewHolder
+        ): Boolean {
+            val from = current.adapterPosition
+            if (from == RecyclerView.NO_POSITION) return false
+            val to = target.adapterPosition
+            if (to == RecyclerView.NO_POSITION) return false
+            if (applets[from].parent != applets[to].parent) return false
             return true
         }
 
@@ -77,12 +123,13 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
             } else {
                 val parent = applet.parent
                 parent?.elements?.remove(applet)
-                if (parent?.count == 0) {
-                    // If all elements in this flow are removed, remove itself
+                if (parent?.count == 0)
+                // If all elements in this flow are removed, remove itself
                     viewModel.removeCandidate(parent)
-                }
+
                 toast(R.string.format_applet_is_removed.format(1))
             }
+            removedApplet = applet
             viewModel.candidates.notifySelfChanged()
         }
     }
@@ -125,13 +172,9 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
         val oldData = ArrayList(applets)
         setFlows(data)
         val diffCallback = object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int {
-                return oldData.size
-            }
+            override fun getOldListSize() = oldData.size
 
-            override fun getNewListSize(): Int {
-                return applets.size
-            }
+            override fun getNewListSize() = applets.size
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 return oldData[oldItemPosition] === applets[newItemPosition]
@@ -139,18 +182,42 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 val new = applets[newItemPosition]
-                if (new !is Flow && new.index == 0) {
+                if (new !is Flow && new.index == 0)
                     return false
-                }
+
+                // Notify number changed
+                if (new.parent == removedApplet?.parent)
+                    return false
+
                 return oldItemPosition == 0 || newItemPosition != 0
+            }
+
+            override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+                val new = applets[newItemPosition]
+                if (new.parent == removedApplet?.parent)
+                    return true
+
+                return null
             }
         }
         DiffUtil.calculateDiff(diffCallback).dispatchUpdatesTo(this)
+        removedApplet = null
     }
 
     inner class AppletViewHolder(val binding: ItemAppletCandidateBinding) :
         ViewHolder(binding.root) {
         init {
+            binding.root.setOnClickListener {
+                val applet = applets[adapterPosition]
+                if (applet is Flow) {
+                    viewModel.toggleCollapse(applet)
+                    viewModel.candidates.notifySelfChanged()
+                } else {
+                    onClickListener.onClick(applet) {
+                        notifyItemChanged(adapterPosition, true)
+                    }
+                }
+            }
             binding.tvTitle.setOnClickListener {
                 applets[adapterPosition].toggleRelation()
                 notifyItemChanged(adapterPosition, true)
@@ -166,7 +233,6 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
                     } else {
                         notifyItemRangeInserted(adapterPosition + 1, applet.count)
                     }
-                    (recyclerView.parent as View).beginMyselfAutoTransition()
                 } else {
                     applet.toggleInversion()
                     notifyItemChanged(adapterPosition)
@@ -202,6 +268,7 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
 
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: AppletViewHolder, position: Int) {
         val applet = applets[position]
         holder.itemView.translationX = 0F
@@ -216,6 +283,7 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
                 it.tvTitle.text = title
             }
             if (isFlow) {
+                it.groupLeft.isVisible = false
                 it.tvDesc.isVisible = false
                 it.ibAction.isVisible = true
                 if (viewModel.isCollapsed(applet as Flow)) {
@@ -227,12 +295,19 @@ class AppletCandidatesAdapter(private val viewModel: FlowEditorViewModel) :
                 }
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
             } else {
+                it.groupLeft.isVisible = true
+                it.tvNumber.text = (applet.index + 1).toString()
                 it.tvDesc.isVisible = applet !is PropertyCriterion<*>
                 it.ibAction.isVisible = applet.isInvertible
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
                 if (applet is Criterion<*, *>) {
                     it.tvDesc.text = option.describe(applet.value)
+                }
+                if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
+                    it.tvDesc.setTypeface(null, Typeface.ITALIC)
+                } else {
+                    it.tvDesc.setTypeface(null, Typeface.NORMAL)
                 }
             }
         }

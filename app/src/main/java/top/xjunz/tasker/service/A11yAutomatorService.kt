@@ -19,7 +19,7 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
-import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.impl.A11yUiAutomatorBridge
@@ -29,7 +29,6 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
-import top.xjunz.tasker.util.unsupportedOperation
 import java.lang.ref.WeakReference
 
 /**
@@ -137,11 +136,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (event != null && componentInfo != event.componentInfo) {
                 componentInfo.copyFrom(event.componentInfo)
                 inspectorViewModel.currentComp.value = componentInfo
-            }
-
-            events.forEach {
-                logcat(it)
-                it.recycle()
             }
         }
     }

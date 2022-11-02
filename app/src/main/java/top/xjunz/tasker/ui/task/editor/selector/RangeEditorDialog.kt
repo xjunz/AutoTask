@@ -7,12 +7,12 @@ import android.view.View
 import android.widget.EditText
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogRangeEditorBinding
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.illegalArgument
 
 /**
  * @author xjunz 2022/10/26

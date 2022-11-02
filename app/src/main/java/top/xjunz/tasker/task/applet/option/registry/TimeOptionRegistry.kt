@@ -40,13 +40,6 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    /* @AppletCategory(0x00_01)
-     private val year = AppletOption(0x10, R.string.in_year_range) {
-         RangeCriterion<Calendar, Int> {
-             it.get(Calendar.YEAR)
-         }
-     }*/
-
     @AppletCategory(0x00_02)
     val month = AppletOption(0x11, R.string.in_months) {
         TimeCollectionCriterion {
@@ -62,7 +55,8 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x00_03)
     val dayOfMonth = AppletOption(0x12, R.string.in_day_of_month) {
         NumberRangeCriterion<Calendar, Int> {
-            it.get(Calendar.DAY_OF_MONTH)
+            // The first day has value 1
+            it.get(Calendar.DAY_OF_MONTH) - 1
         }
     }.withDescriber<Collection<Int>> {
         val days = Array<CharSequence>(31) { i ->
@@ -74,7 +68,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x00_03)
     val dayOfWeek = AppletOption(0x13, R.string.in_day_of_week) {
         TimeCollectionCriterion {
-            it.get(Calendar.DAY_OF_WEEK)
+            it.get(Calendar.DAY_OF_WEEK) - 1
         }
     }.withDescriber<Collection<Int>> {
         val arrays = R.array.days_in_week.array
@@ -94,6 +88,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
                 time shr 16 and 0xFF, time shr 8 and 0xFF, time and 0xFF
             )
         }
+
         val start = it.firstOrNull()
         val stop = it.lastOrNull()
         when {

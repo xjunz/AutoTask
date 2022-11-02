@@ -9,8 +9,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import rikka.shizuku.Shizuku
+import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.util.ShizukuUtil
-import top.xjunz.tasker.util.runtimeException
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
 

@@ -1,5 +1,6 @@
 package top.xjunz.tasker.task.applet.option.registry
 
+import android.content.ComponentName
 import androidx.core.content.pm.PackageInfoCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
@@ -41,18 +42,19 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_01)
-    val activityCollection =
-        AppletOption(0x01, R.string.in_activity_collection) {
-            CollectionCriterion<PackageInfoContext, String> {
-                it.activityName
-            }
-        }.withDescriber<Collection<String>> {
-            if (it.size == 1) {
-                it.first()
-            } else {
-                R.string.format_act_collection_desc.format(it.size)
+    val activityCollection = AppletOption(0x01, R.string.in_activity_collection) {
+        CollectionCriterion<PackageInfoContext, String> {
+            it.activityName?.run {
+                ComponentName.unflattenFromString(it.activityName)?.className
             }
         }
+    }.withDescriber<Collection<String>> {
+        if (it.size == 1) {
+            it.first()
+        } else {
+            R.string.format_act_collection_desc.format(it.size)
+        }
+    }
 
     @AppletCategory(0x00_02)
     val paneTitle = NotInvertibleAppletOption(0x02, R.string.with_pane_title) {

@@ -6,7 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -118,10 +120,6 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (FloatingInspector.isReady()) {
-            showInspectorAndDismissSelf()
-            return
-        }
         overlaySettingLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 updateOverlayGrantButton()
@@ -177,6 +175,18 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
             binding.btnGrant.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_chevron_right_24)
         }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        if (FloatingInspector.isReady()) {
+            showInspectorAndDismissSelf()
+            return null
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

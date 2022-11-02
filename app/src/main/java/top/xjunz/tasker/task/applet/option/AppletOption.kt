@@ -5,12 +5,12 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import androidx.annotation.ArrayRes
 import top.xjunz.shared.ktx.casted
+import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.ColorSchemes
-import top.xjunz.tasker.util.unsupportedOperation
 
 /**
  * The entity describing an applet's information. You can call [yieldApplet] to create an [Applet]
@@ -68,7 +68,6 @@ abstract class AppletOption(
     /**
      * The category id identifying the option's category and its position in the category.
      *
-     * @see AppletOptionRegistry
      */
     var categoryId: Int = -1
 

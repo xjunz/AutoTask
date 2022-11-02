@@ -32,14 +32,28 @@ class AppletOptionOnClickListener(fragment: FlowEditorDialog) {
         fragment.viewModels<FlowEditorViewModel>().value.appletOptionFactory
     }
 
+    fun onClick(applet: Applet, onCompleted: () -> Unit) {
+        onClick(applet, registry.findOption(applet), onCompleted)
+    }
+
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         when {
             option == registry.packageAppletFactory.pkgCollection ->
-                ComponentSelectorDialog().setTitle(option.currentTitle!!)
+                ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
+                    .doOnCompleted {
+                        applet.value = it
+                        onCompleted()
+                    }
+                    .setTitle(option.currentTitle!!)
                     .show(fragmentManager)
 
             option == registry.packageAppletFactory.activityCollection ->
                 ComponentSelectorDialog().setTitle(option.currentTitle!!)
+                    .setSelectedActivities(applet.value?.casted() ?: emptyList())
+                    .doOnCompleted {
+                        applet.value = it
+                        onCompleted()
+                    }
                     .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
                     .show(fragmentManager)
 
@@ -109,14 +123,15 @@ class AppletOptionOnClickListener(fragment: FlowEditorDialog) {
                 DistanceEditorDialog().setArguments(option.currentTitle) {
                     applet.value = it
                     onCompleted()
-                }.setDirection(applet.direction).show(fragmentManager)
+                }.setDistance(applet.value?.casted()).setDirection(applet.direction)
+                    .show(fragmentManager)
             }
 
             applet is Criterion<*, *> -> when (applet.valueType) {
                 AppletValues.VAL_TYPE_TEXT -> {
                     TextEditorDialog().configEditText {
                         it.setMaxLength(64)
-                    }.setArguments(option.currentTitle!!) {
+                    }.setArguments(option.currentTitle!!, applet.value?.casted()) {
                         if (it.isBlank()) {
                             return@setArguments R.string.empty_input_not_allowed.str
                         }

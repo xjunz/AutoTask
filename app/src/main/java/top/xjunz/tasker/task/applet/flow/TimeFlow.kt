@@ -1,8 +1,8 @@
 package top.xjunz.tasker.task.applet.flow
 
+import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.runtime.FlowRuntime
-import top.xjunz.tasker.engine.runtime.TaskContext
 import java.util.*
 
 /**
@@ -10,11 +10,11 @@ import java.util.*
  */
 class TimeFlow : Flow() {
 
-    override fun onPrepare(ctx: TaskContext, runtime: FlowRuntime) {
-        super.onPrepare(ctx, runtime)
-        runtime.setTarget(ctx.getOrPutArgument(id) {
+    override fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
+        super.onPrepare(task, runtime)
+        runtime.setTarget(runtime.getOrPutArgument(id) {
             Calendar.getInstance().also {
-                it.time = Date(System.currentTimeMillis())
+                it.timeInMillis = System.currentTimeMillis()
             }
         })
     }

@@ -81,6 +81,6 @@
 
     <string name="format_pkg_collection_desc">%s等共%d个应用程序</string>
     <string name="format_act_collection_desc">已指定%d个页面</string>
-    <string name="format_selected_pkg_count">已选择%d个应用程序</string>
-    <string name="format_selected_act_count">已选择%d个页面</string>
+    <string name="format_clear_selected_pkg">清空共%d个应用程序</string>
+    <string name="format_clear_selected_act">清空共%d个页面</string>
 </resources>

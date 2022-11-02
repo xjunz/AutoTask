@@ -10,8 +10,8 @@ import top.xjunz.tasker.engine.runtime.Event
 internal annotation class FlowDsl
 
 @FlowDsl
-internal fun RootFlow(init: Flow.() -> Unit): Flow {
-    return Flow().apply(init)
+internal fun DslFlow(initialTarget: Any? = null, init: Flow.() -> Unit): Flow {
+    return DslFlow(initialTarget).apply(init)
 }
 
 @FlowDsl
@@ -43,14 +43,4 @@ internal fun <T : Any, V : Any> DslCriterion<T, V>.Matcher(block: (T, V) -> Bool
 internal fun <T : Any, V : Any> DslCriterion<T, V>.Value(what: V, isInverted: Boolean = false) {
     value = what
     this.isInverted = isInverted
-}
-
-@FlowDsl
-internal fun Flow.And(block: And.() -> Unit) {
-    elements.add(And().apply(block))
-}
-
-@FlowDsl
-internal fun Flow.Or(block: Or.() -> Unit) {
-    elements.add(Or().apply(block))
 }

@@ -8,7 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 /**
  * @author xjunz 2022/10/03
  */
-private fun View.requireBottomSheetBehavior(): BottomSheetBehavior<*> {
+fun View.requireBottomSheetBehavior(): BottomSheetBehavior<*> {
     return (layoutParams as CoordinatorLayout.LayoutParams).behavior as BottomSheetBehavior<*>
 }
 

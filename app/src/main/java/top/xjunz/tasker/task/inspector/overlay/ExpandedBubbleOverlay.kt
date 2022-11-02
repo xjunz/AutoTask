@@ -108,11 +108,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                         ibShowGrid.isVisible = true
                     }
                     InspectorMode.COMPONENT -> {
-                        ibPinScreenshot.isVisible = false
-                        ibGamePad.isVisible = false
-                        vm.showGamePad.value = false
-                        ibLayers.isVisible = false
-                        ibShowGrid.isVisible = false
+                        /* no-op */
                     }
                     InspectorMode.COORDS -> {
                         ibPinScreenshot.isVisible = false

@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.RequiresApi
 import androidx.test.uiautomator.PointerGesture
+import top.xjunz.shared.utils.unsupportedOperation
 
 /**
  * @author xjunz 2021/9/19

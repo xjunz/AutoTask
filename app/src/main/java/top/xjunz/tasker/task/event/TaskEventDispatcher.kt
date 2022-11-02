@@ -22,7 +22,7 @@ class TaskEventDispatcher(looper: Looper, var callback: Callback) {
     private var curEventTime: Long = -1
     private var curPackageName: String? = null
     private var curActivityName: String? = null
-    private var prevContentChangedMills: Long = -1
+    private var prevContentChangedTime: Long = -1
     private var curPanelTitle: String? = null
 
     var contentChangedTimeout = 400
@@ -37,35 +37,35 @@ class TaskEventDispatcher(looper: Looper, var callback: Callback) {
     fun processAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
         if (event.eventTime < curEventTime && !event.isFullScreen) return
-        val eventClassName = event.className?.toString()
-        if (eventClassName == "android.inputmethodservice.SoftInputWindow") return
-        if (eventClassName == floatingInspector.getOverlayAccessibilityEventName()) return
+        val className = event.className?.toString()
+        if (className == "android.inputmethodservice.SoftInputWindow") return
+        if (className == floatingInspector.getOverlayAccessibilityEventName()) return
         curEventTime = event.eventTime
-        val eventFirstText = event.text.firstOrNull()?.toString()
+        val firstText = event.text.firstOrNull()?.toString()
         val prevPanelTitle = curPanelTitle
-        if (eventFirstText != null
+        if (firstText != null
             && event.eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             && event.contentChangeTypes != AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
             && packageName == curPackageName
         )
-            curPanelTitle = eventFirstText
+            curPanelTitle = firstText
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
 
                 val prevActivityName = curActivityName
-                val isActivity = eventClassName != null && eventClassName != curActivityName
-                        && isActivityExisting(packageName, eventClassName)
+                val isActivity = className != null && className != curActivityName
+                        && isActivityExisting(packageName, className)
 
                 if (isActivity)
-                    curActivityName = eventClassName
+                    curActivityName = className
 
                 if (
                     event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED
                     // Only full screen windows, because there may be overlay windows
                     && event.isFullScreen
                 ) {
-                    curPanelTitle = eventFirstText
+                    curPanelTitle = firstText
                     if (curPackageName != packageName) {
                         if (!isActivity)
                             curActivityName = null
@@ -97,8 +97,8 @@ class TaskEventDispatcher(looper: Looper, var callback: Callback) {
                 dispatchContentChanged(packageName)
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ->
-                if (curEventTime - prevContentChangedMills >= contentChangedTimeout) {
-                    prevContentChangedMills = curEventTime
+                if (curEventTime - prevContentChangedTime >= contentChangedTimeout) {
+                    prevContentChangedTime = curEventTime
                     dispatchContentChanged(packageName)
                 }
             else -> dispatchContentChanged(packageName)
@@ -119,7 +119,9 @@ class TaskEventDispatcher(looper: Looper, var callback: Callback) {
 
     private fun isActivityExisting(pkgName: String, actName: String): Boolean {
         val hashCode = 31 * pkgName.hashCode() + actName.hashCode()
-        return activitySetCache.contains(hashCode) || runCatching {
+        if (activitySetCache.contains(hashCode)) return true
+        if (activitySetCache.contains(-hashCode)) return false
+        return runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 app.packageManager.getActivityInfo(
                     ComponentName(pkgName, actName), PackageManager.ComponentInfoFlags.of(0)
@@ -130,6 +132,8 @@ class TaskEventDispatcher(looper: Looper, var callback: Callback) {
             }
         }.onSuccess {
             activitySetCache.add(hashCode)
+        }.onFailure {
+            activitySetCache.add(-hashCode)
         }.isSuccess
     }
 

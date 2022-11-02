@@ -1,13 +1,13 @@
 package top.xjunz.tasker.service
 
 import androidx.annotation.StringRes
+import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.Configurations
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
-import top.xjunz.tasker.util.runtimeException
 
 /**
  * @author xjunz 2022/07/23
