@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor
+package top.xjunz.tasker.ui.task.selector
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -25,10 +25,10 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
-import top.xjunz.tasker.task.applet.option.registry.FlowOptionRegistry
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.MainViewModel
@@ -40,11 +40,11 @@ import top.xjunz.tasker.util.Router
 /**
  * @author xjunz 2022/09/26
  */
-class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
+class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
 
     override val isFullScreen: Boolean = true
 
-    private val viewModel by viewModels<FlowEditorViewModel>()
+    private val viewModel by viewModels<AppletSelectorViewModel>()
 
     private val rvBottom: RecyclerView get() = binding.shoppingCart.rvBottom
 
@@ -52,14 +52,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
 
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
-            viewModel.appletOptionFactory.flowFactory.options,
+            viewModel.appletOptionFactory.flowRegistry.appletFlowOptions,
             ItemAppletFactoryBinding::class.java, {
                 itemView.setOnClickListener {
-                    viewModel.singleSelectFactory(adapterPosition)
+                    viewModel.selectFlowRegistry(adapterPosition)
                 }
             }) { binding, index, data ->
             binding.tvLabel.text = data.title
-            binding.tvLabel.isSelected = viewModel.selectedFactory eq index
+            binding.tvLabel.isSelected = viewModel.selectedFlowRegistry eq index
         }
     }
 
@@ -118,10 +118,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
         viewModel.title = title
     }
 
+    fun doOnCompletion(block: (List<Applet>) -> Unit) = doWhenCreated {
+        viewModel.onCompletion = block
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (viewModel.selectedFactory.isNull()) {
-            viewModel.singleSelectFactory(0)
+        if (viewModel.selectedFlowRegistry.isNull()) {
+            viewModel.selectFlowRegistry(0)
         }
         mainViewModel = requireActivity().viewModels<MainViewModel>().value
         binding.tvTitle.text = viewModel.title
@@ -133,10 +137,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
             binding.rvRight.updatePadding()
         }
         binding.shoppingCart.btnCount.setOnClickListener {
-            if (viewModel.candidates.require().isNotEmpty())
+            if (viewModel.candidates.isNotEmpty())
                 viewModel.showClearDialog.value = true
         }
         binding.shoppingCart.btnComplete.setOnClickListener {
+            viewModel.complete()
+            dismiss()
         }
         binding.cvHeader.setOnClickListener { v ->
             val mode = v.tag.casted<InspectorMode>()
@@ -149,12 +155,13 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
             }
         }
+        binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun observeLiveData() {
-        observe(viewModel.selectedFactory) {
+        observe(viewModel.selectedFlowRegistry) {
             if (binding.rvLeft.adapter == null) {
                 binding.rvLeft.adapter = leftAdapter
             } else {
@@ -172,15 +179,16 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
             transition.addTransition(ChangeBounds().addTarget(binding.rvRight))
             transition.addTransition(MaterialFadeThrough().addTarget(binding.cvHeader))
             binding.rootView.beginAutoTransition(transition)
-            when (viewModel.appletOptionFactory.flowFactory.options[it].appletId) {
-                FlowOptionRegistry.ID_PKG_APPLET_FACTORY -> {
+            val flowRegistry = viewModel.appletOptionFactory.flowRegistry
+            when (flowRegistry.appletFlowOptions[it]) {
+                flowRegistry.componentFlow -> {
                     binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =
                         R.string.format_enable_floating_inspector.format(InspectorMode.COMPONENT.label)
                             .parseAsHtml()
                 }
-                FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY -> {
+                flowRegistry.uiObjectFlow -> {
                     binding.cvHeader.tag = InspectorMode.UI_OBJECT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =
@@ -190,17 +198,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
                 else -> binding.cvHeader.isVisible = false
             }
         }
-        observe(viewModel.candidates) { list ->
-            if (rvBottom.adapter == null) {
-                bottomAdapter.setFlows(list)
-                rvBottom.adapter = bottomAdapter
-            } else {
-                if (list.isEmpty())
-                    shopCartIntegration.collapse()
-                bottomAdapter.updateFlows(list)
-            }
+        observe(viewModel.applets) { list ->
             binding.shoppingCart.btnCount.text =
                 R.string.format_applet_count.format(viewModel.getAppletsCount())
+            if (list.isEmpty())
+                shopCartIntegration.collapse()
+            bottomAdapter.submitList(list)
         }
         observeTransient(mainViewModel.onRequestRoute) { host ->
             if (host == Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
@@ -212,7 +215,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
         }
         observeTransient(viewModel.onAppletAdded) {
             viewModel.appendApplet(it.second)
-            viewModel.candidates.notifySelfChanged()
             val vh = binding.rvRight.findViewHolderForAdapterPosition(it.first)
             if (vh != null)
                 shopCartIntegration.animateIntoShopCart(vh.itemView)

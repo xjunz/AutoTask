@@ -31,9 +31,9 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     private val uncheckedOptions = mutableSetOf<AppletOption>()
 
     private val uiObjectFactory =
-        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY)
+        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
 
-    private val pkgFactory = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_APPLET_FACTORY)
+    private val pkgFactory = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_OPTION_REGISTRY)
 
     private val options = mutableListOf<AppletOption>()
 
@@ -135,8 +135,6 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     @SuppressLint("NotifyDataSetChanged")
     override fun onOverlayInflated() {
         super.onOverlayInflated()
-        uiObjectFactory.brandAll()
-        pkgFactory.brandAll()
         binding.btnCancel.setOnClickListener {
             vm.showNodeInfo.value = false
         }

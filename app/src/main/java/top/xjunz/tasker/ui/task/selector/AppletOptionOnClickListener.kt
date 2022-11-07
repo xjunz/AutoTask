@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor
+package top.xjunz.tasker.ui.task.selector
 
 import androidx.fragment.app.viewModels
 import top.xjunz.shared.ktx.casted
@@ -17,19 +17,19 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.TextEditorDialog
-import top.xjunz.tasker.ui.task.editor.selector.*
+import top.xjunz.tasker.ui.task.selector.option.*
 
 /**
  * @author xjunz 2022/10/08
  */
-class AppletOptionOnClickListener(fragment: FlowEditorDialog) {
+class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
 
     private val fragmentManager by lazy {
         fragment.parentFragmentManager
     }
 
     private val registry: AppletOptionFactory by lazy {
-        fragment.viewModels<FlowEditorViewModel>().value.appletOptionFactory
+        fragment.viewModels<AppletSelectorViewModel>().value.appletOptionFactory
     }
 
     fun onClick(applet: Applet, onCompleted: () -> Unit) {
@@ -38,7 +38,7 @@ class AppletOptionOnClickListener(fragment: FlowEditorDialog) {
 
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         when {
-            option == registry.packageAppletFactory.pkgCollection ->
+            option == registry.packageRegistry.pkgCollection ->
                 ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
                         applet.value = it
@@ -47,7 +47,7 @@ class AppletOptionOnClickListener(fragment: FlowEditorDialog) {
                     .setTitle(option.currentTitle!!)
                     .show(fragmentManager)
 
-            option == registry.packageAppletFactory.activityCollection ->
+            option == registry.packageRegistry.activityCollection ->
                 ComponentSelectorDialog().setTitle(option.currentTitle!!)
                     .setSelectedActivities(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {

@@ -65,7 +65,7 @@ class FlowRuntime private constructor() {
         var arg = arguments[id]
         if (arg == null) {
             arg = defValue()
-            arguments.put(id, arg)
+            arguments[id] = arg
         }
         return arg.casted()
     }

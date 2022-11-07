@@ -123,19 +123,17 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         overlaySettingLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 updateOverlayGrantButton()
-                if (FloatingInspector.isReady()) {
+                if (FloatingInspector.isReady())
                     showInspectorAndDismissSelf()
-                } else {
+                if (!Settings.canDrawOverlays(app))
                     toast(R.string.grant_failed)
-                }
             }
         accessibilitySettingsLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (FloatingInspector.isReady()) {
+                if (FloatingInspector.isReady())
                     showInspectorAndDismissSelf()
-                } else {
+                if (A11yAutomatorService.get() == null)
                     toast(R.string.grant_failed)
-                }
             }
     }
 

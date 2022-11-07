@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor.selector
+package top.xjunz.tasker.ui.task.selector.option
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -16,8 +16,6 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.UiObjectContext
-import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
 
 /**
  * @author xjunz 2022/09/27

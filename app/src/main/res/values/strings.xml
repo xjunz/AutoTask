@@ -17,7 +17,7 @@
     <string name="more">更多</string>
     <string name="service_is_running">服务正在运行…</string>
     <string name="format_running_duration">已运行 %02d:%02d:%02d</string>
-    <string name="stop">停止&#160;&#160;</string>
+    <string name="stop">停止</string>
     <string name="about">关于</string>
     <string name="settings">设置</string>
     <string name="statistics">统计数据</string>
@@ -26,10 +26,10 @@
     <string name="usability_test">可用性测试</string>
     <string name="install_shizuku">安装Shizuku</string>
     <string name="shizuku_not_installed">未安装Shizuku</string>
-    <string name="grant">授权&#160;&#160;</string>
+    <string name="grant">授权</string>
     <string name="granted">已授权</string>
     <string name="enter">进入</string>
-    <string name="run">启动&#160;&#160;</string>
+    <string name="run">启动</string>
     <string name="service_not_started">服务未启动</string>
     <string name="pls_start_service">请先启动服务</string>
     <string name="prompt_start_service">点击右侧按钮启动服务</string>
@@ -228,4 +228,12 @@
     <string name="nothing_selected">未选择任何项目</string>
     <string name="prompt_clear_all">你确定要清空吗？</string>
     <string name="collapse_all_to_drag">折叠全部规则才能进行拖动哦</string>
+    <string name="else_if">否则如果</string>
+    <string name="_else">否则</string>
+    <string name="no_rule_added">未指定任何规则</string>
+    <string name="add_rules">添加规则</string>
+    <string name="reach_max_applet_size">已达到最大规则数，无法继续添加规则</string>
+    <string name="over_max_applet_size">超过最大规则数，添加失败！</string>
+    <string name="format_reach_required_applet_size">该规则组只允许%d条规则哦~</string>
+    <string name="removed">已移除</string>
 </resources>

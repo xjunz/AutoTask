@@ -1,11 +1,13 @@
 package top.xjunz.tasker.task.applet.option
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.text.style.UnderlineSpan
 import androidx.annotation.ArrayRes
 import top.xjunz.shared.ktx.casted
-import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -19,7 +21,10 @@ import top.xjunz.tasker.ui.ColorSchemes
  * @author xjunz 2022/09/22
  */
 abstract class AppletOption(
-    val appletId: Int, private val titleRes: Int, private val invertedTitleRes: Int
+    val appletId: Int,
+    val registryId: Int,
+    private val titleRes: Int,
+    private val invertedTitleRes: Int
 ) : Comparable<AppletOption> {
 
     companion object {
@@ -59,11 +64,6 @@ abstract class AppletOption(
      * Whether this is an valid option able to yield an applet.
      */
     val isValid = appletId != -1
-
-    /**
-     * The id of the factory where the option is manufactured.
-     */
-    var factoryId: Int = -1
 
     /**
      * The category id identifying the option's category and its position in the category.
@@ -125,6 +125,25 @@ abstract class AppletOption(
         return if (isInverted) invertedTitle else title
     }
 
+    fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
+        val relationText = if (isAnd) R.string._and.text else R.string._or.text
+        return SpannableStringBuilder().append(
+            relationText,
+            ForegroundColorSpan(ColorSchemes.colorPrimary),
+            SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+        ).append(origin).also {
+            it.setSpan(
+                UnderlineSpan(), 0, 1,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            it.setSpan(
+                StyleSpan(Typeface.BOLD), 0, 1,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+    }
+
     fun withValue(value: Any?): AppletOption {
         this.value = value
         return this
@@ -144,7 +163,7 @@ abstract class AppletOption(
             "Invalid applet option unable to yield an applet!"
         }
         return rawCreateApplet().also {
-            it.id = factoryId shl 16 or appletId
+            it.id = registryId shl 16 or appletId
             it.isInverted = isInverted
             it.isInvertible = isInvertible
             it.value = value
@@ -168,7 +187,7 @@ abstract class AppletOption(
     protected abstract fun rawCreateApplet(): Applet
 
     override fun compareTo(other: AppletOption): Int {
-        check(factoryId == other.factoryId) {
+        check(registryId == other.registryId) {
             "Only applets with the same factory id are comparable!"
         }
         check(categoryId > -1)
@@ -176,7 +195,7 @@ abstract class AppletOption(
     }
 
     fun isOptionOf(applet: Applet): Boolean {
-        return factoryId shl 16 or appletId == applet.id
+        return registryId shl 16 or appletId == applet.id
     }
 
     override fun equals(other: Any?): Boolean {
@@ -186,14 +205,14 @@ abstract class AppletOption(
         other as AppletOption
 
         if (appletId != other.appletId) return false
-        if (factoryId != other.factoryId) return false
+        if (registryId != other.registryId) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = appletId
-        result = 31 * result + factoryId
+        result = 31 * result + registryId
         return result
     }
 
@@ -201,36 +220,10 @@ abstract class AppletOption(
      * Clone the option clean (without cloning late init variables, such as [value]).
      */
     fun cloned(): AppletOption {
-        return AppletOption(appletId, titleRes, invertedTitleRes, ::yieldApplet)
-            .withDescriber(describer).also {
-                it.factoryId = factoryId
+        return object : AppletOption(appletId, registryId, titleRes, invertedTitleRes) {
+            override fun rawCreateApplet(): Applet {
+                return yieldApplet()
             }
-    }
-}
-
-fun AppletCategoryOption(label: Int): AppletOption {
-    return AppletOption(-1, label, AppletOption.TITLE_NONE) {
-        unsupportedOperation()
-    }
-}
-
-fun AppletOption(
-    appletId: Int,
-    title: Int,
-    invertedTitle: Int = AppletOption.TITLE_AUTO_INVERTED,
-    creator: () -> Applet
-): AppletOption {
-    return object : AppletOption(appletId, title, invertedTitle) {
-        override fun rawCreateApplet(): Applet {
-            return creator.invoke()
-        }
-    }
-}
-
-fun NotInvertibleAppletOption(appletId: Int, title: Int, creator: () -> Applet): AppletOption {
-    return object : AppletOption(appletId, title, TITLE_NONE) {
-        override fun rawCreateApplet(): Applet {
-            return creator.invoke()
-        }
+        }.withDescriber(describer)
     }
 }

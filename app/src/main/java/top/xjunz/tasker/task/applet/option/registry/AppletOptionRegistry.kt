@@ -1,8 +1,8 @@
 package top.xjunz.tasker.task.applet.option.registry
 
+import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.task.applet.anno.AppletCategory
-import top.xjunz.tasker.task.applet.option.AppletCategoryOption
 import top.xjunz.tasker.task.applet.option.AppletOption
 
 /**
@@ -14,7 +14,7 @@ abstract class AppletOptionRegistry(val id: Int) {
 
     abstract val title: Int
 
-    abstract val categoryNames: IntArray
+    abstract val categoryNames: IntArray?
 
     private fun parseDeclaredOptions(): List<AppletOption> {
         return javaClass.declaredFields.mapNotNull m@{
@@ -22,24 +22,55 @@ abstract class AppletOptionRegistry(val id: Int) {
             val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
-            option.factoryId = id
             option.categoryId = anno.categoryId
             it.isAccessible = accessible
             return@m option
         }.sorted()
     }
 
-    val options: List<AppletOption> by lazy {
+    private fun AppletCategoryOption(label: Int): AppletOption {
+        return AppletOption(-1, label, AppletOption.TITLE_NONE) {
+            unsupportedOperation()
+        }
+    }
+
+    protected inline fun AppletOption(
+        appletId: Int,
+        title: Int,
+        invertedTitle: Int = AppletOption.TITLE_AUTO_INVERTED,
+        crossinline creator: () -> Applet
+    ): AppletOption {
+        return object : AppletOption(appletId, id, title, invertedTitle) {
+            override fun rawCreateApplet(): Applet {
+                return creator.invoke()
+            }
+        }
+    }
+
+    protected inline fun NotInvertibleAppletOption(
+        appletId: Int,
+        title: Int,
+        crossinline creator: () -> Applet
+    ): AppletOption {
+        return object : AppletOption(appletId, id, title, TITLE_NONE) {
+            override fun rawCreateApplet(): Applet {
+                return creator.invoke()
+            }
+        }
+    }
+
+    val allOptions: List<AppletOption> by lazy {
         parseDeclaredOptions()
     }
 
     val categorizedOptions: List<AppletOption> by lazy {
         val ret = ArrayList<AppletOption>()
         var previousCategory = -1
-        options.forEach {
+        allOptions.forEach {
             if (it.categoryIndex != previousCategory) {
-                if (categoryNames[it.categoryIndex] != AppletOption.TITLE_NONE) {
-                    ret.add(AppletCategoryOption(categoryNames[it.categoryIndex]))
+                val name = categoryNames?.getOrNull(it.categoryIndex)
+                if (name != null && name != AppletOption.TITLE_NONE) {
+                    ret.add(AppletCategoryOption(name))
                 }
             }
             ret.add(it)
@@ -48,26 +79,11 @@ abstract class AppletOptionRegistry(val id: Int) {
         return@lazy ret
     }
 
-    /**
-     * Brand all options with my factory id. If you access options via [AppletOptionRegistry.options] or
-     * [AppletOptionRegistry.categorizedOptions], calling this method is not necessary.
-     */
-    fun brandAll() {
-        for (field in javaClass.declaredFields) {
-            field.getDeclaredAnnotation(AppletCategory::class.java) ?: continue
-            val accessible = field.isAccessible
-            field.isAccessible = true
-            val option = field.get(this) as AppletOption
-            option.factoryId = id
-            field.isAccessible = accessible
-        }
-    }
-
     fun createAppletFromId(id: Int): Applet {
-        return options.first { it.appletId == id }.yieldApplet()
+        return allOptions.first { it.appletId == id }.yieldApplet()
     }
 
     fun findAppletOptionById(id: Int): AppletOption {
-        return options.first { it.appletId == id }
+        return allOptions.first { it.appletId == id }
     }
 }

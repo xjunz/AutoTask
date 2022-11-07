@@ -6,7 +6,7 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
 /**
  * @author xjunz 2022/11/01
  */
-class DslFlow(private val initialTarget: Any? = null) : Flow() {
+internal class DslFlow(private val initialTarget: Any? = null) : Flow() {
 
     override fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
         if (initialTarget != null)

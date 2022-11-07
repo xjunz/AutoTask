@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor
+package top.xjunz.tasker.ui.task.selector
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator

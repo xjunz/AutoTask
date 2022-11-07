@@ -5,6 +5,7 @@ import androidx.annotation.MainThread
 import androidx.test.uiautomator.UiDevice
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
@@ -20,19 +21,25 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
 @Serializable
 open class AutomatorTask(val name: String) {
 
+    companion object {
+        private val globalVariableRegistry = mutableMapOf<Int, Any>()
+
+        fun clearGlobalVariables() {
+            globalVariableRegistry.clear()
+        }
+    }
+
     @Transient
     lateinit var rootFlow: Flow
 
     var label: String? = null
-
-    lateinit var flowPath: String
 
     @Transient
     lateinit var uiDevice: UiDevice
 
     /**
      * Whether the task is active or not. Even if set to `false`, the task may continue executing until
-     * its latest [Applet] is completed. You can observe [OnStateChangedListener.onTaskStopped] to
+     * its latest [Applet] is completed. You can observe [OnStateChangedListener.onCancelled] to
      * get notified. Inactive tasks will no longer response to any further [Event] from [launch].
      */
     @Transient
@@ -40,7 +47,7 @@ open class AutomatorTask(val name: String) {
         private set
 
     @Transient
-    var onStateChangedListener: OnStateChangedListener = OnStateChangedListener.NoOp
+    var onStateChangedListener: OnStateChangedListener? = null
 
     @Transient
     val id = name.hashCode()
@@ -62,24 +69,42 @@ open class AutomatorTask(val name: String) {
     class TaskCancellationException(task: AutomatorTask) :
         Exception("Task '$task' is cancelled due to user request!")
 
+    /**
+     * Get or put a global variable if absent. The variable can be shared across tasks.
+     */
+    fun <V : Any> getOrPutGlobalVariable(key: Int, initializer: () -> V): V {
+        return globalVariableRegistry.getOrPut(key, initializer).casted()
+    }
+
     interface OnStateChangedListener {
 
-        fun onTaskStarted() {}
+        fun onStarted() {}
 
         /**
-         * When the flow completes due to an unexpected error.
+         * When the task completes due to an unexpected error.
+         *
+         * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onAppletError(runtime: FlowRuntime, t: Throwable) {}
+        fun onError(runtime: FlowRuntime, t: Throwable) {}
 
         /**
-         * When the flow completes due to an applet failure.
+         * When the flow completes failed.
+         *
+         * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onAppletFailure(runtime: FlowRuntime) {}
+        fun onFailure(runtime: FlowRuntime) {}
 
         /**
-         * When the task stops running.
+         * When the task completes successful.
+         *
+         * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onTaskStopped() {}
+        fun onSuccess(runtime: FlowRuntime) {}
+
+        /**
+         * When the task is cancelled.
+         */
+        fun onCancelled() {}
 
         object NoOp : OnStateChangedListener
     }
@@ -99,7 +124,7 @@ open class AutomatorTask(val name: String) {
         onStateChangedListener = stateListener
         startTimestamp = System.currentTimeMillis()
         isActive = true
-        onStateChangedListener.onTaskStarted()
+        onStateChangedListener?.onStarted()
     }
 
     fun deactivate() {
@@ -108,7 +133,7 @@ open class AutomatorTask(val name: String) {
         }
         isActive = false
         if (!isExecuting) {
-            onStateChangedListener.onTaskStopped()
+            onStateChangedListener?.onCancelled()
         }
     }
 
@@ -131,18 +156,23 @@ open class AutomatorTask(val name: String) {
             runtime.observer = observer
         try {
             rootFlow.apply(this, runtime)
+            if (runtime.isSuccessful) {
+                onStateChangedListener?.onSuccess(runtime)
+            } else {
+                onStateChangedListener?.onFailure(runtime)
+            }
+            return runtime.isSuccessful
         } catch (t: Throwable) {
-            isExecuting = false
             when (t) {
-                is FlowFailureException -> onStateChangedListener.onAppletFailure(runtime)
-                is TaskCancellationException -> onStateChangedListener.onTaskStopped()
-                else -> onStateChangedListener.onAppletError(runtime, t)
+                is FlowFailureException -> onStateChangedListener?.onFailure(runtime)
+                is TaskCancellationException -> onStateChangedListener?.onCancelled()
+                else -> onStateChangedListener?.onError(runtime, t)
             }
             return false
         } finally {
+            isExecuting = false
             runtime.recycle()
         }
-        return true
     }
 
     override fun equals(other: Any?): Boolean {

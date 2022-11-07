@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task
+package top.xjunz.tasker.ui.task.editor
 
 import android.os.Bundle
 import android.view.View

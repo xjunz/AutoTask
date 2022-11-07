@@ -7,8 +7,12 @@
         <item name="android:letterSpacing">.1</item>
         <item name="android:windowLightStatusBar">?isLightTheme</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">?isLightTheme</item>
-        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow
-        </item>
+        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
+    </style>
+
+    <style name="FlowEditorPopupMenuStyle" parent="@style/Widget.Material3.PopupMenu.Overflow">
+        <item name="android:dropDownVerticalOffset">16dp</item>
+        <item name="android:dropDownHorizontalOffset">-24dp</item>
     </style>
 
     <style name="Base.Scrim">

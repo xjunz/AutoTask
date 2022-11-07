@@ -18,18 +18,18 @@ class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
 
     @AppletCategory(0)
-    private val pkgEntered =
+    val pkgEntered =
         EventFilterOption(Event.EVENT_ON_PACKAGE_ENTERED, R.string.on_package_entered)
 
     @AppletCategory(1)
-    private val pkgExited =
+    val pkgExited =
         EventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_left)
 
     @AppletCategory(2)
-    private val contentChanged =
+    val contentChanged =
         EventFilterOption(Event.EVENT_ON_CONTENT_CHANGED, R.string.on_content_changed)
 
     override val title: Int = AppletOption.TITLE_NONE
 
-    override val categoryNames: IntArray = intArrayOf(AppletOption.TITLE_NONE)
+    override val categoryNames: IntArray? = null
 }

@@ -6,52 +6,44 @@ import top.xjunz.tasker.task.applet.option.registry.*
 
 
 /**
- * The factory manufacturing all registered [AppletOption]s and [Applet]s.
+ * The factory manufacturing all registered [AppletOption]s.
  *
  * @author xjunz 2022/08/09
  */
 class AppletOptionFactory : AppletFactory {
 
-    val flowFactory = FlowOptionRegistry()
+    val flowRegistry = FlowOptionRegistry()
 
-    private val eventFilterFactory =
-        EventFilterOptionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_FACTORY)
+    val eventRegistry =
+        EventFilterOptionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_REGISTRY)
 
-    val packageAppletFactory = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_APPLET_FACTORY)
+    val packageRegistry = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_OPTION_REGISTRY)
 
-    private val uiObjectAppletFactory =
-        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_APPLET_FACTORY)
+    private val uiObjectRegistry =
+        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
 
-    val timeAppletFactory = TimeOptionRegistry(FlowOptionRegistry.ID_TIME_APPLET_FACTORY)
+    val timeAppletFactory = TimeOptionRegistry(FlowOptionRegistry.ID_TIME_OPTION_REGISTRY)
 
-    private val allFactories = arrayOf(
-        flowFactory,
-        eventFilterFactory,
-        packageAppletFactory,
-        uiObjectAppletFactory,
-        timeAppletFactory
-    )
-
-    val appletFactories = arrayOf(
-        eventFilterFactory, packageAppletFactory, uiObjectAppletFactory, timeAppletFactory
+    private val allRegistries = arrayOf(
+        flowRegistry, eventRegistry, packageRegistry, uiObjectRegistry, timeAppletFactory
     )
 
     fun findOption(applet: Applet): AppletOption {
-        return findFactoryById(applet.factoryId).findAppletOptionById(applet.appletId)
+        return findRegistryById(applet.registryId).findAppletOptionById(applet.appletId)
     }
 
     override fun createAppletById(id: Int): Applet {
-        val factoryId = id ushr 16
+        val registryId = id ushr 16
         val appletId = id and 0xFFFF
-        return findFactoryById(factoryId).createAppletFromId(appletId)
+        return findRegistryById(registryId).createAppletFromId(appletId)
     }
 
-    fun findFlowOption(factoryId: Int): AppletOption {
-        return flowFactory.findAppletOptionById(factoryId)
+    fun findFlowOption(registryId: Int): AppletOption {
+        return flowRegistry.findAppletOptionById(registryId)
     }
 
-    fun findFactoryById(factoryId: Int): AppletOptionRegistry {
-        return allFactories.first { it.id == factoryId }
+    fun findRegistryById(registryId: Int): AppletOptionRegistry {
+        return allRegistries.first { it.id == registryId }
     }
 }
 

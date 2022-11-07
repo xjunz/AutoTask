@@ -1,5 +1,6 @@
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.engine.runtime.FlowRuntime
@@ -43,13 +44,13 @@ abstract class Applet {
      * relation and this applet will not be executed when its previous peer succeeded. If this applet
      * is the first element of a flow, this field will be ignored.
      */
-    var isAnd: Boolean = true
+    open var isAnd: Boolean = true
 
     /**
      * The id identifying an applet's factory and type.
      *
      * @see appletId
-     * @see factoryId
+     * @see registryId
      */
     var id: Int = NO_ID
 
@@ -72,6 +73,10 @@ abstract class Applet {
      * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
      */
     var isInverted = false
+        set(value) {
+            if (value && !isInvertible) unsupportedOperation("This applet is not invertible!")
+            field = value
+        }
 
     /**
      * The masked type of value for `serialization`.
@@ -80,9 +85,9 @@ abstract class Applet {
         internal set
 
     /**
-     * Get the id of the factory where the applet is created.
+     * Get the id of the registry where the applet is created.
      */
-    inline val factoryId get() = id ushr 16
+    inline val registryId get() = id ushr 16
 
     /**
      * Get the type id of this applet.
@@ -94,6 +99,15 @@ abstract class Applet {
     var index: Int = -1
 
     var value: Any? = null
+
+    fun requireParent() = parent!!
+
+    fun isChildOf(flow: Flow): Boolean {
+        if (parent == null) return false
+        if (parent === flow)
+            return true
+        return requireParent().isChildOf(flow)
+    }
 
     /**
      * Execute the applet.
@@ -111,8 +125,7 @@ abstract class Applet {
         isInverted = !isInverted
     }
 
-    protected fun collectionTypeOf(rawType: Int): Int =
-        rawType or AppletValues.MASK_VAL_TYPE_COLLECTION
+    protected fun collectionTypeOf(rawType: Int) = rawType or AppletValues.MASK_VAL_TYPE_COLLECTION
 
     override fun toString(): String {
         if (label == null) {

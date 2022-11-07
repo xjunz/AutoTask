@@ -43,14 +43,6 @@ internal class FlowTest {
                     Matcher { s: String, s2: String -> s.startsWith(s2) }
                 }
 
-                If {
-                    UnaryCriterion {
-                        label = "contains"
-                        Value("b")
-                        Matcher { s: String, s2: String -> s.contains(s2) }
-                    }
-                }
-
                 UnaryCriterion {
                     label = "contains2"
                     Value("task")
@@ -59,20 +51,20 @@ internal class FlowTest {
             }
         }
         MockTask.activate(object : AutomatorTask.OnStateChangedListener {
-            override fun onTaskStarted() {
+            override fun onStarted() {
                 println("---- onTaskStarted ----")
             }
 
-            override fun onAppletError(runtime: FlowRuntime, t: Throwable) {
+            override fun onError(runtime: FlowRuntime, t: Throwable) {
                 println("onAppletError: ${runtime.currentApplet}")
                 t.printStackTrace()
             }
 
-            override fun onAppletFailure(runtime: FlowRuntime) {
+            override fun onFailure(runtime: FlowRuntime) {
                 println("---- onAppletFailure: ${runtime.currentApplet} ----")
             }
 
-            override fun onTaskStopped() {
+            override fun onCancelled() {
                 println("onTaskStopped")
             }
         })
@@ -95,10 +87,12 @@ internal class FlowTest {
                 println(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> skipped")
             }
         }
+        AutomatorTask.clearGlobalVariables()
         assert(MockTask.launch(events, observer))
     }
 
     private fun Applet.isAndToString(): String {
+        if (this is ControlFlow) return ""
         if (index == 0) return ""
         return if (isAnd) "And " else "Or "
     }

@@ -12,7 +12,7 @@ import me.zhanghai.android.appiconloader.AppIconLoader
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.dp
-import top.xjunz.tasker.ui.task.editor.selector.PackageInfoWrapper
+import top.xjunz.tasker.ui.task.selector.option.PackageInfoWrapper
 
 /**
  * @author xjunz 2022/10/07

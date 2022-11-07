@@ -25,6 +25,6 @@ internal object NumberRangeUtil {
         if (a is Long && b is Long)
             return a.compareTo(b)
 
-        unsupportedOperation("Unsupported comparison number type: $a, $b!")
+        unsupportedOperation("Unsupported number type: ${a::class.java} and ${b::class.java}!")
     }
 }

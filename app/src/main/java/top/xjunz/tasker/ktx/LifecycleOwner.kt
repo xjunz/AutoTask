@@ -47,6 +47,14 @@ fun <V> LifecycleOwner.observe(ld: LiveData<V>, observer: Observer<V>) {
     ld.observe(this, observer)
 }
 
+fun <V> LifecycleOwner.observeNostalgic(ld: LiveData<V>, observer: (prev: V?, cur: V) -> Unit) {
+    var prevValue = ld.value
+    ld.observe(this) {
+        observer(prevValue, it)
+        prevValue = it
+    }
+}
+
 inline fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, crossinline observer: (V) -> Unit) {
     observe(ld, object : Observer<V> {
         override fun onChanged(t: V) {
@@ -70,7 +78,7 @@ inline fun <V> LifecycleOwner.observeTransient(
         if (it != null) {
             observer.invoke(it)
             // Must postValue(), otherwise the `null` value will fall through.
-            ld.postValue(null)
+            ld.value = null
         }
     }
 }

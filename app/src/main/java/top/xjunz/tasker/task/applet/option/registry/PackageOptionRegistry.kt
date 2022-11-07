@@ -13,9 +13,7 @@ import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.PackageInfoContext
-import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.NotInvertibleAppletOption
-import top.xjunz.tasker.ui.task.editor.selector.PackageInfoWrapper.Companion.wrapped
+import top.xjunz.tasker.ui.task.selector.option.PackageInfoWrapper.Companion.wrapped
 import top.xjunz.tasker.util.PackageInfoLoader
 
 /**

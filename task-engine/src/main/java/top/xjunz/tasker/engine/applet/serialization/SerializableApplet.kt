@@ -32,17 +32,17 @@ class SerializableApplet(
 
     companion object {
         /**
-         * Convert an normal applet to a serializable applet.
+         * Convert a normal applet to a serializable applet.
          */
         fun Applet.toSerializable(): SerializableApplet {
             val sa = SerializableApplet(id, isAnd, isInverted, serializeValue(value), valueType)
             if (this is Flow) {
-                check(count != 0) {
+                check(size != 0) {
                     "No element!"
                 }
                 sa.remark = remark
-                sa.elements = Array(count) {
-                    elements[it].toSerializable()
+                sa.elements = Array(size) {
+                    this[it].toSerializable()
                 }
             }
             return sa
@@ -57,7 +57,7 @@ class SerializableApplet(
         if (prototype is Flow) {
             prototype.remark = remark
             elements?.forEach {
-                prototype.elements.add(it.toApplet(registry))
+                prototype.add(it.toApplet(registry))
             }
         }
         if (literal != null)

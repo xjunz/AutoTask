@@ -16,17 +16,17 @@ internal fun DslFlow(initialTarget: Any? = null, init: Flow.() -> Unit): Flow {
 
 @FlowDsl
 internal fun Flow.If(block: If.() -> Unit) {
-    elements.add(If().apply(block))
+    add(If().apply(block))
 }
 
 @FlowDsl
 internal fun Flow.When(@Event.EventType eventType: Int) {
-    elements.add(When.ofEvent(eventType))
+    add(When.ofEvent(eventType))
 }
 
 @FlowDsl
 internal fun <T : Any, V : Any> Flow.DslCriterion(block: DslCriterion<T, V>.() -> Unit) {
-    elements.add(DslCriterion<T, V>().apply(block))
+    add(DslCriterion<T, V>().apply(block))
 }
 
 @FlowDsl

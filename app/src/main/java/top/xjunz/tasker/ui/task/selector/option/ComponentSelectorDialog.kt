@@ -1,9 +1,8 @@
-package top.xjunz.tasker.ui.task.editor.selector
+package top.xjunz.tasker.ui.task.selector.option
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.os.Bundle
-import android.transition.ChangeBounds
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.PopupMenu
@@ -21,7 +20,7 @@ import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.ui.task.editor.ShoppingCartIntegration
+import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
 
 /**
  * @author xjunz 2022/10/07
@@ -232,7 +231,6 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
     }
 
     private fun observeLiveData() {
-        val transition = ChangeBounds().addTarget(binding.shoppingCart.root)
         observe(viewModel.selectedCount) {
             binding.shoppingCart.btnCount.text = if (viewModel.mode == MODE_PACKAGE) {
                 R.string.format_clear_selected_pkg.format(it)

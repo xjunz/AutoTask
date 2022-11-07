@@ -8,7 +8,7 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
 /**
  * @author xjunz 2022/08/11
  */
-class When : Flow() {
+class When : ControlFlow() {
 
     override val requiredElementCount: Int = 1
 
@@ -18,10 +18,10 @@ class When : Flow() {
 
         fun ofEvent(@Event.EventType event: Int): When {
             return When().apply {
-                if (elements.isEmpty()) {
-                    elements.add(EventCriterion(event))
+                if (isEmpty()) {
+                    add(EventCriterion(event))
                 } else {
-                    elements[0] = EventCriterion(event)
+                    this[0] = EventCriterion(event)
                 }
             }
         }

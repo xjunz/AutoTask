@@ -8,14 +8,6 @@
         android:layout_height="match_parent"
         android:background="?colorSurface">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_task_editor"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="10"
-            tools:listitem="@layout/item_flow_item" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar"
@@ -23,7 +15,8 @@
             android:layout_height="wrap_content"
             android:stateListAnimator="@animator/sla_appbar"
             app:layout_constraintTop_toTopOf="parent"
-            app:liftOnScroll="true">
+            app:liftOnScroll="true"
+            app:liftOnScrollTargetViewId="@id/rv_task_editor">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -34,7 +27,7 @@
                     android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
+                    android:layout_marginStart="16dp"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -59,12 +52,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_task_editor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            tools:itemCount="10"
+            tools:listitem="@layout/item_flow_item" />
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scroll_view"
-            android:paddingHorizontal="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="3dp"
+            android:paddingHorizontal="16dp"
             android:transitionGroup="true"
             app:backgroundTint="?colorSurface"
             app:behavior_draggable="true"

@@ -2,7 +2,7 @@
  * Copyright (c) 2022 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.ui.task.editor.selector
+package top.xjunz.tasker.ui.task.selector.option
 
 import android.content.Context
 import android.view.LayoutInflater

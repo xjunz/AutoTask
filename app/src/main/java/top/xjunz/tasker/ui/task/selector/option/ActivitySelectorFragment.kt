@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor.selector
+package top.xjunz.tasker.ui.task.selector.option
 
 import android.annotation.SuppressLint
 import android.content.ComponentName

@@ -124,4 +124,3 @@ fun View.shake() {
         0F, 20F, -20F, 15F, -15F, 10F, -10F, 5F, -5F, 0F
     ).start()
 }
-

@@ -7,30 +7,92 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/selector_bg_selectable_item"
-        android:padding="16dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp">
 
         <TextView
-            android:id="@+id/tv_label"
+            android:id="@+id/tv_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="2"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Overline"
+            android:textColor="?colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="123" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="tv_number,divider_bott,divider_top"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="8dp" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider_top"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="2dp"
+            app:dividerColor="@color/material_on_surface_stroke"
+            app:layout_constraintBottom_toTopOf="@id/tv_number"
+            app:layout_constraintEnd_toEndOf="@id/tv_number"
+            app:layout_constraintStart_toStartOf="@id/tv_number"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider_bott"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            app:dividerColor="@color/material_on_surface_stroke"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/tv_number"
+            app:layout_constraintStart_toStartOf="@id/tv_number"
+            app:layout_constraintTop_toBottomOf="@id/tv_number" />
+
+        <TextView
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            app:layout_constraintBottom_toTopOf="@id/tv_label"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginEnd="8dp"
+            android:background="?selectableItemBackground"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
+            app:layout_constraintEnd_toStartOf="@+id/ib_action"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_number"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_goneMarginBottom="8dp"
-            tools:text="进入应用程序时" />
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_goneMarginTop="0dp"
+            tools:text="Hello"
+            tools:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         <TextView
             android:id="@+id/tv_desc"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/tv_label"
-            app:layout_constraintTop_toBottomOf="@+id/tv_label"
-            tools:text="包含3条规则" />
+            app:layout_constraintEnd_toStartOf="@+id/ib_action"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:text="@tools:sample/lorem" />
 
+        <ImageButton
+            android:id="@+id/ib_action"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_selectable_circle"
+            android:contentDescription="@{@string/invert}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_switch_24"
+            app:tint="?colorPrimary" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </layout>

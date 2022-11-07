@@ -11,13 +11,13 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
 class UiObjectFlow : Flow() {
 
     override fun doApply(task: AutomatorTask, runtime: FlowRuntime) {
-        val uiObjectContext = UiObjectContext()
-        runtime.setTarget(uiObjectContext)
-        val node = runtime.getOrPutArgument(id) {
+        val ctx = UiObjectContext()
+        runtime.setTarget(ctx)
+        val node = task.getOrPutGlobalVariable(id) {
             task.uiAutomation.rootInActiveWindow
         }.findFirst {
             task.ensureActive()
-            uiObjectContext.source = it
+            ctx.source = it
             super.doApply(task, runtime)
             runtime.isSuccessful
         }

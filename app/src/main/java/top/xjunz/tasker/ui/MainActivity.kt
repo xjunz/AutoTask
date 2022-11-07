@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
-import android.view.Gravity
+import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -23,7 +23,7 @@ import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
-import top.xjunz.tasker.ui.task.TaskShowcaseDialog
+import top.xjunz.tasker.ui.task.editor.TaskShowcaseDialog
 import top.xjunz.tasker.util.ShizukuUtil
 import java.util.concurrent.TimeoutException
 

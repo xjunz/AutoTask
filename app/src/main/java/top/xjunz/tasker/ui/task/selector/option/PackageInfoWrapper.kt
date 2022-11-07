@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.editor.selector
+package top.xjunz.tasker.ui.task.selector.option
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
