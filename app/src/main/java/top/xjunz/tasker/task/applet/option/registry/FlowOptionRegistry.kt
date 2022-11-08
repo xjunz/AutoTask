@@ -1,5 +1,6 @@
 package top.xjunz.tasker.task.applet.option.registry
 
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.task.applet.anno.AppletCategory
@@ -29,6 +30,19 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         }
     }
 
+    fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
+        return when (flow) {
+            is ElseIf -> if (before) arrayOf(ifFlow, elseIfFlow)
+            else arrayOf(ifFlow, elseIfFlow, elseFlow, doFlow)
+            is If -> if (before) arrayOf(ifFlow) else arrayOf(ifFlow, elseIfFlow, elseFlow, doFlow)
+            is When -> if (!before) arrayOf(ifFlow, doFlow)
+            else illegalArgument("No before peer for When")
+            is Else -> if (before) arrayOf(ifFlow, elseIfFlow) else arrayOf(ifFlow, doFlow)
+            is Do -> if (before) arrayOf(ifFlow, elseIfFlow, elseFlow) else arrayOf(ifFlow, doFlow)
+            else -> illegalArgument("control flow", flow)
+        }
+    }
+
     val controlFlowOptions: Array<AppletOption> by lazy {
         arrayOf(whenFlow, ifFlow, doFlow, elseIfFlow, elseFlow, componentFlow)
     }
@@ -50,7 +64,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val elseIfFlow = FlowOption<ElseIf>(4, R.string.else_if)
 
     @AppletCategory(0x0005)
-    val elseFlow = FlowOption<ElseIf>(5, R.string._else)
+    val elseFlow = FlowOption<Else>(5, R.string._else)
 
     @AppletCategory(0x0010)
     val componentFlow =

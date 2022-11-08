@@ -38,7 +38,7 @@ class AppletOptionFactory : AppletFactory {
         return findRegistryById(registryId).createAppletFromId(appletId)
     }
 
-    fun findFlowOption(registryId: Int): AppletOption {
+    fun findRegistryOption(registryId: Int): AppletOption {
         return flowRegistry.findAppletOptionById(registryId)
     }
 

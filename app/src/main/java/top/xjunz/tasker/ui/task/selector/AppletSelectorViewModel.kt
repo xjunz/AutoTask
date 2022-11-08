@@ -2,19 +2,16 @@ package top.xjunz.tasker.ui.task.selector
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
-import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.base.SavedStateViewModel
-import java.util.*
 
 /**
  * @author xjunz 2022/10/22
@@ -23,9 +20,9 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
 
     var animateItems = true
 
-    var previousSelectedFactory = -1
-
     val appletOptionFactory = AppletOptionFactory()
+
+    var scopedRegistryOption: AppletOption? = null
 
     val selectedFlowRegistry = MutableLiveData<Int>()
 
@@ -35,26 +32,18 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
 
     val onAppletAdded = MutableLiveData<Pair<Int, Applet>>()
 
-    lateinit var onCompletion: (List<Flow>) -> Unit
-
     val candidates = Flow()
 
-    val applets = MutableLiveData<MutableList<Applet>>(mutableListOf())
+    val applets = MutableLiveData(emptyList<Applet>())
+
+    lateinit var onCompletion: (List<Applet>) -> Unit
 
     lateinit var title: CharSequence
 
     private val collapsedFlows = mutableSetOf<Flow>()
 
-    fun getAppletsCount(): Int {
-        return candidates.sumOf { (it as Flow).size }
-    }
-
     fun isCollapsed(flow: Flow): Boolean {
         return collapsedFlows.contains(flow)
-    }
-
-    fun removeCandidate(flow: Flow) {
-        candidates.remove(flow)
     }
 
     fun toggleCollapse(flow: Flow) {
@@ -70,11 +59,8 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
         if (selectedFlowRegistry eq index) return
         options.clear()
         options.addAll(
-            appletOptionFactory.findRegistryById(
-                appletOptionFactory.flowRegistry.appletFlowOptions[index].appletId
-            ).categorizedOptions
+            appletOptionFactory.findRegistryById(getRegistryOptions()[index].appletId).categorizedOptions
         )
-        previousSelectedFactory = selectedFlowRegistry.value ?: 0
         selectedFlowRegistry.value = index
     }
 
@@ -83,7 +69,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
     }
 
     fun appendApplet(applet: Applet) {
-        val flowOption = appletOptionFactory.findFlowOption(applet.registryId)
+        val flowOption = appletOptionFactory.findRegistryOption(applet.registryId)
         if (candidates.isEmpty() || candidates.last().appletId != flowOption.appletId) {
             candidates.add(flowOption.yieldApplet() as Flow)
         }
@@ -100,16 +86,13 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
-        val flowOption = appletOptionFactory.findFlowOption(options.first().registryId)
-        val initialIndex = candidates.size
+        val flowOption = appletOptionFactory.findRegistryOption(options.first().registryId)
+
         candidates.add(flowOption.yieldApplet() as Flow)
         options.forEach {
             appendOption(it)
         }
-        // Collapse by default
-        for (i in initialIndex..candidates.lastIndex) {
-            collapsedFlows.add(candidates[i].casted())
-        }
+
         toast(R.string.options_from_inspector_added.format(options.size))
         notifyCandidatesChanged()
     }
@@ -119,21 +102,20 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
         notifyCandidatesChanged()
     }
 
-    fun swapFlows(from: Flow, to: Flow) {
-        Collections.swap(candidates, candidates.indexOf(from), candidates.indexOf(to))
-    }
-
     fun complete() {
         if (candidates.isEmpty()) {
             toast(R.string.no_rule_added)
         } else {
-            onCompletion.invoke(candidates.map { it as Flow })
+            if (scopedRegistryOption == null) {
+                onCompletion.invoke(candidates)
+            } else {
+                onCompletion.invoke(candidates.single() as Flow)
+            }
         }
     }
 
     fun notifyCandidatesChanged() {
-        val ret = applets.require()
-        ret.clear()
+        val ret = ArrayList<Applet>()
         candidates.forEachIndexed { index, flow ->
             flow as Flow
             flow.index = index
@@ -147,5 +129,13 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
                 }
         }
         applets.value = ret
+    }
+
+    fun getRegistryOptions(): Array<AppletOption> {
+        return if (scopedRegistryOption == null) {
+            appletOptionFactory.flowRegistry.appletFlowOptions
+        } else {
+            arrayOf(scopedRegistryOption!!)
+        }
     }
 }

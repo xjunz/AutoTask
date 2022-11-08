@@ -1,6 +1,6 @@
 package top.xjunz.tasker.ui.task.selector
 
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.Fragment
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -22,23 +22,19 @@ import top.xjunz.tasker.ui.task.selector.option.*
 /**
  * @author xjunz 2022/10/08
  */
-class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
+class AppletOptionOnClickListener(fragment: Fragment, private val factory: AppletOptionFactory) {
 
     private val fragmentManager by lazy {
         fragment.parentFragmentManager
     }
 
-    private val registry: AppletOptionFactory by lazy {
-        fragment.viewModels<AppletSelectorViewModel>().value.appletOptionFactory
-    }
-
     fun onClick(applet: Applet, onCompleted: () -> Unit) {
-        onClick(applet, registry.findOption(applet), onCompleted)
+        onClick(applet, factory.findOption(applet), onCompleted)
     }
 
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         when {
-            option == registry.packageRegistry.pkgCollection ->
+            option == factory.packageRegistry.pkgCollection ->
                 ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
                         applet.value = it
@@ -47,7 +43,7 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
                     .setTitle(option.currentTitle!!)
                     .show(fragmentManager)
 
-            option == registry.packageRegistry.activityCollection ->
+            option == factory.packageRegistry.activityCollection ->
                 ComponentSelectorDialog().setTitle(option.currentTitle!!)
                     .setSelectedActivities(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
@@ -57,7 +53,7 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
                     .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
                     .show(fragmentManager)
 
-            option == registry.timeAppletFactory.timeRange -> {
+            option == factory.timeAppletFactory.timeRange -> {
                 val value = applet.value?.casted<Collection<Long>>()
                 DateTimeRangeEditorDialog().setRange(
                     value?.firstOrNull() ?: System.currentTimeMillis(),
@@ -69,7 +65,7 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
                     }.show(fragmentManager)
             }
 
-            option == registry.timeAppletFactory.hourMinSec -> {
+            option == factory.timeAppletFactory.hourMinSec -> {
                 val value = applet.value?.casted<Collection<Int>>()
                 TimeRangeEditorDialog().setRange(
                     value?.firstOrNull() ?: 0,
@@ -80,7 +76,7 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
                 }.show(fragmentManager)
             }
 
-            option == registry.timeAppletFactory.dayOfMonth -> {
+            option == factory.timeAppletFactory.dayOfMonth -> {
                 val days = Array<CharSequence>(31) { i ->
                     (i + 1).toString()
                 }
@@ -90,14 +86,14 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
                 }.setSpanCount(4).setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
-            option == registry.timeAppletFactory.dayOfWeek -> {
+            option == factory.timeAppletFactory.dayOfWeek -> {
                 EnumSelectorDialog().setArguments(option.currentTitle, R.array.days_in_week) {
                     applet.value = it
                     onCompleted()
                 }.setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
-            option == registry.timeAppletFactory.month -> {
+            option == factory.timeAppletFactory.month -> {
                 EnumSelectorDialog().setArguments(option.currentTitle, R.array.months) {
                     applet.value = it
                     onCompleted()
@@ -105,7 +101,7 @@ class AppletOptionOnClickListener(fragment: AppletSelectorDialog) {
             }
 
             applet is PropertyCriterion<*> -> {
-                applet.isInverted = option.isInverted
+                applet.toggleInversion()
                 onCompleted()
             }
 

@@ -2,6 +2,7 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
@@ -10,6 +11,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.ktx.resolvedId
 import top.xjunz.tasker.ktx.setContentDescriptionAndTooltip
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.ColorSchemes
@@ -17,7 +19,7 @@ import top.xjunz.tasker.ui.ColorSchemes
 /**
  * @author xjunz 2022/11/07
  */
-class TaskFlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
+class FlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
 
     companion object {
         const val ACTION_COLLAPSE = 0
@@ -29,18 +31,29 @@ class TaskFlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
         val option = if (applet.id == -1) null else viewModel.appletOptionFactory.findOption(applet)
         holder.binding.apply {
+            root.translationX = 0F
             root.isSelected = viewModel.selectedApplet == applet
+            tvNumber.isVisible = false
+            dividerTop.isVisible = false
+            dividerBott.isVisible = false
             if (option != null) {
                 tvTitle.text = option.title
                 tvTitle.isVisible = true
                 tvDesc.text = option.describe(applet.value)
-                groupLeft.isVisible = false
+
                 val showRelation = applet.index != 0 && applet !is ControlFlow
                 val title = option.getTitle(applet.isInverted)
                 if (title != null && showRelation) {
                     tvTitle.text = option.makeRelationSpan(title, applet.isAnd)
+                    tvTitle.background = AppCompatResources.getDrawable(
+                        root.context,
+                        com.google.android.material.R.attr.selectableItemBackground.resolvedId
+                    )
+                    tvTitle.isClickable = true
                 } else {
                     tvTitle.text = title
+                    tvTitle.background = null
+                    tvTitle.isClickable = false
                 }
                 tvDesc.isVisible = tvDesc.text.isNotEmpty()
                 if (applet is ControlFlow) {
@@ -52,7 +65,9 @@ class TaskFlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                     tvTitle.setTextColor(ColorSchemes.colorOnSurface)
                 } else {
-                    groupLeft.isVisible = true
+                    dividerTop.isVisible = true
+                    tvNumber.isVisible = true
+                    dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                     tvNumber.text = (applet.index + 1).toString()
                     tvTitle.setTextAppearance(TextAppearance_Material3_LabelLarge)
                     tvTitle.setTextColor(ColorSchemes.colorOnSurface)

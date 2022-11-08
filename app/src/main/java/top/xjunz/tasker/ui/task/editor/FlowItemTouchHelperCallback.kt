@@ -16,7 +16,7 @@ import java.util.*
 /**
  * @author xjunz 2022/11/08
  */
-abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) :
+abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Applet, *>) :
     ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -30,11 +30,10 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
         override fun areContentsTheSame(oldItem: Applet, newItem: Applet): Boolean {
             return true
         }
-
-        override fun getChangePayload(oldItem: Applet, newItem: Applet): Any {
-            return true
-        }
     }
+
+    private var swapFromApplet: Applet? = null
+    private var swapToApplet: Applet? = null
 
     abstract val Flow.isCollapsed: Boolean
 
@@ -64,7 +63,7 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
                 viewHolder.layoutPosition + 1
             )
             while (vh != null) {
-                if (currentList[vh.adapterPosition].isChildOf(applet)) {
+                if (currentList[vh.adapterPosition].isDescendantOf(applet)) {
                     vh.itemView.translationX = dX
                     vh = recyclerView.findViewHolderForAdapterPosition(
                         viewHolder.layoutPosition + i++
@@ -83,15 +82,14 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
     ): Boolean {
         val from = viewHolder.adapterPosition
         val fromApplet = currentList[from]
-        val to = target.adapterPosition
         val toApplet = currentList[target.adapterPosition]
         swapApplets(fromApplet, toApplet)
         fromApplet.requireParent().forEachIndexed { index, applet ->
             applet.index = index
         }
         if (fromApplet.index == 0 || toApplet.index == 0) {
-            adapter.notifyItemChanged(from, true)
-            adapter.notifyItemChanged(to, true)
+            swapFromApplet = fromApplet
+            swapToApplet = toApplet
         }
         notifyFlowChanged()
         return true
@@ -101,6 +99,15 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
         super.clearView(recyclerView, viewHolder)
         val adapterPosition = viewHolder.adapterPosition
         if (adapterPosition == RecyclerView.NO_POSITION) return
+        if (recyclerView.isComputingLayout) return
+        if (swapFromApplet != null) {
+            adapter.notifyItemChanged(currentList.indexOf(swapFromApplet))
+            swapFromApplet = null
+        }
+        if (swapToApplet != null) {
+            adapter.notifyItemChanged(currentList.indexOf(swapToApplet))
+            swapToApplet = null
+        }
         val target = currentList[adapterPosition]
         if (target is Flow) return
         val parent = target.requireParent()
@@ -130,7 +137,7 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
             if (from.isEmpty())
                 toast(R.string.removed)
             else
-                toast(R.string.format_applet_is_removed.format(from.size))
+                toast(R.string.format_applet_is_removed.format(from.flatSize))
         } else {
             if (parent.size == 0)
                 parent.parent?.remove(parent)
@@ -139,7 +146,12 @@ abstract class FlowItemTouchHelper(private val adapter: ListAdapter<Applet, *>) 
         parent.forEachIndexed { index, applet ->
             applet.index = index
         }
-        adapter.notifyItemRangeChanged(pos - from.index, parent.size + 1, true)
+        if (from is Flow) {
+            if (from.index == 0 && parent.isNotEmpty())
+                adapter.notifyItemChanged(currentList.indexOf(parent.first()))
+        } else {
+            adapter.notifyItemRangeChanged(pos - from.index, parent.size + 1, true)
+        }
         notifyFlowChanged()
     }
 }

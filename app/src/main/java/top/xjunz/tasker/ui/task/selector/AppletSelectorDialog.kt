@@ -26,6 +26,8 @@ import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
@@ -52,8 +54,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
 
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
-            viewModel.appletOptionFactory.flowRegistry.appletFlowOptions,
-            ItemAppletFactoryBinding::class.java, {
+            viewModel.getRegistryOptions(), ItemAppletFactoryBinding::class.java, {
                 itemView.setOnClickListener {
                     viewModel.selectFlowRegistry(adapterPosition)
                 }
@@ -63,7 +64,9 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
         }
     }
 
-    private val onOptionClickListener = AppletOptionOnClickListener(this)
+    private val onOptionClickListener by lazy {
+        AppletOptionOnClickListener(this, viewModel.appletOptionFactory)
+    }
 
     private val shopCartIntegration by lazy {
         ShoppingCartIntegration(binding.shoppingCart, viewModel, binding.rvRight)
@@ -122,6 +125,16 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
         viewModel.onCompletion = block
     }
 
+    fun scopedBy(flow: Flow): AppletSelectorDialog {
+        if (flow is ControlFlow) {
+            return this
+        }
+        return doWhenCreated {
+            viewModel.scopedRegistryOption =
+                viewModel.appletOptionFactory.findRegistryOption(flow.appletId)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (viewModel.selectedFlowRegistry.isNull()) {
@@ -161,11 +174,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
 
     @SuppressLint("NotifyDataSetChanged")
     private fun observeLiveData() {
-        observe(viewModel.selectedFlowRegistry) {
+        observeNostalgic(viewModel.selectedFlowRegistry) { prev, it ->
             if (binding.rvLeft.adapter == null) {
                 binding.rvLeft.adapter = leftAdapter
             } else {
-                leftAdapter.notifyItemChanged(viewModel.previousSelectedFactory, true)
+                leftAdapter.notifyItemChanged(prev!!, true)
                 leftAdapter.notifyItemChanged(it, true)
             }
             if (binding.rvRight.adapter == null) {
@@ -198,12 +211,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
                 else -> binding.cvHeader.isVisible = false
             }
         }
-        observe(viewModel.applets) { list ->
+        observe(viewModel.applets) {
             binding.shoppingCart.btnCount.text =
-                R.string.format_applet_count.format(viewModel.getAppletsCount())
-            if (list.isEmpty())
+                R.string.format_applet_count.format(viewModel.candidates.flatSize)
+            if (it.isEmpty())
                 shopCartIntegration.collapse()
-            bottomAdapter.submitList(list)
+            bottomAdapter.submitList(it)
         }
         observeTransient(mainViewModel.onRequestRoute) { host ->
             if (host == Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {

@@ -70,10 +70,11 @@ class TaskEditorDialog : BaseDialogFragment<DialogTaskEditorBinding>() {
                 adapter.notifyItemChanged(prev, true)
             adapter.notifyItemChanged(cur, true)
         }
-        observe(viewModel.flatMappedApplets) {
+        observe(viewModel.applets) {
             adapter.submitList(it)
         }
-        observe(viewModel.currentPage) {
+        observeTransient(viewModel.changedApplet) {
+            adapter.notifyItemChanged(viewModel.applets.require().indexOf(it), true)
         }
     }
 

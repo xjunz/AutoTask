@@ -6,7 +6,6 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.When
-import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 
 /**
@@ -18,17 +17,19 @@ class TaskEditorViewModel : ViewModel() {
 
     private val collapsedFlows = mutableSetOf<Flow>()
 
+    val multiSelections = mutableSetOf<Int>()
+
     val appletOptionFactory = AppletOptionFactory()
 
     var isNewTask: Boolean = true
 
-    val flatMappedApplets = MutableLiveData<List<Applet>>()
+    val applets = MutableLiveData<List<Applet>>()
 
     val singleSelectionIndex = MutableLiveData(-1)
 
     var selectedApplet: Applet? = null
 
-    val currentPage = MutableLiveData<Int>()
+    val changedApplet = MutableLiveData<Applet>()
 
     fun generateDefaultFlow() {
         val root = Flow()
@@ -61,17 +62,16 @@ class TaskEditorViewModel : ViewModel() {
     }
 
     fun notifyFlowChanged() {
-        flatMappedApplets.value = flatmapFlow(rootFlow)
+        applets.value = flatmapFlow(rootFlow)
+    }
+
+    fun multiSelect(index: Int) {
+        multiSelections.add(index)
     }
 
     fun singleSelect(index: Int) {
-        if (index != -1 && singleSelectionIndex eq index) {
-            selectedApplet = null
-            singleSelectionIndex.value = -1
-        } else {
-            selectedApplet = flatMappedApplets.value?.getOrNull(index)
-            singleSelectionIndex.value = index
-        }
+        selectedApplet = applets.value?.getOrNull(index)
+        singleSelectionIndex.value = index
     }
 
     private fun flatmapFlow(flow: Flow, depth: Int = 0): List<Applet> {

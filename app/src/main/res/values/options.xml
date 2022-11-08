@@ -19,9 +19,9 @@
     <string name="format_range">%s至%s</string>
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
-    <string name="on_package_entered">进入指定应用程序时</string>
-    <string name="on_package_left">离开指定应用程序时</string>
-    <string name="on_content_changed">处于指定应用程序内时</string>
+    <string name="on_package_entered">进入应用程序时</string>
+    <string name="on_package_left">离开应用程序时</string>
+    <string name="on_content_changed">处于应用程序内</string>
     <string name="invert">取反</string>
     <string name="is_system">是系统应用</string>
     <string name="not_is_system">不是系统应用</string>

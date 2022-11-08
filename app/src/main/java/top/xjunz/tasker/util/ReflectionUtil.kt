@@ -17,4 +17,10 @@ object ReflectionUtil {
     fun Class<*>.superClassFirstParameterizedType(): Class<*> {
         return (genericSuperclass as ParameterizedType).actualTypeArguments.first().casted()
     }
+
+    fun <T> Any.invokeDeclaredMethod(methodName: String, vararg args: Any?): T {
+        return javaClass.getDeclaredMethod(methodName).also {
+            it.isAccessible = true
+        }.invoke(this, *args)!!.casted()
+    }
 }

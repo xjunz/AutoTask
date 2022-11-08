@@ -67,7 +67,7 @@ inline fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, crossinline observer:
 }
 
 /**
- * Observe a [MutableLiveData] as transient (non-sticky), whose value will be set to `null` once the
+ * Observe a [MutableLiveData] as transient, whose value will be set to `null` once the
  * [observer] is triggered and the observer will not response to a `null` value.
  */
 inline fun <V> LifecycleOwner.observeTransient(
@@ -77,8 +77,8 @@ inline fun <V> LifecycleOwner.observeTransient(
     ld.observe(this) {
         if (it != null) {
             observer.invoke(it)
-            // Must postValue(), otherwise the `null` value will fall through.
-            ld.value = null
+            // Must postValue(), otherwise the `null` value will fall through to other observers.
+            ld.postValue(null)
         }
     }
 }

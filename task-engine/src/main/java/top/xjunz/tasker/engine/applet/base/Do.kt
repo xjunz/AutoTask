@@ -5,7 +5,7 @@ import top.xjunz.shared.utils.unsupportedOperation
 /**
  * @author xjunz 2022/11/03
  */
-class Do : ControlFlow() {
+open class Do : ControlFlow() {
 
     override var isAnd: Boolean = false
         set(value) {

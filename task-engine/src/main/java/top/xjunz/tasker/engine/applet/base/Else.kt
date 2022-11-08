@@ -5,7 +5,7 @@ import top.xjunz.shared.utils.unsupportedOperation
 /**
  * @author xjunz 2022/11/03
  */
-class Else : ControlFlow() {
+class Else : Do() {
 
     // Once the previous result is success, do not execute this flow
     override var isAnd = false

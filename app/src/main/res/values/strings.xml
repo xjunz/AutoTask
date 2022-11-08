@@ -128,7 +128,6 @@
     <string name="drag_to_here_to_remove_overlay">拖动到此处关闭悬浮助手</string>
     <string name="pls_enable_overlay_manually">请在设置中允许本应用的悬浮窗权限</string>
     <string name="edit_task">编辑任务</string>
-    <string name="add_criteria">添加条件</string>
     <string name="delete">删除</string>
     <string name="operate">操作</string>
     <string name="replace_with">替换为…</string>

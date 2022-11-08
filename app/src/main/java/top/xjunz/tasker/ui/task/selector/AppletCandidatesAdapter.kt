@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.R.style.TextAppearance_Material3_BodyMedium
 import com.google.android.material.R.style.TextAppearance_Material3_TitleLarge
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -20,7 +19,7 @@ import top.xjunz.tasker.engine.applet.criterion.Criterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelper
+import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
 import java.util.*
 
 /**
@@ -29,23 +28,15 @@ import java.util.*
 class AppletCandidatesAdapter(
     private val viewModel: AppletSelectorViewModel,
     private val onClickListener: AppletOptionOnClickListener
-) : ListAdapter<Applet, AppletCandidatesAdapter.AppletViewHolder>(FlowItemTouchHelper.DiffCallback) {
+) : ListAdapter<Applet, AppletCandidatesAdapter.AppletViewHolder>(FlowItemTouchHelperCallback.DiffCallback) {
 
-    private val itemTouchHelperCallback = object : FlowItemTouchHelper(this) {
+    private val itemTouchHelperCallback = object : FlowItemTouchHelperCallback(this) {
 
         override val Flow.isCollapsed: Boolean
             get() = viewModel.isCollapsed(this)
 
         override fun notifyFlowChanged() {
             viewModel.notifyCandidatesChanged()
-        }
-
-        override fun swapApplets(from: Applet, to: Applet) {
-            if (from.parent == null) {
-                viewModel.swapFlows(from.casted(), to.casted())
-            } else {
-                super.swapApplets(from, to)
-            }
         }
     }
 
@@ -68,7 +59,7 @@ class AppletCandidatesAdapter(
                     viewModel.toggleCollapse(applet)
                 } else {
                     onClickListener.onClick(applet) {
-                        notifyItemChanged(adapterPosition, true)
+                        notifyItemChanged(adapterPosition)
                     }
                 }
             }
@@ -141,9 +132,5 @@ class AppletCandidatesAdapter(
                 }
             }
         }
-    }
-
-    override fun getItemCount(): Int {
-        return currentList.size
     }
 }

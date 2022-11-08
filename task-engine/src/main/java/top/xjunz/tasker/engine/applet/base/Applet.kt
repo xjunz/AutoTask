@@ -102,11 +102,11 @@ abstract class Applet {
 
     fun requireParent() = parent!!
 
-    fun isChildOf(flow: Flow): Boolean {
+    fun isDescendantOf(flow: Flow): Boolean {
         if (parent == null) return false
         if (parent === flow)
             return true
-        return requireParent().isChildOf(flow)
+        return requireParent().isDescendantOf(flow)
     }
 
     /**

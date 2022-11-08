@@ -74,6 +74,19 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         runtime.tracker.jumpOut()
     }
 
+    val flatSize: Int
+        get() {
+            var size = 0
+            forEach {
+                if (it is Flow) {
+                    size += it.flatSize
+                } else {
+                    size++
+                }
+            }
+            return size
+        }
+
     fun swap(from: Applet, to: Applet) {
         Collections.swap(this, indexOf(from), indexOf(to))
     }
