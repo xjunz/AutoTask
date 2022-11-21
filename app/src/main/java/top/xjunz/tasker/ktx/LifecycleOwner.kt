@@ -43,7 +43,7 @@ fun LifecycleOwner.makeProgressDialog(config: ((ProgressBar, percent: TextView) 
         .setTitle(R.string.pls_wait)
 }
 
-fun <V> LifecycleOwner.observe(ld: LiveData<V>, observer: Observer<V>) {
+fun <V> LifecycleOwner.observe(ld: LiveData<V>, observer: Observer<in V>) {
     ld.observe(this, observer)
 }
 

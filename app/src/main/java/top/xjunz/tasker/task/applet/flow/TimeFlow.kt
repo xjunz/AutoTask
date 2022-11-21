@@ -12,7 +12,7 @@ class TimeFlow : Flow() {
 
     override fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
         super.onPrepare(task, runtime)
-        runtime.setTarget(task.getOrPutGlobalVariable(id) {
+        runtime.setTarget(task.getOrPutCrossTaskVariable(id) {
             Calendar.getInstance().also {
                 it.timeInMillis = System.currentTimeMillis()
             }

@@ -77,7 +77,7 @@ public class GestureController {
      */
     public static GestureController getInstance(UiDevice device) {
         if (sInstance == null || sInstance.mDevice != device) {
-            sInstance = device.getInstrumentation().getGestureController(device);
+            sInstance = device.getBridge().getGestureController(device);
         }
 
         return sInstance;

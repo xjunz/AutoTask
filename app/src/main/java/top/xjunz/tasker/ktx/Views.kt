@@ -88,7 +88,7 @@ fun View.beginAutoTransition(target: View, transition: Transition = AutoTransiti
 }
 
 fun View.beginMyselfAutoTransition(transition: Transition = AutoTransition()) {
-    rootView.beginAutoTransition(this, transition)
+    (parent as ViewGroup).beginAutoTransition(this, transition)
 }
 
 fun View.beginAutoTransition(transition: Transition = AutoTransition()) {

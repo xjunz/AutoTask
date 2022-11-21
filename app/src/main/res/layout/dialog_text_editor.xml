@@ -70,7 +70,6 @@
             style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:text="@android:string/ok"
             app:layout_constraintEnd_toEndOf="parent"

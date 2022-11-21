@@ -14,7 +14,6 @@ import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.RealDisplay
 
 /**
  * @author xjunz 2022/10/24
@@ -56,8 +55,8 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             val max = binding.etMaximum.textString.toFloatOrNull()
             val min = binding.etMinimum.textString.toFloatOrNull()
             if (viewModel.unit == Distance.UNIT_PX && it == Distance.UNIT_DP) {
-                if (max != null) binding.etMaximum.setText((max / RealDisplay.density).asString())
-                if (min != null) binding.etMinimum.setText((min / RealDisplay.density).asString())
+                if (max != null) binding.etMaximum.setText((max / top.xjunz.tasker.bridge.DisplayManagerBridge.density).asString())
+                if (min != null) binding.etMinimum.setText((min / top.xjunz.tasker.bridge.DisplayManagerBridge.density).asString())
             } else if (viewModel.unit == Distance.UNIT_DP && it == Distance.UNIT_PX) {
                 if (max != null) binding.etMaximum.setText(max.dp.toString())
                 if (min != null) binding.etMinimum.setText(min.dp.toString())

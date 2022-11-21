@@ -10,7 +10,7 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
 class PackageFlow : Flow() {
 
     override fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
-        val info = task.getOrPutGlobalVariable(id) {
+        val info = task.getOrPutCrossTaskVariable(id) {
             val comp = runtime.hitEvent.componentInfo
             PackageInfoContext(comp.pkgName, comp.actName, comp.paneTitle)
         }

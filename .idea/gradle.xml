@@ -14,7 +14,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/hidden-apis" />
             <option value="$PROJECT_DIR$/shared-library" />
-            <option value="$PROJECT_DIR$/task-engine" />
+            <option value="$PROJECT_DIR$/tasker-engine" />
             <option value="$PROJECT_DIR$/ui-automator" />
           </set>
         </option>

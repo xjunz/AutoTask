@@ -1,26 +1,37 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.graphics.Canvas
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.task.applet.isContainer
 import java.util.*
 
 /**
  * @author xjunz 2022/11/08
  */
-abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Applet, *>) :
-    ItemTouchHelper.SimpleCallback(
-        ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-        ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-    ) {
+open class FlowItemTouchHelperCallback(
+    private val rv: RecyclerView,
+    private val viewModel: FlowViewModel
+) : ItemTouchHelper.SimpleCallback(
+    ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+) {
+
+    init {
+        rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                firstVisiblePosition = -1
+                lastVisiblePosition = -1
+            }
+        })
+    }
 
     object DiffCallback : DiffUtil.ItemCallback<Applet>() {
         override fun areItemsTheSame(oldItem: Applet, newItem: Applet): Boolean {
@@ -32,18 +43,53 @@ abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Appl
         }
     }
 
-    private var swapFromApplet: Applet? = null
-    private var swapToApplet: Applet? = null
+    private val adapter by lazy {
+        rv.adapter!!.casted<ListAdapter<Applet, *>>().apply {
+            registerAdapterDataObserver(object : AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    firstVisiblePosition = -1
+                    lastVisiblePosition = -1
+                }
 
-    abstract val Flow.isCollapsed: Boolean
-
-    protected open val currentList: List<Applet> get() = adapter.currentList
-
-    abstract fun notifyFlowChanged()
-
-    protected open fun swapApplets(from: Applet, to: Applet) {
-        Collections.swap(from.requireParent(), from.index, to.index)
+                override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                    firstVisiblePosition = -1
+                    lastVisiblePosition = -1
+                }
+            })
+        }
     }
+
+    protected val Applet.isCollapsed: Boolean get() = viewModel.isCollapsed(this)
+
+    protected val currentList: List<Applet> get() = adapter.currentList
+
+    protected open fun onMoveEnded(hasDragged: Boolean, position: Int) {
+        /* no-op */
+    }
+
+    protected open fun shouldBeInvolvedInSwipe(next: Applet, origin: Applet): Boolean {
+        if (origin is Flow && !origin.isCollapsed) {
+            return next.isDescendantOf(origin)
+        }
+        return false
+    }
+
+    protected open fun doRemove(parent: Flow, from: Applet): Int {
+        parent.remove(from)
+        return if (from is Flow) from.flatSize else 1
+    }
+
+    private val layoutManager: LinearLayoutManager by lazy {
+        rv.layoutManager!!.casted()
+    }
+
+    private val pendingChangedApplets = mutableSetOf<Applet>()
+
+    private var hasDragged: Boolean? = null
+    private var hasSwapped: Boolean = false
+
+    private var firstVisiblePosition = -1
+    private var lastVisiblePosition = -1
 
     override fun onChildDraw(
         c: Canvas,
@@ -55,21 +101,30 @@ abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Appl
         isCurrentlyActive: Boolean
     ) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        if (viewHolder.adapterPosition == RecyclerView.NO_POSITION) return
-        val applet = currentList[viewHolder.adapterPosition]
-        if (applet is Flow && !applet.isCollapsed) {
-            var i = 1
-            var vh = recyclerView.findViewHolderForAdapterPosition(
-                viewHolder.layoutPosition + 1
-            )
-            while (vh != null) {
-                if (currentList[vh.adapterPosition].isDescendantOf(applet)) {
-                    vh.itemView.translationX = dX
-                    vh = recyclerView.findViewHolderForAdapterPosition(
-                        viewHolder.layoutPosition + i++
+        val position = viewHolder.adapterPosition
+        if (position == RecyclerView.NO_POSITION) return
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            if (dY != 0F) {
+                hasDragged = true
+            } else if (hasDragged != true) {
+                hasDragged = false
+            }
+        } else if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+
+            if (firstVisiblePosition == -1)
+                firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+            if (lastVisiblePosition == -1)
+                lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
+
+            for (i in firstVisiblePosition..lastVisiblePosition) {
+                if (i == position) continue
+                val vh = recyclerView.findViewHolderForAdapterPosition(i)
+                if (vh != null
+                    && shouldBeInvolvedInSwipe(
+                        currentList[vh.adapterPosition], currentList[position]
                     )
-                } else {
-                    break
+                ) {
+                    vh.itemView.translationX = dX
                 }
             }
         }
@@ -82,36 +137,50 @@ abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Appl
     ): Boolean {
         val from = viewHolder.adapterPosition
         val fromApplet = currentList[from]
-        val toApplet = currentList[target.adapterPosition]
-        swapApplets(fromApplet, toApplet)
-        fromApplet.requireParent().forEachIndexed { index, applet ->
-            applet.index = index
-        }
+        val to = target.adapterPosition
+        val toApplet = currentList[to]
+        Collections.swap(fromApplet.requireParent(), fromApplet.index, toApplet.index)
+        hasSwapped = true
         if (fromApplet.index == 0 || toApplet.index == 0) {
-            swapFromApplet = fromApplet
-            swapToApplet = toApplet
+            pendingChangedApplets.add(fromApplet)
+            pendingChangedApplets.add(toApplet)
         }
-        notifyFlowChanged()
+        if (fromApplet is Flow && !fromApplet.isContainer) {
+            viewModel.notifyFlowChanged()
+        } else {
+            viewModel.regenerateApplets()
+            adapter.notifyItemMoved(from, to)
+        }
         return true
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        val adapterPosition = viewHolder.adapterPosition
-        if (adapterPosition == RecyclerView.NO_POSITION) return
-        if (recyclerView.isComputingLayout) return
-        if (swapFromApplet != null) {
-            adapter.notifyItemChanged(currentList.indexOf(swapFromApplet))
-            swapFromApplet = null
+        try {
+            val adapterPosition = viewHolder.adapterPosition
+            if (hasDragged != null)
+                onMoveEnded(hasDragged!!, adapterPosition)
+            if (adapterPosition == RecyclerView.NO_POSITION) return
+            if (recyclerView.isComputingLayout) return
+            if (hasSwapped) {
+                // Update indexes
+                val target = currentList[adapterPosition]
+                if (target !is Flow || target.isContainer) {
+                    val parent = target.requireParent()
+                    adapter.notifyItemRangeChanged(
+                        adapterPosition - target.index, parent.size, true
+                    )
+                }
+                // Update relation text
+                pendingChangedApplets.forEach {
+                    notifyAppletChanged(it)
+                }
+            }
+        } finally {
+            hasDragged = null
+            hasSwapped = false
+            pendingChangedApplets.clear()
         }
-        if (swapToApplet != null) {
-            adapter.notifyItemChanged(currentList.indexOf(swapToApplet))
-            swapToApplet = null
-        }
-        val target = currentList[adapterPosition]
-        if (target is Flow) return
-        val parent = target.requireParent()
-        adapter.notifyItemRangeChanged(adapterPosition - target.index, parent.size, true)
     }
 
     override fun canDropOver(
@@ -132,26 +201,28 @@ abstract class FlowItemTouchHelperCallback(private val adapter: ListAdapter<Appl
         val pos = viewHolder.adapterPosition
         val from = currentList[pos]
         val parent = from.requireParent()
-        parent.remove(from)
-        if (from is Flow) {
-            if (from.isEmpty())
-                toast(R.string.removed)
-            else
-                toast(R.string.format_applet_is_removed.format(from.flatSize))
+        val count = doRemove(parent, from)
+        if (count == 0) {
+            toast(R.string.removed)
         } else {
-            if (parent.size == 0)
-                parent.parent?.remove(parent)
-            toast(R.string.format_applet_is_removed.format(1))
+            toast(R.string.format_applet_is_removed.format(count))
         }
         parent.forEachIndexed { index, applet ->
             applet.index = index
         }
         if (from is Flow) {
+            // Update relation text
             if (from.index == 0 && parent.isNotEmpty())
-                adapter.notifyItemChanged(currentList.indexOf(parent.first()))
-        } else {
-            adapter.notifyItemRangeChanged(pos - from.index, parent.size + 1, true)
-        }
-        notifyFlowChanged()
+                notifyAppletChanged(parent.first())
+        } else
+        // Update indexes
+            parent.forEach {
+                notifyAppletChanged(it)
+            }
+        viewModel.notifyFlowChanged()
+    }
+
+    private fun notifyAppletChanged(applet: Applet) {
+        adapter.notifyItemChanged(currentList.indexOf(applet))
     }
 }

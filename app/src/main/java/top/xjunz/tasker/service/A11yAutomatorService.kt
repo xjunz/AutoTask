@@ -22,9 +22,8 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.impl.A11yUiAutomatorBridge
 import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.task.event.TaskEventDispatcher
+import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
@@ -71,7 +70,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     lateinit var inspector: FloatingInspector
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        A11yUiAutomatorBridge(this, uiAutomation)
+        top.xjunz.tasker.bridge.A11yUiAutomatorBridge(this, uiAutomation)
     }
 
     private var launchedInInspectorMode = false
@@ -128,8 +127,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private val componentInfo = ComponentInfo()
 
-    private val taskEventDispatcher: TaskEventDispatcher by lazy {
-        TaskEventDispatcher(mainLooper) { events ->
+    private val a11yEventDispatcher: A11yEventDispatcher by lazy {
+        A11yEventDispatcher(mainLooper) { events ->
             val event = events.find {
                 it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
             }
@@ -142,7 +141,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (isInspectorShown()) {
-            taskEventDispatcher.processAccessibilityEvent(event)
+            a11yEventDispatcher.processAccessibilityEvent(event)
         }
         callbacks?.onAccessibilityEvent(event)
     }

@@ -5,21 +5,27 @@ import android.graphics.Typeface
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import com.google.android.material.R.attr.selectableItemBackground
 import com.google.android.material.R.style.*
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.resolvedId
 import top.xjunz.tasker.ktx.setContentDescriptionAndTooltip
 import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.task.applet.isContainer
+import top.xjunz.tasker.task.applet.isRelating
+import top.xjunz.tasker.task.applet.nonContainerParent
+import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.ColorSchemes
 
 /**
  * @author xjunz 2022/11/07
  */
-class FlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
+class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
 
     companion object {
         const val ACTION_COLLAPSE = 0
@@ -32,36 +38,33 @@ class FlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
         val option = if (applet.id == -1) null else viewModel.appletOptionFactory.findOption(applet)
         holder.binding.apply {
             root.translationX = 0F
-            root.isSelected = viewModel.selectedApplet == applet
+            root.isSelected = viewModel.selectedApplet.value == applet
+                    || viewModel.isMultiSelected(applet)
             tvNumber.isVisible = false
             dividerTop.isVisible = false
             dividerBott.isVisible = false
             if (option != null) {
-                tvTitle.text = option.title
+                var desc = option.describe(applet.value)
+                var title = option.getTitle(applet.isInverted) ?: applet.label
                 tvTitle.isVisible = true
-                tvDesc.text = option.describe(applet.value)
-
-                val showRelation = applet.index != 0 && applet !is ControlFlow
-                val title = option.getTitle(applet.isInverted)
-                if (title != null && showRelation) {
-                    tvTitle.text = option.makeRelationSpan(title, applet.isAnd)
+                if (option.descAsTitle) {
+                    title = desc
+                }
+                if (title != null && applet.isRelating) {
+                    title = AppletOption.makeRelationSpan(title, applet.isAnd)
                     tvTitle.background = AppCompatResources.getDrawable(
-                        root.context,
-                        com.google.android.material.R.attr.selectableItemBackground.resolvedId
+                        root.context, selectableItemBackground.resolvedId
                     )
                     tvTitle.isClickable = true
                 } else {
-                    tvTitle.text = title
                     tvTitle.background = null
                     tvTitle.isClickable = false
                 }
-                tvDesc.isVisible = tvDesc.text.isNotEmpty()
                 if (applet is ControlFlow) {
                     tvDesc.isVisible = false
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
                     tvTitle.setTextColor(ColorSchemes.colorPrimary)
-                } else if (applet.parent is ControlFlow) {
-                    tvDesc.isVisible = false
+                } else if (applet.nonContainerParent is ControlFlow) {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                     tvTitle.setTextColor(ColorSchemes.colorOnSurface)
                 } else {
@@ -78,6 +81,8 @@ class FlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
                         ibAction.tag = ACTION_ENTER
                         ibAction.setImageResource(R.drawable.ic_baseline_chevron_right_24)
                         ibAction.setContentDescriptionAndTooltip(R.string.enter.text)
+                        tvDesc.isVisible = true
+                        desc = R.string.format_applet_count.format(applet.flatSize)
                     } else {
                         ibAction.isVisible = true
                         ibAction.tag = ACTION_COLLAPSE
@@ -103,6 +108,9 @@ class FlowItemViewBinder(private val viewModel: TaskEditorViewModel) {
                 } else {
                     tvDesc.setTypeface(null, Typeface.NORMAL)
                 }
+                tvTitle.text = title
+                tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
+                tvDesc.text = desc
             } else {
                 tvDesc.isVisible = false
                 tvTitle.isVisible = false

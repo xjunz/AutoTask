@@ -3,6 +3,7 @@ package top.xjunz.tasker.ui.task.selector
 import androidx.fragment.app.Fragment
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.engine.applet.criterion.Criterion
@@ -22,7 +23,14 @@ import top.xjunz.tasker.ui.task.selector.option.*
 /**
  * @author xjunz 2022/10/08
  */
-class AppletOptionOnClickListener(fragment: Fragment, private val factory: AppletOptionFactory) {
+open class AppletOptionOnClickListener(
+    fragment: Fragment,
+    protected val factory: AppletOptionFactory
+) {
+
+    private val actionOptionOnClickListener by lazy {
+        ActionOptionOnClickListener(fragment, factory)
+    }
 
     private val fragmentManager by lazy {
         fragment.parentFragmentManager
@@ -32,8 +40,10 @@ class AppletOptionOnClickListener(fragment: Fragment, private val factory: Apple
         onClick(applet, factory.findOption(applet), onCompleted)
     }
 
-    fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
+    open fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         when {
+            applet is Action -> actionOptionOnClickListener.onClick(applet, option, onCompleted)
+
             option == factory.packageRegistry.pkgCollection ->
                 ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
@@ -53,7 +63,7 @@ class AppletOptionOnClickListener(fragment: Fragment, private val factory: Apple
                     .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
                     .show(fragmentManager)
 
-            option == factory.timeAppletFactory.timeRange -> {
+            option == factory.timeRegistry.timeRange -> {
                 val value = applet.value?.casted<Collection<Long>>()
                 DateTimeRangeEditorDialog().setRange(
                     value?.firstOrNull() ?: System.currentTimeMillis(),
@@ -65,18 +75,17 @@ class AppletOptionOnClickListener(fragment: Fragment, private val factory: Apple
                     }.show(fragmentManager)
             }
 
-            option == factory.timeAppletFactory.hourMinSec -> {
+            option == factory.timeRegistry.hourMinSec -> {
                 val value = applet.value?.casted<Collection<Int>>()
                 TimeRangeEditorDialog().setRange(
-                    value?.firstOrNull() ?: 0,
-                    value?.lastOrNull() ?: 0
+                    value?.firstOrNull(), value?.lastOrNull()
                 ).setTitle(option.currentTitle!!).doOnCompletion { start, end ->
                     applet.value = listOf(start, end)
                     onCompleted()
                 }.show(fragmentManager)
             }
 
-            option == factory.timeAppletFactory.dayOfMonth -> {
+            option == factory.timeRegistry.dayOfMonth -> {
                 val days = Array<CharSequence>(31) { i ->
                     (i + 1).toString()
                 }
@@ -86,14 +95,14 @@ class AppletOptionOnClickListener(fragment: Fragment, private val factory: Apple
                 }.setSpanCount(4).setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
-            option == factory.timeAppletFactory.dayOfWeek -> {
+            option == factory.timeRegistry.dayOfWeek -> {
                 EnumSelectorDialog().setArguments(option.currentTitle, R.array.days_in_week) {
                     applet.value = it
                     onCompleted()
                 }.setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
-            option == factory.timeAppletFactory.month -> {
+            option == factory.timeRegistry.month -> {
                 EnumSelectorDialog().setArguments(option.currentTitle, R.array.months) {
                     applet.value = it
                     onCompleted()
@@ -137,8 +146,7 @@ class AppletOptionOnClickListener(fragment: Fragment, private val factory: Apple
                     }.apply {
                         if (option.hasPresets) {
                             setDropDownData(
-                                option.presetsNameRes.array,
-                                option.presetsValueRes.array
+                                option.presetsNameRes.array, option.presetsValueRes.array
                             )
                         }
                     }.show(fragmentManager)

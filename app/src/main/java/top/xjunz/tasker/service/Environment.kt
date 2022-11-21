@@ -1,5 +1,7 @@
 package top.xjunz.tasker.service
 
+import android.app.UiAutomation
+import androidx.test.uiautomator.UiDevice
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -18,3 +20,9 @@ inline val isFloatingInspectorShown get() = A11yAutomatorService.get()?.isInspec
 inline val a11yAutomatorService get() = A11yAutomatorService.require()
 
 inline val floatingInspector get() = FloatingInspector.require()
+
+inline val uiAutomatorBridge get() = currentService.uiAutomatorBridge
+
+inline val uiAutomation: UiAutomation get() = uiAutomatorBridge.uiAutomation
+
+inline val uiDevice: UiDevice get() = uiAutomatorBridge.uiDevice

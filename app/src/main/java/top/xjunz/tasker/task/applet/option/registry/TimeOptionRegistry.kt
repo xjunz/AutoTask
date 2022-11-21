@@ -3,12 +3,12 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
+import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletCategory
-import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.util.formatTime
 import java.util.*
 
@@ -18,11 +18,11 @@ import java.util.*
 class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private inline fun TimeCollectionCriterion(crossinline block: (Calendar) -> Int): CollectionCriterion<Calendar, Int> {
-        return CollectionCriterion(AppletValues.VAL_TYPE_INT, block)
+        return collectionCriterion(AppletValues.VAL_TYPE_INT, block)
     }
 
     @AppletCategory(0x00_00)
-    val timeRange = NotInvertibleAppletOption(0, R.string.time_range) {
+    val timeRange = appletOption(0, R.string.time_range) {
         NumberRangeCriterion<Calendar, Long> {
             it.timeInMillis
         }
@@ -40,7 +40,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_02)
-    val month = AppletOption(0x11, R.string.in_months) {
+    val month = invertibleAppletOption(0x11, R.string.in_months) {
         TimeCollectionCriterion {
             it.get(Calendar.MONTH)
         }
@@ -52,7 +52,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_03)
-    val dayOfMonth = AppletOption(0x12, R.string.in_day_of_month) {
+    val dayOfMonth = invertibleAppletOption(0x12, R.string.in_day_of_month) {
         NumberRangeCriterion<Calendar, Int> {
             // The first day has value 1
             it.get(Calendar.DAY_OF_MONTH) - 1
@@ -65,7 +65,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_03)
-    val dayOfWeek = AppletOption(0x13, R.string.in_day_of_week) {
+    val dayOfWeek = invertibleAppletOption(0x13, R.string.in_day_of_week) {
         TimeCollectionCriterion {
             it.get(Calendar.DAY_OF_WEEK) - 1
         }
@@ -77,7 +77,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_04)
-    val hourMinSec = AppletOption(0x20, R.string.in_hour_min_sec_range) {
+    val hourMinSec = invertibleAppletOption(0x20, R.string.in_hour_min_sec_range) {
         NumberRangeCriterion<Calendar, Int> {
             it.get(Calendar.HOUR) shl 16 or it.get(Calendar.MINUTE) shl 8 or it.get(Calendar.SECOND)
         }
@@ -91,8 +91,8 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         val start = it.firstOrNull()
         val stop = it.lastOrNull()
         when {
-            start == null && stop != null -> format(stop)
-            start != null && stop == null -> format(start)
+            start == null && stop != null -> R.string.format_before.format(format(stop))
+            start != null && stop == null -> R.string.format_after.format(format(start))
             start != null && stop != null -> R.string.format_range.format(
                 format(start), format(stop)
             )
@@ -100,7 +100,5 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    override val title: Int = R.string.current_time_matches
-
-    override val categoryNames: IntArray = intArrayOf(AppletOption.TITLE_NONE)
+    override val categoryNames: IntArray? = null
 }

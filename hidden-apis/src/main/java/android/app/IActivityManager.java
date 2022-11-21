@@ -19,6 +19,8 @@ public interface IActivityManager extends IInterface {
     List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
                                                            int ignoreWindowingMode) throws RemoteException;
 
+    void forceStopPackage(String packageName, int userId);
+
     abstract class Stub extends Binder implements IActivityManager {
 
         public static IActivityManager asInterface(IBinder obj) {

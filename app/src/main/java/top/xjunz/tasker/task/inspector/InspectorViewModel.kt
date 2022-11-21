@@ -37,6 +37,8 @@ class InspectorViewModel {
 
     val emphaticNode = MutableLiveData<StableNodeInfo>()
 
+    var showExtraOptions: Boolean = true
+
     var windowWidth: Int = -1
 
     var windowHeight: Int = -1

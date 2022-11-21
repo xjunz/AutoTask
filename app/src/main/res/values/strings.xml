@@ -136,7 +136,7 @@
     <string name="add_before">在前面添加</string>
     <string name="back">返回</string>
     <string name="complete">完成</string>
-    <string name="format_applet_count">清空共%d条规则</string>
+    <string name="format_clear_applets">清空共%d条规则</string>
     <string name="expand_more">展开</string>
     <string name="unfold_less">收起</string>
     <string name="sort_by_app_name">按应用名称</string>
@@ -176,7 +176,7 @@
     <string name="format_px">%d像素</string>
     <string name="no_node_selected">未选中任何节点</string>
     <string name="node_info_overlay_subtitle">请勾选想要指定的规则</string>
-    <string name="ui_object">UI组件</string>
+    <string name="ui_object">控件</string>
     <string name="child_node">子节点</string>
     <string name="seekbar">拖动条</string>
     <string name="tip_floating_inspector_enabled">悬浮助手已启用，点击悬浮图标，即可选择屏幕上的内容。</string>
@@ -198,15 +198,18 @@
     <string name="screen_height">屏幕高度</string>
     <string name="help">帮助</string>
     <string name="help_distance_unit"><b>像素</b>: 屏幕上的最小显示单元
-        \n<b>dp</b>: 设备无关像素，可在不同屏幕上显示相同的大小，是安卓APP中最常用的显示单位
+    \n<b>dp</b>: 设备无关像素，可在不同屏幕上显示相同的大小，是安卓APP中最常用的显示单位
     \n<b>屏幕高度/宽度: </b>取值范围之间为0~1，代表多少比例的屏幕的宽度/高度
     \n<b>父节点高度/宽度: </b>取值范围之间为0~1，代表多少比例的父节点的宽度/高度
     </string>
     <string name="format_scoped_distance_name">到%s%s边缘的距离</string>
-    <string name="format_error_min_greater_than_max">%1$s不能小于%2$s</string>
+    <string name="format_error_min_greater_than_max">%1$s不能大于%2$s</string>
     <string name="format_error_min_max_not_in_scope">当前选中单位为\"%s\"，最大值和最小值范围为0到1</string>
     <string name="format_less_than">小于等于%s</string>
     <string name="format_larger_than">大于等于%s</string>
+    <string name="format_percent_less_than">小于等于%d%%</string>
+    <string name="format_percent_larger_than">大于等于%d%%</string>
+    <string name="format_percent_range">%1$d%%至%2$d%%</string>
     <string name="parent_width">父节点宽度</string>
     <string name="parent_height">父节点高度</string>
     <string name="format_error_no_limit">未指定%1$s或%2$s</string>
@@ -221,7 +224,7 @@
     <string name="format_after">%s之后</string>
     <string name="with_pane_title">页面标题为</string>
     <string name="no_comp_detected">暂未检测到任何程序和页面</string>
-    <string name="format_switch_mode">已切换到%s模式</string>
+    <string name="format_switch_mode">悬浮助手已切换到%s模式</string>
     <string name="coords">坐标点</string>
     <string name="format_current">当前%s</string>
     <string name="nothing_selected">未选择任何项目</string>
@@ -235,4 +238,25 @@
     <string name="over_max_applet_size">超过最大规则数，添加失败！</string>
     <string name="format_reach_required_applet_size">该规则组只允许%d条规则哦~</string>
     <string name="removed">已移除</string>
+    <string name="device_status">设备状态</string>
+    <string name="prompt_applet_multi_selection_depth">只能选中相同层级的规则哦！</string>
+    <string name="merge_rules">合并已选规则</string>
+    <string name="split_merged_rules">解散当前规则组</string>
+    <string name="format_selection_count">已选中%d项</string>
+    <string name="matches_rule_set">满足规则组合</string>
+    <string name="format_applet_count">共%d条规则</string>
+    <string name="prompt_merge_single_applet">选中多个规则才可以合并哦！</string>
+    <string name="quit_multi_selection">退出多选模式</string>
+    <string name="too_deeply_nested">合并失败，请勿嵌套过深！</string>
+    <string name="prompt_split_container_flow">确定要解散当前规则组吗？</string>
+    <string name="unable_to_merge">无法合并所选规则</string>
+    <string name="ui_object_operations">控件操作</string>
+    <string name="copy_text">复制文本到剪贴板</string>
+    <string name="extract_text">提取文本</string>
+    <string name="matched_ui_object_text">控件的文字</string>
+    <string name="matched_ui_object">满足条件的控件</string>
+    <string name="extracted_text">提取的文本</string>
+    <string name="input_field">文本框</string>
+    <string name="input_content">输入的内容</string>
+
 </resources>

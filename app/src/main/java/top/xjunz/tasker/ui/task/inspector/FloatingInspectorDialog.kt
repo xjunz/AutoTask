@@ -59,6 +59,8 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
         var mode = InspectorMode.COMPONENT
 
+        lateinit var doOnSucceeded: Runnable
+
         override fun onStartBinding() {
             isBinding.postValue(true)
         }
@@ -88,7 +90,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
             viewModelScope.launch(Dispatchers.Default) {
                 try {
                     enabler.enableA11yService(true)
-                    // Delay 500ms to wait for the a11y service to be pulled up
+                    // Delay 500ms to wait for the a11y service to be pulled up?
                     delay(500)
                 } catch (t: Throwable) {
                     onError.postValue(t)
@@ -114,6 +116,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     private fun showInspectorAndDismissSelf() {
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
+        viewModel.doOnSucceeded.run()
         dismiss()
         toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
     }
@@ -135,6 +138,10 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                 if (A11yAutomatorService.get() == null)
                     toast(R.string.grant_failed)
             }
+    }
+
+    fun doOnSucceeded(block: Runnable) = doWhenCreated {
+        viewModel.doOnSucceeded = block
     }
 
     fun setMode(mode: InspectorMode) = doWhenCreated {

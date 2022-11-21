@@ -16,5 +16,5 @@ rootProject.name = "自动任务"
 include ':app'
 include ':hidden-apis'
 include ':ui-automator'
-include ':task-engine'
+include ':tasker-engine'
 include ':shared-library'

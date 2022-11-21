@@ -22,11 +22,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
-import top.xjunz.tasker.databinding.DialogAppletShoppingCartBinding
+import top.xjunz.tasker.databinding.DialogAppletSelectorBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
@@ -42,7 +41,7 @@ import top.xjunz.tasker.util.Router
 /**
  * @author xjunz 2022/09/26
  */
-class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>() {
+class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     override val isFullScreen: Boolean = true
 
@@ -54,7 +53,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
 
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
-            viewModel.getRegistryOptions(), ItemAppletFactoryBinding::class.java, {
+            viewModel.registryOptions, ItemAppletFactoryBinding::class.java, {
                 itemView.setOnClickListener {
                     viewModel.selectFlowRegistry(adapterPosition)
                 }
@@ -86,7 +85,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
                 }
             }
             binding.ibInvert.setOnClickListener {
-                viewModel.options[adapterPosition].toggleInverted()
+                viewModel.options[adapterPosition].toggleInversion()
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, position, option ->
@@ -125,14 +124,8 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
         viewModel.onCompletion = block
     }
 
-    fun scopedBy(flow: Flow): AppletSelectorDialog {
-        if (flow is ControlFlow) {
-            return this
-        }
-        return doWhenCreated {
-            viewModel.scopedRegistryOption =
-                viewModel.appletOptionFactory.findRegistryOption(flow.appletId)
-        }
+    fun scopedBy(flow: Flow): AppletSelectorDialog = doWhenCreated {
+        viewModel.setScope(flow)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -140,6 +133,9 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
         if (viewModel.selectedFlowRegistry.isNull()) {
             viewModel.selectFlowRegistry(0)
         }
+        if (savedInstanceState == null)
+            viewModel.flow = Flow()
+
         mainViewModel = requireActivity().viewModels<MainViewModel>().value
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)
@@ -150,7 +146,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
             binding.rvRight.updatePadding()
         }
         binding.shoppingCart.btnCount.setOnClickListener {
-            if (viewModel.candidates.isNotEmpty())
+            if (viewModel.flow.isNotEmpty())
                 viewModel.showClearDialog.value = true
         }
         binding.shoppingCart.btnComplete.setOnClickListener {
@@ -163,13 +159,27 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
                 if (floatingInspector.mode != mode) {
                     floatingInspector.mode = mode
                     toast(R.string.format_switch_mode.format(mode.label))
+                    requireActivity().pressHome()
                 }
             } else {
-                FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
+                FloatingInspectorDialog().setMode(mode).doOnSucceeded {
+                    floatingInspector.viewModel.showExtraOptions = !viewModel.isScoped
+                }.show(parentFragmentManager)
             }
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
+        if (viewModel.isScoped)
+            binding.cvHeader.doOnPreDraw {
+                if (isFloatingInspectorShown) {
+                    floatingInspector.viewModel.showExtraOptions = false
+                    val mode = it.tag?.casted<InspectorMode>() ?: return@doOnPreDraw
+                    if (floatingInspector.mode != mode) {
+                        floatingInspector.mode = mode
+                        toast(R.string.format_switch_mode.format(mode.label))
+                    }
+                }
+            }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -193,7 +203,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
             transition.addTransition(MaterialFadeThrough().addTarget(binding.cvHeader))
             binding.rootView.beginAutoTransition(transition)
             val flowRegistry = viewModel.appletOptionFactory.flowRegistry
-            when (flowRegistry.appletFlowOptions[it]) {
+            when (viewModel.registryOptions[it]) {
                 flowRegistry.componentFlow -> {
                     binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
@@ -213,7 +223,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletShoppingCartBinding>
         }
         observe(viewModel.applets) {
             binding.shoppingCart.btnCount.text =
-                R.string.format_applet_count.format(viewModel.candidates.flatSize)
+                R.string.format_clear_applets.format(viewModel.flow.flatSize)
             if (it.isEmpty())
                 shopCartIntegration.collapse()
             bottomAdapter.submitList(it)

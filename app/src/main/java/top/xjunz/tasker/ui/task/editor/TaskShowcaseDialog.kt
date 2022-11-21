@@ -21,7 +21,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             v.updatePadding(top = insets.top)
         }
         binding.ibCreateTask.setOnClickListener {
-            TaskEditorDialog().show(parentFragmentManager)
+            FlowEditorDialog().show(parentFragmentManager)
         }
     }
 

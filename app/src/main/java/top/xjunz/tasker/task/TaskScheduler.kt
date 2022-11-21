@@ -4,15 +4,15 @@ import android.os.Looper
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.FlowRuntime
 import top.xjunz.tasker.service.AutomatorService
-import top.xjunz.tasker.task.event.TaskEventDispatcher
+import top.xjunz.tasker.task.event.A11yEventDispatcher
 
 /**
  * @author xjunz 2022/08/05
  */
 class TaskScheduler(private val service: AutomatorService, private val looper: Looper) :
-    TaskEventDispatcher.Callback {
+    A11yEventDispatcher.Callback {
 
-    private val dispatcher = TaskEventDispatcher(looper, this)
+    private val dispatcher = A11yEventDispatcher(looper, this)
 
     /**
      * Schedule all active tasks, all of which are running in the thread that owns the [looper].

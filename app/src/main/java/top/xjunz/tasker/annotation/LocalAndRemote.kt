@@ -5,7 +5,8 @@
 package top.xjunz.tasker.annotation
 
 /**
- * The annotation indicating that its targets are used in both local and remote processes.
+ * The annotation indicating that its target may be used in both local and remote processes.
+ * You should deal with these two situations carefully.
  *
  * @see RemoteOnly
  *

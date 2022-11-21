@@ -6,13 +6,11 @@ import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
 
 /**
- * The abstract registry storing [AppletOption].
+ * The abstract registry storing [AppletOption]s.
  *
  * @author xjunz 2022/08/11
  */
 abstract class AppletOptionRegistry(val id: Int) {
-
-    abstract val title: Int
 
     abstract val categoryNames: IntArray?
 
@@ -28,13 +26,13 @@ abstract class AppletOptionRegistry(val id: Int) {
         }.sorted()
     }
 
-    private fun AppletCategoryOption(label: Int): AppletOption {
-        return AppletOption(-1, label, AppletOption.TITLE_NONE) {
+    private fun appletCategoryOption(label: Int): AppletOption {
+        return invertibleAppletOption(-1, label, AppletOption.TITLE_NONE) {
             unsupportedOperation()
         }
     }
 
-    protected inline fun AppletOption(
+    protected inline fun invertibleAppletOption(
         appletId: Int,
         title: Int,
         invertedTitle: Int = AppletOption.TITLE_AUTO_INVERTED,
@@ -47,7 +45,7 @@ abstract class AppletOptionRegistry(val id: Int) {
         }
     }
 
-    protected inline fun NotInvertibleAppletOption(
+    protected inline fun appletOption(
         appletId: Int,
         title: Int,
         crossinline creator: () -> Applet
@@ -70,7 +68,7 @@ abstract class AppletOptionRegistry(val id: Int) {
             if (it.categoryIndex != previousCategory) {
                 val name = categoryNames?.getOrNull(it.categoryIndex)
                 if (name != null && name != AppletOption.TITLE_NONE) {
-                    ret.add(AppletCategoryOption(name))
+                    ret.add(appletCategoryOption(name))
                 }
             }
             ret.add(it)

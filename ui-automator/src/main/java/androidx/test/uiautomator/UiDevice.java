@@ -147,6 +147,10 @@ public class UiDevice implements Searchable {
         return node != null ? new UiObject2(this, selector, node) : null;
     }
 
+    public UiObject2 wrapUiObject2(AccessibilityNodeInfo nodeInfo) {
+        return new UiObject2(this, null, nodeInfo);
+    }
+
     /**
      * Returns all objects that match the {@code selector} criteria.
      */
@@ -257,7 +261,7 @@ public class UiDevice implements Searchable {
      * @return UiDevice instance
      */
     public static UiDevice getInstance(UiAutomatorBridge instrumentation) {
-        if (sInstance == null || instrumentation != sInstance.getInstrumentation()) {
+        if (sInstance == null || instrumentation != sInstance.getBridge()) {
             sInstance = new UiDevice(instrumentation);
         }
         return sInstance;
@@ -642,7 +646,7 @@ public class UiDevice implements Searchable {
      */
     public void waitForIdle(long timeout) {
         Tracer.trace(timeout);
-        getInstrumentation().waitForIdle(timeout);
+        getBridge().waitForIdle(timeout);
     }
 
     /**
@@ -1124,12 +1128,12 @@ public class UiDevice implements Searchable {
         return roots.toArray(new AccessibilityNodeInfo[0]);
     }
 
-    public UiAutomatorBridge getInstrumentation() {
+    public UiAutomatorBridge getBridge() {
         return mInstrumentation;
     }
 
     UiAutomation getUiAutomation() {
-        return getInstrumentation().getUiAutomation();
+        return getBridge().getUiAutomation();
     }
 
     QueryController getQueryController() {

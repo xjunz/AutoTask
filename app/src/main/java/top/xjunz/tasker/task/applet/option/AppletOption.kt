@@ -45,7 +45,7 @@ abstract class AppletOption(
             }
         }
 
-        private fun makeSpannedLabel(label: CharSequence): CharSequence {
+        private fun makeLabelSpan(label: CharSequence): CharSequence {
             val index = label.indexOf('(')
             if (index > -1) {
                 return SpannableStringBuilder().append(label.substring(0, index)).append(
@@ -56,6 +56,26 @@ abstract class AppletOption(
             }
             return label
         }
+
+        fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
+            val relationText = if (isAnd) R.string._and.text else R.string._or.text
+            return SpannableStringBuilder().append(
+                relationText,
+                ForegroundColorSpan(ColorSchemes.colorPrimary),
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+            ).append(origin).also {
+                it.setSpan(
+                    UnderlineSpan(), 0, 1,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                it.setSpan(
+                    StyleSpan(Typeface.BOLD), 0, 1,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+
+        }
+
     }
 
     private var describer: (Any) -> CharSequence = DEFAULT_DESCRIBER
@@ -97,8 +117,18 @@ abstract class AppletOption(
 
     val hasPresets get() = presetsNameRes != -1 && presetsValueRes != -1
 
+    var descAsTitle: Boolean = false
+
+    var isShizukuOnly = false
+
+    var isA11yOnly = false
+
+    var arguments: Array<ReferenceDescriptor> = emptyArray()
+
+    var results: Array<ReferenceDescriptor> = emptyArray()
+
     val title: CharSequence?
-        get() = if (titleRes == TITLE_NONE) null else makeSpannedLabel(titleRes.text)
+        get() = if (titleRes == TITLE_NONE) null else makeLabelSpan(titleRes.text)
 
     private val invertedTitleResource: Int by lazy {
         @SuppressLint("DiscouragedApi")
@@ -115,7 +145,7 @@ abstract class AppletOption(
     }
 
     val invertedTitle: CharSequence?
-        get() = if (invertedTitleResource == TITLE_NONE) null else makeSpannedLabel(
+        get() = if (invertedTitleResource == TITLE_NONE) null else makeLabelSpan(
             invertedTitleResource.text
         )
 
@@ -125,23 +155,14 @@ abstract class AppletOption(
         return if (isInverted) invertedTitle else title
     }
 
-    fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
-        val relationText = if (isAnd) R.string._and.text else R.string._or.text
-        return SpannableStringBuilder().append(
-            relationText,
-            ForegroundColorSpan(ColorSchemes.colorPrimary),
-            SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-        ).append(origin).also {
-            it.setSpan(
-                UnderlineSpan(), 0, 1,
-                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            it.setSpan(
-                StyleSpan(Typeface.BOLD), 0, 1,
-                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
+    fun shizukuOnly(): AppletOption {
+        isShizukuOnly = true
+        return this
+    }
 
+    fun descAsTitle(): AppletOption {
+        descAsTitle = true
+        return this
     }
 
     fun withValue(value: Any?): AppletOption {
@@ -154,7 +175,7 @@ abstract class AppletOption(
     val description: CharSequence?
         get() = if (value == null) null else describe(value!!)
 
-    fun toggleInverted() {
+    fun toggleInversion() {
         isInverted = !isInverted
     }
 
@@ -184,6 +205,22 @@ abstract class AppletOption(
         return this
     }
 
+    fun withResults(vararg pairs: Pair<Int, Class<*>>): AppletOption {
+        check(pairs.isNotEmpty())
+        results = Array(pairs.size) {
+            ReferenceDescriptor(pairs[it].first, pairs[it].second)
+        }
+        return this
+    }
+
+    fun withArguments(vararg pairs: Pair<Int, Class<*>>): AppletOption {
+        check(pairs.isNotEmpty())
+        arguments = Array(pairs.size) {
+            ReferenceDescriptor(pairs[it].first, pairs[it].second)
+        }
+        return this
+    }
+
     protected abstract fun rawCreateApplet(): Applet
 
     override fun compareTo(other: AppletOption): Int {
@@ -192,10 +229,6 @@ abstract class AppletOption(
         }
         check(categoryId > -1)
         return categoryId.compareTo(other.categoryId)
-    }
-
-    fun isOptionOf(applet: Applet): Boolean {
-        return registryId shl 16 or appletId == applet.id
     }
 
     override fun equals(other: Any?): Boolean {

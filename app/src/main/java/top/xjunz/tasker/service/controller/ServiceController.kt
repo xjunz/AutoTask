@@ -3,11 +3,10 @@ package top.xjunz.tasker.service.controller
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import top.xjunz.tasker.service.AutomatorService
 import java.lang.ref.WeakReference
 
 /**
- * The abstract service controller manipulating an [AutomatorService].
+ * The abstract service controller manipulating a service.
  *
  * @author xjunz 2022/07/12
  */

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException
 abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     companion object {
-        private const val BINDING_SERVICE_TIMEOUT_MILLS = 5000L
+        private const val BINDING_SERVICE_TIMEOUT_MILLS = 6000L
     }
 
     protected abstract val tag: String
@@ -72,7 +72,10 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
             listener?.onStartBinding()
             bindingJob = async {
                 Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-                delay(BINDING_SERVICE_TIMEOUT_MILLS)
+                delay(BINDING_SERVICE_TIMEOUT_MILLS / 2)
+                // Retry?
+                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
+                delay(BINDING_SERVICE_TIMEOUT_MILLS / 2)
                 throw TimeoutException()
             }
             bindingJob?.invokeOnCompletion {

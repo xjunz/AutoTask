@@ -11,12 +11,13 @@ import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 
 /**
  * @author xjunz 2022/11/08
  */
-class FlowItemMenuHelper(val viewModel: TaskEditorViewModel, val fragment: Fragment) {
+class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragment) {
 
     fun showMenu(anchor: View, applet: Applet): PopupMenu? {
         val popup = PopupMenu(
@@ -32,12 +33,14 @@ class FlowItemMenuHelper(val viewModel: TaskEditorViewModel, val fragment: Fragm
             popup.setOnMenuItemClickListener l@{
                 val index = popup.indexOf(it) - 1
                 if (index >= 0) {
-                    parent[applet.index] = registry.allOptions[index].yieldApplet()
-                    viewModel.notifyFlowChanged()
+                    val newApplet = registry.allOptions[index].yieldApplet()
+                    parent[applet.index] = newApplet
+                    viewModel.regenerateApplets()
+                    viewModel.changedApplet.value = newApplet
                 }
                 return@l true
             }
-        } else if (applet is Flow) {
+        } else if (applet is Flow && !applet.isContainer) {
             popup.menuInflater.inflate(R.menu.flow_editor, popup.menu)
             if (applet is When) {
                 popup.menu.findItem(R.id.item_add_inside).isEnabled = false
@@ -70,19 +73,19 @@ class FlowItemMenuHelper(val viewModel: TaskEditorViewModel, val fragment: Fragm
                     toast(R.string.format_reach_required_applet_size.format(flow.requiredElementCount))
                     return true
                 }
-                AppletSelectorDialog().setTitle(item.title!!).doOnCompletion {
+                AppletSelectorDialog().doOnCompletion {
                     if (flow.size + it.size > Applet.MAX_FLOW_CHILD_COUNT) {
                         toast(R.string.over_max_applet_size)
                         return@doOnCompletion
                     }
                     if (addBefore) {
                         flow.addAll(applet.index, it)
-                    } else {
-                        flow.addAll(it)
-                    }
-                    if (addBefore) {
                         applet.index = applet.requireParent().indexOf(applet)
                         viewModel.changedApplet.value = applet
+                    } else {
+                        val changed = flow.lastOrNull()
+                        flow.addAll(it)
+                        viewModel.changedApplet.value = changed
                     }
                     viewModel.notifyFlowChanged()
                 }.scopedBy(flow).show(fragment.parentFragmentManager)

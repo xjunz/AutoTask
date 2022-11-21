@@ -76,7 +76,7 @@ public class UiObject2 implements Searchable {
         mCachedNode = cachedNode;
         mGestures = Gestures.getInstance();
         mGestureController = GestureController.getInstance(device);
-        mDisplayMetrics = mDevice.getInstrumentation().getDisplayMetrics();
+        mDisplayMetrics = mDevice.getBridge().getDisplayMetrics();
     }
 
     /**
@@ -604,7 +604,7 @@ public class UiObject2 implements Searchable {
      */
     public boolean fling(final Direction direction, final int speed) {
         ;
-        if (speed < mDevice.getInstrumentation().getScaledMinimumFlingVelocity()) {
+        if (speed < mDevice.getBridge().getScaledMinimumFlingVelocity()) {
             throw new IllegalArgumentException("Speed is less than the minimum fling velocity");
         }
 

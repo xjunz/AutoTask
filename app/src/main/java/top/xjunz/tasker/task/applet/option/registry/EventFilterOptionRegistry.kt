@@ -13,7 +13,7 @@ import top.xjunz.tasker.task.applet.option.AppletOption
 class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun EventFilterOption(@Event.EventType event: Int, label: Int) =
-        AppletOption(event, label, AppletOption.TITLE_NONE) {
+        invertibleAppletOption(event, label, AppletOption.TITLE_NONE) {
             EventCriterion(event)
         }
 
@@ -29,7 +29,9 @@ class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     val contentChanged =
         EventFilterOption(Event.EVENT_ON_CONTENT_CHANGED, R.string.on_content_changed)
 
-    override val title: Int = AppletOption.TITLE_NONE
+    @AppletCategory(3)
+    val notificationReceived =
+        EventFilterOption(Event.EVENT_ON_NOTIFICATION_RECEIVED, R.string.on_notification_received)
 
     override val categoryNames: IntArray? = null
 }

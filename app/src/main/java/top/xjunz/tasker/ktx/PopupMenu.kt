@@ -16,6 +16,10 @@ import top.xjunz.tasker.util.ReflectionUtil.invokeDeclaredMethod
 /**
  * @author xjunz 2022/11/09
  */
+
+/**
+ * Config the first item as menu title. Call this after [PopupMenu.show].
+ */
 fun PopupMenu.configHeaderTitle() {
     val list = invokeDeclaredMethod<ListView>("getMenuListView")
     list.doOnPreDraw {

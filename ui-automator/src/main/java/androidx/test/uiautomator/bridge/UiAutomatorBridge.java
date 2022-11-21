@@ -45,6 +45,10 @@ public abstract class UiAutomatorBridge {
 
     private DisplayMetrics mDefaultDisplayMetrics;
 
+    private UiDevice mUiDevice;
+
+    private GestureController mGestureController;
+
     private final List<UiAutomation.OnAccessibilityEventListener> mEventListeners = new ArrayList<>(2);
 
     private final UiAutomation.OnAccessibilityEventListener mEventListener = event -> {
@@ -155,6 +159,17 @@ public abstract class UiAutomatorBridge {
         return mDefaultDisplayMetrics;
     }
 
+    public UiDevice getUiDevice() {
+        if (mUiDevice == null)
+            mUiDevice = UiDevice.getInstance(this);
+        return mUiDevice;
+    }
+
+    public GestureController getGestureController() {
+        if (mGestureController == null)
+            mGestureController = getGestureController(getUiDevice());
+        return mGestureController;
+    }
 
     public abstract GestureController getGestureController(UiDevice device);
 }

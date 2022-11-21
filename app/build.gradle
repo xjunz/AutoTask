@@ -60,7 +60,7 @@ android {
 
 dependencies {
     compileOnly project(":hidden-apis")
-    implementation project(':task-engine')
+    implementation project(':tasker-engine')
     implementation project(':ui-automator')
     implementation project(':shared-library')
 
@@ -69,13 +69,13 @@ dependencies {
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     // ktx
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.activity:activity-ktx:1.6.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.3'
+    implementation 'androidx.activity:activity-ktx:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.5.4'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.7.0'
     // coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
@@ -93,6 +93,6 @@ dependencies {
     implementation 'com.jaredrummler:android-shell:1.0.0'
     // test
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 }

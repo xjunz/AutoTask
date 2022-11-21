@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.view.WindowManager
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
 import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
 import top.xjunz.tasker.engine.value.Distance
@@ -17,7 +18,6 @@ import top.xjunz.tasker.task.applet.option.registry.UiObjectOptionRegistry
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.util.RealDisplay
 import top.xjunz.tasker.util.Router
 import top.xjunz.tasker.util.Router.routeTo
 import java.util.*
@@ -63,18 +63,21 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         }
     }
 
-
     private fun collectProperties() {
-        vm.currentComp.value?.let {
-            options.add(pkgFactory.pkgCollection.withValue(Collections.singleton(it.pkgName)))
+        if (vm.currentMode eq InspectorMode.COMPONENT || vm.showExtraOptions) {
+            vm.currentComp.value?.let {
+                options.add(pkgFactory.pkgCollection.withValue(Collections.singleton(it.pkgName)))
 
-            if (it.actName != null) {
-                val compName = ComponentName(it.pkgName, it.actName!!).flattenToShortString()
-                options.add(pkgFactory.activityCollection.withValue(Collections.singleton(compName)))
+                if (it.actName != null) {
+                    val compName = ComponentName(it.pkgName, it.actName!!).flattenToShortString()
+                    options.add(
+                        pkgFactory.activityCollection.withValue(Collections.singleton(compName))
+                    )
+                }
+
+                if (it.paneTitle != null)
+                    options.add(pkgFactory.paneTitle.withValue(it.paneTitle))
             }
-
-            if (it.paneTitle != null)
-                options.add(pkgFactory.paneTitle.withValue(it.paneTitle))
         }
         if (vm.currentMode eq InspectorMode.COMPONENT) return
 
@@ -122,11 +125,11 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
         options.add(uiObjectFactory.left.withValue(Distance.exactPxInScreen(rScreen.left)))
 
-        options.add(uiObjectFactory.right.withValue(Distance.exactPxInScreen(RealDisplay.size.x - rScreen.right)))
+        options.add(uiObjectFactory.right.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.x - rScreen.right)))
 
         options.add(uiObjectFactory.top.withValue(Distance.exactPxInScreen(rScreen.top)))
 
-        options.add(uiObjectFactory.bottom.withValue(Distance.exactPxInScreen(RealDisplay.size.y - rScreen.bottom)))
+        options.add(uiObjectFactory.bottom.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.y - rScreen.bottom)))
 
         options.add(uiObjectFactory.width.withValue(Distance.exactPx(rScreen.width())))
         options.add(uiObjectFactory.height.withValue(Distance.exactPx(rScreen.height())))

@@ -3,26 +3,22 @@ package top.xjunz.tasker.ui.task.selector
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isFloatingInspectorShown
+import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.ui.base.SavedStateViewModel
+import top.xjunz.tasker.ui.task.editor.FlowViewModel
 
 /**
  * @author xjunz 2022/10/22
  */
-class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(states) {
+class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     var animateItems = true
-
-    val appletOptionFactory = AppletOptionFactory()
-
-    var scopedRegistryOption: AppletOption? = null
 
     val selectedFlowRegistry = MutableLiveData<Int>()
 
@@ -32,34 +28,42 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
 
     val onAppletAdded = MutableLiveData<Pair<Int, Applet>>()
 
-    val candidates = Flow()
+    lateinit var registryOptions: Array<AppletOption>
 
-    val applets = MutableLiveData(emptyList<Applet>())
+    var isScoped = false
 
     lateinit var onCompletion: (List<Applet>) -> Unit
 
-    lateinit var title: CharSequence
+    var title: CharSequence? = null
 
-    private val collapsedFlows = mutableSetOf<Flow>()
-
-    fun isCollapsed(flow: Flow): Boolean {
-        return collapsedFlows.contains(flow)
-    }
-
-    fun toggleCollapse(flow: Flow) {
-        if (collapsedFlows.contains(flow)) {
-            collapsedFlows.remove(flow)
-        } else {
-            collapsedFlows.add(flow)
+    fun setScope(flow: Flow) {
+        // Find its control flow, we need its control flow's option title to be shown
+        var controlFlow: Flow? = flow
+        while (controlFlow != null && controlFlow !is ControlFlow) {
+            controlFlow = controlFlow.requireParent()
         }
-        notifyCandidatesChanged()
+        title = appletOptionFactory.findOption(controlFlow!!).title
+        if (flow is ControlFlow) {
+            isScoped = false
+            if (flow is If) {
+                registryOptions = appletOptionFactory.flowRegistry.criterionFlowOptions
+            } else if (flow is Do) {
+                registryOptions = appletOptionFactory.flowRegistry.actionFlowOptions
+            }
+        } else {
+            isScoped = true
+            registryOptions = arrayOf(appletOptionFactory.findRegistryOption(flow.appletId))
+            // If scoped, do not show extra options from other registry, like showing component
+            // options while showing ui object options.
+            if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
+        }
     }
 
     fun selectFlowRegistry(index: Int) {
         if (selectedFlowRegistry eq index) return
         options.clear()
         options.addAll(
-            appletOptionFactory.findRegistryById(getRegistryOptions()[index].appletId).categorizedOptions
+            appletOptionFactory.findRegistryById(registryOptions[index].appletId).categorizedOptions
         )
         selectedFlowRegistry.value = index
     }
@@ -70,10 +74,10 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
 
     fun appendApplet(applet: Applet) {
         val flowOption = appletOptionFactory.findRegistryOption(applet.registryId)
-        if (candidates.isEmpty() || candidates.last().appletId != flowOption.appletId) {
-            candidates.add(flowOption.yieldApplet() as Flow)
+        if (flow.isEmpty() || flow.last().appletId != flowOption.appletId) {
+            flow.add(flowOption.yieldApplet() as Flow)
         }
-        val last = candidates.last() as Flow
+        val last = flow.last() as Flow
         if (last.isNotEmpty()) {
             val prev = last.last()
             if (prev.id == applet.id)
@@ -81,45 +85,53 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
                 applet.isAnd = false
         }
         last.add(applet)
-        notifyCandidatesChanged()
+        notifyFlowChanged()
     }
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
         val flowOption = appletOptionFactory.findRegistryOption(options.first().registryId)
 
-        candidates.add(flowOption.yieldApplet() as Flow)
+        flow.add(flowOption.yieldApplet() as Flow)
         options.forEach {
             appendOption(it)
         }
 
         toast(R.string.options_from_inspector_added.format(options.size))
-        notifyCandidatesChanged()
+        notifyFlowChanged()
     }
 
     fun clearAllCandidates() {
-        candidates.clear()
-        notifyCandidatesChanged()
+        flow.clear()
+        notifyFlowChanged()
     }
 
     fun complete() {
-        if (candidates.isEmpty()) {
+        if (flow.isEmpty()) {
             toast(R.string.no_rule_added)
         } else {
-            if (scopedRegistryOption == null) {
-                onCompletion.invoke(candidates)
+            if (isScoped) {
+                onCompletion.invoke(flow.single() as Flow)
             } else {
-                onCompletion.invoke(candidates.single() as Flow)
+                onCompletion.invoke(mergeCandidates())
             }
         }
     }
 
-    fun notifyCandidatesChanged() {
+    private fun mergeCandidates(): List<Applet> {
+        val ret = mutableListOf<Applet>()
+        flow.forEach {
+            if (it is PhantomFlow) ret.addAll(it) else ret.add(it)
+        }
+        return ret
+    }
+
+    override fun flatmapFlow(): List<Applet> {
         val ret = ArrayList<Applet>()
-        candidates.forEachIndexed { index, flow ->
+        flow.forEachIndexed { index, flow ->
             flow as Flow
             flow.index = index
-            flow.parent = candidates
+            flow.parent = this.flow
             ret.add(flow)
             if (!isCollapsed(flow))
                 flow.forEachIndexed { i, applet ->
@@ -128,14 +140,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(st
                     ret.add(applet)
                 }
         }
-        applets.value = ret
-    }
-
-    fun getRegistryOptions(): Array<AppletOption> {
-        return if (scopedRegistryOption == null) {
-            appletOptionFactory.flowRegistry.appletFlowOptions
-        } else {
-            arrayOf(scopedRegistryOption!!)
-        }
+        ret.trimToSize()
+        return ret
     }
 }

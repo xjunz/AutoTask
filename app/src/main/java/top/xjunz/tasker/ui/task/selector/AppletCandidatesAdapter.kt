@@ -19,6 +19,7 @@ import top.xjunz.tasker.engine.applet.criterion.Criterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
 import java.util.*
 
@@ -27,27 +28,13 @@ import java.util.*
  */
 class AppletCandidatesAdapter(
     private val viewModel: AppletSelectorViewModel,
-    private val onClickListener: AppletOptionOnClickListener
+    private val onClickListener: AppletOptionOnClickListener,
 ) : ListAdapter<Applet, AppletCandidatesAdapter.AppletViewHolder>(FlowItemTouchHelperCallback.DiffCallback) {
-
-    private val itemTouchHelperCallback = object : FlowItemTouchHelperCallback(this) {
-
-        override val Flow.isCollapsed: Boolean
-            get() = viewModel.isCollapsed(this)
-
-        override fun notifyFlowChanged() {
-            viewModel.notifyCandidatesChanged()
-        }
-    }
-
-    private val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-
-    private lateinit var recyclerView: RecyclerView
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+        ItemTouchHelper(FlowItemTouchHelperCallback(recyclerView, viewModel))
+            .attachToRecyclerView(recyclerView)
     }
 
     inner class AppletViewHolder(val binding: ItemAppletCandidateBinding) :
@@ -72,7 +59,7 @@ class AppletCandidatesAdapter(
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
                     notifyItemChanged(adapterPosition, true)
-                    viewModel.notifyCandidatesChanged()
+                    viewModel.notifyFlowChanged()
                 } else {
                     applet.toggleInversion()
                     notifyItemChanged(adapterPosition)
@@ -99,12 +86,14 @@ class AppletCandidatesAdapter(
             val option = viewModel.appletOptionFactory.findOption(applet)
             val title = option.getTitle(applet.isInverted)
             if (title != null && showRelation) {
-                it.tvTitle.text = option.makeRelationSpan(title, applet.isAnd)
+                it.tvTitle.text = AppletOption.makeRelationSpan(title, applet.isAnd)
             } else {
                 it.tvTitle.text = title
             }
             if (isFlow) {
-                it.groupLeft.isVisible = false
+                it.tvNumber.isVisible = false
+                it.dividerTop.isVisible = false
+                it.dividerBott.isVisible = false
                 it.tvDesc.isVisible = false
                 it.ibAction.isVisible = true
                 if (viewModel.isCollapsed(applet as Flow)) {
@@ -116,7 +105,9 @@ class AppletCandidatesAdapter(
                 }
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
             } else {
-                it.groupLeft.isVisible = true
+                it.tvNumber.isVisible = true
+                it.dividerTop.isVisible = true
+                it.dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                 it.tvNumber.text = (applet.index + 1).toString()
                 it.tvDesc.isVisible = applet !is PropertyCriterion<*>
                 it.ibAction.isVisible = applet.isInvertible

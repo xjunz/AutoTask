@@ -11,7 +11,6 @@ import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnPreDraw
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.circularreveal.CircularRevealCompat
@@ -67,11 +66,6 @@ class ShoppingCartIntegration(
                 viewModel.setValue(key, behavior.peekHeight)
             }
             binding.rvBottom.updatePadding(bottom = insets.bottom)
-            binding.root.doOnPreDraw {
-                it.updateLayoutParams {
-                    //height = it.height - insets.top
-                }
-            }
         }
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -172,9 +166,7 @@ class ShoppingCartIntegration(
             )
         ).with(ObjectAnimator.ofFloat(circularRevealContainer, View.ALPHA, 1F, 0F))
         animator.addListener(
-            CircularRevealCompat.createCircularRevealListener(
-                circularRevealContainer
-            )
+            CircularRevealCompat.createCircularRevealListener(circularRevealContainer)
         )
         animator.startDelay = 250
         animator.start()

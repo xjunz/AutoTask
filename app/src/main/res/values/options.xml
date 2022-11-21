@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="current_package_matches">当前应用程序满足</string>
-    <string name="match_package_name">匹配包名</string>
+    <string name="current_app">当前程序</string>
+    <string name="package_name">包名</string>
     <string name="component_info">程序和页面</string>
 
     <string name="starts_with">以指定文本开始</string>
@@ -30,12 +30,12 @@
     <string name="in_version_range">指定版本号</string>
     <string name="not_in_version_range">排除指定版本号</string>
 
-    <string name="ui_object_exists">存在UI组件满足</string>
+    <string name="ui_object_exists">存在控件</string>
     <string name="with_type">控件类型为</string>
     <string name="with_text">指定文本内容</string>
     <string name="not_with_text">排除文本内容</string>
     <string name="in_length_range">文本长度范围</string>
-    <string name="content_desc">内容描述 (ContentDescription)</string>
+    <string name="content_desc">内容描述为 (ContentDescription)</string>
     <string name="is_clickable">可点击 (isClickable)</string>
     <string name="not_is_clickable">不可点击 (isClickable)</string>
     <string name="is_long_clickable">可长按 (isLongClickable)</string>
@@ -74,13 +74,39 @@
     <string name="in_hour_min_sec_range">指定时分秒</string>
     <string name="not_in_hour_min_sec_range">指定时分秒以外</string>
     <string name="property">属性</string>
-    <string name="current_time_matches">当前时间满足</string>
-    <string name="current_activity_matches">当前页面满足</string>
+    <string name="current_time">当前时间</string>
+    <string name="current_activity">当前页面</string>
     <string name="in_activity_collection">指定页面 (Activity)</string>
     <string name="not_in_activity_collection">排除页面 (Activity)</string>
+
+    <string name="screen_orientation_portrait">屏幕处于竖屏状态</string>
+    <string name="not_screen_orientation_portrait">屏幕处于横屏状态</string>
+    <string name="is_charging">正在充电</string>
+    <string name="not_is_charging">未在充电</string>
+    <string name="in_battery_capacity_range">电池电量在指定范围内</string>
+    <string name="not_in_battery_capacity_range">电池电量不在指定范围内</string>
 
     <string name="format_pkg_collection_desc">%s等共%d个应用程序</string>
     <string name="format_act_collection_desc">已指定%d个页面</string>
     <string name="format_clear_selected_pkg">清空共%d个应用程序</string>
     <string name="format_clear_selected_act">清空共%d个页面</string>
+
+    <string name="global_actions">全局操作</string>
+    <string name="press_back">点击返回键</string>
+    <string name="press_recent">切换到最近使用应用</string>
+    <string name="press_home">回到桌面</string>
+    <string name="perform_click">点击控件</string>
+    <string name="perform_long_click">长按控件</string>
+    <string name="perform_input_text">向文本框中输入文字</string>
+    <string name="perform_input_ref_text">匹配并输入文字(仅限文本框)</string>
+    <string name="force_stop_current_pkg">强行停止当前应用</string>
+
+    <string name="notification_contains">通知内容包含</string>
+    <string name="not_notification_contains">通知内容不包含</string>
+    <string name="in_notification_pkg_names">发送通知的应用为</string>
+    <string name="not_in_notification_pkg_names">发送通知的应用不为</string>
+    <string name="notification_matches">通知内容满足正则表达式</string>
+    <string name="not_notification_matches">通知内容不满足正则表达式</string>
+    <string name="on_notification_received">收到通知时</string>
+    <string name="current_notification">当前通知</string>
 </resources>

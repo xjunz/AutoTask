@@ -18,7 +18,7 @@ import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.LocalOnly
 import top.xjunz.tasker.annotation.RemoteOnly
-import top.xjunz.tasker.impl.ShizukuUiAutomatorBridge
+import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
 import java.lang.ref.WeakReference
