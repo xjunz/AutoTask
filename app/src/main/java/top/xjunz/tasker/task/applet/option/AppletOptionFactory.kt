@@ -29,10 +29,10 @@ class AppletOptionFactory : AppletFactory {
     private val notificationOptionRegistry =
         NotificationOptionRegistry(FlowOptionRegistry.ID_NOTIFICATION_OPTION_REGISTRY)
 
-    val globalActionRegistry =
+    private val globalActionRegistry =
         GlobalActionRegistry(FlowOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
 
-    val uiObjectActionRegistry =
+    private val uiObjectActionRegistry =
         UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
 
@@ -51,14 +51,20 @@ class AppletOptionFactory : AppletFactory {
         uiObjectActionRegistry
     )
 
-    fun findOption(applet: Applet): AppletOption {
-        return findRegistryById(applet.registryId).findAppletOptionById(applet.appletId)
+    fun requireOption(applet: Applet): AppletOption {
+        return requireNotNull(findOption(applet)) {
+            "Option for applet[$applet] not found!"
+        }
+    }
+
+    fun findOption(applet: Applet): AppletOption? {
+        return requireRegistryById(applet.registryId).findAppletOptionById(applet.appletId)
     }
 
     override fun createAppletById(id: Int): Applet {
         val registryId = id ushr 16
         val appletId = id and 0xFFFF
-        return findRegistryById(registryId).createAppletFromId(appletId)
+        return requireRegistryById(registryId).createAppletFromId(appletId)
     }
 
     /**
@@ -67,12 +73,14 @@ class AppletOptionFactory : AppletFactory {
      *
      * @param registryId id of the registry, see [Applet.registryId].
      */
-    fun findRegistryOption(registryId: Int): AppletOption {
-        return flowRegistry.findAppletOptionById(registryId)
+    fun requireRegistryOption(registryId: Int): AppletOption {
+        return flowRegistry.findAppletOptionById(registryId)!!
     }
 
-    fun findRegistryById(registryId: Int): AppletOptionRegistry {
-        return allRegistries.first { it.id == registryId }
+    fun requireRegistryById(registryId: Int): AppletOptionRegistry {
+        return allRegistries.first {
+            it.id == registryId
+        }
     }
 }
 

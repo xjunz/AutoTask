@@ -4,10 +4,10 @@
 
 package top.xjunz.tasker.ktx
 
+import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
-import androidx.core.content.ContextCompat
 import androidx.core.text.parseAsHtml
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
@@ -34,9 +34,14 @@ fun View.setContentDescriptionAndTooltip(text: CharSequence) {
 
 @BindingAdapter("help")
 fun View.setHelp(help: CharSequence) {
-    background =
-        ContextCompat.getDrawable(context, android.R.attr.selectableItemBackground.resolvedId)
+    background = android.R.attr.selectableItemBackground.resolvedId.getDrawable()
     setOnClickListener {
         context.makeSimplePromptDialog(R.string.help.str, help).show()
     }
+}
+
+@BindingAdapter("linkable")
+fun TextView.setLinkable(linkable: Boolean) {
+    if (linkable)
+        movementMethod = LinkMovementMethod.getInstance()
 }

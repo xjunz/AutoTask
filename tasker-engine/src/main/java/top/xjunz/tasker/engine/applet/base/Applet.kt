@@ -1,9 +1,8 @@
 package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * The base executable element of a [Flow].
@@ -11,6 +10,12 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
  * @author xjunz 2022/08/04
  */
 abstract class Applet {
+
+    object Configurator {
+
+        const val MAX_REFERRED_TAG_LENGTH = 12
+
+    }
 
     companion object {
 
@@ -23,7 +28,7 @@ abstract class Applet {
          * limited to 9 (64/7) and the max child count of a flow is 128 (2^7). Also there is only 1
          * (64%7) bit remaining unused.
          *
-         * @see FlowRuntime
+         * @see TaskRuntime
          */
         const val FLOW_CHILD_COUNT_BITS = 7
 
@@ -99,31 +104,20 @@ abstract class Applet {
 
     var value: Any? = null
 
-    var references: List<Reference> = emptyList()
+    var referring: Map<Int, String> = emptyMap()
 
-    var isReferred: Boolean = false
+    var referred: Map<Int, String> = emptyMap()
 
-    /**
-     * Reference id is used to track this applet in runtime to refer.
-     */
-    var refid: String? = null
-
-    fun requireParent() = parent!!
-
-    fun isDescendantOf(flow: Flow): Boolean {
-        if (parent == null) return false
-        if (parent === flow)
-            return true
-        return requireParent().isDescendantOf(flow)
+    fun requireParent() = requireNotNull(parent) {
+        "Parent not found!"
     }
 
     /**
      * Execute the applet.
      *
-     * @param task The owner task
      * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
-    abstract fun apply(task: AutomatorTask, runtime: FlowRuntime)
+    abstract fun apply(runtime: TaskRuntime)
 
     fun toggleRelation() {
         isAnd = !isAnd

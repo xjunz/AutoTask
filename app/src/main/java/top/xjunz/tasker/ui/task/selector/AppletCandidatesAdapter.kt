@@ -15,8 +15,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.criterion.Criterion
-import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -83,7 +81,7 @@ class AppletCandidatesAdapter(
         holder.binding.let {
             val isFlow = applet is Flow
             val showRelation = position != 0 && applet.index != 0
-            val option = viewModel.appletOptionFactory.findOption(applet)
+            val option = viewModel.appletOptionFactory.requireOption(applet)
             val title = option.getTitle(applet.isInverted)
             if (title != null && showRelation) {
                 it.tvTitle.text = AppletOption.makeRelationSpan(title, applet.isAnd)
@@ -109,13 +107,11 @@ class AppletCandidatesAdapter(
                 it.dividerTop.isVisible = true
                 it.dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                 it.tvNumber.text = (applet.index + 1).toString()
-                it.tvDesc.isVisible = applet !is PropertyCriterion<*>
                 it.ibAction.isVisible = applet.isInvertible
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
-                if (applet is Criterion<*, *>) {
-                    it.tvDesc.text = option.describe(applet.value)
-                }
+                it.tvDesc.text = option.describe(applet.value)
+                it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
                 if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
                     it.tvDesc.setTypeface(null, Typeface.ITALIC)
                 } else {

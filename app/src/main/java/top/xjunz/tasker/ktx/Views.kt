@@ -7,6 +7,7 @@ package top.xjunz.tasker.ktx
 import android.animation.ObjectAnimator
 import android.graphics.Bitmap
 import android.text.InputFilter
+import android.text.InputType
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
@@ -15,6 +16,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
+import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.graphics.Insets
 import androidx.core.graphics.applyCanvas
 import androidx.core.view.WindowInsetsCompat
@@ -80,6 +83,22 @@ fun EditText.setMaxLength(len: Int) {
     filters += InputFilter.LengthFilter(len)
 }
 
+fun EditText.configInputType(type: Class<*>, allowMultiLine: Boolean = false) {
+    when (type) {
+        String::class.java -> {
+            inputType = InputType.TYPE_CLASS_TEXT
+            if (allowMultiLine) {
+                inputType = inputType or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            }
+        }
+        Int::class.java, Long::class.java ->
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+        Float::class.java ->
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL or
+                    InputType.TYPE_NUMBER_FLAG_SIGNED
+    }
+}
+
 fun View.beginAutoTransition(target: View, transition: Transition = AutoTransition()) {
     this as ViewGroup
     TransitionManager.beginDelayedTransition(
@@ -87,8 +106,12 @@ fun View.beginAutoTransition(target: View, transition: Transition = AutoTransiti
     )
 }
 
-fun View.beginMyselfAutoTransition(transition: Transition = AutoTransition()) {
-    (parent as ViewGroup).beginAutoTransition(this, transition)
+fun TextView.setDrawableStart(@DrawableRes res: Int) {
+    if (res == View.NO_ID) {
+        setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+    } else {
+        setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(), null, null, null)
+    }
 }
 
 fun View.beginAutoTransition(transition: Transition = AutoTransition()) {

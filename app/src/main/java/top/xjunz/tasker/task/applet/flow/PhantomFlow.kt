@@ -1,9 +1,8 @@
 package top.xjunz.tasker.task.applet.flow
 
 import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.ControlFlow
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * A flow which is intended to be merged into its parent flow. This flow only exists in edition time.
@@ -12,7 +11,7 @@ import top.xjunz.tasker.engine.runtime.FlowRuntime
  */
 class PhantomFlow : ControlFlow() {
 
-    override fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
+    override fun onPrepare(runtime: TaskRuntime) {
         unsupportedOperation("PhantomFlow is not expected to be present in runtime!")
     }
 

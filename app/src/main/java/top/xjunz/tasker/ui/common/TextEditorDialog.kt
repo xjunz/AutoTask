@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
+import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
 import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.textString
@@ -26,6 +29,8 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
         lateinit var title: CharSequence
 
+        var caption: CharSequence? = null
+
         var defText: CharSequence? = null
 
         var dropDownNames: Array<CharSequence>? = null
@@ -35,7 +40,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         /**
          * Return the error message, null if there is no error
          */
-        lateinit var onConfirmed: (CharSequence) -> String?
+        lateinit var onConfirmed: (String) -> CharSequence?
 
         var editTextConfig: ((EditText) -> Unit)? = null
     }
@@ -43,7 +48,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
     private val viewModel by viewModels<InnerViewModel>()
 
     fun setArguments(
-        title: CharSequence, defText: String? = null, onConfirmed: (CharSequence) -> String?
+        title: CharSequence, defText: String? = null, onConfirmed: (String) -> CharSequence?
     ) = doWhenCreated {
         viewModel.title = title
         viewModel.defText = defText
@@ -62,12 +67,17 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.dropDownValues = values
     }
 
+    fun setCaption(caption: CharSequence) = doWhenCreated {
+        viewModel.caption = caption
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
         binding.apply {
             tvTitle.text = viewModel.title
+            tvCaption.isVisible = !viewModel.caption.isNullOrEmpty()
+            tvCaption.text = viewModel.caption
             viewModel.editTextConfig?.invoke(etInput)
             btnPositive.setOnClickListener {
                 val error = viewModel.onConfirmed(binding.etInput.textString)
@@ -95,13 +105,30 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     etInput.setSelection(etInput.textString.length)
                 }
             }
+            if (!viewModel.defText.isNullOrEmpty()) {
+                etInput.doAfterTextChanged {
+                    if (it?.toString() != viewModel.defText) {
+                        btnNegative.setText(R.string.reset)
+                    } else {
+                        btnNegative.setText(android.R.string.cancel)
+                    }
+                }
+            }
             if (savedInstanceState == null)
                 etInput.setText(viewModel.defText)
 
             etInput.setSelection(etInput.textString.length)
             etInput.requestFocus()
+
             btnNegative.setOnClickListener {
-                etInput.setText(viewModel.defText)
+                if (viewModel.defText.isNullOrEmpty()) {
+                    dismiss()
+                } else if (etInput.textString == viewModel.defText) {
+                    dismiss()
+                } else {
+                    etInput.setText(viewModel.defText)
+                    etInput.setSelection(etInput.textString.length)
+                }
             }
             ibDismiss.setOnClickListener {
                 dismiss()

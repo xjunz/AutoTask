@@ -2,7 +2,6 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.R.attr.selectableItemBackground
@@ -12,10 +11,8 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.ktx.format
-import top.xjunz.tasker.ktx.resolvedId
-import top.xjunz.tasker.ktx.setContentDescriptionAndTooltip
-import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isRelating
 import top.xjunz.tasker.task.applet.nonContainerParent
@@ -35,15 +32,41 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
 
     @SuppressLint("SetTextI18n")
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
-        val option = if (applet.id == -1) null else viewModel.appletOptionFactory.findOption(applet)
+        val option = if (applet.id == -1) null
+        else viewModel.appletOptionFactory.requireOption(applet)
         holder.binding.apply {
             root.translationX = 0F
-            root.isSelected = viewModel.selectedApplet.value == applet
-                    || viewModel.isMultiSelected(applet)
+            root.isSelected = viewModel.isSelected(applet)
             tvNumber.isVisible = false
             dividerTop.isVisible = false
             dividerBott.isVisible = false
+            tvBadge.isVisible = false
+            root.isEnabled = true
+            tvTitle.isEnabled = true
             if (option != null) {
+                if (viewModel.isSelectingReference) {
+                    // When selecting ref, only enable valid targets
+                    val ref = option.results.find {
+                        it.type == viewModel.referenceToSelect.type
+                    }
+                    if (applet.isContainer) {
+                        root.isEnabled = viewModel.hasCandidateReference(applet as Flow)
+                        tvBadge.isVisible = false
+                    } else {
+                        root.isEnabled = ref != null
+                        tvBadge.isVisible = root.isEnabled
+                    }
+                    tvTitle.isEnabled = root.isEnabled
+                    if (ref != null) {
+                        val refid = applet.referred[option.results.indexOf(ref)]
+                        if (refid != null) {
+                            tvBadge.text =
+                                ref.name + "[$refid]".foreColored(ColorSchemes.textColorLink)
+                        } else {
+                            tvBadge.text = ref.name
+                        }
+                    }
+                }
                 var desc = option.describe(applet.value)
                 var title = option.getTitle(applet.isInverted) ?: applet.label
                 tvTitle.isVisible = true
@@ -51,10 +74,9 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                     title = desc
                 }
                 if (title != null && applet.isRelating) {
-                    title = AppletOption.makeRelationSpan(title, applet.isAnd)
-                    tvTitle.background = AppCompatResources.getDrawable(
-                        root.context, selectableItemBackground.resolvedId
-                    )
+                    title = if (root.isEnabled) AppletOption.makeRelationSpan(title, applet.isAnd)
+                    else AppletOption.makeRelationText(title, applet.isAnd)
+                    tvTitle.background = selectableItemBackground.resolvedId.getDrawable()
                     tvTitle.isClickable = true
                 } else {
                     tvTitle.background = null
@@ -63,21 +85,21 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                 if (applet is ControlFlow) {
                     tvDesc.isVisible = false
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
-                    tvTitle.setTextColor(ColorSchemes.colorPrimary)
+                    tvTitle.setTextColor(R.color.color_text_control_normal.colorStateList)
                 } else if (applet.nonContainerParent is ControlFlow) {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
-                    tvTitle.setTextColor(ColorSchemes.colorOnSurface)
+                    tvTitle.setTextColor(ColorSchemes.textColorPrimary)
                 } else {
                     dividerTop.isVisible = true
                     tvNumber.isVisible = true
                     dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                     tvNumber.text = (applet.index + 1).toString()
                     tvTitle.setTextAppearance(TextAppearance_Material3_LabelLarge)
-                    tvTitle.setTextColor(ColorSchemes.colorOnSurface)
+                    tvTitle.setTextColor(ColorSchemes.textColorPrimary)
                 }
                 if (applet is Flow) {
                     if (applet.isContainer) {
-                        ibAction.isVisible = true
+                        ibAction.isVisible = root.isEnabled
                         ibAction.tag = ACTION_ENTER
                         ibAction.setImageResource(R.drawable.ic_baseline_chevron_right_24)
                         ibAction.setContentDescriptionAndTooltip(R.string.enter.text)
@@ -96,7 +118,7 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                         }
                     }
                 } else {
-                    ibAction.isInvisible = !applet.isInvertible
+                    ibAction.isInvisible = !applet.isInvertible || viewModel.isSelectingReference
                     ibAction.tag = ACTION_INVERT
                     if (applet.isInvertible) {
                         ibAction.setImageResource(R.drawable.ic_baseline_switch_24)

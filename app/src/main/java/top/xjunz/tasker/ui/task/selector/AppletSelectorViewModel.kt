@@ -42,7 +42,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         while (controlFlow != null && controlFlow !is ControlFlow) {
             controlFlow = controlFlow.requireParent()
         }
-        title = appletOptionFactory.findOption(controlFlow!!).title
+        title = appletOptionFactory.requireOption(controlFlow!!).title
         if (flow is ControlFlow) {
             isScoped = false
             if (flow is If) {
@@ -52,7 +52,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
             }
         } else {
             isScoped = true
-            registryOptions = arrayOf(appletOptionFactory.findRegistryOption(flow.appletId))
+            registryOptions = arrayOf(appletOptionFactory.requireRegistryOption(flow.appletId))
             // If scoped, do not show extra options from other registry, like showing component
             // options while showing ui object options.
             if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
@@ -63,7 +63,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         if (selectedFlowRegistry eq index) return
         options.clear()
         options.addAll(
-            appletOptionFactory.findRegistryById(registryOptions[index].appletId).categorizedOptions
+            appletOptionFactory.requireRegistryById(registryOptions[index].appletId).categorizedOptions
         )
         selectedFlowRegistry.value = index
     }
@@ -73,7 +73,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     }
 
     fun appendApplet(applet: Applet) {
-        val flowOption = appletOptionFactory.findRegistryOption(applet.registryId)
+        val flowOption = appletOptionFactory.requireRegistryOption(applet.registryId)
         if (flow.isEmpty() || flow.last().appletId != flowOption.appletId) {
             flow.add(flowOption.yieldApplet() as Flow)
         }
@@ -90,7 +90,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
-        val flowOption = appletOptionFactory.findRegistryOption(options.first().registryId)
+        val flowOption = appletOptionFactory.requireRegistryOption(options.first().registryId)
 
         flow.add(flowOption.yieldApplet() as Flow)
         options.forEach {

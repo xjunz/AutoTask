@@ -49,7 +49,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         var superClass: Class<*> = javaClass
         for (i in 1 until bindingRequiredSuperClassDepth) {
             superClass = superClass.superclass

@@ -10,12 +10,12 @@ import android.os.Looper
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.*
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.os.HandlerCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.dpFloat
+import top.xjunz.tasker.ktx.getDrawable
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import kotlin.math.hypot
 
@@ -200,8 +200,7 @@ class LayoutInspectorView @JvmOverloads constructor(
         }
     }
 
-    private val pointerDrawable =
-        ContextCompat.getDrawable(context, R.drawable.ic_twotone_navigation_24)!!
+    private val pointerDrawable = R.drawable.ic_twotone_navigation_24.getDrawable()
 
     private val reusableRect = Rect()
 

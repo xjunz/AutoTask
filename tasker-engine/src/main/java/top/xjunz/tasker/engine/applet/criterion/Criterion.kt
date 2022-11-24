@@ -2,10 +2,9 @@ package top.xjunz.tasker.engine.applet.criterion
 
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * The base criterion applet abstraction.
@@ -23,7 +22,7 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
      */
     open lateinit var defaultValue: V
 
-    override fun apply(task: AutomatorTask, runtime: FlowRuntime) {
+    override fun apply(runtime: TaskRuntime) {
         runtime.isSuccessful =
             isInverted != matchTarget(runtime.getTarget(), value?.casted() ?: defaultValue)
     }

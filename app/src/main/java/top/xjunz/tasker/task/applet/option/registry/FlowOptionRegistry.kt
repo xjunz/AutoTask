@@ -76,14 +76,13 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
     @AppletCategory(0x0010)
     val componentFlow = flowOption<PackageFlow>(ID_PKG_OPTION_REGISTRY, R.string.current_app)
+        .withResult<String>(R.string.package_name)
 
     @AppletCategory(0x0011)
     val uiObjectFlow =
         flowOption<UiObjectFlow>(ID_UI_OBJECT_OPTION_REGISTRY, R.string.ui_object_exists)
-            .withResults(
-                R.string.matched_ui_object to AccessibilityNodeInfo::class.java,
-                R.string.matched_ui_object_text to String::class.java
-            )
+            .withResult<AccessibilityNodeInfo>(R.string.ui_object)
+            .withResult<String>(R.string.matched_ui_object_text)
 
     @AppletCategory(0x0012)
     val timeFlow = flowOption<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
@@ -94,6 +93,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletCategory(0x0014)
     val notificationFlow =
         flowOption<NotificationFlow>(ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification)
+            .withResult<String>(R.string.notification_content)
 
     @AppletCategory(0x0020)
     val globalActionFlow =

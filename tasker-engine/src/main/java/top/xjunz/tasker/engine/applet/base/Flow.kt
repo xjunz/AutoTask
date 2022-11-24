@@ -1,10 +1,8 @@
 package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.runtime.FlowRuntime
-import java.util.*
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * A flow is a set of [applets][Applet] but is also a special applet.
@@ -16,12 +14,12 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
 
-    protected open fun shouldSkipAll(task: AutomatorTask, runtime: FlowRuntime): Boolean = false
+    protected open fun shouldSkipAll(runtime: TaskRuntime): Boolean = false
 
     @CallSuper
-    protected open fun doApply(task: AutomatorTask, runtime: FlowRuntime) {
+    protected open fun doApply(runtime: TaskRuntime) {
         forEachIndexed _continue@{ index, applet ->
-            task.ensureActive()
+            runtime.task.ensureActive()
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
             if (index != 0 && applet.isAnd != runtime.isSuccessful) {
@@ -33,7 +31,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
             runtime.observer?.onStarted(applet, runtime)
-            applet.apply(task, runtime)
+            applet.apply(runtime)
             runtime.observer?.onTerminated(applet, runtime)
         }
     }
@@ -52,56 +50,39 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         /* no-op */
     }
 
-    override fun apply(task: AutomatorTask, runtime: FlowRuntime) {
-        onPreApply(task, runtime)
+    override fun apply(runtime: TaskRuntime) {
+        onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
-        if (shouldSkipAll(task, runtime)) {
+        if (shouldSkipAll(runtime)) {
             runtime.observer?.onSkipped(this, runtime)
         } else {
-            onPrepare(task, runtime)
+            onPrepare(runtime)
             // Backup the target, because sub-flows may change the target, we don't want the changed
             // value to fall through.
             val backup = runtime.getRawTarget()
-            doApply(task, runtime)
-            onPostApply(task, runtime)
+            doApply(runtime)
+            onPostApply(runtime)
             // restore the target
             runtime.setTarget(backup)
         }
         runtime.tracker.jumpOut()
     }
 
-    val flatSize: Int
-        get() {
-            var size = 0
-            forEach {
-                if (it is Flow) {
-                    size += it.flatSize
-                } else {
-                    size++
-                }
-            }
-            return size
-        }
-
-    fun swap(from: Applet, to: Applet) {
-        Collections.swap(this, indexOf(from), indexOf(to))
-    }
-
-    protected open fun onPrepare(task: AutomatorTask, runtime: FlowRuntime) {
+    protected open fun onPrepare(runtime: TaskRuntime) {
         /* no-op */
     }
 
     /**
-     * Do something before the flow is started. At this time, [FlowRuntime.currentFlow] is
+     * Do something before the flow is started. At this time, [TaskRuntime.currentFlow] is
      * not yet assigned to this flow.
      */
-    protected open fun onPreApply(task: AutomatorTask, runtime: FlowRuntime) {}
+    protected open fun onPreApply(runtime: TaskRuntime) {}
 
     /**
      * Do something after all [elements] are completed.
      */
-    protected open fun onPostApply(task: AutomatorTask, runtime: FlowRuntime) {
+    protected open fun onPostApply(runtime: TaskRuntime) {
         // do nothing by default
     }
 }

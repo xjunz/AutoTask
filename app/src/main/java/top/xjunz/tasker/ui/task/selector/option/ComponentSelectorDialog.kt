@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -67,8 +66,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             viewModel.selectedPackages, ItemApplicationInfoBinding::class.java,
             {
                 binding.tvApplicationName.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                binding.root.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.bg_option_frame)
+                binding.root.background = R.drawable.bg_option_frame.getDrawable()
                 binding.root.updateLayoutParams<MarginLayoutParams> {
                     updateMargins(4.dp, 0, 4.dp, 4.dp)
                 }

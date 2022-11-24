@@ -1,18 +1,15 @@
 package top.xjunz.tasker.task.applet.option
 
 import android.annotation.SuppressLint
-import android.graphics.Typeface
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.text.style.UnderlineSpan
 import androidx.annotation.ArrayRes
+import androidx.annotation.StringRes
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorSchemes
+import java.util.*
 
 /**
  * The entity describing an applet's information. You can call [yieldApplet] to create an [Applet]
@@ -48,32 +45,20 @@ abstract class AppletOption(
         private fun makeLabelSpan(label: CharSequence): CharSequence {
             val index = label.indexOf('(')
             if (index > -1) {
-                return SpannableStringBuilder().append(label.substring(0, index)).append(
-                    label.substring(index),
-                    ForegroundColorSpan(ColorSchemes.textColorDisabled),
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+                return label.subSequence(0, index) + label.substring(index)
+                    .foreColored(ColorSchemes.textColorDisabled)
             }
             return label
         }
 
-        fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
-            val relationText = if (isAnd) R.string._and.text else R.string._or.text
-            return SpannableStringBuilder().append(
-                relationText,
-                ForegroundColorSpan(ColorSchemes.colorPrimary),
-                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-            ).append(origin).also {
-                it.setSpan(
-                    UnderlineSpan(), 0, 1,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                it.setSpan(
-                    StyleSpan(Typeface.BOLD), 0, 1,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
+        fun makeRelationText(origin: CharSequence, isAnd: Boolean): String {
+            val relationText = if (isAnd) R.string._and.str else R.string._or.str
+            return relationText + origin
+        }
 
+        fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
+            val relation = if (isAnd) R.string._and.str else R.string._or.str
+            return relation.foreColored(ColorSchemes.colorPrimary).underlined().bold() + origin
         }
 
     }
@@ -94,7 +79,7 @@ abstract class AppletOption(
     /**
      * As per [Applet.isInverted].
      */
-    var isInverted = false
+    private var isInverted = false
 
     /**
      * As per [Applet.isInvertible].
@@ -123,9 +108,9 @@ abstract class AppletOption(
 
     var isA11yOnly = false
 
-    var arguments: Array<ReferenceDescriptor> = emptyArray()
+    var arguments: List<ValueDescriptor> = emptyList()
 
-    var results: Array<ReferenceDescriptor> = emptyArray()
+    var results: List<ValueDescriptor> = emptyList()
 
     val title: CharSequence?
         get() = if (titleRes == TITLE_NONE) null else makeLabelSpan(titleRes.text)
@@ -205,20 +190,32 @@ abstract class AppletOption(
         return this
     }
 
-    fun withResults(vararg pairs: Pair<Int, Class<*>>): AppletOption {
-        check(pairs.isNotEmpty())
-        results = Array(pairs.size) {
-            ReferenceDescriptor(pairs[it].first, pairs[it].second)
-        }
+    inline fun <reified T> withResult(@StringRes name: Int): AppletOption {
+        if (results == Collections.EMPTY_LIST)
+            results = mutableListOf()
+        (results as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, true))
         return this
     }
 
-    fun withArguments(vararg pairs: Pair<Int, Class<*>>): AppletOption {
-        check(pairs.isNotEmpty())
-        arguments = Array(pairs.size) {
-            ReferenceDescriptor(pairs[it].first, pairs[it].second)
-        }
+    inline fun <reified T> withArgument(
+        @StringRes name: Int,
+        isRef: Boolean? = null
+    ): AppletOption {
+        if (arguments == Collections.EMPTY_LIST)
+            arguments = mutableListOf()
+        (arguments as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, isRef))
         return this
+    }
+
+    /**
+     * Describe [Applet.value] as an argument.
+     */
+    inline fun <reified T> withValueArgument(@StringRes name: Int): AppletOption {
+        return withArgument<T>(name, false)
+    }
+
+    inline fun <reified T> withRefArgument(@StringRes name: Int): AppletOption {
+        return withArgument<T>(name, true)
     }
 
     protected abstract fun rawCreateApplet(): Applet

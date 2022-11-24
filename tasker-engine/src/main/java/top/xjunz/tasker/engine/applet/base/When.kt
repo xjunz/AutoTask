@@ -1,9 +1,8 @@
 package top.xjunz.tasker.engine.applet.base
 
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.criterion.EventCriterion
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/08/11
@@ -27,8 +26,8 @@ class When : ControlFlow() {
         }
     }
 
-    override fun onPostApply(task: AutomatorTask, runtime: FlowRuntime) {
-        super.onPostApply(task, runtime)
+    override fun onPostApply(runtime: TaskRuntime) {
+        super.onPostApply(runtime)
         if (!runtime.isSuccessful) {
             stopship(runtime)
         }

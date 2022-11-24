@@ -47,7 +47,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             uiDevice.wrapUiObject2(it).click()
             true
         }
-    }.withArguments(R.string.ui_object to AccessibilityNodeInfo::class.java)
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
 
     @AppletCategory(0x0002)
     val longClick = simpleUiObjectActionOption(0x0002, R.string.perform_long_click) {
@@ -57,7 +57,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             uiDevice.wrapUiObject2(it).longClick()
             true
         }
-    }.withArguments(R.string.ui_object to AccessibilityNodeInfo::class.java)
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
 
     @AppletCategory(0x0010)
     val setText = uiObjectActionOption<String>(
@@ -70,9 +70,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             uiDevice.wrapUiObject2(node).text = value
             true
         }
-    }.withArguments(
-        R.string.input_field to AccessibilityNodeInfo::class.java,
-        R.string.input_content to String::class.java
-    )
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.input_field)
+        .withArgument<String>(R.string.input_content)
 
 }

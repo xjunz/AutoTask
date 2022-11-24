@@ -25,19 +25,19 @@ import top.xjunz.tasker.ui.task.selector.option.*
  */
 open class AppletOptionOnClickListener(
     fragment: Fragment,
-    protected val factory: AppletOptionFactory
+    private val factory: AppletOptionFactory
 ) {
 
     private val actionOptionOnClickListener by lazy {
         ActionOptionOnClickListener(fragment, factory)
     }
 
-    private val fragmentManager by lazy {
-        fragment.parentFragmentManager
+    protected val fragmentManager by lazy {
+        fragment.childFragmentManager
     }
 
     fun onClick(applet: Applet, onCompleted: () -> Unit) {
-        onClick(applet, factory.findOption(applet), onCompleted)
+        onClick(applet, factory.requireOption(applet), onCompleted)
     }
 
     open fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
@@ -138,7 +138,7 @@ open class AppletOptionOnClickListener(
                         it.setMaxLength(64)
                     }.setArguments(option.currentTitle!!, applet.value?.casted()) {
                         if (it.isBlank()) {
-                            return@setArguments R.string.empty_input_not_allowed.str
+                            return@setArguments R.string.error_empty_input.str
                         }
                         applet.value = it
                         onCompleted()

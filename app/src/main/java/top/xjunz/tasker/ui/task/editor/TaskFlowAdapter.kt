@@ -1,16 +1,25 @@
 package top.xjunz.tasker.ui.task.editor
 
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.findChildWithRefid
+import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
+import top.xjunz.tasker.task.applet.isDescendantOf
+import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
 
 /**
@@ -29,6 +38,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        if (viewModel.isReadyOnly) return
         ItemTouchHelper(object : FlowItemTouchHelperCallback(recyclerView, viewModel) {
 
             override fun onMoveEnded(hasDragged: Boolean, position: Int) {
@@ -76,12 +86,68 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         AppletOptionOnClickListener(fragment, viewModel.appletOptionFactory)
     }
 
+    private inline fun showMultiReferenceSelectorMenu(
+        anchor: View,
+        candidates: List<ValueDescriptor>,
+        crossinline onSelected: (ValueDescriptor) -> Unit
+    ) {
+        if (candidates.size == 1) {
+            onSelected(candidates.single())
+        } else {
+            val popup = PopupMenu(fragment.requireContext(), anchor, Gravity.END)
+            popup.menu.add(R.string.which_to_refer)
+            candidates.forEach {
+                popup.menu.add(it.name)
+            }
+            popup.setOnMenuItemClickListener {
+                onSelected(candidates[popup.indexOf(it) - 1])
+                return@setOnMenuItemClickListener true
+            }
+            popup.configHeaderTitle()
+            popup.show()
+        }
+    }
+
     inner class FlowViewHolder(val binding: ItemFlowItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.root.setOnClickListener { view ->
                 val applet = currentList[adapterPosition]
+                if (viewModel.isSelectingReference && !applet.isContainer) {
+                    val option = viewModel.appletOptionFactory.requireOption(applet)
+                    val candidates = option.results.filter {
+                        viewModel.referenceToSelect.type == it.type
+                    }
+                    showMultiReferenceSelectorMenu(view, candidates) { candidate ->
+                        val which = option.results.indexOf(candidate)
+                        if (applet.referred.containsKey(which)) {
+                            // Already a tag for this reference
+                            viewModel.doOnRefSelected(
+                                applet, which, applet.referred.getValue(which)
+                            )
+                            // Notify ref selected
+                            viewModel.onRefSelected.value = true
+                        } else {
+                            TextEditorDialog().setCaption(
+                                R.string.format_set_refid.formatAsHtml(candidate.name)
+                            ).configEditText {
+                                it.setMaxLength(Applet.Configurator.MAX_REFERRED_TAG_LENGTH)
+                            }.setArguments(R.string.set_refid.text) {
+                                if (it.isEmpty()) {
+                                    return@setArguments R.string.error_empty_input.text
+                                }
+                                if (viewModel.flow.findChildWithRefid(it) != null) {
+                                    return@setArguments R.string.error_tag_exists.text
+                                }
+                                viewModel.doOnRefSelected(applet, which, it)
+                                viewModel.onRefSelected.value = true
+                                return@setArguments null
+                            }.show(fragment.childFragmentManager)
+                        }
+                    }
+                    return@setOnClickListener
+                }
                 if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else if (applet is Flow && applet.isContainer) {
@@ -99,7 +165,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 }
             }
             binding.root.setOnLongClickListener {
-                if (!viewModel.isInMultiSelectionMode) {
+                if (!viewModel.isReadyOnly && !viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(currentList[adapterPosition])
                 }
                 return@setOnLongClickListener true
@@ -119,17 +185,24 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         currentList[adapterPosition].toggleInversion()
                         notifyItemChanged(adapterPosition, true)
                     }
-                    FlowItemViewBinder.ACTION_ENTER ->
-                        FlowEditorDialog().setFlow(applet as Flow)
-                            .doOnCompletion { edited ->
-                                // We don't need to replace the flow, just refilling it is ok
-                                applet.clear()
-                                applet.addAll(edited)
-                                viewModel.regenerateApplets()
-                                viewModel.changedApplet.value = applet
-                            }.doSplit {
-                                viewModel.splitContainerFlow(applet)
-                            }.show(fragment.parentFragmentManager)
+                    FlowItemViewBinder.ACTION_ENTER -> {
+                        val dialog = FlowEditorDialog().setFlow(
+                            applet as Flow, viewModel.isSelectingReference
+                        ).doOnCompletion { edited ->
+                            // We don't need to replace the flow, just refilling it is ok
+                            applet.clear()
+                            applet.addAll(edited)
+                            viewModel.regenerateApplets()
+                            viewModel.changedApplet.value = applet
+                        }.doSplit {
+                            viewModel.splitContainerFlow(applet)
+                        }
+                        if (viewModel.isSelectingReference) {
+                            dialog.doOnReferenceSelected(viewModel.doOnRefSelected)
+                            dialog.setReferenceToSelect(viewModel.referenceToSelect)
+                        }
+                        dialog.show(fragment.childFragmentManager)
+                    }
                 }
             }
         }

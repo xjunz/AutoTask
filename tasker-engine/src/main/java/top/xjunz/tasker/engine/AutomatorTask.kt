@@ -2,38 +2,22 @@ package top.xjunz.tasker.engine
 
 import android.os.Handler
 import androidx.annotation.MainThread
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import top.xjunz.shared.ktx.casted
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
- * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [rootFlow] are
+ * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [flow] are
  * immutable.
  *
  * @author xjunz 2022/07/12
  */
-@Serializable
 class AutomatorTask(val name: String) {
 
-    companion object {
-
-        private val globalVariableRegistry = mutableMapOf<Int, Any>()
-
-        fun clearGlobalVariables() {
-            globalVariableRegistry.clear()
-        }
-    }
-
-    @Transient
     val handlers = mutableMapOf<Int, Handler>()
 
-    @Transient
-    lateinit var rootFlow: Flow
+    lateinit var flow: Flow
 
     var label: String? = null
 
@@ -42,36 +26,24 @@ class AutomatorTask(val name: String) {
      * its latest [Applet] is completed. You can observe [OnStateChangedListener.onCancelled] to
      * get notified. Inactive tasks will no longer response to any further [Event] from [launch].
      */
-    @Transient
     var isActive = false
         private set
 
-    @Transient
     var onStateChangedListener: OnStateChangedListener? = null
 
-    @Transient
     val id = name.hashCode()
 
-    @Transient
     private var startTimestamp: Long = -1
 
     /**
-     * Whether the task is traversing its [rootFlow].
+     * Whether the task is traversing its [flow].
      */
-    @Transient
     private var isExecuting = false
 
     class FlowFailureException(reason: String) : RuntimeException(reason)
 
     class TaskCancellationException(task: AutomatorTask) :
         RuntimeException("Task '$task' is cancelled due to user request!")
-
-    /**
-     * Get or put a global variable if absent. The variable can be shared across tasks.
-     */
-    fun <V : Any> getOrPutCrossTaskVariable(key: Int, initializer: () -> V): V {
-        return globalVariableRegistry.getOrPut(key, initializer).casted()
-    }
 
     interface OnStateChangedListener {
 
@@ -82,21 +54,21 @@ class AutomatorTask(val name: String) {
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onError(runtime: FlowRuntime, t: Throwable) {}
+        fun onError(runtime: TaskRuntime, t: Throwable) {}
 
         /**
          * When the flow completes failed.
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onFailure(runtime: FlowRuntime) {}
+        fun onFailure(runtime: TaskRuntime) {}
 
         /**
          * When the task completes successful.
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onSuccess(runtime: FlowRuntime) {}
+        fun onSuccess(runtime: TaskRuntime) {}
 
         /**
          * When the task is cancelled.
@@ -136,26 +108,21 @@ class AutomatorTask(val name: String) {
         }
     }
 
-
-    private fun trace(any: Any) {
-        logcat(any, tag = "AutomatorTask")
-    }
-
     /**
      * Called when an event is received.
      *
      * @return `true` if the task starts executed and `false` otherwise
      */
     @MainThread
-    fun launch(events: Array<Event>, observer: FlowRuntime.Observer? = null): Boolean {
+    fun launch(events: Array<Event>, observer: TaskRuntime.Observer? = null): Boolean {
         if (!isActive) return false
         if (isExecuting) return false
         isExecuting = true
-        val runtime = FlowRuntime.obtain(events)
+        val runtime = TaskRuntime.obtain(this, events)
         if (observer != null)
             runtime.observer = observer
         try {
-            rootFlow.apply(this, runtime)
+            flow.apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
             } else {

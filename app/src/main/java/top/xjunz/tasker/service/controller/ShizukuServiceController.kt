@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException
 abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     companion object {
-        private const val BINDING_SERVICE_TIMEOUT_MILLS = 6000L
+        private const val BINDING_SERVICE_TIMEOUT_MILLS = 3000L
     }
 
     protected abstract val tag: String
@@ -47,6 +47,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
         override fun onServiceConnected(name: ComponentName?, ibinder: IBinder?) {
             try {
+                bindingJob?.cancel()
                 if (ibinder == null || !ibinder.pingBinder()) {
                     runtimeException("Got an invalid binder!")
                 } else {
@@ -59,8 +60,6 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
                 }
             } catch (t: Throwable) {
                 listener?.onError(t)
-            } finally {
-                bindingJob?.cancel()
             }
         }
 
@@ -72,17 +71,14 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
             listener?.onStartBinding()
             bindingJob = async {
                 Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-                delay(BINDING_SERVICE_TIMEOUT_MILLS / 2)
-                // Retry?
-                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-                delay(BINDING_SERVICE_TIMEOUT_MILLS / 2)
+                delay(BINDING_SERVICE_TIMEOUT_MILLS)
                 throw TimeoutException()
             }
             bindingJob?.invokeOnCompletion {
+                bindingJob = null
                 if (it != null && it !is CancellationException) {
                     listener?.onError(it)
                 }
-                bindingJob = null
             }
         }
     }

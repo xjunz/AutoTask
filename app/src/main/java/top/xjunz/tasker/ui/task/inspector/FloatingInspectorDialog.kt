@@ -14,7 +14,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -177,8 +176,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         } else {
             binding.btnGrant.isEnabled = true
             binding.btnGrant.text = R.string.goto_grant.text
-            binding.btnGrant.icon =
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_chevron_right_24)
+            binding.btnGrant.icon = R.drawable.ic_baseline_chevron_right_24.getDrawable()
         }
     }
 

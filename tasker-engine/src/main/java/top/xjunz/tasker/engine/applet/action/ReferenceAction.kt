@@ -1,34 +1,33 @@
 package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/11/15
  */
 abstract class ReferenceAction<V>(override val valueType: Int) : Action() {
 
-    override fun apply(task: AutomatorTask, runtime: FlowRuntime) {
-        check(references.isNotEmpty()) {
+    override fun apply(runtime: TaskRuntime) {
+        check(referring.isNotEmpty()) {
             "Need references!"
         }
-        val args = Array(references.size) {
-            runtime.findReferredValue(references[it])
+        val args = Array(referring.size) {
+            runtime.getResultByRefid(referring[it])
         }
         runtime.isSuccessful = doAction(args, value?.casted(), runtime)
     }
 
-    abstract fun doAction(args: Array<Any?>, value: V?, runtime: FlowRuntime): Boolean
+    abstract fun doAction(args: Array<Any?>, value: V?, runtime: TaskRuntime): Boolean
 }
 
 inline fun <V> referenceAction(
     valueType: Int,
-    crossinline action: (args: Array<Any?>, value: V?, runtime: FlowRuntime) -> Boolean
+    crossinline action: (args: Array<Any?>, value: V?, runtime: TaskRuntime) -> Boolean
 ): ReferenceAction<V> {
     return object : ReferenceAction<V>(valueType) {
-        override fun doAction(args: Array<Any?>, value: V?, runtime: FlowRuntime): Boolean {
+        override fun doAction(args: Array<Any?>, value: V?, runtime: TaskRuntime): Boolean {
             return action(args, value, runtime)
         }
     }

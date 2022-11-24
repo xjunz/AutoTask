@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import top.xjunz.shared.ktx.casted
 
 /**
  * @author xjunz 2022/05/18
@@ -24,4 +25,12 @@ fun <T : Fragment> T.doWhenCreated(block: CoroutineScope.() -> Unit): T {
 
 fun DialogFragment.show(fm: FragmentManager) {
     show(fm, javaClass.simpleName)
+}
+
+inline fun <reified T : Fragment> Fragment.peekParentFragment(): T {
+    var parent = requireParentFragment()
+    while (parent.javaClass != T::class.java) {
+        parent = parent.requireParentFragment()
+    }
+    return parent.casted()
 }

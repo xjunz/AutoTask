@@ -130,7 +130,7 @@
     <string name="edit_task">编辑任务</string>
     <string name="delete">删除</string>
     <string name="operate">操作</string>
-    <string name="replace_with">替换为…</string>
+    <string name="replace_with">替换为</string>
     <string name="add_inside">在内部添加</string>
     <string name="add_after">在后面添加</string>
     <string name="add_before">在前面添加</string>
@@ -184,7 +184,7 @@
     <string name="prompt_clear_all_options">确定要清空所有规则吗？</string>
     <string name="format_applet_is_removed">已移除%d条规则</string>
     <string name="reset">重置</string>
-    <string name="empty_input_not_allowed">输入不能为空</string>
+    <string name="error_empty_input">输入不能为空</string>
     <string name="minimum">最小值</string>
     <string name="maximum">最大值</string>
     <string name="no_limit">无限制</string>
@@ -245,7 +245,7 @@
     <string name="format_selection_count">已选中%d项</string>
     <string name="matches_rule_set">满足规则组合</string>
     <string name="format_applet_count">共%d条规则</string>
-    <string name="prompt_merge_single_applet">选中多个规则才可以合并哦！</string>
+    <string name="error_merge_single_applet">选中多个规则才可以合并哦！</string>
     <string name="quit_multi_selection">退出多选模式</string>
     <string name="too_deeply_nested">合并失败，请勿嵌套过深！</string>
     <string name="prompt_split_container_flow">确定要解散当前规则组吗？</string>
@@ -258,5 +258,19 @@
     <string name="extracted_text">提取的文本</string>
     <string name="input_field">文本框</string>
     <string name="input_content">输入的内容</string>
+    <string name="unspecified">未指定</string>
+    <string name="refer_to">引用</string>
+    <string name="specify_value">直接指定</string>
+    <string name="notification_content">通知内容</string>
+    <string name="regex">正则表达式</string>
+    <string name="format_select">请选择%s</string>
+    <string name="set_refid">设置标识</string>
+    <string name="edit_refid">编辑标识</string>
+    <string name="format_set_refid"><![CDATA[为该引用（<b>%s</b>）设置唯一标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。]]></string>
+    <string name="error_tag_exists">该标识已经存在，请重新编辑。</string>
+    <string name="no_candidate_reference">没有可选的引用</string>
+    <string name="which_to_refer">引用哪个？</string>
+    <string name="format_not_specified">未指定\"%s\"！</string>
+    <string name="prompt_merge_applets">确定要合并所选规则吗？</string>
 
 </resources>

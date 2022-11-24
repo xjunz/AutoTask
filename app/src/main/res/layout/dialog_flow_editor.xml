@@ -54,15 +54,16 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_selectable_circle"
-                    android:contentDescription="@{@string/dismiss}"
+                    android:contentDescription="@{@android:string/cancel}"
                     android:src="@drawable/ic_baseline_close_24"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ib_check"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:layout_goneMarginEnd="12dp"
                     app:tint="?colorOnPrimaryContainer" />
 
                 <ImageButton
-                    android:id="@+id/ib_combine"
+                    android:id="@+id/ib_merge"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginEnd="8dp"
@@ -86,7 +87,7 @@
                     android:src="@drawable/ic_baseline_call_split_24"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_combine"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_merge"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?colorOnPrimaryContainer"
                     tools:visibility="visible" />
@@ -105,7 +106,7 @@
             tools:listitem="@layout/item_flow_item" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_add_inside"
+            android:id="@+id/fab_action"
             style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

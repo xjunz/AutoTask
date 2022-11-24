@@ -7,7 +7,6 @@ import android.transition.TransitionSet
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.activity.viewModels
-import androidx.core.text.parseAsHtml
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -30,6 +29,7 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
+import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.MainViewModel
@@ -208,15 +208,13 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =
-                        R.string.format_enable_floating_inspector.format(InspectorMode.COMPONENT.label)
-                            .parseAsHtml()
+                        R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.COMPONENT.label)
                 }
                 flowRegistry.uiObjectFlow -> {
                     binding.cvHeader.tag = InspectorMode.UI_OBJECT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =
-                        R.string.format_enable_floating_inspector.format(InspectorMode.UI_OBJECT.label)
-                            .parseAsHtml()
+                        R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.UI_OBJECT.label)
                 }
                 else -> binding.cvHeader.isVisible = false
             }

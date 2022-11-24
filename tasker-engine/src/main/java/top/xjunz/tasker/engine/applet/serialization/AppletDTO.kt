@@ -4,7 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.base.Reference
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.applet.serialization.AppletValues.deserializeValue
 import top.xjunz.tasker.engine.applet.serialization.AppletValues.serializeValue
@@ -17,17 +16,17 @@ import top.xjunz.tasker.engine.applet.serialization.AppletValues.serializeValue
 @Serializable
 @SerialName("E") // Element
 class AppletDTO(
-    private val id: Int,
+    private val id: Int = Applet.NO_ID,
     @SerialName("a")
     private val isAnd: Boolean = true,
     @SerialName("i")
     private val isInverted: Boolean = false,
     @SerialName("v")
     private val literal: String? = null,
-    @SerialName("t")
-    private val tag: String? = null,
+    @SerialName("q")
+    private val referred: Map<Int, String> = emptyMap(),
     @SerialName("r")
-    private val refs: List<Reference> = emptyList()
+    private val referring: Map<Int, String> = emptyMap()
 ) {
 
     @SerialName("e")
@@ -38,7 +37,7 @@ class AppletDTO(
          * Convert a normal applet to a serializable applet.
          */
         fun Applet.toDTO(): AppletDTO {
-            val dto = AppletDTO(id, isAnd, isInverted, serializeValue(value), refid, references)
+            val dto = AppletDTO(id, isAnd, isInverted, serializeValue(value), referred, referring)
             if (this is Flow) {
                 check(size != 0) {
                     "No element!"
@@ -55,8 +54,8 @@ class AppletDTO(
         val prototype = registry.createAppletById(id)
         prototype.isAnd = isAnd
         prototype.isInverted = isInverted
-        prototype.refid = tag
-        prototype.references = refs
+        prototype.referred = referred
+        prototype.referring = referring
         if (prototype is Flow) {
             elements?.forEach {
                 prototype.add(it.toApplet(registry))

@@ -25,7 +25,7 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
         )
         val parent = applet.requireParent()
         if (parent is ControlFlow && parent.requiredElementCount == 1) {
-            val registry = viewModel.appletOptionFactory.findRegistryById(applet.registryId)
+            val registry = viewModel.appletOptionFactory.requireRegistryById(applet.registryId)
             popup.menu.add(R.string.replace_with)
             registry.allOptions.forEach {
                 popup.menu.add(it.title)
@@ -88,7 +88,7 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
                         viewModel.changedApplet.value = changed
                     }
                     viewModel.notifyFlowChanged()
-                }.scopedBy(flow).show(fragment.parentFragmentManager)
+                }.scopedBy(flow).show(fragment.childFragmentManager)
             } else {
                 // Control flow add before/after
                 val popup = PopupMenu(

@@ -52,8 +52,9 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
         unaryArgProcessor<String, String> { arg, v ->
             if (v == null) null else arg?.firstGroupValue(v)
         }
-    }.withArguments(R.string.text to String::class.java)
-        .withResults(R.string.extracted_text to String::class.java)
+    }.withRefArgument<String>(R.string.text)
+        .withValueArgument<String>(R.string.regex)
+        .withResult<String>(R.string.extracted_text)
 
     @AppletCategory(0x0005)
     val copyText = appletOption(0x0021, R.string.copy_text) {
@@ -70,6 +71,5 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
                 false
             }
         }
-    }.withArguments(R.string.text to String::class.java)
-
+    }.withArgument<String>(R.string.text)
 }

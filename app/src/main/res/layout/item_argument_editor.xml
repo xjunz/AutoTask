@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_option_frame"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="文本" />
+
+        <TextView
+            android:id="@+id/tv_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:drawablePadding="8dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="5"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            app:drawableTint="?colorPrimary"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@+id/iv_enter"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_title"
+            tools:drawableStartCompat="@drawable/ic_baseline_link_24"
+            tools:text="控件1（文本）" />
+
+        <ImageView
+            android:id="@+id/iv_enter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/enter"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?colorPrimary"
+            tools:src="@drawable/ic_baseline_chevron_right_24" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

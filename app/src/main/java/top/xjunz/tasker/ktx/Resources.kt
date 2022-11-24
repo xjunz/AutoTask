@@ -5,8 +5,11 @@
 package top.xjunz.tasker.ktx
 
 import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import androidx.annotation.*
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.text.parseAsHtml
 import top.xjunz.tasker.app
 import java.io.InputStream
 
@@ -16,6 +19,10 @@ inline val @receiver:StringRes Int.str get() = app.getString(this)
 
 inline val @receiver:ArrayRes Int.array: Array<CharSequence>
     get() = app.resources.getTextArray(this)
+
+fun @receiver:DrawableRes Int.getDrawable(): Drawable {
+    return ResourcesCompat.getDrawable(app.appTheme.resources, this, app.appTheme)!!
+}
 
 @get:ColorInt
 inline val @receiver:ColorRes Int.color
@@ -36,11 +43,16 @@ inline val @receiver:AttrRes Int.resolvedId: Int
 inline val @receiver:AttrRes Int.attrColorStateList: ColorStateList
     get() = app.getColorStateList(resolvedId)
 
+inline val @receiver:AttrRes Int.colorStateList: ColorStateList
+    get() = app.appTheme.resources.getColorStateList(this, app.appTheme)
+
 fun @receiver:ColorInt Int.toColorStateList(): ColorStateList {
     return ColorStateList.valueOf(this)
 }
 
 fun @receiver:StringRes Int.format(vararg any: Any?) = str.format(*any)
+
+fun @receiver:StringRes Int.formatAsHtml(vararg any: Any?) = str.format(*any).parseAsHtml()
 
 inline val Number.dp get() = (app.resources.displayMetrics.density * toFloat()).pxSize
 

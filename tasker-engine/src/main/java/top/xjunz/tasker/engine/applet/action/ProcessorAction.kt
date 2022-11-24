@@ -2,30 +2,33 @@ package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/11/21
  */
 abstract class ProcessorAction<V, R>(override val valueType: Int) : ReferenceAction<V>(valueType) {
 
-    final override fun doAction(args: Array<Any?>, value: V?, runtime: FlowRuntime): Boolean {
+    final override fun doAction(args: Array<Any?>, value: V?, runtime: TaskRuntime): Boolean {
         val ret = doProcess(args, value, runtime)
-        if (ret != null)
-            runtime.registerResultIfNeeded(this, ret)
+        if (ret != null) {
+            referred.forEach { (which, refid) ->
+                runtime.registerResult(refid, getReferredValue(which, ret))
+            }
+        }
         return ret != null
     }
 
-    abstract fun doProcess(args: Array<Any?>, value: V?, runtime: FlowRuntime): R?
+    abstract fun doProcess(args: Array<Any?>, value: V?, runtime: TaskRuntime): R?
 
 }
 
 inline fun <V, R> processorAction(
     valueType: Int,
-    crossinline action: (args: Array<Any?>, value: V?, runtime: FlowRuntime) -> R?
+    crossinline action: (args: Array<Any?>, value: V?, runtime: TaskRuntime) -> R?
 ): ProcessorAction<V, R> {
     return object : ProcessorAction<V, R>(valueType) {
-        override fun doProcess(args: Array<Any?>, value: V?, runtime: FlowRuntime): R? {
+        override fun doProcess(args: Array<Any?>, value: V?, runtime: TaskRuntime): R? {
             return action(args, value, runtime)
         }
     }

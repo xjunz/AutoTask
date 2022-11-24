@@ -1,9 +1,8 @@
 package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.runtime.FlowRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.uiAutomation
 
 /**
@@ -11,18 +10,20 @@ import top.xjunz.tasker.service.uiAutomation
  */
 class UiObjectFlow : Flow() {
 
-    override fun doApply(task: AutomatorTask, runtime: FlowRuntime) {
+    override fun doApply(runtime: TaskRuntime) {
         val ctx = UiObjectContext()
         runtime.setTarget(ctx)
-        val node = task.getOrPutCrossTaskVariable(id) {
+        val node = runtime.getOrPutCrossTaskVariable(id) {
             uiAutomation.rootInActiveWindow
         }.findFirst {
             ctx.source = it
-            super.doApply(task, runtime)
+            super.doApply(runtime)
             runtime.isSuccessful
         }
         if (node != null) {
-            runtime.registerResultIfNeeded(this, node)
+            referred.forEach { (which, id) ->
+                runtime.registerResult(id, getReferredValue(which, node))
+            }
             runtime.isSuccessful = true
         } else {
             runtime.isSuccessful = false

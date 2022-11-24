@@ -1,5 +1,6 @@
 package top.xjunz.tasker.ui
 
+import android.content.res.ColorStateList
 import androidx.annotation.ColorInt
 import top.xjunz.tasker.ktx.attrColor
 import top.xjunz.tasker.ktx.attrColorStateList
@@ -16,8 +17,14 @@ object ColorSchemes {
         )
 
     @get:ColorInt
-    val textColorTertiary: Int
-        get() = android.R.attr.textColorTertiary.attrColorStateList.defaultColor
+    val textColorLink: Int
+        get() = android.R.attr.textColorLink.attrColor
+
+    val textColorTertiary: ColorStateList
+        get() = android.R.attr.textColorTertiary.attrColorStateList
+
+    val textColorPrimary: ColorStateList
+        get() = android.R.attr.textColorPrimary.attrColorStateList
 
     @get:ColorInt
     val colorTertiary: Int

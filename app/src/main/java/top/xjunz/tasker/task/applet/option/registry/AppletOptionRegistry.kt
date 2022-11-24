@@ -81,7 +81,7 @@ abstract class AppletOptionRegistry(val id: Int) {
         return allOptions.first { it.appletId == id }.yieldApplet()
     }
 
-    fun findAppletOptionById(id: Int): AppletOption {
-        return allOptions.first { it.appletId == id }
+    fun findAppletOptionById(id: Int): AppletOption? {
+        return allOptions.firstOrNull { it.appletId == id }
     }
 }
