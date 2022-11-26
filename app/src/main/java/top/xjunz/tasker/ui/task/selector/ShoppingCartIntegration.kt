@@ -85,9 +85,6 @@ class ShoppingCartIntegration(
             }
 
         })
-        circularRevealContainer.setOnClickListener {
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
         circularRevealContainer.setCardBackgroundColor(
             ColorUtils.setAlphaComponent(ColorSchemes.colorPrimary, (0.32 * 0xFF).toInt())
         )

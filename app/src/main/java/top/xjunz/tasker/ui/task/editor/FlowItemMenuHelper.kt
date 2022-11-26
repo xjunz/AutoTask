@@ -25,10 +25,10 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
         )
         val parent = applet.requireParent()
         if (parent is ControlFlow && parent.requiredElementCount == 1) {
-            val registry = viewModel.appletOptionFactory.requireRegistryById(applet.registryId)
+            val registry = viewModel.factory.requireRegistryById(applet.registryId)
             popup.menu.add(R.string.replace_with)
             registry.allOptions.forEach {
-                popup.menu.add(it.title)
+                popup.menu.add(it.rawTitle)
             }
             popup.setOnMenuItemClickListener l@{
                 val index = popup.indexOf(it) - 1
@@ -36,7 +36,7 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
                     val newApplet = registry.allOptions[index].yieldApplet()
                     parent[applet.index] = newApplet
                     viewModel.regenerateApplets()
-                    viewModel.changedApplet.value = newApplet
+                    viewModel.onAppletChanged.value = newApplet
                 }
                 return@l true
             }
@@ -81,11 +81,11 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
                     if (addBefore) {
                         flow.addAll(applet.index, it)
                         applet.index = applet.requireParent().indexOf(applet)
-                        viewModel.changedApplet.value = applet
+                        viewModel.onAppletChanged.value = applet
                     } else {
                         val changed = flow.lastOrNull()
                         flow.addAll(it)
-                        viewModel.changedApplet.value = changed
+                        viewModel.onAppletChanged.value = changed
                     }
                     viewModel.notifyFlowChanged()
                 }.scopedBy(flow).show(fragment.childFragmentManager)
@@ -95,10 +95,9 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
                     anchor.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
                 )
                 popup.menu.add(item.title)
-                val options =
-                    viewModel.appletOptionFactory.flowRegistry.getPeerOptions(flow, addBefore)
+                val options = viewModel.factory.flowRegistry.getPeerOptions(flow, addBefore)
                 options.forEach {
-                    popup.menu.add(it.title)
+                    popup.menu.add(it.rawTitle)
                 }
                 popup.setOnMenuItemClickListener {
                     val index = popup.indexOf(it) - 1

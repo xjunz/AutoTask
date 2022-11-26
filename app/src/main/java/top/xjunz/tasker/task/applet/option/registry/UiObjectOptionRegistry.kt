@@ -253,32 +253,32 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x0300)
     val left = appletOption(0xE0, R.string.left_margin) {
         uiObjectBoundsCriterion(Gravity.START)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0301)
     val right = appletOption(0xE1, R.string.right_margin) {
         uiObjectBoundsCriterion(Gravity.END)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0302)
     val top = appletOption(0xE2, R.string.top_margin) {
         uiObjectBoundsCriterion(Gravity.TOP)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0303)
     val bottom = appletOption(0xE3, R.string.bottom_margin) {
         uiObjectBoundsCriterion(Gravity.BOTTOM)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0304)
     val width = appletOption(0xE4, R.string.width) {
         uiObjectBoundsCriterion(Gravity.FILL_HORIZONTAL)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0305)
     val height = appletOption(0xE5, R.string.height) {
         uiObjectBoundsCriterion(Gravity.FILL_VERTICAL)
-    }.withDescriber(distanceDescriber)
+    }.withValueDescriber(distanceDescriber)
 /*
     @AppletCategory(0x0400)
     val depth = NotInvertibleAppletOption(ID_DEPTH, R.string.node_depth) {

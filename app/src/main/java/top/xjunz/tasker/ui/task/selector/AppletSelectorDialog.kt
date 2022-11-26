@@ -6,11 +6,11 @@ import android.transition.ChangeBounds
 import android.transition.TransitionSet
 import android.view.View
 import android.view.animation.AnimationUtils
-import androidx.activity.viewModels
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
@@ -49,7 +49,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     private val rvBottom: RecyclerView get() = binding.shoppingCart.rvBottom
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
@@ -58,13 +58,13 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     viewModel.selectFlowRegistry(adapterPosition)
                 }
             }) { binding, index, data ->
-            binding.tvLabel.text = data.title
+            binding.tvLabel.text = data.rawTitle
             binding.tvLabel.isSelected = viewModel.selectedFlowRegistry eq index
         }
     }
 
     private val onOptionClickListener by lazy {
-        AppletOptionOnClickListener(this, viewModel.appletOptionFactory)
+        AppletOptionOnClickListener(childFragmentManager, viewModel.appletOptionFactory)
     }
 
     private val shopCartIntegration by lazy {
@@ -79,7 +79,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 val option = viewModel.options[position]
                 if (option.isValid) {
                     val applet = option.yieldApplet()
-                    onOptionClickListener.onClick(applet, option) {
+                    onOptionClickListener.onClick(binding.tvLabel.text, applet, option) {
                         viewModel.onAppletAdded.value = position to applet
                     }
                 }
@@ -136,7 +136,6 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         if (savedInstanceState == null)
             viewModel.flow = Flow()
 
-        mainViewModel = requireActivity().viewModels<MainViewModel>().value
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)
         binding.tvTitle.oneShotApplySystemInsets { v, insets ->
@@ -226,13 +225,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 shopCartIntegration.collapse()
             bottomAdapter.submitList(it)
         }
-        observeTransient(mainViewModel.onRequestRoute) { host ->
-            if (host == Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
-                val prevSize = bottomAdapter.itemCount
-                viewModel.acceptAppletsFromInspector()
-                shopCartIntegration.expand()
-                rvBottom.scrollToPosition(prevSize)
-            }
+        mainViewModel.doOnHostRouted(this, Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
+            val prevSize = bottomAdapter.itemCount
+            viewModel.acceptAppletsFromInspector()
+            shopCartIntegration.expand()
+            rvBottom.scrollToPosition(prevSize)
         }
         observeTransient(viewModel.onAppletAdded) {
             viewModel.appendApplet(it.second)

@@ -5,6 +5,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
+import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.firstGroupValue
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.task.applet.anno.AppletCategory
@@ -48,17 +49,19 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.shizukuOnly()
 
     @AppletCategory(0x0004)
-    val extractText = appletOption(0x0020, R.string.extract_text) {
-        unaryArgProcessor<String, String> { arg, v ->
+    val extractText = appletOption(0x0020, R.string.format_extract_text) {
+        unaryArgProcessor<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
             if (v == null) null else arg?.firstGroupValue(v)
         }
     }.withRefArgument<String>(R.string.text)
         .withValueArgument<String>(R.string.regex)
         .withResult<String>(R.string.extracted_text)
+        .withHelperText(R.string.help_extract_text)
+        .hasCompositeTitle()
 
     @AppletCategory(0x0005)
-    val copyText = appletOption(0x0021, R.string.copy_text) {
-        singleArgAction<String, String> { arg, v ->
+    val copyText = appletOption(0x0021, R.string.format_copy_text) {
+        singleArgAction<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
             if (arg == null && v == null) {
                 false
             } else if (arg != null) {
@@ -72,4 +75,5 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
             }
         }
     }.withArgument<String>(R.string.text)
+        .hasCompositeTitle()
 }

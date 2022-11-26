@@ -43,7 +43,7 @@ class AppletCandidatesAdapter(
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
                 } else {
-                    onClickListener.onClick(applet) {
+                    onClickListener.onClick(binding.tvTitle.text, applet) {
                         notifyItemChanged(adapterPosition)
                     }
                 }
@@ -82,9 +82,11 @@ class AppletCandidatesAdapter(
             val isFlow = applet is Flow
             val showRelation = position != 0 && applet.index != 0
             val option = viewModel.appletOptionFactory.requireOption(applet)
-            val title = option.getTitle(applet.isInverted)
+            val title = option.getTitle(applet)
             if (title != null && showRelation) {
-                it.tvTitle.text = AppletOption.makeRelationSpan(title, applet.isAnd)
+                it.tvTitle.text = AppletOption.makeRelationSpan(
+                    title, applet.isAnd, viewModel.isInCriterionScope
+                )
             } else {
                 it.tvTitle.text = title
             }
@@ -110,7 +112,7 @@ class AppletCandidatesAdapter(
                 it.ibAction.isVisible = applet.isInvertible
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
-                it.tvDesc.text = option.describe(applet.value)
+                it.tvDesc.text = option.describe(applet)
                 it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
                 if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
                     it.tvDesc.setTypeface(null, Typeface.ITALIC)

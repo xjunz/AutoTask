@@ -13,7 +13,7 @@ abstract class Applet {
 
     object Configurator {
 
-        const val MAX_REFERRED_TAG_LENGTH = 12
+        const val MAX_REFERENCE_ID_LENGTH = 12
 
     }
 

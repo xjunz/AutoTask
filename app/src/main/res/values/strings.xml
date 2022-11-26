@@ -251,8 +251,8 @@
     <string name="prompt_split_container_flow">确定要解散当前规则组吗？</string>
     <string name="unable_to_merge">无法合并所选规则</string>
     <string name="ui_object_operations">控件操作</string>
-    <string name="copy_text">复制文本到剪贴板</string>
-    <string name="extract_text">提取文本</string>
+    <string name="format_copy_text">复制%s到剪贴板</string>
+    <string name="format_extract_text">从%s中提取文本</string>
     <string name="matched_ui_object_text">控件的文字</string>
     <string name="matched_ui_object">满足条件的控件</string>
     <string name="extracted_text">提取的文本</string>
@@ -266,11 +266,14 @@
     <string name="format_select">请选择%s</string>
     <string name="set_refid">设置标识</string>
     <string name="edit_refid">编辑标识</string>
-    <string name="format_set_refid"><![CDATA[为该引用（<b>%s</b>）设置唯一标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。]]></string>
+    <string name="format_set_refid">为该引用(%s)设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
     <string name="error_tag_exists">该标识已经存在，请重新编辑。</string>
     <string name="no_candidate_reference">没有可选的引用</string>
     <string name="which_to_refer">引用哪个？</string>
     <string name="format_not_specified">未指定\"%s\"！</string>
     <string name="prompt_merge_applets">确定要合并所选规则吗？</string>
+    <string name="format_perform_long_click">长按%s</string>
+    <string name="format_perform_click">点击%s</string>
+    <string name="help_extract_text">使用包含捕获组的正则表达式来提取文字，只有第一个捕获组的文字会被提取。</string>
 
 </resources>

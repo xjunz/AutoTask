@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 
 /**
@@ -16,8 +15,6 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
     lateinit var flow: Flow
 
     var isReadyOnly: Boolean = false
-
-    val appletOptionFactory = AppletOptionFactory()
 
     val applets = MutableLiveData(emptyList<Applet>())
 

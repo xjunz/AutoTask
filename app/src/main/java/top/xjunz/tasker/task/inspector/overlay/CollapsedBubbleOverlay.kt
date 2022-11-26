@@ -14,7 +14,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
 import top.xjunz.tasker.util.Icons
 import top.xjunz.tasker.util.Router
-import top.xjunz.tasker.util.Router.routeTo
+import top.xjunz.tasker.util.Router.route
 
 /**
  * @author xjunz 2022/10/17
@@ -79,7 +79,7 @@ class CollapsedBubbleOverlay(
             }
         }
         binding.ibCenter.setOnLongClickListener {
-            context.routeTo(Router.HOST_NONE)
+            context.route(Router.HOST_NONE)
             return@setOnLongClickListener true
         }
         inspector.observe(vm.isCollapsed) {

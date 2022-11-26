@@ -40,29 +40,29 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x0001)
-    val click = simpleUiObjectActionOption(0x0001, R.string.perform_click) {
+    val click = simpleUiObjectActionOption(0x0001, R.string.format_perform_click) {
         if (it.isClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_CLICK)
         } else {
             uiDevice.wrapUiObject2(it).click()
             true
         }
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
     @AppletCategory(0x0002)
-    val longClick = simpleUiObjectActionOption(0x0002, R.string.perform_long_click) {
+    val longClick = simpleUiObjectActionOption(0x0002, R.string.format_perform_long_click) {
         if (it.isLongClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_LONG_CLICK)
         } else {
             uiDevice.wrapUiObject2(it).longClick()
             true
         }
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
     @AppletCategory(0x0010)
     val setText = uiObjectActionOption<String>(
         0x0010,
-        R.string.perform_input_text,
+        R.string.format_perform_input_text,
         AppletValues.VAL_TYPE_TEXT
     ) { node, value ->
         if (!node.isEditable) false
@@ -71,6 +71,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             true
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.input_field)
-        .withArgument<String>(R.string.input_content)
+        .withArgument<String>(R.string.text)
+        .hasCompositeTitle()
 
 }

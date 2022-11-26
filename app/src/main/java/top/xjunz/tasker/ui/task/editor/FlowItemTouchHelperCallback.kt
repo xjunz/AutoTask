@@ -106,7 +106,7 @@ open class FlowItemTouchHelperCallback(
         val position = viewHolder.adapterPosition
         if (position == RecyclerView.NO_POSITION) return
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            if (dY != 0F) {
+            if (dY != 0F || dX != 0F) {
                 hasDragged = true
             } else if (hasDragged != true) {
                 hasDragged = false

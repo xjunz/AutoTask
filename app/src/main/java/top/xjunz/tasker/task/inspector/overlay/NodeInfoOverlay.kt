@@ -19,7 +19,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.Router
-import top.xjunz.tasker.util.Router.routeTo
+import top.xjunz.tasker.util.Router.route
 import java.util.*
 
 /**
@@ -57,8 +57,8 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
                 adapter.notifyItemChanged(adapterPosition, true)
             }
         }) { b, _, p ->
-            b.tvAttrName.text = p.title
-            b.tvAttrValue.text = p.description
+            b.tvAttrName.text = p.rawTitle
+            b.tvAttrValue.text = p.rawDescription
             b.checkbox.isChecked = !uncheckedOptions.contains(p)
         }
     }
@@ -145,7 +145,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             checkedOptions = options - uncheckedOptions
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false
-            context.routeTo(Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR)
+            context.route(Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR)
         }
         binding.container.background = context.createMaterialShapeDrawable()
         inspector.observe(vm.showNodeInfo) {

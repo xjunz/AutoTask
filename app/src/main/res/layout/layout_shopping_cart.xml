@@ -33,8 +33,6 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:alpha="0"
-                android:clickable="true"
-                android:focusable="true"
                 app:layout_constraintBottom_toTopOf="@+id/rv_bottom"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

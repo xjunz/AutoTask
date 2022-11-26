@@ -1,6 +1,5 @@
 package top.xjunz.tasker.ui.task.inspector
 
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -12,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
@@ -34,7 +32,6 @@ import top.xjunz.tasker.service.controller.ShizukuA11yServiceEnabler
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
-import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 
 /**
@@ -105,13 +102,6 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
     }
 
     private val viewModel by viewModels<InnerViewModel>()
-
-    private lateinit var mainViewModel: MainViewModel
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mainViewModel = requireActivity().viewModels<MainViewModel>().value
-    }
 
     private fun showInspectorAndDismissSelf() {
         a11yAutomatorService.showFloatingInspector(viewModel.mode)

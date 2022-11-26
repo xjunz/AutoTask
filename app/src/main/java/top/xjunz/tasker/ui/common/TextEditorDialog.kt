@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ui.common
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
@@ -15,13 +16,19 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
 import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.setLinkable
 import top.xjunz.tasker.ktx.textString
+import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 
 /**
  * @author xjunz 2022/05/10
  */
 class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
+
+    companion object {
+        const val ACTION_INPUT = "input"
+    }
 
     override val isFullScreen: Boolean = false
 
@@ -67,7 +74,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.dropDownValues = values
     }
 
-    fun setCaption(caption: CharSequence) = doWhenCreated {
+    fun setCaption(caption: CharSequence?) = doWhenCreated {
         viewModel.caption = caption
     }
 
@@ -77,6 +84,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         binding.apply {
             tvTitle.text = viewModel.title
             tvCaption.isVisible = !viewModel.caption.isNullOrEmpty()
+            tvCaption.setLinkable(true)
             tvCaption.text = viewModel.caption
             viewModel.editTextConfig?.invoke(etInput)
             btnPositive.setOnClickListener {
@@ -133,6 +141,19 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             ibDismiss.setOnClickListener {
                 dismiss()
             }
+        }
+        dialog?.setOnKeyListener l@{ _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER
+                && event.action == KeyEvent.ACTION_UP
+            ) {
+                binding.btnPositive.performClick()
+                return@l true
+            }
+            return@l false
+        }
+        peekMainViewModel().doOnAction(this, ACTION_INPUT) {
+            binding.etInput.setText(it)
+            binding.etInput.setSelection(it.length)
         }
     }
 

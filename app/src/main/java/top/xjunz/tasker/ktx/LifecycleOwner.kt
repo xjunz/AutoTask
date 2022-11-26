@@ -30,6 +30,12 @@ fun LifecycleOwner.peekContext(): Context {
     error("This LifecycleOwner is not an Activity or a Fragment!")
 }
 
+fun LifecycleOwner.peekActivity(): Activity {
+    if (this is Activity) return this
+    if (this is Fragment) return requireActivity()
+    error("This LifecycleOwner is not an Activity or a Fragment!")
+}
+
 fun LifecycleOwner.makeProgressDialog(config: ((ProgressBar, percent: TextView) -> Unit)? = null):
         MaterialAlertDialogBuilder {
     val binding = LayoutProgressBinding.inflate(LayoutInflater.from(peekContext()))

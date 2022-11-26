@@ -4,7 +4,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.flow.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 
@@ -70,6 +73,10 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
     @AppletCategory(0x0005)
     val containerFlow = flowOption<Flow>(5, R.string.matches_rule_set)
+        .withDescriber<Any> { applet, _ ->
+            val size = (applet as Flow).flatSize.toString().foreColored()
+            R.string.format_applet_count.formatSpans(size)
+        }
 
     @AppletCategory(0x000F)
     val whenFlow = flowOption<When>(ID_EVENT_FILTER_REGISTRY, R.string._when)

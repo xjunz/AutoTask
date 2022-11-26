@@ -23,7 +23,7 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         collectionCriterion<NotificationFlow.NotificationInfo, String> {
             it.packageName
         }
-    }.withDescriber<Collection<String>> {
+    }.withValueDescriber<Collection<String>> {
         if (it.size == 1) {
             val first = it.first()
             PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first

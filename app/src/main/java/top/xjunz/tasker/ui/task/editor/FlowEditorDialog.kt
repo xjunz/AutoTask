@@ -6,6 +6,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
@@ -25,17 +26,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     private val viewModel by viewModels<FlowEditorViewModel>()
 
+    private val globalViewModel by activityViewModels<GlobalFlowEditorViewModel>()
+
     private val adapter by lazy {
         TaskFlowAdapter(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews(savedInstanceState)
+        initViews()
         observeLiveData()
     }
 
-    private fun initViews(savedInstanceState: Bundle?) {
+    private fun initViews() {
         binding.fabAction.applySystemInsets { v, insets ->
             v.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = insets.bottom + 16.dp
@@ -45,8 +48,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             v.updatePadding(top = insets.top)
         }
         binding.rvTaskEditor.adapter = adapter
-        if (viewModel.isNewTask && savedInstanceState == null)
-            viewModel.generateDefaultFlow()
 
         binding.ibMerge.setOnClickListener {
             viewModel.showMergeConfirmation.value = true
@@ -81,18 +82,21 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         observe(viewModel.applets) {
             adapter.submitList(it)
         }
-        observeTransient(viewModel.changedApplet) {
+        observeTransient(viewModel.onAppletChanged) {
             adapter.notifyItemChanged(viewModel.applets.require().indexOf(it), true)
         }
+        observeTransient(globalViewModel.onAppletChanged) {
+            viewModel.onAppletChanged.value = it
+        }
         observe(viewModel.selectionLiveData) {
-            if (viewModel.isSelectingReference) {
-                if (viewModel.isSelectingReference
+            if (viewModel.isSelectingRef) {
+                if (viewModel.isSelectingRef
                     && !viewModel.hasCandidateReference(viewModel.flow)
                 ) {
                     toast(R.string.no_candidate_reference)
                     binding.tvTitle.text = R.string.no_candidate_reference.text
                 } else {
-                    val refName = viewModel.referenceToSelect.name
+                    val refName = viewModel.refValueDescriptor.name
                     binding.tvTitle.text = R.string.format_select.format(refName)
                 }
             } else if (it.isEmpty()) {
@@ -119,12 +123,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         observeConfirmation(viewModel.showMergeConfirmation, R.string.prompt_merge_applets) {
             viewModel.mergeSelectedApplets()
         }
-        observeTransient(viewModel.onRefSelected) {
-            dismiss()
-            // Dismiss parent fragment as well
-            parentFragment?.run {
-                viewModels<FlowEditorViewModel>().value.onRefSelected.value = true
-            }
+        observeTransient(globalViewModel.onReferenceSelected) {
+            if (viewModel.isSelectingRef) dismiss()
         }
     }
 
@@ -137,8 +137,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         return true
     }
 
-    fun setReferenceToSelect(ref: ValueDescriptor) = doWhenCreated {
-        viewModel.referenceToSelect = ref
+    fun setReferenceToSelect(victim: Applet, ref: ValueDescriptor) = doWhenCreated {
+        viewModel.refSelectingApplet = victim
+        viewModel.refValueDescriptor = ref
         viewModel.isReadyOnly = true
     }
 
@@ -154,8 +155,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         viewModel.doSplit = block
     }
 
-    fun setFlow(flow: Flow, readonly: Boolean = false) = doWhenCreated {
-        viewModel.initWith(flow, readonly)
+    fun setFlow(flow: Flow?, readonly: Boolean) = doWhenCreated {
+        val root = flow ?: globalViewModel.generateDefaultFlow()
+        viewModel.initialize(globalViewModel.factory, root, flow == null, readonly)
+        if (globalViewModel.setRootFlowIfAbsent(viewModel.flow)) {
+            viewModel.addCloseable {
+                globalViewModel.clearRootFlow()
+            }
+        }
     }
 
 }

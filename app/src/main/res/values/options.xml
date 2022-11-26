@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="_when">当</string>
+    <string name="_if">如果</string>
+    <string name="_do">那么</string>
+    <string name="_and">并且</string>
+    <string name="_or">或者</string>
+    <string name="on_success">然后</string>
+    <string name="on_failure">否则</string>
+
     <string name="current_app">当前程序</string>
     <string name="package_name">包名</string>
     <string name="component_info">程序和页面</string>
@@ -95,9 +103,7 @@
     <string name="press_back">点击返回键</string>
     <string name="press_recent">切换到最近使用应用</string>
     <string name="press_home">回到桌面</string>
-    <string name="perform_click">点击控件</string>
-    <string name="perform_long_click">长按控件</string>
-    <string name="perform_input_text">向文本框中输入文字</string>
+    <string name="format_perform_input_text">向%s中输入%s</string>
     <string name="perform_input_ref_text">匹配并输入文字(仅限文本框)</string>
     <string name="force_stop_current_pkg">强行停止当前应用</string>
 

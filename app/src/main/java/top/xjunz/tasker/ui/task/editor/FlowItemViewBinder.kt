@@ -1,7 +1,7 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
-import android.graphics.Typeface
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.R.attr.selectableItemBackground
@@ -10,12 +10,10 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.flatSize
-import top.xjunz.tasker.task.applet.isContainer
-import top.xjunz.tasker.task.applet.isRelating
-import top.xjunz.tasker.task.applet.nonContainerParent
+import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.ColorSchemes
 
@@ -30,10 +28,11 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
         const val ACTION_ENTER = 2
     }
 
+    private inline val factory get() = viewModel.factory
+
     @SuppressLint("SetTextI18n")
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
-        val option = if (applet.id == -1) null
-        else viewModel.appletOptionFactory.requireOption(applet)
+        val option = if (applet.id == -1) null else factory.requireOption(applet)
         holder.binding.apply {
             root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
@@ -44,10 +43,11 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
             root.isEnabled = true
             tvTitle.isEnabled = true
             if (option != null) {
-                if (viewModel.isSelectingReference) {
+                if (viewModel.isSelectingRef) {
                     // When selecting ref, only enable valid targets
-                    val ref = option.results.find {
-                        it.type == viewModel.referenceToSelect.type
+                    val ref = if (applet === viewModel.refSelectingApplet) null
+                    else option.results.find {
+                        it.type == viewModel.refValueDescriptor.type
                     }
                     if (applet.isContainer) {
                         root.isEnabled = viewModel.hasCandidateReference(applet as Flow)
@@ -67,15 +67,16 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                         }
                     }
                 }
-                var desc = option.describe(applet.value)
-                var title = option.getTitle(applet.isInverted) ?: applet.label
+                var desc = option.describe(applet)
+                var title = option.getTitle(applet) ?: applet.label
                 tvTitle.isVisible = true
                 if (option.descAsTitle) {
                     title = desc
                 }
-                if (title != null && applet.isRelating) {
-                    title = if (root.isEnabled) AppletOption.makeRelationSpan(title, applet.isAnd)
-                    else AppletOption.makeRelationText(title, applet.isAnd)
+                if (title != null && applet.index != 0 && applet !is ControlFlow) {
+                    title = AppletOption.makeRelationSpan(
+                        title, applet.isAnd, applet.controlFlowParent is If
+                    )
                     tvTitle.background = selectableItemBackground.resolvedId.getDrawable()
                     tvTitle.isClickable = true
                 } else {
@@ -104,7 +105,6 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                         ibAction.setImageResource(R.drawable.ic_baseline_chevron_right_24)
                         ibAction.setContentDescriptionAndTooltip(R.string.enter.text)
                         tvDesc.isVisible = true
-                        desc = R.string.format_applet_count.format(applet.flatSize)
                     } else {
                         ibAction.isVisible = true
                         ibAction.tag = ACTION_COLLAPSE
@@ -118,7 +118,7 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                         }
                     }
                 } else {
-                    ibAction.isInvisible = !applet.isInvertible || viewModel.isSelectingReference
+                    ibAction.isInvisible = !applet.isInvertible || viewModel.isSelectingRef
                     ibAction.tag = ACTION_INVERT
                     if (applet.isInvertible) {
                         ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
@@ -126,10 +126,17 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                     }
                 }
                 if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
-                    tvDesc.setTypeface(null, Typeface.ITALIC)
+                    desc = desc?.quoted()
+                    tvDesc.setBackgroundColor(
+                        ColorUtils.setAlphaComponent(
+                            ColorSchemes.colorPrimaryContainer, (0.25F * 0xFF).toInt()
+                        )
+                    )
                 } else {
-                    tvDesc.setTypeface(null, Typeface.NORMAL)
+                    tvDesc.background = null
                 }
+                // Clear spans
+                if (!tvTitle.isEnabled) title = title?.toString()
                 tvTitle.text = title
                 tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
                 tvDesc.text = desc

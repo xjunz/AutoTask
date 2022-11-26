@@ -1,12 +1,15 @@
 package top.xjunz.tasker.ktx
 
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
 import android.text.style.*
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.core.text.set
+import top.xjunz.tasker.ui.ColorSchemes
 
 /**
  * @author xjunz 2022/11/25
@@ -16,11 +19,29 @@ private inline fun CharSequence.ensureSpannable(block: (Spannable) -> Unit): Cha
     return (if (this is Spannable) this else SpannableStringBuilder(this)).also(block)
 }
 
+fun @receiver:StringRes Int.formatSpans(vararg args: Any): CharSequence {
+    val raw = this.str
+    val split = raw.split("%s").flatMap {
+        it.split("%d")
+    }
+    var title: CharSequence = split[0]
+    for (i in 1..split.lastIndex) {
+        val s = split[i]
+        val rep: CharSequence = when (val arg = args[i - 1]) {
+            is CharSequence -> arg
+            else -> arg.toString()
+        }
+        title += rep + s
+    }
+    return title
+}
+
 private fun CharSequence.setSpan(span: Any) = ensureSpannable {
     it[0..length] = span
 }
 
-fun CharSequence.foreColored(color: Int) = setSpan(ForegroundColorSpan(color))
+fun CharSequence.foreColored(color: Int = ColorSchemes.colorPrimary) =
+    setSpan(ForegroundColorSpan(color))
 
 fun CharSequence.linked(url: String) = setSpan(URLSpan(url))
 
@@ -42,6 +63,15 @@ fun CharSequence.underlined() = setSpan(UnderlineSpan())
 fun CharSequence.bold() = setSpan(StyleSpan(Typeface.BOLD))
 
 fun CharSequence.italic() = setSpan(StyleSpan(Typeface.ITALIC))
+
+fun CharSequence.quoted() =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        setSpan(QuoteSpan(ColorSchemes.colorPrimaryContainer, 4, 8))
+    } else {
+        setSpan(QuoteSpan(ColorSchemes.colorPrimaryContainer))
+    }
+
+fun CharSequence.relativeSize(size: Float) = setSpan(RelativeSizeSpan(size))
 
 operator fun CharSequence.plus(next: CharSequence): CharSequence {
     if (this is SpannableStringBuilder) {

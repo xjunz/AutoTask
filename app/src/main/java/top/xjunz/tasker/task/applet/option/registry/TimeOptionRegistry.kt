@@ -26,7 +26,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         NumberRangeCriterion<Calendar, Long> {
             it.timeInMillis
         }
-    }.withDescriber<Collection<Long>> {
+    }.withValueDescriber<Collection<Long>> {
         val start = it.firstOrNull()
         val stop = it.lastOrNull()
         when {
@@ -44,7 +44,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         TimeCollectionCriterion {
             it.get(Calendar.MONTH)
         }
-    }.withDescriber<Collection<Int>> {
+    }.withValueDescriber<Collection<Int>> {
         val arrays = R.array.months.array
         it.joinToString { month ->
             arrays[month]
@@ -57,7 +57,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
             // The first day has value 1
             it.get(Calendar.DAY_OF_MONTH) - 1
         }
-    }.withDescriber<Collection<Int>> {
+    }.withValueDescriber<Collection<Int>> {
         val days = Array<CharSequence>(31) { i ->
             (i + 1).toString()
         }
@@ -69,7 +69,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         TimeCollectionCriterion {
             it.get(Calendar.DAY_OF_WEEK) - 1
         }
-    }.withDescriber<Collection<Int>> {
+    }.withValueDescriber<Collection<Int>> {
         val arrays = R.array.days_in_week.array
         it.joinToString { day ->
             arrays[day]
@@ -81,7 +81,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         NumberRangeCriterion<Calendar, Int> {
             it.get(Calendar.HOUR) shl 16 or it.get(Calendar.MINUTE) shl 8 or it.get(Calendar.SECOND)
         }
-    }.withDescriber<Collection<Int>> {
+    }.withValueDescriber<Collection<Int>> {
         fun format(time: Int): String {
             return "%02d:%02d:%02d".format(
                 time shr 16 and 0xFF, time shr 8 and 0xFF, time and 0xFF

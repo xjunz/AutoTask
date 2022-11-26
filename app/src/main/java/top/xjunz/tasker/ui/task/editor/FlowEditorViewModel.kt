@@ -6,19 +6,21 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.clone
 import top.xjunz.tasker.task.applet.depth
 import top.xjunz.tasker.task.applet.isContainer
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 
 /**
  * @author xjunz 2022/09/10
  */
 class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
+
+    lateinit var factory: AppletOptionFactory
 
     val selectionLiveData = MutableLiveData(Flow())
 
@@ -28,7 +30,11 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     inline val isEditingContainerFlow get() = flow.parent != null && flow.isContainer
 
-    val isSelectingReference get() = ::referenceToSelect.isInitialized
+    lateinit var refSelectingApplet: Applet
+
+    lateinit var refValueDescriptor: ValueDescriptor
+
+    val isSelectingRef get() = ::refSelectingApplet.isInitialized
 
     val showSplitConfirmation = MutableLiveData<Boolean>()
 
@@ -38,9 +44,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     var selectedApplet = MutableLiveData<Applet>()
 
-    val changedApplet = MutableLiveData<Applet>()
-
-    val onRefSelected = MutableLiveData<Boolean>()
+    val onAppletChanged = MutableLiveData<Applet>()
 
     lateinit var doOnCompletion: (Flow) -> Unit
 
@@ -48,25 +52,12 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var doSplit: () -> Unit
 
-    lateinit var referenceToSelect: ValueDescriptor
-
-    fun generateDefaultFlow() {
-        val root = Flow()
-        val whenFlow = appletOptionFactory.flowRegistry.whenFlow.yieldApplet() as When
-        whenFlow.add(appletOptionFactory.eventRegistry.contentChanged.yieldApplet())
-        root.add(whenFlow)
-        root.add(appletOptionFactory.flowRegistry.ifFlow.yieldApplet())
-        root.add(appletOptionFactory.flowRegistry.doFlow.yieldApplet())
-        flow = root
-        notifyFlowChanged()
-    }
-
     private fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
             toast(R.string.prompt_applet_multi_selection_depth)
         } else {
             selectionLiveData.require().add(applet)
-            changedApplet.value = applet
+            onAppletChanged.value = applet
             selectionLiveData.notifySelfChanged()
         }
     }
@@ -85,7 +76,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     private fun multiUnselect(applet: Applet) {
         selections.remove(applet)
-        changedApplet.value = applet
+        onAppletChanged.value = applet
         selectionLiveData.notifySelfChanged()
     }
 
@@ -102,7 +93,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         while (itr.hasNext()) {
             val removed = itr.next()
             itr.remove()
-            changedApplet.value = removed
+            onAppletChanged.value = removed
         }
         selectionLiveData.notifySelfChanged()
     }
@@ -150,7 +141,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
         val parent = first.requireParent()
         val insertPosition = selections.minOf { it.index }
-        val container = appletOptionFactory.flowRegistry.containerFlow.yieldApplet() as Flow
+        val container = factory.flowRegistry.containerFlow.yieldApplet() as Flow
         container.addAll(selections)
         container.parent = parent
         selections.forEach {
@@ -165,17 +156,21 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
         parent.forEachIndexed { index, applet ->
             applet.index = index
-            changedApplet.value = applet
+            onAppletChanged.value = applet
         }
         notifyFlowChanged()
     }
 
-    fun initWith(initialFlow: Flow, readonly: Boolean) {
+    fun initialize(
+        appletOptionFactory: AppletOptionFactory,
+        initialFlow: Flow,
+        newTask: Boolean,
+        readonly: Boolean
+    ) {
+        factory = appletOptionFactory
         isReadyOnly = readonly
-        flow = if (readonly) initialFlow else initialFlow.clone(appletOptionFactory)
-        flow.parent = initialFlow.parent
-        flow.index = initialFlow.index
-        isNewTask = false
+        flow = if (readonly) initialFlow else initialFlow.clone(factory)
+        isNewTask = newTask
         notifyFlowChanged()
     }
 
@@ -198,14 +193,14 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         // Notify indexes changed
         for (i in container.index + container.size..parent.lastIndex) {
             parent[i].index = i
-            changedApplet.value = parent[i]
+            onAppletChanged.value = parent[i]
         }
         notifyFlowChanged()
     }
 
     private fun Applet.hasResultWithDescriptor(): Boolean {
-        val option = appletOptionFactory.findOption(this)
-        if (option != null && option.results.any { it.type == referenceToSelect.type }) {
+        val option = factory.findOption(this)
+        if (option != null && option.results.any { it.type == refValueDescriptor.type }) {
             return true
         }
         if (this is Flow) {

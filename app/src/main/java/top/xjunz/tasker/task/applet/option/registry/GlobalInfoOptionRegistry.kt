@@ -36,7 +36,7 @@ class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         NumberRangeCriterion<Unit, Int>(AppletValues.VAL_TYPE_INT) {
             BatteryManagerBridge.capacity
         }
-    }.withDescriber<Collection<Int?>> {
+    }.withValueDescriber<Collection<Int?>> {
         val first = it.firstOrNull()
         val last = it.lastOrNull()
         if (first == null && last != null) {

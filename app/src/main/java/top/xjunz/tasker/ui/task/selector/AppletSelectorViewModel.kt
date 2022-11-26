@@ -9,14 +9,18 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
+import top.xjunz.tasker.task.applet.controlFlowParent
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
 
 /**
  * @author xjunz 2022/10/22
  */
 class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
+
+    val appletOptionFactory = AppletOptionFactory()
 
     var animateItems = true
 
@@ -32,17 +36,20 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     var isScoped = false
 
+    var isInCriterionScope = false
+
     lateinit var onCompletion: (List<Applet>) -> Unit
 
     var title: CharSequence? = null
 
     fun setScope(flow: Flow) {
         // Find its control flow, we need its control flow's option title to be shown
-        var controlFlow: Flow? = flow
-        while (controlFlow != null && controlFlow !is ControlFlow) {
-            controlFlow = controlFlow.requireParent()
+        val controlFlow = if (flow is ControlFlow) flow else flow.controlFlowParent
+        checkNotNull(controlFlow) {
+            "ControlFlow not found!"
         }
-        title = appletOptionFactory.requireOption(controlFlow!!).title
+        isInCriterionScope = controlFlow is If
+        title = appletOptionFactory.requireOption(controlFlow).rawTitle
         if (flow is ControlFlow) {
             isScoped = false
             if (flow is If) {

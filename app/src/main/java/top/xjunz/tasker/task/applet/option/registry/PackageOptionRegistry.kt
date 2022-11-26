@@ -26,7 +26,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         collectionCriterion<PackageInfoContext, String> {
             it.packageName
         }
-    }.withDescriber<Collection<String>> {
+    }.withValueDescriber<Collection<String>> {
         if (it.size == 1) {
             val first = it.first()
             PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first
@@ -46,7 +46,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
                 ComponentName.unflattenFromString(it.activityName)?.className
             }
         }
-    }.withDescriber<Collection<String>> {
+    }.withValueDescriber<Collection<String>> {
         if (it.size == 1) {
             it.first()
         } else {

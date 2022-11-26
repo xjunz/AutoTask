@@ -34,11 +34,11 @@ abstract class AppletOption(
 
         const val TITLE_NONE = -1
 
-        private val DEFAULT_DESCRIBER: (Any) -> CharSequence = {
-            if (it is Boolean) {
-                if (it) R.string._true.text else R.string._false.text
+        private val DEFAULT_DESCRIBER: (Applet?, Any?) -> CharSequence? = { _, value ->
+            if (value is Boolean) {
+                if (value) R.string._true.text else R.string._false.text
             } else {
-                it.toString()
+                value?.toString()
             }
         }
 
@@ -51,19 +51,27 @@ abstract class AppletOption(
             return label
         }
 
-        fun makeRelationText(origin: CharSequence, isAnd: Boolean): String {
-            val relationText = if (isAnd) R.string._and.str else R.string._or.str
-            return relationText + origin
-        }
-
-        fun makeRelationSpan(origin: CharSequence, isAnd: Boolean): CharSequence {
-            val relation = if (isAnd) R.string._and.str else R.string._or.str
-            return relation.foreColored(ColorSchemes.colorPrimary).underlined().bold() + origin
+        fun makeRelationSpan(
+            origin: CharSequence,
+            isAnd: Boolean,
+            isCriterion: Boolean
+        ): CharSequence {
+            val relation = if (isCriterion) {
+                if (isAnd) R.string._and.str else R.string._or.str
+            } else {
+                if (isAnd) R.string.on_success.str else R.string.on_failure.str
+            }
+            return relation.foreColored().underlined().bold() + origin
         }
 
     }
 
-    private var describer: (Any) -> CharSequence = DEFAULT_DESCRIBER
+    private var describer: (Applet?, Any?) -> CharSequence? = DEFAULT_DESCRIBER
+
+    private var helpTextRes: Int = -1
+
+    var helpText: CharSequence? = null
+        get() = if (helpTextRes != -1) helpTextRes.text else field
 
     /**
      * Whether this is an valid option able to yield an applet.
@@ -104,6 +112,8 @@ abstract class AppletOption(
 
     var descAsTitle: Boolean = false
 
+    var isComplexTitle: Boolean = false
+
     var isShizukuOnly = false
 
     var isA11yOnly = false
@@ -112,7 +122,7 @@ abstract class AppletOption(
 
     var results: List<ValueDescriptor> = emptyList()
 
-    val title: CharSequence?
+    val rawTitle: CharSequence?
         get() = if (titleRes == TITLE_NONE) null else makeLabelSpan(titleRes.text)
 
     private val invertedTitleResource: Int by lazy {
@@ -134,10 +144,17 @@ abstract class AppletOption(
             invertedTitleResource.text
         )
 
-    val currentTitle get() = getTitle(isInverted)
+    val currentTitle get() = getTitle(null, isInverted)
 
-    fun getTitle(isInverted: Boolean): CharSequence? {
-        return if (isInverted) invertedTitle else title
+    private fun getTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
+        if (isComplexTitle) {
+            return getComplexTitle(applet)
+        }
+        return if (isInverted) invertedTitle else rawTitle
+    }
+
+    fun getTitle(applet: Applet): CharSequence? {
+        return getTitle(applet, applet.isInverted)
     }
 
     fun shizukuOnly(): AppletOption {
@@ -155,10 +172,10 @@ abstract class AppletOption(
         return this
     }
 
-    fun describe(value: Any?): CharSequence? = if (value == null) null else describer(value)
+    fun describe(applet: Applet): CharSequence? = describer(applet, applet.value)
 
-    val description: CharSequence?
-        get() = if (value == null) null else describe(value!!)
+    val rawDescription: CharSequence?
+        get() = if (value == null) null else describer(null, value!!)
 
     fun toggleInversion() {
         isInverted = !isInverted
@@ -176,8 +193,58 @@ abstract class AppletOption(
         }
     }
 
-    fun <T : Any> withDescriber(block: (T) -> CharSequence): AppletOption {
-        describer = { block(it.casted()) }
+    fun <T : Any> withValueDescriber(block: (T) -> CharSequence): AppletOption {
+        describer = { _, value ->
+            if (value == null) {
+                null
+            } else {
+                block(value.casted())
+            }
+        }
+        return this
+    }
+
+    fun <T : Any> withDescriber(block: (Applet, T?) -> CharSequence?): AppletOption {
+        describer = { applet, value ->
+            if (applet == null) {
+                null
+            } else {
+                block(applet, value?.casted())
+            }
+        }
+        return this
+    }
+
+    private fun getComplexTitle(applet: Applet?): CharSequence {
+        if (applet == null) {
+            return titleRes.format(*Array(arguments.size) {
+                arguments[it].name
+            })
+        }
+        val split = titleRes.str.split("%s")
+        var title: CharSequence = split[0]
+        for (i in 1..split.lastIndex) {
+            val s = split[i]
+            val index = i - 1
+            val arg = arguments[index]
+            val refid = applet.referring[index]
+            val rep = when {
+                arg.isReferenceOnly -> refid?.foreColored() ?: arg.name
+                arg.isValueOnly -> arg.name
+                else -> when {
+                    value == null && refid == null -> arg.name
+                    value == null && refid != null -> refid.foreColored()
+                    refid == null -> arg.name
+                    else -> error("Value and reference both specified!")
+                }
+            }
+            title += rep + s
+        }
+        return title
+    }
+
+    fun hasCompositeTitle(): AppletOption {
+        isComplexTitle = true
         return this
     }
 
@@ -191,8 +258,7 @@ abstract class AppletOption(
     }
 
     inline fun <reified T> withResult(@StringRes name: Int): AppletOption {
-        if (results == Collections.EMPTY_LIST)
-            results = mutableListOf()
+        if (results == Collections.EMPTY_LIST) results = mutableListOf()
         (results as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, true))
         return this
     }
@@ -201,8 +267,7 @@ abstract class AppletOption(
         @StringRes name: Int,
         isRef: Boolean? = null
     ): AppletOption {
-        if (arguments == Collections.EMPTY_LIST)
-            arguments = mutableListOf()
+        if (arguments == Collections.EMPTY_LIST) arguments = mutableListOf()
         (arguments as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, isRef))
         return this
     }
@@ -216,6 +281,18 @@ abstract class AppletOption(
 
     inline fun <reified T> withRefArgument(@StringRes name: Int): AppletOption {
         return withArgument<T>(name, true)
+    }
+
+    fun withHelperText(@StringRes res: Int): AppletOption {
+        helpTextRes = res
+        helpText = null
+        return this
+    }
+
+    fun withHelperText(text: CharSequence): AppletOption {
+        helpText = text
+        helpTextRes = -1
+        return this
     }
 
     protected abstract fun rawCreateApplet(): Applet

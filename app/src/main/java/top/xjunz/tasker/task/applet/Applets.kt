@@ -1,7 +1,6 @@
 package top.xjunz.tasker.task.applet
 
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
@@ -22,6 +21,18 @@ val Applet.nonContainerParent: Flow?
         if (parent == null) return null
         if (requireParent().isContainer) return requireParent().nonContainerParent
         return requireParent()
+    }
+
+/**
+ * The nearest parent [ControlFlow].
+ */
+val Applet.controlFlowParent: ControlFlow?
+    get() {
+        var controlFlow: Flow? = parent
+        while (controlFlow != null && controlFlow !is ControlFlow) {
+            controlFlow = controlFlow.parent
+        }
+        return controlFlow as? ControlFlow
     }
 
 /**
@@ -54,13 +65,25 @@ fun Applet.isDescendantOf(flow: Flow): Boolean {
     return requireParent().isDescendantOf(flow)
 }
 
-fun Flow.findChildWithRefid(id: String): Applet? {
+fun Flow.findChildrenReferringRefid(refid: String): List<Applet> {
+    val ret = mutableListOf<Applet>()
+    forEach {
+        if (it.referring.containsValue(refid))
+            ret.add(it)
+        if (it is Flow) {
+            ret.addAll(it.findChildrenReferringRefid(refid))
+        }
+    }
+    return if (ret.isEmpty()) emptyList() else ret
+}
+
+fun Flow.findChildOwningRefid(id: String): Applet? {
     forEach {
         if (referred.containsValue(id))
             return this
 
         if (it is Flow) {
-            val found = it.findChildWithRefid(id)
+            val found = it.findChildOwningRefid(id)
             if (found != null)
                 return found
         }
@@ -68,8 +91,8 @@ fun Flow.findChildWithRefid(id: String): Applet? {
     return null
 }
 
-fun Flow.requireChildWithRefid(id: String): Applet {
-    return requireNotNull(findChildWithRefid(id)) {
+fun Flow.requireChildOwningRefid(id: String): Applet {
+    return requireNotNull(findChildOwningRefid(id)) {
         "Applet with refid '$id' not found!"
     }
 }
@@ -91,13 +114,7 @@ inline val Applet.depth: Int
         return depth
     }
 
-/**
- * Whether the applet relates to its previous peer.
- */
-inline val Applet.isRelating
-    get() = index != 0 && this !is ControlFlow && this !is Action
-
-fun <T : Applet> T.clone(factory: AppletFactory): T {
+fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = true): T {
     val cloned = factory.createAppletById(id)
     cloned.id = id
     cloned.isAnd = isAnd
@@ -105,7 +122,16 @@ fun <T : Applet> T.clone(factory: AppletFactory): T {
     cloned.isInverted = isInverted
     cloned.isInvertible = isInvertible
     cloned.label = label
-    cloned.referred = referred
+    cloned.referred = mutableMapOf<Int, String>().apply {
+        putAll(referred)
+    }
+    cloned.referring = mutableMapOf<Int, String>().apply {
+        putAll(referring)
+    }
+    if (cloneHierarchyInfo) {
+        cloned.parent = parent
+        cloned.index = index
+    }
     if (this is Flow) {
         cloned as Flow
         forEach {
@@ -115,18 +141,26 @@ fun <T : Applet> T.clone(factory: AppletFactory): T {
     return cloned.casted()
 }
 
-fun Applet.setRefid(which: Int, tag: String) {
-    if (referred === emptyMap<Int, String>()) {
-        referred = mutableMapOf()
+fun Applet.setRefid(whichRet: Int, id: String?) {
+    if (id == null) {
+        removeRefid(whichRet)
+    } else {
+        if (referred === emptyMap<Int, String>()) {
+            referred = mutableMapOf()
+        }
+        (referred as MutableMap)[whichRet] = id
     }
-    (referred as MutableMap)[which] = tag
 }
 
-fun Applet.setReference(which: Int, ref: String) {
-    if (referring === emptyMap<Int, String>()) {
-        referring = mutableMapOf()
+fun Applet.setReference(whichArg: Int, ref: String?) {
+    if (ref == null) {
+        removeReference(whichArg)
+    } else {
+        if (referring === emptyMap<Int, String>()) {
+            referring = mutableMapOf()
+        }
+        (referring as MutableMap)[whichArg] = ref
     }
-    (referring as MutableMap)[which] = ref
 }
 
 fun Applet.removeReference(which: Int) {
