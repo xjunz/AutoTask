@@ -15,7 +15,6 @@ class ActionOptionOnClickListener(
 ) {
 
     fun onClick(
-        title: CharSequence,
         applet: Applet,
         option: AppletOption,
         onCompleted: () -> Unit

@@ -10,11 +10,11 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 abstract class ReferenceAction<V>(override val valueType: Int) : Action() {
 
     override fun apply(runtime: TaskRuntime) {
-        check(referring.isNotEmpty()) {
+        check(references.isNotEmpty()) {
             "Need references!"
         }
-        val args = Array(referring.size) {
-            runtime.getResultByRefid(referring[it])
+        val args = Array(references.size) {
+            runtime.getResultByRefid(references[it])
         }
         runtime.isSuccessful = doAction(args, value?.casted(), runtime)
     }

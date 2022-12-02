@@ -76,7 +76,7 @@
             android:id="@+id/btn_more"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_option_frame"
+            android:background="@drawable/bg_selectable_primary_surface"
             android:drawableEnd="@drawable/ic_baseline_chevron_right_24"
             android:gravity="center"
             android:paddingHorizontal="16dp"

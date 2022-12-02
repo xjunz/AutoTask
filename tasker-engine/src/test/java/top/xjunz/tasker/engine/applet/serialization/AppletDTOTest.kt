@@ -23,7 +23,7 @@ internal class AppletDTOTest {
             label = "RootFlow"
             When(Event.EVENT_ON_PACKAGE_ENTERED)
             If {
-                referred = "If"
+                refids = "If"
                 id = 3
                 UnaryCriterion<String> {
                     value = "hello"

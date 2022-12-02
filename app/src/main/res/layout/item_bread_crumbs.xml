@@ -13,7 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="4dp"
-            android:background="@drawable/bg_option_frame"
+            android:background="@drawable/bg_selectable_primary_surface"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
             tools:text="@tools:sample/lorem" />

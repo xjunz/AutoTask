@@ -9,6 +9,7 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.util.Router.launchAction
 import java.util.*
 
 /**
@@ -25,6 +26,10 @@ abstract class AppletOption(
 ) : Comparable<AppletOption> {
 
     companion object {
+
+        const val ACTION_TOGGLE_RELATION = "toggle-relation"
+        const val ACTION_NAVIGATE_REFERENCE = "navigate-reference"
+
         /**
          * Indicate that the inverted title of an option is auto-generated.
          *
@@ -53,15 +58,17 @@ abstract class AppletOption(
 
         fun makeRelationSpan(
             origin: CharSequence,
-            isAnd: Boolean,
+            applet: Applet,
             isCriterion: Boolean
         ): CharSequence {
             val relation = if (isCriterion) {
-                if (isAnd) R.string._and.str else R.string._or.str
+                if (applet.isAnd) R.string._and.str else R.string._or.str
             } else {
-                if (isAnd) R.string.on_success.str else R.string.on_failure.str
+                if (applet.isAnd) R.string.on_success.str else R.string.on_failure.str
             }
-            return relation.foreColored().underlined().bold() + origin
+            return relation.foreColored().underlined().bold().clickable {
+                app.launchAction(ACTION_TOGGLE_RELATION, applet.hashCode())
+            } + origin
         }
 
     }
@@ -215,6 +222,13 @@ abstract class AppletOption(
         return this
     }
 
+    private fun makeReferenceText(applet: Applet, refid: CharSequence?): CharSequence? {
+        if (refid == null) return null
+        return refid.foreColored().bold().clickable {
+            app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid|" + applet.hashCode())
+        }
+    }
+
     private fun getComplexTitle(applet: Applet?): CharSequence {
         if (applet == null) {
             return titleRes.format(*Array(arguments.size) {
@@ -227,13 +241,13 @@ abstract class AppletOption(
             val s = split[i]
             val index = i - 1
             val arg = arguments[index]
-            val refid = applet.referring[index]
+            val refid = applet.references[index]
             val rep = when {
-                arg.isReferenceOnly -> refid?.foreColored() ?: arg.name
+                arg.isReferenceOnly -> makeReferenceText(applet, refid) ?: arg.name
                 arg.isValueOnly -> arg.name
                 else -> when {
                     value == null && refid == null -> arg.name
-                    value == null && refid != null -> refid.foreColored()
+                    value == null && refid != null -> makeReferenceText(applet, refid)!!
                     refid == null -> arg.name
                     else -> error("Value and reference both specified!")
                 }

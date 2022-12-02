@@ -43,7 +43,7 @@ class AppletCandidatesAdapter(
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
                 } else {
-                    onClickListener.onClick(binding.tvTitle.text, applet) {
+                    onClickListener.onClick(applet) {
                         notifyItemChanged(adapterPosition)
                     }
                 }
@@ -85,7 +85,7 @@ class AppletCandidatesAdapter(
             val title = option.getTitle(applet)
             if (title != null && showRelation) {
                 it.tvTitle.text = AppletOption.makeRelationSpan(
-                    title, applet.isAnd, viewModel.isInCriterionScope
+                    title, applet, viewModel.isInCriterionScope
                 )
             } else {
                 it.tvTitle.text = title

@@ -3,6 +3,7 @@ package top.xjunz.tasker.ui.common
 import android.content.Context
 import android.widget.ArrayAdapter
 import android.widget.Filter
+import top.xjunz.shared.ktx.casted
 
 class DropdownArrayAdapter(
     context: Context, val data: MutableList<CharSequence>
@@ -16,24 +17,23 @@ class DropdownArrayAdapter(
         object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val results = FilterResults()
-                return if (constraint != null) {
+                return if (constraint.isNullOrEmpty()) {
+                    results.also {
+                        it.values = candidates
+                        it.count = candidates.size
+                    }
+                } else {
                     val res = candidates.filter { it.contains(constraint, true) }
                     results.also {
                         it.values = res
                         it.count = res.size
                     }
-                } else {
-                    results.also {
-                        it.values = candidates
-                        it.count = candidates.size
-                    }
                 }
             }
 
-            @Suppress("UNCHECKED_CAST")
             override fun publishResults(constraint: CharSequence?, results: FilterResults) {
                 data.clear()
-                data.addAll(results.values as? List<String> ?: emptyList())
+                data.addAll(results.values?.casted() ?: emptyList())
                 if (results.count == 0) {
                     notifyDataSetInvalidated()
                 } else {

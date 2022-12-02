@@ -30,19 +30,19 @@ open class AppletOptionOnClickListener(
 
     private val actionOptionOnClickListener = ActionOptionOnClickListener(fragmentManager)
 
-    fun onClick(title: CharSequence, applet: Applet, onCompleted: () -> Unit) {
-        onClick(title, applet, factory.requireOption(applet), onCompleted)
+    fun onClick(applet: Applet, onCompleted: () -> Unit) {
+        onClick(applet, factory.requireOption(applet), onCompleted)
     }
 
     open fun onClick(
-        title: CharSequence,
         applet: Applet,
         option: AppletOption,
         onCompleted: () -> Unit
     ) {
+        val title = option.getTitle(applet)!!
         when {
             applet is Action ->
-                actionOptionOnClickListener.onClick(title, applet, option, onCompleted)
+                actionOptionOnClickListener.onClick(applet, option, onCompleted)
 
             option == factory.packageRegistry.pkgCollection ->
                 ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
@@ -54,7 +54,7 @@ open class AppletOptionOnClickListener(
                     .show(fragmentManager)
 
             option == factory.packageRegistry.activityCollection ->
-                ComponentSelectorDialog().setTitle(title)
+                ComponentSelectorDialog().setTitle(option.rawTitle!!)
                     .setSelectedActivities(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
                         applet.value = it

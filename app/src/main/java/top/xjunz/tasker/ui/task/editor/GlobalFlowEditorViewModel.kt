@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.When
-import top.xjunz.tasker.task.applet.findChildrenReferringRefid
+import top.xjunz.tasker.task.applet.forEachReference
+import top.xjunz.tasker.task.applet.forEachRefid
+import top.xjunz.tasker.task.applet.isAheadOf
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.editor.FlowReferenceTracer
 
 /**
  * A global view model serving all [FlowEditorDialog]s, this view model is expected to
@@ -18,25 +21,38 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     private var _root: Flow? = null
 
+    private val selected = mutableSetOf<Pair<Applet, Int>>()
+
+    val selectedRefs: Set<Pair<Applet, Int>> get() = selected
+
     val root: Flow get() = _root!!
 
     val factory = AppletOptionFactory()
 
     val onReferenceSelected = MutableLiveData<Boolean>()
 
-    val onAppletChanged = MutableLiveData<Applet>()
+    val onAppletChanged = MutableLiveData<Applet?>()
 
-    fun renameRefid(prev: String, cur: String) {
-        root.findChildrenReferringRefid(prev).forEach {
-            it.referring.forEach { (which, refid) ->
-                if (refid == prev) (it.referring as MutableMap)[which] = cur
+    val tracer = FlowReferenceTracer()
+
+    fun renameRefidInRoot(prev: Set<String>, cur: String) {
+        root.forEachRefid { applet, which, refid ->
+            if (prev.contains(refid)) {
+                tracer.setRefid(applet, which, cur)
             }
+            false
+        }
+        root.forEachReference { applet, which, refid ->
+            if (prev.contains(refid)) {
+                tracer.renameReference(applet, which, cur)
+            }
+            false
         }
     }
 
-    fun notifyRefidChanged(changed: String) {
-        root.findChildrenReferringRefid(changed).forEach {
-            onAppletChanged.value = it
+    fun setRefidForSelections(refid: String) {
+        selected.forEach { (applet, which) ->
+            tracer.setRefid(applet, which, refid)
         }
     }
 
@@ -50,12 +66,81 @@ class GlobalFlowEditorViewModel : ViewModel() {
         return root
     }
 
-    fun setRootFlowIfAbsent(flow: Flow): Boolean {
-        if (_root == null) {
-            _root = flow
-            return true
+    fun setRoot(flow: Flow) {
+        _root = flow
+    }
+
+    fun isRefSelected(applet: Applet) = selected.any {
+        it.first === applet
+    }
+
+    private fun Flow.addSelectionsWithRefid(id: String, block: (Applet, Int) -> Unit) {
+        forEach {
+            for ((index, refid) in it.refids) {
+                if (refid == id) {
+                    block(it, index)
+                    onAppletChanged.value = it
+                    break
+                }
+            }
+            if (it is Flow) {
+                it.addSelectionsWithRefid(id, block)
+            }
         }
-        return false
+    }
+
+    fun addRefSelection(applet: Applet, which: Int) {
+        selected.add(applet to which)
+        onAppletChanged.value = applet
+    }
+
+    fun addRefSelectionWithRefid(self: Applet, refid: String) {
+        root.addSelectionsWithRefid(refid) { applet, index ->
+            if (applet != self && self.parent == null || applet.isAheadOf(self)) {
+                selected.add(applet to index)
+            }
+        }
+    }
+
+    fun removeRefSelection(applet: Applet) {
+        val found = selected.find {
+            it.first === applet
+        }
+        checkNotNull(found) {
+            "This applet is not referred?"
+        }
+        val refid = found.first.refids[found.second]
+        if (refid == null) {
+            selected.removeIf {
+                it.first === applet
+            }
+            onAppletChanged.value = applet
+        } else selected.filter {
+            it.first.refids[it.second] == refid
+        }.forEach {
+            selected.remove(it)
+            onAppletChanged.value = it.first
+        }
+    }
+
+    fun isRefidLegalForSelections(refid: String): Boolean {
+        var legal = true
+        root.forEachRefid { applet, i, id ->
+            if (id == refid && !selectedRefs.any {
+                    it.first == applet && it.second == i
+                }
+            ) {
+                legal = false
+                true
+            } else {
+                false
+            }
+        }
+        return legal
+    }
+
+    fun clearRefSelections() {
+        selected.clear()
     }
 
     fun clearRootFlow() {

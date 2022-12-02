@@ -14,15 +14,16 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.findChildOwningRefid
+import top.xjunz.tasker.ktx.configHeaderTitle
+import top.xjunz.tasker.ktx.indexOf
+import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
+import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
-import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
-import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/08/14
@@ -34,11 +35,11 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
 
     private val globalViewModel: GlobalFlowEditorViewModel by fragment.activityViewModels()
 
-    private val itemViewBinder = FlowItemViewBinder(viewModel)
+    private val itemViewBinder = FlowItemViewBinder(viewModel, globalViewModel)
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    private val menuHelper = FlowItemMenuHelper(viewModel, fragment)
+    private val menuHelper = FlowItemMenuHelper(viewModel, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -90,13 +91,14 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         AppletOptionOnClickListener(fragment.childFragmentManager, globalViewModel.factory)
     }
 
-    private inline fun showMultiReferenceSelectorMenu(
+    private inline fun showMultiReferencesSelectorMenu(
         anchor: View,
+        option: AppletOption,
         candidates: List<ValueDescriptor>,
-        crossinline onSelected: (ValueDescriptor) -> Unit
+        crossinline onSelected: (Int) -> Unit
     ) {
         if (candidates.size == 1) {
-            onSelected(candidates.single())
+            onSelected(option.results.indexOf(candidates.single()))
         } else {
             val popup = PopupMenu(fragment.requireContext(), anchor, Gravity.END)
             popup.menu.add(R.string.which_to_refer)
@@ -104,7 +106,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 popup.menu.add(it.name)
             }
             popup.setOnMenuItemClickListener {
-                onSelected(candidates[popup.indexOf(it) - 1])
+                onSelected(popup.indexOf(it) - 1)
                 return@setOnMenuItemClickListener true
             }
             popup.configHeaderTitle()
@@ -116,51 +118,33 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.root.setOnClickListener { view ->
+            binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
                 if (viewModel.isSelectingRef && !applet.isContainer) {
-                    val option = globalViewModel.factory.requireOption(applet)
-                    val candidates = option.results.filter {
-                        viewModel.refValueDescriptor.type == it.type
-                    }
-                    showMultiReferenceSelectorMenu(view, candidates) { candidate ->
-                        val which = option.results.indexOf(candidate)
-                        if (applet.referred.containsKey(which)) {
-                            // Already a tag for this reference
-                            viewModel.doOnRefSelected(
-                                applet, which, applet.referred.getValue(which)
-                            )
-                            // Notify ref selected
-                            globalViewModel.onReferenceSelected.value = true
-                        } else {
-                            TextEditorDialog().setCaption(
-                                R.string.format_set_refid.formatSpans(
-                                    candidate.name.foreColored().clickable {
-                                        it.context.launchAction(
-                                            TextEditorDialog.ACTION_INPUT, candidate.name
-                                        )
-                                    })
-                            ).configEditText {
-                                it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
-                            }.setArguments(R.string.set_refid.text) {
-                                if (it.isEmpty()) {
-                                    return@setArguments R.string.error_empty_input.text
-                                }
-                                if (viewModel.flow.findChildOwningRefid(it) != null) {
-                                    return@setArguments R.string.error_tag_exists.text
-                                }
-                                viewModel.doOnRefSelected(applet, which, it)
-                                globalViewModel.onReferenceSelected.value = true
-                                return@setArguments null
-                            }.show(fragment.childFragmentManager)
+                    if (globalViewModel.isRefSelected(applet)) {
+                        globalViewModel.removeRefSelection(applet)
+                        if (globalViewModel.selectedRefs.isEmpty())
+                            viewModel.isFabVisible.value = false
+                    } else {
+                        val option = globalViewModel.factory.requireOption(applet)
+                        val candidates = option.results.filter {
+                            viewModel.refValueDescriptor.type == it.type
+                        }
+                        showMultiReferencesSelectorMenu(view, option, candidates) {
+                            val refid = applet.refids[it]
+                            if (refid == null) {
+                                globalViewModel.addRefSelection(applet, it)
+                            } else {
+                                globalViewModel.addRefSelectionWithRefid(
+                                    viewModel.refSelectingApplet, refid
+                                )
+                            }
+                            if (globalViewModel.selectedRefs.isNotEmpty())
+                                viewModel.isFabVisible.value = true
                         }
                     }
-                    return@setOnClickListener
-                }
-                if (viewModel.isInMultiSelectionMode) {
+                } else if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
-                } else if (applet is Flow && applet.isContainer) {
-                    binding.ibAction.performClick()
                 } else {
                     val menu = menuHelper.showMenu(view, applet)
                     if (menu != null) {
@@ -168,8 +152,8 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         menu.setOnDismissListener {
                             viewModel.singleSelect(-1)
                         }
-                    } else optionOnClickListener.onClick(binding.tvTitle.text, applet) {
-                        notifyItemChanged(adapterPosition)
+                    } else {
+                        binding.ibAction.performClick()
                     }
                 }
             }
@@ -179,11 +163,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 }
                 return@setOnLongClickListener true
             }
-            binding.tvTitle.setOnClickListener {
-                currentList[adapterPosition].toggleRelation()
-                notifyItemChanged(adapterPosition, true)
-            }
-            binding.ibAction.setOnClickListener {
+            binding.ibAction.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]
                 when (it.tag as? Int) {
                     FlowItemViewBinder.ACTION_COLLAPSE -> {
@@ -193,6 +173,17 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                     FlowItemViewBinder.ACTION_INVERT -> {
                         currentList[adapterPosition].toggleInversion()
                         notifyItemChanged(adapterPosition, true)
+                    }
+                    FlowItemViewBinder.ACTION_EDIT -> {
+                        val menu = menuHelper.showMenu(it, applet)
+                        if (menu != null) {
+                            viewModel.singleSelect(adapterPosition)
+                            menu.setOnDismissListener {
+                                viewModel.singleSelect(-1)
+                            }
+                        } else optionOnClickListener.onClick(applet) {
+                            notifyItemChanged(adapterPosition)
+                        }
                     }
                     FlowItemViewBinder.ACTION_ENTER -> {
                         val dialog = FlowEditorDialog().setFlow(
@@ -209,8 +200,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         if (viewModel.isSelectingRef) {
                             dialog.doOnReferenceSelected(viewModel.doOnRefSelected)
                             dialog.setReferenceToSelect(
-                                viewModel.refSelectingApplet,
-                                viewModel.refValueDescriptor
+                                viewModel.refSelectingApplet, viewModel.refValueDescriptor, null
                             )
                         }
                         dialog.show(fragment.childFragmentManager)

@@ -61,7 +61,7 @@
                     android:insetBottom="6dp"
                     android:paddingHorizontal="16dp"
                     android:textColor="?colorError"
-                    app:icon="@drawable/ic_baseline_clear_all_24"
+                    app:icon="@drawable/ic_remove_shopping_cart"
                     app:iconGravity="start"
                     app:iconTint="?colorError"
                     app:rippleColor="?colorControlHighlight"

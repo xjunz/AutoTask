@@ -266,7 +266,7 @@
     <string name="format_select">请选择%s</string>
     <string name="set_refid">设置标识</string>
     <string name="edit_refid">编辑标识</string>
-    <string name="format_set_refid">为该引用(%s)设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
+    <string name="prompt_set_refid">为所选引用设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
     <string name="error_tag_exists">该标识已经存在，请重新编辑。</string>
     <string name="no_candidate_reference">没有可选的引用</string>
     <string name="which_to_refer">引用哪个？</string>
@@ -275,5 +275,10 @@
     <string name="format_perform_long_click">长按%s</string>
     <string name="format_perform_click">点击%s</string>
     <string name="help_extract_text">使用包含捕获组的正则表达式来提取文字，只有第一个捕获组的文字会被提取。</string>
+    <string name="execute_rule_set">执行规则组合</string>
+    <string name="confirm_ref">确认引用</string>
+    <string name="do_not_show_next_time">我已知晓，下次不再提示</string>
+    <string name="help_multi_references">您已选中来自多个规则的引用，这些引用将会被设置同一个标识，其中最后执行成功的规则将会被引用。</string>
+    <string name="edit">编辑</string>
 
 </resources>

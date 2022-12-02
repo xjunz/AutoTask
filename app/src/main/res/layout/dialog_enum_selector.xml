@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             tools:listitem="@layout/item_enum_selector"
-            android:background="@drawable/bg_option_frame"
+            android:background="@drawable/bg_selectable_surface"
             android:padding="12dp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"

@@ -28,7 +28,7 @@
             android:layout_width="1dp"
             android:layout_height="0dp"
             android:layout_marginBottom="2dp"
-            app:dividerColor="@color/material_on_surface_stroke"
+            app:dividerColor="?colorPrimaryContainer"
             app:layout_constraintBottom_toTopOf="@id/tv_number"
             app:layout_constraintEnd_toEndOf="@id/tv_number"
             app:layout_constraintStart_toStartOf="@id/tv_number"
@@ -39,7 +39,7 @@
             android:layout_width="1dp"
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
-            app:dividerColor="@color/material_on_surface_stroke"
+            app:dividerColor="?colorPrimaryContainer"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/tv_number"
             app:layout_constraintStart_toStartOf="@id/tv_number"
@@ -47,12 +47,15 @@
 
         <TextView
             android:id="@+id/tv_title"
+            linkable="@{true}"
+            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
+            app:layout_constraintBottom_toTopOf="@+id/cg_refids"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/tv_number"
@@ -67,43 +70,47 @@
             android:id="@+id/tv_desc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
             android:duplicateParentState="true"
+            android:ellipsize="end"
+            android:maxLines="5"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/cg_refids"
             tools:text="@tools:sample/lorem" />
 
-        <ImageButton
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ib_action"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="4dp"
             android:background="@drawable/bg_selectable_circle"
             android:contentDescription="@{@string/invert}"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
+            app:contentPadding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_baseline_switch_24"
-            app:tint="?colorPrimary" />
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
+            app:tint="?colorPrimary"
+            tools:src="@drawable/ic_baseline_switch_24" />
 
         <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cg_refids"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_title"
-            app:layout_constraintTop_toTopOf="@+id/tv_title"
-            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
             app:selectionRequired="false"
             app:singleLine="true">
 
@@ -113,8 +120,10 @@
                 linkable="@{true}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="?colorTertiaryContainer"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:textColor="?colorOnTertiaryContainer" />
         </com.google.android.material.chip.ChipGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

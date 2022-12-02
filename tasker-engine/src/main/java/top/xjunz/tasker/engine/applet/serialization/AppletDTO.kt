@@ -37,7 +37,7 @@ class AppletDTO(
          * Convert a normal applet to a serializable applet.
          */
         fun Applet.toDTO(): AppletDTO {
-            val dto = AppletDTO(id, isAnd, isInverted, serializeValue(value), referred, referring)
+            val dto = AppletDTO(id, isAnd, isInverted, serializeValue(value), refids, references)
             if (this is Flow) {
                 check(size != 0) {
                     "No element!"
@@ -54,8 +54,8 @@ class AppletDTO(
         val prototype = registry.createAppletById(id)
         prototype.isAnd = isAnd
         prototype.isInverted = isInverted
-        prototype.referred = referred
-        prototype.referring = referring
+        prototype.refids = referred
+        prototype.references = referring
         if (prototype is Flow) {
             elements?.forEach {
                 prototype.add(it.toApplet(registry))

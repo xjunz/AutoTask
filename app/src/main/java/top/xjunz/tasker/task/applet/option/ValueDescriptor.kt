@@ -35,4 +35,10 @@ class ValueDescriptor(
 
         return null
     }
+
+    override fun toString(): String {
+        return "ValueDescriptor(type=$type, isReference=$isReference, name=$name)"
+    }
+
+
 }

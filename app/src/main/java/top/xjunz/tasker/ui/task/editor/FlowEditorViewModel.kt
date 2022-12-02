@@ -28,7 +28,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     inline val isInMultiSelectionMode get() = selections.size > 0
 
-    inline val isEditingContainerFlow get() = flow.parent != null && flow.isContainer
+    inline val isEditingContainerFlow get() = flow.parent != null && flow.isContainer && !isReadyOnly
 
     lateinit var refSelectingApplet: Applet
 
@@ -42,13 +42,17 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     var isNewTask: Boolean = true
 
+    var isBase: Boolean = false
+
     var selectedApplet = MutableLiveData<Applet>()
 
     val onAppletChanged = MutableLiveData<Applet>()
 
+    val isFabVisible = MutableLiveData<Boolean>()
+
     lateinit var doOnCompletion: (Flow) -> Unit
 
-    lateinit var doOnRefSelected: (Applet, Int, String) -> Unit
+    lateinit var doOnRefSelected: (String) -> Unit
 
     lateinit var doSplit: () -> Unit
 
@@ -130,10 +134,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     }
 
     fun mergeSelectedApplets() {
-        if (selections.size == 1) {
-            toast(R.string.error_merge_single_applet)
-            return
-        }
+        check(selections.size > 1)
         val first = selections.first()
         if (first.depth == Applet.MAX_FLOW_NESTED_DEPTH) {
             toast(R.string.too_deeply_nested)
@@ -165,11 +166,11 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         appletOptionFactory: AppletOptionFactory,
         initialFlow: Flow,
         newTask: Boolean,
-        readonly: Boolean
+        readonly: Boolean,
     ) {
         factory = appletOptionFactory
         isReadyOnly = readonly
-        flow = if (readonly) initialFlow else initialFlow.clone(factory)
+        flow = if (readonly || newTask) initialFlow else initialFlow.clone(factory)
         isNewTask = newTask
         notifyFlowChanged()
     }

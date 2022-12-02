@@ -14,7 +14,6 @@ import top.xjunz.tasker.databinding.DialogArgumentsEditorBinding
 import top.xjunz.tasker.databinding.ItemArgumentEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -22,7 +21,8 @@ import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.GlobalFlowEditorViewModel
-import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
+import java.util.*
 
 /**
  * @author xjunz 2022/11/22
@@ -39,34 +39,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
         lateinit var doOnCompletion: () -> Unit
 
-        val changedRefidSet = mutableSetOf<String>()
-
         val onItemChanged = MutableLiveData<ValueDescriptor>()
-
-        private var revocations = mutableMapOf<ValueDescriptor, Runnable>()
-
-        /**
-         * Revoke operations related to this [arg].
-         */
-        fun revoke(arg: ValueDescriptor) {
-            revocations[arg]?.run()
-            revocations.remove(arg)
-        }
-
-        fun registerRevocationIfAbsent(arg: ValueDescriptor, block: Runnable) {
-            if (revocations.containsKey(arg))
-                return
-            revocations[arg] = block
-        }
-
-        fun revokeAll() {
-            revocations.forEach {
-                it.value.run()
-            }
-            clearRevocations()
-        }
-
-        fun clearRevocations() = revocations.clear()
 
         fun checkForUnspecifiedArgument(): Int {
             option.arguments.forEachIndexed { which, arg ->
@@ -74,7 +47,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 if (arg.isValueOnly && !isValueSet) {
                     return which
                 }
-                val isReferenceSet = applet.referring[which] != null
+                val isReferenceSet = applet.references[which] != null
                 if (arg.isReferenceOnly && !isReferenceSet) {
                     return which
                 }
@@ -94,50 +67,31 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val globalViewModel by activityViewModels<GlobalFlowEditorViewModel>()
 
-    private fun showInputDialog(which: Int, arg: ValueDescriptor) {
+    private fun showValueInputDialog(which: Int, arg: ValueDescriptor) {
         TextEditorDialog().configEditText { et ->
             et.configInputType(arg.type, true)
             et.maxLines = 5
         }.setCaption(option.helpText).setArguments(arg.name, applet.value?.toString()) set@{
             if (it.isEmpty()) return@set R.string.error_empty_input.str
             val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
-            viewModel.revoke(arg)
-            val refid = applet.referring[which]
-            val prevValue = applet.value
-            applet.removeReference(which)
-            applet.value = parsed
-            viewModel.registerRevocationIfAbsent(arg) {
-                applet.value = prevValue
-                if (refid != null) applet.setReference(which, refid)
-            }
+            globalViewModel.tracer.setValue(applet, which, parsed)
             viewModel.onItemChanged.value = arg
             return@set null
         }.show(parentFragmentManager)
     }
 
-    private fun showReferenceSelectorDialog(whichArg: Int, arg: ValueDescriptor) {
-        FlowEditorDialog().setReferenceToSelect(applet, arg).setFlow(globalViewModel.root, true)
-            .doOnReferenceSelected { refApplet, whichRefid, refid ->
-                viewModel.revoke(arg)
-                val prevRefid = applet.referring[whichArg]
-                refApplet.setRefid(whichRefid, refid)
-                applet.setReference(whichArg, refid)
-                val value = applet.value
-                if (!arg.isReferenceOnly) {
-                    applet.value = null
-                }
-                viewModel.registerRevocationIfAbsent(arg) {
-                    refApplet.setRefid(whichRefid, prevRefid)
-                    applet.setReference(whichArg, prevRefid)
-                    applet.value = value
-                }
+    private fun showReferenceSelectorDialog(whichArg: Int, arg: ValueDescriptor, id: String?) {
+        FlowEditorDialog().setFlow(globalViewModel.root, true)
+            .setReferenceToSelect(applet, arg, id)
+            .doOnReferenceSelected { refid ->
+                globalViewModel.tracer.setReference(applet, arg, whichArg, refid)
                 viewModel.onItemChanged.value = arg
             }.show(childFragmentManager)
     }
 
     private val adapter by lazy {
         inlineAdapter(option.arguments, ItemArgumentEditorBinding::class.java, {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 val which = adapterPosition
                 val arg = option.arguments[which]
                 if (arg.isTolerant) {
@@ -147,47 +101,34 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     popup.show()
                     popup.setOnMenuItemClickListener set@{ item ->
                         when (popup.indexOf(item)) {
-                            0 -> showReferenceSelectorDialog(which, arg)
-                            1 -> showInputDialog(which, arg)
+                            0 -> showReferenceSelectorDialog(which, arg, null)
+                            1 -> showValueInputDialog(which, arg)
                         }
                         return@set true
                     }
                 } else if (arg.isReferenceOnly) {
-                    showReferenceSelectorDialog(which, arg)
+                    showReferenceSelectorDialog(which, arg, applet.references[which])
                 } else if (arg.isValueOnly) {
-                    showInputDialog(which, arg)
+                    showValueInputDialog(which, arg)
                 }
             }
             binding.tvValue.setOnClickListener {
                 val position = adapterPosition
                 val arg = option.arguments[position]
-                val refid = applet.referring.getValue(position)
-                val refApplet = globalViewModel.root.requireChildOwningRefid(refid)
-                val refWhich = refApplet.referred.entries.first { it.value == refid }.key
-                val result = globalViewModel.factory.requireOption(refApplet).results[refWhich]
-                TextEditorDialog().setCaption(
-                    R.string.format_set_refid.formatSpans(result.name.foreColored().clickable {
-                        it.context.launchAction(TextEditorDialog.ACTION_INPUT, result.name)
-                    })
-                ).configEditText {
+                val refid = applet.references.getValue(position)
+                TextEditorDialog().setCaption(R.string.prompt_set_refid.text).configEditText {
                     it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
                 }.setArguments(R.string.edit_refid.text, refid) {
+                    if (it == refid) return@setArguments null
                     if (it.isEmpty()) {
                         return@setArguments R.string.error_empty_input.text
                     }
-                    if (it != refid && globalViewModel.root.findChildOwningRefid(it) != null) {
+                    if (!globalViewModel.isRefidLegalForSelections(it)) {
                         return@setArguments R.string.error_tag_exists.text
                     }
-                    refApplet.setRefid(refWhich, it)
-                    applet.setReference(position, it)
-                    globalViewModel.renameRefid(refid, it)
-                    viewModel.changedRefidSet.remove(refid)
-                    viewModel.changedRefidSet.add(it)
-                    viewModel.registerRevocationIfAbsent(arg) {
-                        refApplet.setRefid(refWhich, refid)
-                        applet.setReference(position, refid)
-                        globalViewModel.renameRefid(it, refid)
-                    }
+                    // This applet may be not attached to the root
+                    globalViewModel.tracer.renameReference(applet, position, it)
+                    globalViewModel.renameRefidInRoot(Collections.singleton(refid), it)
                     viewModel.onItemChanged.value = arg
                     return@setArguments null
                 }.show(childFragmentManager)
@@ -197,8 +138,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             binding.tvValue.isEnabled = true
             binding.tvValue.isClickable = false
             binding.tvValue.background = null
-            if (!arg.isValueOnly && applet.referring.containsKey(pos)) {
-                val refid = applet.referring.getValue(pos)
+            if (!arg.isValueOnly && applet.references.containsKey(pos)) {
+                val refid = applet.references.getValue(pos)
                 // Not value only and the reference is available
                 binding.tvValue.text = refid.underlined().foreColored()
                 binding.tvValue.setDrawableStart(R.drawable.ic_baseline_link_24)
@@ -224,7 +165,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        viewModel.revokeAll()
+        globalViewModel.tracer.revokeAll()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -232,17 +173,17 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         binding.rvArgument.adapter = adapter
         binding.tvTitle.text = option.currentTitle
         binding.btnCancel.setOnClickListener {
-            viewModel.revokeAll()
+            globalViewModel.tracer.revokeAll()
             dismiss()
         }
         binding.btnComplete.setOnClickListener {
             val illegal = viewModel.checkForUnspecifiedArgument()
             if (illegal == -1) {
-                viewModel.clearRevocations()
                 viewModel.doOnCompletion()
-                viewModel.changedRefidSet.forEach {
-                    globalViewModel.notifyRefidChanged(it)
+                globalViewModel.tracer.getReferenceChangedApplets().forEach {
+                    globalViewModel.onAppletChanged.value = it
                 }
+                globalViewModel.tracer.reset()
                 dismiss()
             } else {
                 val item = binding.rvArgument.findViewHolderForAdapterPosition(illegal)?.itemView

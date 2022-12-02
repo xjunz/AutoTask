@@ -12,7 +12,7 @@ abstract class ProcessorAction<V, R>(override val valueType: Int) : ReferenceAct
     final override fun doAction(args: Array<Any?>, value: V?, runtime: TaskRuntime): Boolean {
         val ret = doProcess(args, value, runtime)
         if (ret != null) {
-            referred.forEach { (which, refid) ->
+            refids.forEach { (which, refid) ->
                 runtime.registerResult(refid, getReferredValue(which, ret))
             }
         }

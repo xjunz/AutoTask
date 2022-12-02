@@ -21,7 +21,7 @@ class UiObjectFlow : Flow() {
             runtime.isSuccessful
         }
         if (node != null) {
-            referred.forEach { (which, id) ->
+            refids.forEach { (which, id) ->
                 runtime.registerResult(id, getReferredValue(which, node))
             }
             runtime.isSuccessful = true

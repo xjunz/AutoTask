@@ -19,7 +19,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.Router
-import top.xjunz.tasker.util.Router.route
+import top.xjunz.tasker.util.Router.launchRoute
 import java.util.*
 
 /**
@@ -145,7 +145,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             checkedOptions = options - uncheckedOptions
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false
-            context.route(Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR)
+            context.launchRoute(Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR)
         }
         binding.container.background = context.createMaterialShapeDrawable()
         inspector.observe(vm.showNodeInfo) {

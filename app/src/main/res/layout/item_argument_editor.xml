@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_option_frame"
+        android:background="@drawable/bg_selectable_surface"
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp">
 

@@ -22,6 +22,8 @@ object Configurations {
 
     var operatingMode by global.primitive("operating_mode", OperatingMode.Shizuku.VALUE)
 
+    var showMultiReferenceHelp by global.primitive("show_multi_reference_help", true)
+
     private fun <T> SharedPreferences.nullable(
         name: String,
         defValue: T?

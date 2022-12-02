@@ -30,12 +30,14 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.flatSize
+import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorSchemes
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
+import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Router
 
 /**
@@ -79,7 +81,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 val option = viewModel.options[position]
                 if (option.isValid) {
                     val applet = option.yieldApplet()
-                    onOptionClickListener.onClick(binding.tvLabel.text, applet, option) {
+                    onOptionClickListener.onClick(applet, option) {
                         viewModel.onAppletAdded.value = position to applet
                     }
                 }
@@ -152,7 +154,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             viewModel.complete()
             dismiss()
         }
-        binding.cvHeader.setOnClickListener { v ->
+        binding.cvHeader.setAntiMoneyClickListener { v ->
             val mode = v.tag.casted<InspectorMode>()
             if (isFloatingInspectorShown) {
                 if (floatingInspector.mode != mode) {
@@ -239,6 +241,14 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         observeConfirmation(viewModel.showClearDialog, R.string.prompt_clear_all_options) {
             viewModel.clearAllCandidates()
+        }
+        mainViewModel.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
+            val hashcode = it.toInt()
+            val index = viewModel.applets.require().indexOfFirst { applet ->
+                applet.hashCode() == hashcode
+            }
+            viewModel.applets.require()[index].toggleRelation()
+            bottomAdapter.notifyItemChanged(index)
         }
     }
 }

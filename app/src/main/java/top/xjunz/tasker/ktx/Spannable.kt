@@ -54,7 +54,6 @@ fun CharSequence.clickable(underlined: Boolean = false, doOnClick: (View) -> Uni
 
         override fun onClick(widget: View) {
             doOnClick(widget)
-            widget.postInvalidate()
         }
     })
 
@@ -64,12 +63,16 @@ fun CharSequence.bold() = setSpan(StyleSpan(Typeface.BOLD))
 
 fun CharSequence.italic() = setSpan(StyleSpan(Typeface.ITALIC))
 
-fun CharSequence.quoted() =
+fun CharSequence.quoted(strokeColor: Int = ColorSchemes.colorPrimaryContainer) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        setSpan(QuoteSpan(ColorSchemes.colorPrimaryContainer, 4, 8))
+        setSpan(QuoteSpan(strokeColor, 4, 8))
     } else {
-        setSpan(QuoteSpan(ColorSchemes.colorPrimaryContainer))
+        setSpan(QuoteSpan(strokeColor))
     }
+
+fun CharSequence.backColored() = setSpan(BackgroundColorSpan(ColorSchemes.colorPrimaryContainer))
+
+fun CharSequence.bulleted() = setSpan(BulletSpan(8, ColorSchemes.colorPrimary))
 
 fun CharSequence.relativeSize(size: Float) = setSpan(RelativeSizeSpan(size))
 

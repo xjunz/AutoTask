@@ -4,7 +4,7 @@ import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
@@ -17,7 +17,7 @@ import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 /**
  * @author xjunz 2022/11/08
  */
-class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragment) {
+class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fm: FragmentManager) {
 
     fun showMenu(anchor: View, applet: Applet): PopupMenu? {
         val popup = PopupMenu(
@@ -88,7 +88,7 @@ class FlowItemMenuHelper(val viewModel: FlowEditorViewModel, val fragment: Fragm
                         viewModel.onAppletChanged.value = changed
                     }
                     viewModel.notifyFlowChanged()
-                }.scopedBy(flow).show(fragment.childFragmentManager)
+                }.scopedBy(flow).show(fm)
             } else {
                 // Control flow add before/after
                 val popup = PopupMenu(

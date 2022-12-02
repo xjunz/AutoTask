@@ -72,7 +72,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val elseFlow = flowOption<Else>(4, R.string._else)
 
     @AppletCategory(0x0005)
-    val containerFlow = flowOption<Flow>(5, R.string.matches_rule_set)
+    val containerFlow = flowOption<Flow>(5, AppletOption.TITLE_NONE)
         .withDescriber<Any> { applet, _ ->
             val size = (applet as Flow).flatSize.toString().foreColored()
             R.string.format_applet_count.formatSpans(size)

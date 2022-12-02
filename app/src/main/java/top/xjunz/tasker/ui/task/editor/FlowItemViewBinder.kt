@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import com.google.android.material.R.attr.selectableItemBackground
 import com.google.android.material.R.style.*
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -20,12 +19,16 @@ import top.xjunz.tasker.ui.ColorSchemes
 /**
  * @author xjunz 2022/11/07
  */
-class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
+class FlowItemViewBinder(
+    private val viewModel: FlowEditorViewModel,
+    private val globalViewModel: GlobalFlowEditorViewModel
+) {
 
     companion object {
         const val ACTION_COLLAPSE = 0
         const val ACTION_INVERT = 1
         const val ACTION_ENTER = 2
+        const val ACTION_EDIT = 3
     }
 
     private inline val factory get() = viewModel.factory
@@ -36,53 +39,61 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
         holder.binding.apply {
             root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
+                    || (viewModel.isSelectingRef && globalViewModel.isRefSelected(applet))
             tvNumber.isVisible = false
             dividerTop.isVisible = false
             dividerBott.isVisible = false
-            tvBadge.isVisible = false
+            cgRefids.isVisible = false
             root.isEnabled = true
             tvTitle.isEnabled = true
             if (option != null) {
                 if (viewModel.isSelectingRef) {
+                    val isAhead = viewModel.refSelectingApplet.parent == null
+                            || applet.isAheadOf(viewModel.refSelectingApplet)
                     // When selecting ref, only enable valid targets
-                    val ref = if (applet === viewModel.refSelectingApplet) null
-                    else option.results.find {
+                    val ref = if (!isAhead) null else option.results.find {
                         it.type == viewModel.refValueDescriptor.type
                     }
                     if (applet.isContainer) {
-                        root.isEnabled = viewModel.hasCandidateReference(applet as Flow)
-                        tvBadge.isVisible = false
+                        root.isEnabled = isAhead && viewModel.hasCandidateReference(applet as Flow)
                     } else {
                         root.isEnabled = ref != null
-                        tvBadge.isVisible = root.isEnabled
+                        cgRefids.isVisible = root.isEnabled
                     }
                     tvTitle.isEnabled = root.isEnabled
                     if (ref != null) {
-                        val refid = applet.referred[option.results.indexOf(ref)]
+                        val refid = applet.refids[option.results.indexOf(ref)]
                         if (refid != null) {
                             tvBadge.text =
-                                ref.name + "[$refid]".foreColored(ColorSchemes.textColorLink)
+                                ref.name + "[$refid]".foreColored(ColorSchemes.colorTertiary)
                         } else {
                             tvBadge.text = ref.name
                         }
                     }
+                } else {
+                    cgRefids.isVisible = false
                 }
                 var desc = option.describe(applet)
                 var title = option.getTitle(applet) ?: applet.label
                 tvTitle.isVisible = true
                 if (option.descAsTitle) {
                     title = desc
+                } else if (applet.isContainer) {
+                    title = if (applet.controlFlowParent is If) {
+                        R.string.matches_rule_set.text
+                    } else {
+                        R.string.execute_rule_set.text
+                    }
                 }
                 if (title != null && applet.index != 0 && applet !is ControlFlow) {
                     title = AppletOption.makeRelationSpan(
-                        title, applet.isAnd, applet.controlFlowParent is If
+                        title, applet, applet.controlFlowParent is If
                     )
-                    tvTitle.background = selectableItemBackground.resolvedId.getDrawable()
-                    tvTitle.isClickable = true
-                } else {
-                    tvTitle.background = null
-                    tvTitle.isClickable = false
                 }
+
+                // Clear span if is selected ref
+                if (viewModel.isSelectingRef) title = title?.toString()
+
                 if (applet is ControlFlow) {
                     tvDesc.isVisible = false
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
@@ -118,11 +129,17 @@ class FlowItemViewBinder(private val viewModel: FlowEditorViewModel) {
                         }
                     }
                 } else {
-                    ibAction.isInvisible = !applet.isInvertible || viewModel.isSelectingRef
-                    ibAction.tag = ACTION_INVERT
+                    ibAction.isInvisible = viewModel.isSelectingRef
                     if (applet.isInvertible) {
+                        ibAction.tag = ACTION_INVERT
                         ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                         ibAction.setContentDescriptionAndTooltip(R.string.invert.text)
+                    } else if (option.arguments.isNotEmpty() || option.value != null) {
+                        ibAction.tag = ACTION_EDIT
+                        ibAction.setImageResource(R.drawable.ic_edit)
+                        ibAction.setContentDescriptionAndTooltip(R.string.edit.text)
+                    } else {
+                        ibAction.isVisible = false
                     }
                 }
                 if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {

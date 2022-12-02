@@ -15,7 +15,7 @@ object Router {
     const val HOST_NONE = "no-op"
     const val HOST_ACTION = "action"
 
-    fun Context.route(host: String) {
+    fun Context.launchRoute(host: String) {
         viewUrlSafely("$SCHEME://$host")
     }
 

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:padding="24dp">
+        android:paddingHorizontal="16dp">
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/ib_dismiss"
@@ -26,6 +26,7 @@
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:maxLines="3"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
@@ -40,28 +41,21 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
             app:layout_constraintTop_toBottomOf="@+id/top_barrier"
             tools:text="@tools:sample/lorem" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_input"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/material_switch"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:labelFor="@+id/et_input"
+            android:text="@string/do_not_show_next_time"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_caption">
-
-            <AutoCompleteTextView
-                android:id="@+id/et_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/top_barrier"
@@ -88,12 +82,14 @@
             style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:text="@android:string/ok"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@+id/btn_negative"
-            app:layout_constraintTop_toBottomOf="@id/til_input" />
+            app:layout_constraintTop_toBottomOf="@+id/material_switch" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

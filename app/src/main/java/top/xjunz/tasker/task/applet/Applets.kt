@@ -65,36 +65,115 @@ fun Applet.isDescendantOf(flow: Flow): Boolean {
     return requireParent().isDescendantOf(flow)
 }
 
-fun Flow.findChildrenReferringRefid(refid: String): List<Applet> {
+
+private fun Flow.findChildrenReferringRefidRecur(ret: MutableMap<Applet, Int>, refid: String) {
+    forEach {
+        for ((which, id) in it.references) {
+            if (id == refid) {
+                ret[it] = which
+                break
+            }
+        }
+        if (it is Flow) {
+            it.findChildrenReferringRefidRecur(ret, refid)
+        }
+    }
+}
+
+fun Flow.findChildrenReferringRefid(refid: String): Map<Applet, Int> {
+    val ret = mutableMapOf<Applet, Int>()
+    findChildrenReferringRefidRecur(ret, refid)
+    return if (ret.isEmpty()) emptyMap() else ret
+}
+
+fun Flow.hasChildOwningRefid(id: String): Boolean {
+    forEach {
+        if (refids.containsValue(id))
+            return true
+
+        if (it is Flow) {
+            val found = it.hasChildOwningRefid(id)
+            if (found)
+                return true
+        }
+    }
+    return false
+}
+
+fun Flow.iterate(block: (Applet) -> Boolean) {
+    forEach {
+        if (block(it)) return@forEach
+        if (it is Flow) {
+            it.iterate(block)
+        }
+    }
+}
+
+inline fun Flow.forEachRefid(crossinline block: (Applet, which: Int, refid: String) -> Boolean) {
+    iterate {
+        it.refids.forEach { (t, u) ->
+            if (block(it, t, u)) return@iterate true
+        }
+        return@iterate false
+    }
+}
+
+private val Applet.hierarchy: Int
+    get() {
+        var hierarchy = 0
+        var p: Applet? = this
+        var d = 0
+        while (p != null) {
+            // Note: We need index + 1, because the index starts from 0. Zero does not change
+            // hierarchy value when it's left shifted.
+            hierarchy = hierarchy or (p.index + 1 shl d++ * Applet.FLOW_CHILD_COUNT_BITS)
+            p = p.parent
+        }
+        return hierarchy
+    }
+
+fun Applet.isAheadOf(applet: Applet): Boolean {
+    return hierarchy < applet.hierarchy
+}
+
+fun Applet.whichRefid(refid: String): Int {
+    return refids.keys.firstOrNull { refids[it] == refid } ?: -1
+}
+
+fun Applet.whichReference(refid: String): Int {
+    return references.keys.firstOrNull { references[it] == refid } ?: -1
+}
+
+inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, refid: String) -> Boolean) {
+    iterate {
+        it.references.forEach { (t, u) ->
+            if (block(it, t, u)) return@iterate true
+        }
+        return@iterate false
+    }
+}
+
+fun Flow.findChildOwningRefid(id: String): List<Applet> {
     val ret = mutableListOf<Applet>()
     forEach {
-        if (it.referring.containsValue(refid))
+        if (it.refids.containsValue(id))
             ret.add(it)
         if (it is Flow) {
-            ret.addAll(it.findChildrenReferringRefid(refid))
+            ret.addAll(it.findChildOwningRefid(id))
         }
     }
     return if (ret.isEmpty()) emptyList() else ret
 }
 
-fun Flow.findChildOwningRefid(id: String): Applet? {
+fun Flow.findAnyChildOwningRefid(id: String): Applet? {
     forEach {
-        if (referred.containsValue(id))
-            return this
-
+        if (it.refids.containsValue(id))
+            return it
         if (it is Flow) {
-            val found = it.findChildOwningRefid(id)
-            if (found != null)
-                return found
+            return it.findAnyChildOwningRefid(id)
         }
     }
     return null
-}
-
-fun Flow.requireChildOwningRefid(id: String): Applet {
-    return requireNotNull(findChildOwningRefid(id)) {
-        "Applet with refid '$id' not found!"
-    }
 }
 
 /**
@@ -122,11 +201,11 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     cloned.isInverted = isInverted
     cloned.isInvertible = isInvertible
     cloned.label = label
-    cloned.referred = mutableMapOf<Int, String>().apply {
-        putAll(referred)
+    cloned.refids = mutableMapOf<Int, String>().apply {
+        putAll(refids)
     }
-    cloned.referring = mutableMapOf<Int, String>().apply {
-        putAll(referring)
+    cloned.references = mutableMapOf<Int, String>().apply {
+        putAll(references)
     }
     if (cloneHierarchyInfo) {
         cloned.parent = parent
@@ -145,10 +224,10 @@ fun Applet.setRefid(whichRet: Int, id: String?) {
     if (id == null) {
         removeRefid(whichRet)
     } else {
-        if (referred === emptyMap<Int, String>()) {
-            referred = mutableMapOf()
+        if (refids === emptyMap<Int, String>()) {
+            refids = mutableMapOf()
         }
-        (referred as MutableMap)[whichRet] = id
+        (refids as MutableMap)[whichRet] = id
     }
 }
 
@@ -156,21 +235,21 @@ fun Applet.setReference(whichArg: Int, ref: String?) {
     if (ref == null) {
         removeReference(whichArg)
     } else {
-        if (referring === emptyMap<Int, String>()) {
-            referring = mutableMapOf()
+        if (references === emptyMap<Int, String>()) {
+            references = mutableMapOf()
         }
-        (referring as MutableMap)[whichArg] = ref
+        (references as MutableMap)[whichArg] = ref
     }
 }
 
 fun Applet.removeReference(which: Int) {
-    if (referring === emptyMap<Int, String>()) return
-    (referring as MutableMap).remove(which)
-    if (referring.isEmpty()) referring = emptyMap()
+    if (references === emptyMap<Int, String>()) return
+    (references as MutableMap).remove(which)
+    if (references.isEmpty()) references = emptyMap()
 }
 
 fun Applet.removeRefid(which: Int) {
-    if (referred === emptyMap<Int, String>()) return
-    (referred as MutableMap).remove(which)
-    if (referred.isEmpty()) referred = emptyMap()
+    if (refids === emptyMap<Int, String>()) return
+    (refids as MutableMap).remove(which)
+    if (refids.isEmpty()) refids = emptyMap()
 }

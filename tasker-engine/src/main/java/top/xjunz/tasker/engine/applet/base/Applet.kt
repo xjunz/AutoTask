@@ -104,9 +104,9 @@ abstract class Applet {
 
     var value: Any? = null
 
-    var referring: Map<Int, String> = emptyMap()
+    var references: Map<Int, String> = emptyMap()
 
-    var referred: Map<Int, String> = emptyMap()
+    var refids: Map<Int, String> = emptyMap()
 
     fun requireParent() = requireNotNull(parent) {
         "Parent not found!"

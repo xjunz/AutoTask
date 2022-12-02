@@ -7,6 +7,7 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.ktx.applySystemInsets
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/07/30
@@ -20,8 +21,8 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         binding.topBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
         }
-        binding.ibCreateTask.setOnClickListener {
-            FlowEditorDialog().setFlow(null, false).show(childFragmentManager)
+        binding.ibCreateTask.setAntiMoneyClickListener {
+            FlowEditorDialog().setFlow(null, false).asBase().show(childFragmentManager)
         }
     }
 
