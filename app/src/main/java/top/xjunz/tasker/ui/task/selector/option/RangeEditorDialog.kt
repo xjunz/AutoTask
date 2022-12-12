@@ -61,9 +61,8 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
     protected open fun configEditText(et: EditText) {
         when (viewModel.type) {
             AppletValues.VAL_TYPE_INT, AppletValues.VAL_TYPE_LONG -> {
-                val digits = DigitsKeyListener.getInstance("0123456789")
                 et.inputType = InputType.TYPE_CLASS_NUMBER
-                et.filters += digits
+                et.filters += DigitsKeyListener.getInstance("0123456789")
             }
             AppletValues.VAL_TYPE_FLOAT -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
@@ -76,10 +75,12 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         if (min == null && binding.etMinimum.textString.isNotEmpty()) {
             binding.etMinimum.shake()
             binding.etMinimum.error = R.string.error_mal_format.str
+            binding.etMinimum.requestFocus()
             return true
         } else if (max == null && binding.etMaximum.textString.isNotEmpty()) {
             binding.etMaximum.shake()
             binding.etMaximum.error = R.string.error_mal_format.str
+            binding.etMaximum.requestFocus()
             return true
         }
         if (min == null && max == null) {

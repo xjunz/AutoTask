@@ -20,7 +20,7 @@ internal class AppletDTOTest {
     fun testFlowApply() {
         val rootFlow = DslFlow {
             id = 1
-            label = "RootFlow"
+            comment = "RootFlow"
             When(Event.EVENT_ON_PACKAGE_ENTERED)
             If {
                 refids = "If"

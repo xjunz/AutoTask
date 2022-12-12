@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import rikka.shizuku.Shizuku
-import top.xjunz.tasker.Configurations
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.util.ShizukuUtil
@@ -29,7 +29,7 @@ class AutoStarter : BroadcastReceiver() {
             || intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED
         ) {
             // only available when it is Shizuku mode
-            if (Configurations.operatingMode != OperatingMode.Shizuku.VALUE) return
+            if (Preferences.operatingMode != OperatingMode.Shizuku.VALUE) return
             Shizuku.addBinderReceivedListenerSticky(oneShotBinderReceivedListener)
         }
     }

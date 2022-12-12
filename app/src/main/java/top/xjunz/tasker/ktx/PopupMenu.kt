@@ -9,7 +9,7 @@ import androidx.core.view.children
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.get
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.ReflectionUtil.invokeDeclaredMethod
 
 
@@ -26,7 +26,7 @@ fun PopupMenu.configHeaderTitle() {
         val text = list[0].casted<ViewGroup>()
             .findViewById<TextView>(com.google.android.material.R.id.title)
         text.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-        text.setTextColor(ColorSchemes.colorPrimary)
+        text.setTextColor(ColorScheme.colorPrimary)
     }
 }
 

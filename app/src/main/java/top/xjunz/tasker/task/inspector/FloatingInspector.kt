@@ -7,7 +7,6 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.require
@@ -87,8 +86,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     fun getOverlayAccessibilityEventName(): String {
         if (!::overlayA11yEventName.isInitialized) {
-            overlayA11yEventName =
-                BuildConfig.APPLICATION_ID + ".FloatingInspectorWindow@" + hashCode()
+            overlayA11yEventName = "FloatingInspectorWindow@" + hashCode()
         }
         return overlayA11yEventName
     }

@@ -1,24 +1,24 @@
 package top.xjunz.tasker.util
 
+import android.os.SystemClock
 import android.view.View
 import android.view.View.OnClickListener
 
 /**
  * @author xjunz 2022/11/29
  */
-object AntiMonkey {
+object AntiMonkeyUtil {
 
-    fun View.setAntiMoneyClickListener(moneyClickInterval: Int = 350, listener: OnClickListener) {
+    fun View.setAntiMoneyClickListener(thresholdInterval: Int = 350, listener: OnClickListener) {
         setOnClickListener(object : OnClickListener {
 
             var prevClickTimestamp = -1L
 
             override fun onClick(v: View?) {
-                if (prevClickTimestamp == -1L
-                    || System.currentTimeMillis() - prevClickTimestamp > moneyClickInterval
-                ) {
+                val uptime = SystemClock.uptimeMillis()
+                if (prevClickTimestamp == -1L || uptime - prevClickTimestamp >= thresholdInterval) {
                     listener.onClick(v)
-                    prevClickTimestamp = System.currentTimeMillis()
+                    prevClickTimestamp = uptime
                 }
             }
         })

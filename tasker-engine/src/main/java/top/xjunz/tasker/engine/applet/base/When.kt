@@ -1,7 +1,5 @@
 package top.xjunz.tasker.engine.applet.base
 
-import top.xjunz.tasker.engine.applet.criterion.EventCriterion
-import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -9,27 +7,22 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class When : ControlFlow() {
 
-    override val requiredElementCount: Int = 1
+    override val maxSize: Int = 1
 
-    override val isRequired: Boolean = true
+    override val minSize: Int = 1
 
-    companion object {
-
-        fun ofEvent(@Event.EventType event: Int): When {
-            return When().apply {
-                if (isEmpty()) {
-                    add(EventCriterion(event))
-                } else {
-                    this[0] = EventCriterion(event)
-                }
-            }
-        }
-    }
+    override val requiredIndex: Int = 0
 
     override fun onPostApply(runtime: TaskRuntime) {
         super.onPostApply(runtime)
         if (!runtime.isSuccessful) {
             stopship(runtime)
         }
+    }
+
+    override fun staticCheckMySelf() {
+        super.staticCheckMySelf()
+        check(index == 0)
+        check(isEnabled)
     }
 }

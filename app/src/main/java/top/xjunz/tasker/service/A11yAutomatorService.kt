@@ -13,16 +13,16 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
 import android.view.accessibility.AccessibilityEvent
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
+import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.unsupportedOperation
+import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.ktx.isTrue
+import top.xjunz.tasker.task.AutomatorTaskScheduler
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -55,22 +55,24 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private val lifecycleRegistry = LifecycleRegistry(this)
 
-    private lateinit var inspectorViewModel: InspectorViewModel
-
-    override val isRunning get() = runningState.isTrue
-
     private var startTimestamp: Long = -1
 
     private var callbacks: AccessibilityServiceHidden.Callbacks? = null
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
 
+    private lateinit var inspectorViewModel: InspectorViewModel
+
     private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
 
     lateinit var inspector: FloatingInspector
 
+    lateinit var taskScheduler: AutomatorTaskScheduler
+
+    override val isRunning get() = runningState.isTrue
+
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        top.xjunz.tasker.bridge.A11yUiAutomatorBridge(this, uiAutomation)
+        A11yUiAutomatorBridge(this, uiAutomation)
     }
 
     private var launchedInInspectorMode = false
@@ -82,11 +84,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (!launchedInInspectorMode) {
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
+            } else {
+                taskScheduler = AutomatorTaskScheduler(this, mainLooper)
             }
             instanceRef = WeakReference(this)
             runningState.value = true
-            lifecycleRegistry.currentState = Lifecycle.State.STARTED
             startTimestamp = System.currentTimeMillis()
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
         } catch (t: Throwable) {
             t.printStackTrace()
             launchError.value = t
@@ -128,7 +132,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     private val componentInfo = ComponentInfo()
 
     private val a11yEventDispatcher: A11yEventDispatcher by lazy {
-        A11yEventDispatcher(mainLooper) { events ->
+        A11yEventDispatcher { events ->
             val event = events.find {
                 it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
             }
@@ -141,7 +145,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (isInspectorShown()) {
-            a11yEventDispatcher.processAccessibilityEvent(event)
+            lifecycleScope.launch {
+                a11yEventDispatcher.processAccessibilityEvent(event)
+            }
         }
         callbacks?.onAccessibilityEvent(event)
     }
@@ -200,9 +206,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun executeShellCommand(
-        command: String?,
-        sink: ParcelFileDescriptor?,
-        source: ParcelFileDescriptor?
+        command: String?, sink: ParcelFileDescriptor?, source: ParcelFileDescriptor?
     ) {
         unsupportedOperation()
     }

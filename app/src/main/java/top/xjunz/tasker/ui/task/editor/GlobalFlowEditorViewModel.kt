@@ -57,12 +57,12 @@ class GlobalFlowEditorViewModel : ViewModel() {
     }
 
     fun generateDefaultFlow(): Flow {
-        val root = factory.flowRegistry.containerFlow.yieldApplet() as Flow
-        val whenFlow = factory.flowRegistry.whenFlow.yieldApplet() as When
-        whenFlow.add(factory.eventRegistry.contentChanged.yieldApplet())
+        val root = factory.flowRegistry.rootFlow.yield() as Flow
+        val whenFlow = factory.flowRegistry.whenFlow.yield() as When
+        whenFlow.add(factory.eventRegistry.contentChanged.yield())
         root.add(whenFlow)
-        root.add(factory.flowRegistry.ifFlow.yieldApplet())
-        root.add(factory.flowRegistry.doFlow.yieldApplet())
+        root.add(factory.flowRegistry.ifFlow.yield())
+        root.add(factory.flowRegistry.doFlow.yield())
         return root
     }
 

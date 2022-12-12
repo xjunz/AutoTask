@@ -19,6 +19,8 @@ abstract class Applet {
 
     companion object {
 
+        const val MAX_ID = 0x00FF_FFFF
+
         const val NO_ID = -1
 
         /**
@@ -49,7 +51,12 @@ abstract class Applet {
      * relation and this applet will not be executed when its previous peer succeeded. If this applet
      * is the first element of a flow, this field will be ignored.
      */
-    open var isAnd: Boolean = true
+    open var isAnd = true
+
+    /**
+     * If an applet is not enabled, the applet will not be executed as if it is removed from its parent.
+     */
+    var isEnabled = true
 
     /**
      * The id identifying an applet's factory and type.
@@ -58,21 +65,24 @@ abstract class Applet {
      * @see registryId
      */
     var id: Int = NO_ID
+        set(value) {
+            check(id <= MAX_ID) {
+                "Illegal applet ID: $id"
+            }
+            field = value
+        }
 
     /**
-     * A human-readable label.
+     * A human-readable comment to this applet.
      */
-    open var label: String? = null
+    var comment: String? = null
 
     /**
      * If an applet is invertible, its execution result can be inverted to the contrary side.
      */
     open var isInvertible = true
 
-    /**
-     * If an applet is required, it is not allowed to be removed from its parent [Flow].
-     */
-    open val isRequired = false
+    open val requiredIndex = -1
 
     /**
      * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
@@ -91,7 +101,7 @@ abstract class Applet {
     /**
      * Get the id of the registry where the applet is created.
      */
-    inline val registryId get() = id ushr 16
+    inline val registryId get() = id ushr 16 and 0xFF
 
     /**
      * Get the type id of this applet.
@@ -117,7 +127,7 @@ abstract class Applet {
      *
      * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
-    abstract fun apply(runtime: TaskRuntime)
+    abstract suspend fun apply(runtime: TaskRuntime)
 
     fun toggleRelation() {
         isAnd = !isAnd
@@ -125,6 +135,10 @@ abstract class Applet {
 
     fun toggleInversion() {
         isInverted = !isInverted
+    }
+
+    fun toggleAbility() {
+        isEnabled = !isEnabled
     }
 
     /**
@@ -139,9 +153,9 @@ abstract class Applet {
     protected fun collectionTypeOf(rawType: Int) = rawType or AppletValues.MASK_VAL_TYPE_COLLECTION
 
     override fun toString(): String {
-        if (label == null) {
+        if (comment == null) {
             return javaClass.simpleName
         }
-        return "${javaClass.simpleName}(label=$label, id=$id)"
+        return "${javaClass.simpleName}(label=$comment, id=$id)"
     }
 }

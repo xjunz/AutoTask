@@ -1,10 +1,14 @@
 package top.xjunz.tasker.engine.runtime
 
 import androidx.core.util.Pools.SimplePool
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.task.AutomatorTask
 
 
 /**
@@ -29,15 +33,16 @@ class TaskRuntime private constructor() {
 
         private val globalVariableRegistry = mutableMapOf<Int, Any>()
 
-        fun clearGlobalVariables() {
-            globalVariableRegistry.clear()
-        }
-
-        fun obtain(task: AutomatorTask, events: Array<Event>): TaskRuntime {
+        fun obtain(
+            snapshot: Snapshot,
+            coroutineScope: CoroutineScope,
+            events: Array<out Event>
+        ): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
-            instance.task = task
-            instance.events = events
+            instance.coroutineScope = coroutineScope
+            instance._events = events
             instance.target = events
+            instance._snapshot = snapshot
             return instance
         }
 
@@ -48,9 +53,25 @@ class TaskRuntime private constructor() {
         }
     }
 
-    lateinit var task: AutomatorTask
+    val isActive get() = coroutineScope?.isActive == true
 
-    lateinit var events: Array<Event>
+    fun ensureActive() {
+        coroutineScope?.ensureActive()
+    }
+
+    fun halt() {
+        coroutineScope?.cancel()
+    }
+
+    private var _snapshot: Snapshot? = null
+
+    private val snapshot: Snapshot get() = _snapshot!!
+
+    private var _events: Array<out Event>? = null
+
+    val events: Array<out Event> get() = _events!!
+
+    private var coroutineScope: CoroutineScope? = null
 
     /**
      * Target is for applet to use in runtime via [TaskRuntime.getTarget].
@@ -66,8 +87,11 @@ class TaskRuntime private constructor() {
     /**
      * Get or put a global variable if absent. The variable can be shared across tasks.
      */
-    fun <V : Any> getOrPutCrossTaskVariable(key: Int, initializer: () -> V): V {
-        return globalVariableRegistry.getOrPut(key, initializer).casted()
+    fun <V : Any> getEnvironmentVariable(key: Int, initializer: (() -> V)? = null): V {
+        if (initializer == null) {
+            return snapshot.registry.getValue(key).casted()
+        }
+        return snapshot.registry.getOrDefault(key, initializer).casted()
     }
 
     /**
@@ -106,6 +130,9 @@ class TaskRuntime private constructor() {
     }
 
     fun recycle() {
+        _snapshot = null
+        coroutineScope = null
+        _events = null
         results.clear()
         tracker.reset()
         observer = null

@@ -8,7 +8,7 @@ import top.xjunz.tasker.ktx.attrColorStateList
 /**
  * @author xjunz 2022/09/10
  */
-object ColorSchemes {
+object ColorScheme {
 
     @get:ColorInt
     val textColorDisabled: Int
@@ -29,6 +29,10 @@ object ColorSchemes {
     @get:ColorInt
     val colorTertiary: Int
         get() = com.google.android.material.R.attr.colorTertiary.attrColor
+
+    @get:ColorInt
+    val colorTertiaryContainer: Int
+        get() = com.google.android.material.R.attr.colorTertiaryContainer.attrColor
 
     @get:ColorInt
     val colorPrimary: Int

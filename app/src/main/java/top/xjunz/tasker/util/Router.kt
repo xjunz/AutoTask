@@ -2,6 +2,7 @@ package top.xjunz.tasker.util
 
 import android.content.Context
 import top.xjunz.tasker.ktx.viewUrlSafely
+import java.net.URLEncoder
 
 /**
  * Helper class for routing app to a specific host.
@@ -29,7 +30,9 @@ object Router {
         }
         val query = StringBuilder()
         queries.forEach {
-            query.append(it.first).append("=").append(it.second).append("&")
+            query.append(it.first).append("=").append(
+                URLEncoder.encode(it.second.toString(), "utf-8")
+            ).append("&")
         }
         query.deleteCharAt(query.lastIndex)
         viewUrlSafely("$SCHEME://$host/?$query")

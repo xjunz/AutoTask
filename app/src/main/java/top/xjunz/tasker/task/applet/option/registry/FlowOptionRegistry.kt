@@ -4,10 +4,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.ktx.foreColored
-import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletCategory
-import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.flow.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 
@@ -25,6 +22,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
         const val ID_GLOBAL_ACTION_REGISTRY = 0x50
         const val ID_UI_OBJECT_ACTION_REGISTRY = 0x51
+        const val ID_CONTROL_ACTION_REGISTRY = 0x52
     }
 
     override val categoryNames: IntArray? = null
@@ -36,14 +34,12 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
+        Regex("验证码.*?(\\d+?)")
         return when (flow) {
-            is ElseIf -> if (before) arrayOf(ifFlow, elseIfFlow)
-            else arrayOf(ifFlow, elseIfFlow, elseFlow, doFlow)
-            is If -> if (before) arrayOf(ifFlow) else arrayOf(ifFlow, elseIfFlow, elseFlow, doFlow)
-            is When -> if (!before) arrayOf(ifFlow, doFlow)
-            else illegalArgument("No before peer for When")
-            is Else -> if (before) arrayOf(ifFlow, elseIfFlow) else arrayOf(ifFlow, doFlow)
-            is Do -> if (before) arrayOf(ifFlow, elseIfFlow, elseFlow) else arrayOf(ifFlow, doFlow)
+            is If -> if (before) emptyArray() else arrayOf(doFlow)
+            is When -> if (before) emptyArray() else arrayOf(ifFlow, doFlow)
+            is Else -> if (before) emptyArray() else arrayOf(ifFlow)
+            is Do -> if (before) emptyArray() else arrayOf(ifFlow, elseIfFlow, elseFlow)
             else -> illegalArgument("control flow", flow)
         }
     }
@@ -56,8 +52,11 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     val actionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(globalActionFlow, uiObjectActionFlow)
+        arrayOf(globalActionFlow, uiObjectActionFlow, controlActionFlow)
     }
+
+    @AppletCategory(0x0000)
+    val rootFlow = flowOption<RootFlow>(0, AppletOption.TITLE_NONE)
 
     @AppletCategory(0x0001)
     val ifFlow = flowOption<If>(1, R.string._if)
@@ -73,10 +72,6 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
     @AppletCategory(0x0005)
     val containerFlow = flowOption<Flow>(5, AppletOption.TITLE_NONE)
-        .withDescriber<Any> { applet, _ ->
-            val size = (applet as Flow).flatSize.toString().foreColored()
-            R.string.format_applet_count.formatSpans(size)
-        }
 
     @AppletCategory(0x000F)
     val whenFlow = flowOption<When>(ID_EVENT_FILTER_REGISTRY, R.string._when)
@@ -100,7 +95,6 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletCategory(0x0014)
     val notificationFlow =
         flowOption<NotificationFlow>(ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification)
-            .withResult<String>(R.string.notification_content)
 
     @AppletCategory(0x0020)
     val globalActionFlow =
@@ -109,5 +103,9 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletCategory(0x0021)
     val uiObjectActionFlow =
         flowOption<PhantomFlow>(ID_UI_OBJECT_ACTION_REGISTRY, R.string.ui_object_operations)
+
+    @AppletCategory(0x0022)
+    val controlActionFlow =
+        flowOption<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
 
 }

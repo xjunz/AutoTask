@@ -42,6 +42,7 @@ class AppletCandidatesAdapter(
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
+                    notifyItemChanged(adapterPosition, true)
                 } else {
                     onClickListener.onClick(applet) {
                         notifyItemChanged(adapterPosition)
@@ -79,10 +80,9 @@ class AppletCandidatesAdapter(
         val applet = currentList[position]
         holder.itemView.translationX = 0F
         holder.binding.let {
-            val isFlow = applet is Flow
             val showRelation = position != 0 && applet.index != 0
             val option = viewModel.appletOptionFactory.requireOption(applet)
-            val title = option.getTitle(applet)
+            val title = if (option.descAsTitle) option.describe(applet) else option.getTitle(applet)
             if (title != null && showRelation) {
                 it.tvTitle.text = AppletOption.makeRelationSpan(
                     title, applet, viewModel.isInCriterionScope
@@ -90,30 +90,35 @@ class AppletCandidatesAdapter(
             } else {
                 it.tvTitle.text = title
             }
-            if (isFlow) {
+            if (!option.descAsTitle) {
+                it.tvDesc.text = option.describe(applet)
+            }
+            it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
+            if (applet.parent === viewModel.flow) {
                 it.tvNumber.isVisible = false
                 it.dividerTop.isVisible = false
                 it.dividerBott.isVisible = false
                 it.tvDesc.isVisible = false
-                it.ibAction.isVisible = true
-                if (viewModel.isCollapsed(applet as Flow)) {
-                    it.ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
-                    it.ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
-                } else {
-                    it.ibAction.setContentDescriptionAndTooltip(R.string.unfold_less.text)
-                    it.ibAction.setImageResource(R.drawable.ic_baseline_expand_less_24)
-                }
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
             } else {
                 it.tvNumber.isVisible = true
                 it.dividerTop.isVisible = true
                 it.dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                 it.tvNumber.text = (applet.index + 1).toString()
-                it.ibAction.isVisible = applet.isInvertible
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                 it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
-                it.tvDesc.text = option.describe(applet)
-                it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
+            }
+            if (applet is Flow) {
+                it.ibAction.isVisible = true
+                if (viewModel.isCollapsed(applet)) {
+                    it.ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
+                    it.ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
+                } else {
+                    it.ibAction.setContentDescriptionAndTooltip(R.string.unfold_less.text)
+                    it.ibAction.setImageResource(R.drawable.ic_baseline_expand_less_24)
+                }
+            } else {
+                it.ibAction.isVisible = applet.isInvertible
                 if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
                     it.tvDesc.setTypeface(null, Typeface.ITALIC)
                 } else {

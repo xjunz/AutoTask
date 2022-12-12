@@ -8,12 +8,12 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.Router.launchAction
 import java.util.*
 
 /**
- * The entity describing an applet's information. You can call [yieldApplet] to create an [Applet]
+ * The entity describing an applet's information. You can call [yield] to create an [Applet]
  * as per the option.
  *
  * @author xjunz 2022/09/22
@@ -27,8 +27,9 @@ abstract class AppletOption(
 
     companion object {
 
-        const val ACTION_TOGGLE_RELATION = "toggle-relation"
-        const val ACTION_NAVIGATE_REFERENCE = "navigate-reference"
+        const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
+        const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
+        const val ACTION_EDIT_VALUE = "AO_EDIT_VAL"
 
         /**
          * Indicate that the inverted title of an option is auto-generated.
@@ -51,7 +52,7 @@ abstract class AppletOption(
             val index = label.indexOf('(')
             if (index > -1) {
                 return label.subSequence(0, index) + label.substring(index)
-                    .foreColored(ColorSchemes.textColorDisabled)
+                    .foreColored(ColorScheme.textColorDisabled)
             }
             return label
         }
@@ -132,6 +133,8 @@ abstract class AppletOption(
     val rawTitle: CharSequence?
         get() = if (titleRes == TITLE_NONE) null else makeLabelSpan(titleRes.text)
 
+    var valueChecker: ((Any?) -> String?)? = null
+
     private val invertedTitleResource: Int by lazy {
         @SuppressLint("DiscouragedApi")
         when (invertedTitleRes) {
@@ -188,7 +191,7 @@ abstract class AppletOption(
         isInverted = !isInverted
     }
 
-    fun yieldApplet(): Applet {
+    fun yield(): Applet {
         check(isValid) {
             "Invalid applet option unable to yield an applet!"
         }
@@ -225,7 +228,7 @@ abstract class AppletOption(
     private fun makeReferenceText(applet: Applet, refid: CharSequence?): CharSequence? {
         if (refid == null) return null
         return refid.foreColored().bold().clickable {
-            app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid|" + applet.hashCode())
+            app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid" + Char(0) + applet.hashCode())
         }
     }
 
@@ -297,6 +300,13 @@ abstract class AppletOption(
         return withArgument<T>(name, true)
     }
 
+    inline fun <T : Any> withValueChecker(crossinline checker: (T?) -> String?): AppletOption {
+        valueChecker = {
+            checker(it?.casted())
+        }
+        return this
+    }
+
     fun withHelperText(@StringRes res: Int): AppletOption {
         helpTextRes = res
         helpText = null
@@ -343,7 +353,7 @@ abstract class AppletOption(
     fun cloned(): AppletOption {
         return object : AppletOption(appletId, registryId, titleRes, invertedTitleRes) {
             override fun rawCreateApplet(): Applet {
-                return yieldApplet()
+                return yield()
             }
         }.withDescriber(describer)
     }

@@ -17,7 +17,7 @@ import com.google.android.material.circularreveal.CircularRevealCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.LayoutShoppingCartBinding
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.util.Motions
@@ -86,7 +86,7 @@ class ShoppingCartIntegration(
 
         })
         circularRevealContainer.setCardBackgroundColor(
-            ColorUtils.setAlphaComponent(ColorSchemes.colorPrimary, (0.32 * 0xFF).toInt())
+            ColorUtils.setAlphaComponent(ColorScheme.colorPrimary, (0.32 * 0xFF).toInt())
         )
         ibExpand.setOnClickListener {
             if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {

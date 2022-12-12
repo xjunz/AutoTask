@@ -30,7 +30,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     val options = mutableListOf<AppletOption>()
 
-    val onAppletAdded = MutableLiveData<Pair<Int, Applet>>()
+    val onAppletAdded = MutableLiveData<Int>()
 
     lateinit var registryOptions: Array<AppletOption>
 
@@ -50,11 +50,11 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         }
         isInCriterionScope = controlFlow is If
         title = appletOptionFactory.requireOption(controlFlow).rawTitle
-        if (flow is ControlFlow) {
+        if (flow !is ScopedFlow<*>) {
             isScoped = false
-            if (flow is If) {
+            if (controlFlow is If) {
                 registryOptions = appletOptionFactory.flowRegistry.criterionFlowOptions
-            } else if (flow is Do) {
+            } else if (controlFlow is Do) {
                 registryOptions = appletOptionFactory.flowRegistry.actionFlowOptions
             }
         } else {
@@ -76,22 +76,25 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     }
 
     private fun appendOption(option: AppletOption) {
-        appendApplet(option.yieldApplet())
+        appendApplet(option.yield())
     }
 
     fun appendApplet(applet: Applet) {
         val flowOption = appletOptionFactory.requireRegistryOption(applet.registryId)
-        if (flow.isEmpty() || flow.last().appletId != flowOption.appletId) {
-            flow.add(flowOption.yieldApplet() as Flow)
+        val last = flow.lastOrNull()
+        if (last !is Flow || (flowOption.appletId != last.appletId)) {
+            val newFlow = flowOption.yield() as Flow
+            if (newFlow !is PhantomFlow) {
+                flow.add(newFlow)
+                newFlow.add(applet)
+            } else {
+                flow.add(applet)
+            }
+        } else {
+            last.add(applet)
+            // Divider changed
+            onAppletChanged.value = last.getOrNull(last.lastIndex - 1)
         }
-        val last = flow.last() as Flow
-        if (last.isNotEmpty()) {
-            val prev = last.last()
-            if (prev.id == applet.id)
-            // Auto OR relation if the previous applet is of the same id
-                applet.isAnd = false
-        }
-        last.add(applet)
         notifyFlowChanged()
     }
 
@@ -99,7 +102,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         val options = floatingInspector.getSelectedOptions()
         val flowOption = appletOptionFactory.requireRegistryOption(options.first().registryId)
 
-        flow.add(flowOption.yieldApplet() as Flow)
+        flow.add(flowOption.yield() as Flow)
         options.forEach {
             appendOption(it)
         }
@@ -135,15 +138,14 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     override fun flatmapFlow(): List<Applet> {
         val ret = ArrayList<Applet>()
-        flow.forEachIndexed { index, flow ->
-            flow as Flow
-            flow.index = index
-            flow.parent = this.flow
-            ret.add(flow)
-            if (!isCollapsed(flow))
-                flow.forEachIndexed { i, applet ->
+        flow.forEachIndexed { index, child ->
+            child.index = index
+            child.parent = this.flow
+            ret.add(child)
+            if (child is Flow && !isCollapsed(child))
+                child.forEachIndexed { i, applet ->
                     applet.index = i
-                    applet.parent = flow
+                    applet.parent = child
                     ret.add(applet)
                 }
         }

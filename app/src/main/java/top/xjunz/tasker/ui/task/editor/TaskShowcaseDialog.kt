@@ -7,7 +7,7 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.ktx.applySystemInsets
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/07/30

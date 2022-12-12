@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
@@ -45,8 +44,6 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     var isBase: Boolean = false
 
     var selectedApplet = MutableLiveData<Applet>()
-
-    val onAppletChanged = MutableLiveData<Applet>()
 
     val isFabVisible = MutableLiveData<Boolean>()
 
@@ -107,15 +104,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         flow.forEachIndexed { index, applet ->
             applet.index = index
             applet.parent = flow
+            ret.add(applet)
             if (applet is Flow && collapsedFlows.contains(applet)) {
-                ret.add(applet)
                 return@forEachIndexed
             }
-            if (applet is ControlFlow) {
+            if (applet is Flow && depth < 2) {
+                ret.addAll(flatmapFlow(applet, depth + 1))
+            }
+            /*if (applet is ControlFlow) {
                 ret.add(applet)
                 if (depth < 1)
                     ret.addAll(flatmapFlow(applet, depth + 1))
-            } else if (applet is Flow && !applet.isContainer) {
+            } else if (applet is Flow) {
                 ret.add(applet)
                 applet.forEachIndexed { i, a ->
                     a.index = i
@@ -124,7 +124,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 }
             } else {
                 ret.add(applet)
-            }
+            }*/
         }
         return ret
     }
@@ -142,7 +142,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
         val parent = first.requireParent()
         val insertPosition = selections.minOf { it.index }
-        val container = factory.flowRegistry.containerFlow.yieldApplet() as Flow
+        val container = factory.flowRegistry.containerFlow.yield() as Flow
         container.addAll(selections)
         container.parent = parent
         selections.forEach {
@@ -155,10 +155,22 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         } else {
             parent.add(container)
         }
-        parent.forEachIndexed { index, applet ->
-            applet.index = index
-            onAppletChanged.value = applet
+        container.forEach {
+            onAppletChanged.value = it
         }
+        updateChildrenIndexesIfNeeded(parent)
+        notifyFlowChanged()
+    }
+
+    /**
+     * Split a container flow into its parent. This is the reverse operation against [mergeSelectedApplets].
+     */
+    fun splitContainerFlow(container: Flow) {
+        check(container.isContainer)
+        val parent = container.requireParent()
+        parent.remove(container)
+        parent.addAll(container.index, container)
+        updateChildrenIndexesIfNeeded(parent)
         notifyFlowChanged()
     }
 
@@ -183,22 +195,6 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         doSplit.invoke()
     }
 
-    /**
-     * Split a container flow into its parent. This is the reverse operation against [mergeSelectedApplets].
-     */
-    fun splitContainerFlow(container: Flow) {
-        check(container.isContainer)
-        val parent = container.requireParent()
-        parent.remove(container)
-        parent.addAll(container.index, container)
-        // Notify indexes changed
-        for (i in container.index + container.size..parent.lastIndex) {
-            parent[i].index = i
-            onAppletChanged.value = parent[i]
-        }
-        notifyFlowChanged()
-    }
-
     private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
         if (option != null && option.results.any { it.type == refValueDescriptor.type }) {
@@ -215,6 +211,17 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     fun hasCandidateReference(flow: Flow): Boolean {
         return flow.any {
             it.hasResultWithDescriptor()
+        }
+    }
+
+    fun notifyFlowAbilityChanged(flow: Flow, depth: Int = 2) {
+        onAppletChanged.value = flow
+        flow.forEach {
+            if (it is Flow && depth > 0) {
+                notifyFlowAbilityChanged(it, depth - 1)
+            } else {
+                onAppletChanged.value = it
+            }
         }
     }
 }

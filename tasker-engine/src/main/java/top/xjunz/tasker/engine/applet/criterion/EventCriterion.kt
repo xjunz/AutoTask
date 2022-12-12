@@ -11,7 +11,7 @@ class EventCriterion(private val eventType: Int) : Applet() {
 
     override var valueType: Int = AppletValues.VAL_TYPE_INT
 
-    override fun apply(runtime: TaskRuntime) {
+    override suspend fun apply(runtime: TaskRuntime) {
         val hit = runtime.events.find { it.type == eventType }
         if (hit == null) {
             runtime.isSuccessful = false

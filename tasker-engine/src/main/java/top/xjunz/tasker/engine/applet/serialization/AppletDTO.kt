@@ -19,6 +19,8 @@ class AppletDTO(
     private val id: Int = Applet.NO_ID,
     @SerialName("a")
     private val isAnd: Boolean = true,
+    @SerialName("en")
+    private val isEnabled: Boolean = true,
     @SerialName("i")
     private val isInverted: Boolean = false,
     @SerialName("v")
@@ -26,7 +28,9 @@ class AppletDTO(
     @SerialName("q")
     private val referred: Map<Int, String> = emptyMap(),
     @SerialName("r")
-    private val referring: Map<Int, String> = emptyMap()
+    private val referring: Map<Int, String> = emptyMap(),
+    @SerialName("c")
+    private val comment: String? = null
 ) {
 
     @SerialName("e")
@@ -37,7 +41,9 @@ class AppletDTO(
          * Convert a normal applet to a serializable applet.
          */
         fun Applet.toDTO(): AppletDTO {
-            val dto = AppletDTO(id, isAnd, isInverted, serializeValue(value), refids, references)
+            val dto = AppletDTO(
+                id, isAnd, isEnabled, isInverted, serializeValue(value), refids, references, comment
+            )
             if (this is Flow) {
                 check(size != 0) {
                     "No element!"
@@ -53,9 +59,11 @@ class AppletDTO(
     fun toApplet(registry: AppletFactory): Applet {
         val prototype = registry.createAppletById(id)
         prototype.isAnd = isAnd
+        prototype.isEnabled = isEnabled
         prototype.isInverted = isInverted
         prototype.refids = referred
         prototype.references = referring
+        prototype.comment = comment
         if (prototype is Flow) {
             elements?.forEach {
                 prototype.add(it.toApplet(registry))

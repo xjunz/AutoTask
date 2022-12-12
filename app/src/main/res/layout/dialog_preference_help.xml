@@ -47,15 +47,26 @@
             app:layout_constraintTop_toBottomOf="@+id/top_barrier"
             tools:text="@tools:sample/lorem" />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/material_switch"
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_caption"
+            tools:visibility="visible" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/checkbox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/do_not_show_next_time"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_caption" />
+            app:layout_constraintTop_toBottomOf="@+id/container" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/top_barrier"
@@ -89,7 +100,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@+id/btn_negative"
-            app:layout_constraintTop_toBottomOf="@+id/material_switch" />
+            app:layout_constraintTop_toBottomOf="@+id/checkbox" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

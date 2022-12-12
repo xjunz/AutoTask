@@ -23,4 +23,10 @@ object ReflectionUtil {
             it.isAccessible = true
         }.invoke(this, *args)!!.casted()
     }
+
+    fun <T> Any.invokeSuperMethod(methodName: String, vararg args: Any?): T {
+        return javaClass.superclass.getDeclaredMethod(methodName).also {
+            it.isAccessible = true
+        }.invoke(this, *args)!!.casted()
+    }
 }

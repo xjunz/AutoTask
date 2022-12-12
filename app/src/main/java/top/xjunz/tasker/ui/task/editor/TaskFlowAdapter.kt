@@ -16,14 +16,15 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.configHeaderTitle
 import top.xjunz.tasker.ktx.indexOf
+import top.xjunz.tasker.ktx.modifyAlpha
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
-import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
-import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
+import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/08/14
@@ -39,7 +40,8 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    private val menuHelper = FlowItemMenuHelper(viewModel, fragment.childFragmentManager)
+    private val menuHelper =
+        FlowItemMenuHelper(viewModel, globalViewModel.factory, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -87,10 +89,6 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         viewModel.singleSelect(-1)
     }
 
-    private val optionOnClickListener by lazy {
-        AppletOptionOnClickListener(fragment.childFragmentManager, globalViewModel.factory)
-    }
-
     private inline fun showMultiReferencesSelectorMenu(
         anchor: View,
         option: AppletOption,
@@ -118,6 +116,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
+            binding.tvComment.setBackgroundColor(ColorScheme.colorTertiaryContainer.modifyAlpha(.3))
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
                 if (viewModel.isSelectingRef && !applet.isContainer) {
@@ -146,14 +145,9 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 } else if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else {
-                    val menu = menuHelper.showMenu(view, applet)
-                    if (menu != null) {
-                        viewModel.singleSelect(adapterPosition)
-                        menu.setOnDismissListener {
-                            viewModel.singleSelect(-1)
-                        }
-                    } else {
-                        binding.ibAction.performClick()
+                    viewModel.singleSelect(adapterPosition)
+                    menuHelper.showMenu(view, applet).setOnDismissListener {
+                        viewModel.singleSelect(-1)
                     }
                 }
             }
@@ -171,19 +165,14 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         notifyItemChanged(adapterPosition)
                     }
                     FlowItemViewBinder.ACTION_INVERT -> {
-                        currentList[adapterPosition].toggleInversion()
-                        notifyItemChanged(adapterPosition, true)
+                        applet.toggleInversion()
+                        notifyItemChanged(adapterPosition)
                     }
                     FlowItemViewBinder.ACTION_EDIT -> {
-                        val menu = menuHelper.showMenu(it, applet)
-                        if (menu != null) {
-                            viewModel.singleSelect(adapterPosition)
-                            menu.setOnDismissListener {
-                                viewModel.singleSelect(-1)
-                            }
-                        } else optionOnClickListener.onClick(applet) {
-                            notifyItemChanged(adapterPosition)
-                        }
+                        menuHelper.onFlowMenuItemClick(it, applet, R.id.item_edit)
+                    }
+                    FlowItemViewBinder.ACTION_ADD -> {
+                        menuHelper.onFlowMenuItemClick(it, applet, R.id.item_add_inside)
                     }
                     FlowItemViewBinder.ACTION_ENTER -> {
                         val dialog = FlowEditorDialog().setFlow(
@@ -208,7 +197,6 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 }
             }
         }
-
     }
 
 

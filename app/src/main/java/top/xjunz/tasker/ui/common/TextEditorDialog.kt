@@ -33,7 +33,9 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
     private class InnerViewModel : ViewModel() {
 
-        lateinit var title: CharSequence
+        var allowEmptyInput = false
+
+        var title: CharSequence? = null
 
         var caption: CharSequence? = null
 
@@ -53,8 +55,8 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
     private val viewModel by viewModels<InnerViewModel>()
 
-    fun setArguments(
-        title: CharSequence, defText: String? = null, onConfirmed: (String) -> CharSequence?
+    fun init(
+        title: CharSequence?, defText: String? = null, onConfirmed: (String) -> CharSequence?
     ) = doWhenCreated {
         viewModel.title = title
         viewModel.defText = defText
@@ -77,6 +79,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.caption = caption
     }
 
+    fun setAllowEmptyInput() = doWhenCreated {
+        viewModel.allowEmptyInput = true
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
@@ -86,6 +92,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             tvCaption.text = viewModel.caption
             viewModel.editTextConfig?.invoke(etInput)
             btnPositive.setOnClickListener {
+                if (!viewModel.allowEmptyInput && binding.etInput.text.isEmpty()) {
+                    toastAndShake(R.string.error_empty_input)
+                    return@setOnClickListener
+                }
                 val error = viewModel.onConfirmed(binding.etInput.textString)
                 if (error == null) {
                     dismiss()
@@ -143,7 +153,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         dialog?.setOnKeyListener l@{ _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER
                 && event.action == KeyEvent.ACTION_UP
-                && binding.etInput.lineCount == binding.etInput.maxLines
+                && binding.etInput.maxLines == 1
             ) {
                 binding.btnPositive.performClick()
                 return@l true

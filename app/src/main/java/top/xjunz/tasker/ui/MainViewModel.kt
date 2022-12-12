@@ -5,7 +5,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import top.xjunz.tasker.Configurations
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.peekActivity
@@ -40,7 +40,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     fun setCurrentOperatingMode(mode: OperatingMode) {
         serviceController.removeStateListener()
-        Configurations.operatingMode = mode.VALUE
+        Preferences.operatingMode = mode.VALUE
         serviceController.setStateListener(this)
         operatingMode.value = mode
     }

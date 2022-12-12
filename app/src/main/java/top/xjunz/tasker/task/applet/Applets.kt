@@ -4,9 +4,10 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 
-/* Helper extension functions for Applets. These functions is not expected to be called in runtime.*/
+/* Helper extension functions for Applet. These functions are not expected to be called in runtime.*/
 
 /**
  * Container flow is a flow, which is only used to hold other applets.
@@ -45,6 +46,13 @@ val Applet.root: Flow
         return requireParent().root
     }
 
+val Applet.rootOrNull: Flow?
+    get() {
+        if (parent == null)
+            return if (this is Flow) this else null
+        return parent?.rootOrNull
+    }
+
 val Flow.flatSize: Int
     get() {
         var size = 0
@@ -80,26 +88,6 @@ private fun Flow.findChildrenReferringRefidRecur(ret: MutableMap<Applet, Int>, r
     }
 }
 
-fun Flow.findChildrenReferringRefid(refid: String): Map<Applet, Int> {
-    val ret = mutableMapOf<Applet, Int>()
-    findChildrenReferringRefidRecur(ret, refid)
-    return if (ret.isEmpty()) emptyMap() else ret
-}
-
-fun Flow.hasChildOwningRefid(id: String): Boolean {
-    forEach {
-        if (refids.containsValue(id))
-            return true
-
-        if (it is Flow) {
-            val found = it.hasChildOwningRefid(id)
-            if (found)
-                return true
-        }
-    }
-    return false
-}
-
 fun Flow.iterate(block: (Applet) -> Boolean) {
     forEach {
         if (block(it)) return@forEach
@@ -118,7 +106,7 @@ inline fun Flow.forEachRefid(crossinline block: (Applet, which: Int, refid: Stri
     }
 }
 
-private val Applet.hierarchy: Int
+private inline val Applet.hierarchy: Int
     get() {
         var hierarchy = 0
         var p: Applet? = this
@@ -141,7 +129,9 @@ fun Applet.whichRefid(refid: String): Int {
 }
 
 fun Applet.whichReference(refid: String): Int {
-    return references.keys.firstOrNull { references[it] == refid } ?: -1
+    return references.keys.firstOrNull {
+        references[it] == refid
+    } ?: -1
 }
 
 inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, refid: String) -> Boolean) {
@@ -153,32 +143,8 @@ inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, refid: 
     }
 }
 
-fun Flow.findChildOwningRefid(id: String): List<Applet> {
-    val ret = mutableListOf<Applet>()
-    forEach {
-        if (it.refids.containsValue(id))
-            ret.add(it)
-        if (it is Flow) {
-            ret.addAll(it.findChildOwningRefid(id))
-        }
-    }
-    return if (ret.isEmpty()) emptyList() else ret
-}
-
-fun Flow.findAnyChildOwningRefid(id: String): Applet? {
-    forEach {
-        if (it.refids.containsValue(id))
-            return it
-        if (it is Flow) {
-            return it.findAnyChildOwningRefid(id)
-        }
-    }
-    return null
-}
-
 /**
- * The depth in root flow, starting from 0, which means the nested depth in root flow whose parent
- * is `null`.
+ * The depth in root flow. If the receiver applet is the root flow, returns 0.
  *
  * @see Applet.MAX_FLOW_NESTED_DEPTH
  */
@@ -186,21 +152,47 @@ inline val Applet.depth: Int
     get() {
         var depth = 0
         var p = parent
-        while (p != null) {
+        while (p !== null) {
             p = p.parent
             depth++
         }
         return depth
     }
 
+/**
+ * The depth in a specific flow. If the receiver applet is the flow, returns 0. If the receiver flow
+ * is not a descendant of the fow, returns -1.
+ */
+fun Applet.depthInAncestor(flow: Flow): Int {
+    var depth = 0
+    var p: Applet? = this
+    while (p !== flow) {
+        // Not its descendant
+        if (p == null) return -1
+        p = p.parent
+        depth++
+    }
+    return depth
+}
+
+inline val Applet.isAttached: Boolean get() = rootOrNull is RootFlow
+
+val Applet.isEnabledInHierarchy: Boolean
+    get() {
+        if (!isEnabled) return false
+        if (parent == null) return true
+        return requireParent().isEnabledInHierarchy
+    }
+
 fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = true): T {
     val cloned = factory.createAppletById(id)
     cloned.id = id
     cloned.isAnd = isAnd
+    cloned.isEnabled = isEnabled
     cloned.value = value
     cloned.isInverted = isInverted
     cloned.isInvertible = isInvertible
-    cloned.label = label
+    cloned.comment = comment
     cloned.refids = mutableMapOf<Int, String>().apply {
         putAll(refids)
     }

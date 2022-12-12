@@ -43,6 +43,8 @@ class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
             R.string.format_percent_less_than.format(last)
         } else if (last == null && first != null) {
             R.string.format_percent_larger_than.format(first)
+        } else if (last == first) {
+            "$first%"
         } else {
             R.string.format_percent_range.format(first, last)
         }

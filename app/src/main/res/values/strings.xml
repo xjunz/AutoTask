@@ -118,7 +118,7 @@
     <string name="create_task">创建任务</string>
     <string name="turn_on_floating_assistant">打开悬浮助手</string>
     <string name="dismiss">关闭</string>
-    <string name="select">选择</string>
+    <string name="select">选中</string>
     <string name="reselect">重选</string>
     <string name="inspect_layout">查看布局</string>
     <string name="find_next">查找上一个</string>
@@ -129,7 +129,7 @@
     <string name="pls_enable_overlay_manually">请在设置中允许本应用的悬浮窗权限</string>
     <string name="edit_task">编辑任务</string>
     <string name="delete">删除</string>
-    <string name="operate">操作</string>
+    <string name="operation">操作</string>
     <string name="replace_with">替换为</string>
     <string name="add_inside">在内部添加</string>
     <string name="add_after">在后面添加</string>
@@ -148,7 +148,7 @@
     <string name="launch_activity">启动页</string>
     <string name="format_enable_floating_inspector"><![CDATA[使用<b>悬浮助手</b>帮助您快速选择%s]]></string>
     <string name="enable_floating_inspector">启用悬浮助手</string>
-    <string name="enable">开启</string>
+    <string name="enable">启用</string>
     <string name="goto_grant">去授权</string>
     <string name="overlay_permission">悬浮窗权限</string>
     <string name="grant_failed">授权失败</string>
@@ -243,7 +243,7 @@
     <string name="merge_rules">合并已选规则</string>
     <string name="split_merged_rules">解散当前规则组</string>
     <string name="format_selection_count">已选中%d项</string>
-    <string name="matches_rule_set">满足规则组合</string>
+    <string name="matches_rule_set">满足规则组</string>
     <string name="format_applet_count">共%d条规则</string>
     <string name="error_merge_single_applet">选中多个规则才可以合并哦！</string>
     <string name="quit_multi_selection">退出多选模式</string>
@@ -275,10 +275,23 @@
     <string name="format_perform_long_click">长按%s</string>
     <string name="format_perform_click">点击%s</string>
     <string name="help_extract_text">使用包含捕获组的正则表达式来提取文字，只有第一个捕获组的文字会被提取。</string>
-    <string name="execute_rule_set">执行规则组合</string>
+    <string name="execute_rule_set">执行规则组</string>
     <string name="confirm_ref">确认引用</string>
     <string name="do_not_show_next_time">我已知晓，下次不再提示</string>
     <string name="help_multi_references">您已选中来自多个规则的引用，这些引用将会被设置同一个标识，其中最后执行成功的规则将会被引用。</string>
     <string name="edit">编辑</string>
-
+    <string name="delay">延时</string>
+    <string name="format_delay">延时%s毫秒后</string>
+    <string name="repeat">重复</string>
+    <string name="format_repeat">重复执行%d次</string>
+    <string name="control_actions">流程控制</string>
+    <string name="help_delay_flow">设置延时时间，单位为毫秒，1秒等于1000毫秒。</string>
+    <string name="remove">移除</string>
+    <string name="add_comment">添加说明</string>
+    <string name="edit_comment">编辑说明</string>
+    <string name="disable">禁用</string>
+    <string name="comment">说明:&#160;</string>
+    <string name="input_repeat_count">请输入重复执行次数。</string>
+    <string name="help_swipe_to_remove">在规则列表中水平滑动某个规则即可将其直接移除哦！</string>
+    <string name="help_long_click_to_select">在规则列表中长按某个规则即可将其选中哦！</string>
 </resources>

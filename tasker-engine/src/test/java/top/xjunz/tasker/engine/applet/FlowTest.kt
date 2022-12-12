@@ -1,10 +1,12 @@
 package top.xjunz.tasker.engine.applet
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.junit.Test
-import top.xjunz.tasker.engine.AutomatorTask
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
+import top.xjunz.tasker.engine.task.AutomatorTask
 import java.util.*
 
 
@@ -18,11 +20,11 @@ internal class FlowTest {
     @Test
     fun testFlowApply() {
         val rootFlow = DslFlow("abc") {
-            label = "RootFlow"
+            comment = "RootFlow"
             When(Event.EVENT_ON_PACKAGE_ENTERED)
             If {
                 UnaryCriterion {
-                    label = "notEqual"
+                    comment = "notEqual"
                     Matcher { s, s2 -> s == s2 }
                     value = "a"
                     isInverted = true
@@ -31,20 +33,20 @@ internal class FlowTest {
 
                 UnaryCriterion {
                     isAnd = false
-                    label = "equal"
+                    comment = "equal"
                     Matcher { s, s2 -> s == s2 }
                     Value("b")
                 }
 
                 UnaryCriterion {
                     isAnd = false
-                    label = "startsWith"
+                    comment = "startsWith"
                     Value("x")
                     Matcher { s: String, s2: String -> s.startsWith(s2) }
                 }
 
                 UnaryCriterion {
-                    label = "contains2"
+                    comment = "contains2"
                     Value("task")
                     Matcher { s: String, s2: String -> s.contains(s2) }
                 }
@@ -87,8 +89,9 @@ internal class FlowTest {
                 println(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> skipped")
             }
         }
-        TaskRuntime.clearGlobalVariables()
-        assert(mockTask.launch(events, observer))
+        GlobalScope.launch {
+            assert(mockTask.launch(this, events,observer))
+        }
     }
 
     private fun Applet.isAndToString(): String {

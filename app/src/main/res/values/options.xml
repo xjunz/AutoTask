@@ -8,7 +8,11 @@
     <string name="on_success">然后</string>
     <string name="on_failure">否则</string>
 
-    <string name="current_app">当前程序</string>
+    <string name="current_app">当前程序满足</string>
+    <string name="current_notification">当前通知满足</string>
+    <string name="ui_object_exists">存在控件满足</string>
+    <string name="current_time">当前时间满足</string>
+
     <string name="package_name">包名</string>
     <string name="component_info">程序和页面</string>
 
@@ -38,16 +42,15 @@
     <string name="in_version_range">指定版本号</string>
     <string name="not_in_version_range">排除指定版本号</string>
 
-    <string name="ui_object_exists">存在控件</string>
     <string name="with_type">控件类型为</string>
     <string name="with_text">指定文本内容</string>
     <string name="not_with_text">排除文本内容</string>
     <string name="in_length_range">文本长度范围</string>
     <string name="content_desc">内容描述为 (ContentDescription)</string>
-    <string name="is_clickable">可点击 (isClickable)</string>
-    <string name="not_is_clickable">不可点击 (isClickable)</string>
-    <string name="is_long_clickable">可长按 (isLongClickable)</string>
-    <string name="not_is_long_clickable">不可长按 (isLongClickable)</string>
+    <string name="is_clickable">可点击</string>
+    <string name="not_is_clickable">不可点击</string>
+    <string name="is_long_clickable">可长按</string>
+    <string name="not_is_long_clickable">不可长按</string>
     <string name="is_editable">可编辑 (isEditable)</string>
     <string name="not_is_editable">不可编辑 (isEditable)</string>
     <string name="is_enabled">已启用 (isEnabled)</string>
@@ -82,8 +85,6 @@
     <string name="in_hour_min_sec_range">指定时分秒</string>
     <string name="not_in_hour_min_sec_range">指定时分秒以外</string>
     <string name="property">属性</string>
-    <string name="current_time">当前时间</string>
-    <string name="current_activity">当前页面</string>
     <string name="in_activity_collection">指定页面 (Activity)</string>
     <string name="not_in_activity_collection">排除页面 (Activity)</string>
 
@@ -114,5 +115,4 @@
     <string name="notification_matches">通知内容满足正则表达式</string>
     <string name="not_notification_matches">通知内容不满足正则表达式</string>
     <string name="on_notification_received">收到通知时</string>
-    <string name="current_notification">当前通知</string>
 </resources>

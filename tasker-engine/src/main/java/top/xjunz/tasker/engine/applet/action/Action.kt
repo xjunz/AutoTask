@@ -17,7 +17,7 @@ inline fun <V> newAction(
 
         override val valueType: Int = valueType
 
-        override fun apply(runtime: TaskRuntime) {
+        override suspend fun apply(runtime: TaskRuntime) {
             runtime.isSuccessful = block.invoke(value?.casted(), runtime)
         }
     }

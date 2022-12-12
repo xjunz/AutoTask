@@ -1,6 +1,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.tasker.engine.applet.criterion.DslCriterion
+import top.xjunz.tasker.engine.applet.criterion.EventCriterion
 import top.xjunz.tasker.engine.runtime.Event
 
 /**
@@ -21,7 +22,13 @@ internal fun Flow.If(block: If.() -> Unit) {
 
 @FlowDsl
 internal fun Flow.When(@Event.EventType eventType: Int) {
-    add(When.ofEvent(eventType))
+    add(When().apply {
+        if (isEmpty()) {
+            add(EventCriterion(eventType))
+        } else {
+            this[0] = EventCriterion(eventType)
+        }
+    })
 }
 
 @FlowDsl

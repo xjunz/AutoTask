@@ -4,38 +4,31 @@ import android.app.Notification
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.view.accessibility.AccessibilityEvent
-import top.xjunz.shared.ktx.casted
+import kotlinx.coroutines.*
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.runtime.Event
+import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.service.floatingInspector
+import java.lang.ref.WeakReference
 
 /**
  * @author xjunz 2022/10/29
  */
-class A11yEventDispatcher(looper: Looper, var callback: Callback) {
+class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
 
     private val activityHashCache = mutableSetOf<Int>()
 
     private var curEventTime: Long = -1
     private var curPackageName: String? = null
     private var curActivityName: String? = null
-    private var prevContentChangedTime: Long = -1
     private var curPanelTitle: String? = null
 
-    var contentChangedTimeout = 400
+    var contentChangedTimeout = 250L
 
-    private val handler = object : Handler(looper) {
-        override fun handleMessage(msg: Message) {
-            super.handleMessage(msg)
-            callback.onEvent(msg.obj.casted())
-        }
-    }
+    private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
-    fun processAccessibilityEvent(event: AccessibilityEvent) {
+    suspend fun processAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
         if (event.eventTime < curEventTime && !event.isFullScreen) return
         val className = event.className?.toString()
@@ -54,14 +47,12 @@ class A11yEventDispatcher(looper: Looper, var callback: Callback) {
         when (event.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
                 if (className == Notification::class.java.name) {
-                    Message.obtain(
-                        handler, Event.EVENT_ON_NOTIFICATION_RECEIVED, arrayOf(
-                            Event.obtain(
-                                Event.EVENT_ON_NOTIFICATION_RECEIVED,
-                                packageName, paneTitle = firstText
-                            )
+                    dispatchEvents(
+                        Event.obtain(
+                            Event.EVENT_ON_NOTIFICATION_RECEIVED,
+                            packageName, paneTitle = firstText
                         )
-                    ).sendToTarget()
+                    )
                 }
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -83,7 +74,6 @@ class A11yEventDispatcher(looper: Looper, var callback: Callback) {
                         if (!isActivity)
                             curActivityName = null
 
-                        val message = Message.obtain(handler, Event.EVENT_ON_CONTENT_CHANGED)
                         val pkgEnterEvent = Event.obtain(
                             Event.EVENT_ON_PACKAGE_ENTERED,
                             packageName,
@@ -97,37 +87,36 @@ class A11yEventDispatcher(looper: Looper, var callback: Callback) {
                                 prevActivityName,
                                 prevPanelTitle
                             )
-                            message.obj = arrayOf(pkgEnterEvent, pkgExitEvent)
+                            dispatchEvents(pkgEnterEvent, pkgExitEvent)
                         } else {
-                            message.obj = arrayOf(pkgEnterEvent)
+                            dispatchEvents(pkgEnterEvent)
                         }
-                        message.sendToTarget()
                         curPackageName = packageName
                         return
                     }
                 }
                 dispatchContentChanged(packageName)
             }
-            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ->
-                if (curEventTime - prevContentChangedTime >= contentChangedTimeout) {
-                    prevContentChangedTime = curEventTime
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+                eventDispatchScope?.get()?.cancel()
+                coroutineScope {
+                    eventDispatchScope = WeakReference(this)
+                    delay(contentChangedTimeout)
                     dispatchContentChanged(packageName)
                 }
+            }
             else -> dispatchContentChanged(packageName)
         }
     }
 
     private fun dispatchContentChanged(packageName: String) {
         if (packageName != curPackageName) return
-        val message = Message.obtain(
-            handler, Event.EVENT_ON_CONTENT_CHANGED,
-            arrayOf(
-                Event.obtain(
-                    Event.EVENT_ON_CONTENT_CHANGED, packageName, curActivityName, curPanelTitle
-                )
+        dispatchEvents(
+            Event.obtain(
+                Event.EVENT_ON_CONTENT_CHANGED,
+                packageName, curActivityName, curPanelTitle
             )
         )
-        message.sendToTarget()
     }
 
     private fun isActivityExisting(pkgName: String, actName: String): Boolean {
@@ -148,13 +137,5 @@ class A11yEventDispatcher(looper: Looper, var callback: Callback) {
         }.onFailure {
             activityHashCache.add(-hashCode)
         }.isSuccess
-    }
-
-    fun removePendingEvents() {
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    fun interface Callback {
-        fun onEvent(events: Array<Event>)
     }
 }

@@ -26,7 +26,7 @@ class AppletOptionFactory : AppletFactory {
     private val globalInfoRegistry =
         GlobalInfoOptionRegistry(FlowOptionRegistry.ID_GLOBAL_OPTION_REGISTRY)
 
-    private val notificationOptionRegistry =
+    val notificationOptionRegistry =
         NotificationOptionRegistry(FlowOptionRegistry.ID_NOTIFICATION_OPTION_REGISTRY)
 
     private val globalActionRegistry =
@@ -34,6 +34,9 @@ class AppletOptionFactory : AppletFactory {
 
     private val uiObjectActionRegistry =
         UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
+
+    private val controlActionRegistry =
+        ControlActionRegistry(FlowOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
 
     private val allRegistries = arrayOf(
@@ -48,7 +51,8 @@ class AppletOptionFactory : AppletFactory {
         notificationOptionRegistry,
         // action
         globalActionRegistry,
-        uiObjectActionRegistry
+        uiObjectActionRegistry,
+        controlActionRegistry
     )
 
     fun requireOption(applet: Applet): AppletOption {

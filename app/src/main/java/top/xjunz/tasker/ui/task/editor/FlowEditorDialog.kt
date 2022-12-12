@@ -21,7 +21,7 @@ import top.xjunz.tasker.task.applet.nonContainerParent
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 import top.xjunz.tasker.task.applet.whichReference
-import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.common.TextEditorDialog
@@ -114,25 +114,23 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         val distinctRefids = refids.toSet()
         val caption = if (globalViewModel.selectedRefs.size > 1) {
-            R.string.prompt_set_refid.text + "\n\n" + R.string.help_multi_references.text
-                .relativeSize(.8F).quoted(ColorSchemes.colorPrimary).bold()
+            R.string.prompt_set_refid.text +
+                    "\n\n" + R.string.help_multi_references.text.relativeSize(.8F)
+                .quoted(ColorScheme.colorPrimary).bold()
         } else {
             R.string.prompt_set_refid.text
         }
         val dialog = TextEditorDialog().setCaption(caption).configEditText {
             it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
-        }.setArguments(R.string.set_refid.text, distinctRefids.singleOrNull()) {
-            if (it.isEmpty()) {
-                return@setArguments R.string.error_empty_input.text
-            }
+        }.init(R.string.set_refid.text, distinctRefids.singleOrNull()) {
             if (!globalViewModel.isRefidLegalForSelections(it)) {
-                return@setArguments R.string.error_tag_exists.text
+                return@init R.string.error_tag_exists.text
             }
             globalViewModel.setRefidForSelections(it)
             globalViewModel.renameRefidInRoot(distinctRefids, it)
             viewModel.doOnRefSelected(it)
             globalViewModel.onReferenceSelected.value = true
-            return@setArguments null
+            return@init null
         }
         if (refids.size == globalViewModel.selectedRefs.size && distinctRefids.size == 1) {
             // All applets have the same refid
@@ -219,7 +217,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         val mainViewModel = peekMainViewModel()
         mainViewModel.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
             val hashcode = it.toInt()
-            // May not found in this dialog ,check it
+            // May not found in this dialog, check it
             viewModel.applets.require().firstOrNull { applet ->
                 applet.hashCode() == hashcode
             }?.run {
@@ -229,25 +227,22 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         if (!viewModel.isSelectingRef)
             mainViewModel.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
-                val split = data.split('|')
+                val split = data.split(Char(0))
                 val hashcode = split[1].toInt()
-                val applet = viewModel.applets.require().firstOrNull {
+                val applet = adapter.currentList.firstOrNull {
                     it.hashCode() == hashcode
-                }
-                if (applet != null) {
-                    val refid = split[0]
-                    val option = globalViewModel.factory.requireOption(applet)
-                    val arg = option.arguments[applet.whichReference(refid)]
-                    FlowEditorDialog().setFlow(globalViewModel.root, true)
-                        .setReferenceToSelect(applet, arg, refid)
-                        .doOnReferenceSelected {
-                            globalViewModel.tracer.getReferenceChangedApplets().forEach {
-                                viewModel.onAppletChanged.value = it
-                            }
-                            globalViewModel.tracer.reset()
+                } ?: return@doOnAction
+                val refid = split[0]
+                val option = globalViewModel.factory.requireOption(applet)
+                val arg = option.arguments[applet.whichReference(refid)]
+                FlowEditorDialog().setFlow(globalViewModel.root, true)
+                    .setReferenceToSelect(applet, arg, refid)
+                    .doOnReferenceSelected {
+                        globalViewModel.tracer.getReferenceChangedApplets().forEach {
+                            viewModel.onAppletChanged.value = it
                         }
-                        .show(childFragmentManager)
-                }
+                        globalViewModel.tracer.reset()
+                    }.show(childFragmentManager)
             }
     }
 

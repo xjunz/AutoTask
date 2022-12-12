@@ -9,7 +9,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class ReferenceAction<V>(override val valueType: Int) : Action() {
 
-    override fun apply(runtime: TaskRuntime) {
+    override suspend fun apply(runtime: TaskRuntime) {
         check(references.isNotEmpty()) {
             "Need references!"
         }

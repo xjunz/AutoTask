@@ -132,6 +132,8 @@ open class FlowItemTouchHelperCallback(
         }
     }
 
+    private inline val Applet.isSingle get() = this !is Flow || isEmpty()
+
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
@@ -147,11 +149,12 @@ open class FlowItemTouchHelperCallback(
             pendingChangedApplets.add(fromApplet)
             pendingChangedApplets.add(toApplet)
         }
-        if (fromApplet is Flow && !fromApplet.isContainer) {
-            viewModel.notifyFlowChanged()
-        } else {
+        if (fromApplet.isSingle && toApplet.isSingle) {
+            // If there is no flow with multiple children, do it more efficiently
             viewModel.regenerateApplets()
             adapter.notifyItemMoved(from, to)
+        } else {
+            viewModel.notifyFlowChanged()
         }
         return true
     }
@@ -209,18 +212,17 @@ open class FlowItemTouchHelperCallback(
         } else {
             toast(R.string.format_applet_is_removed.format(count))
         }
-        parent.forEachIndexed { index, applet ->
-            applet.index = index
-        }
         if (from is Flow) {
             // Update relation text
             if (from.index == 0 && parent.isNotEmpty())
                 notifyAppletChanged(parent.first())
-        } else
-        // Update indexes
-            parent.forEach {
-                notifyAppletChanged(it)
-            }
+        } else {
+            // Update indexes
+            viewModel.updateChildrenIndexesIfNeeded(parent)
+        }
+        if (parent.size == 0) {
+            notifyAppletChanged(parent)
+        }
         viewModel.notifyFlowChanged()
     }
 

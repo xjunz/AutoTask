@@ -1,21 +1,27 @@
 package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.ScopedFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.uiAutomation
 
 /**
  * @author xjunz 2022/08/25
  */
-class UiObjectFlow : Flow() {
+class UiObjectFlow : ScopedFlow<UiObjectContext>() {
 
-    override fun doApply(runtime: TaskRuntime) {
-        val ctx = UiObjectContext()
-        runtime.setTarget(ctx)
-        val node = runtime.getOrPutCrossTaskVariable(id) {
+    private val rootNodeKey = generateUniqueKey(1)
+
+    override fun initializeTarget(runtime: TaskRuntime): UiObjectContext {
+        return UiObjectContext()
+    }
+
+    override suspend fun doApply(runtime: TaskRuntime) {
+        val ctx = runtime.target
+        val node = runtime.getEnvironmentVariable(rootNodeKey) {
             uiAutomation.rootInActiveWindow
         }.findFirst {
+            runtime.ensureActive()
             ctx.source = it
             super.doApply(runtime)
             runtime.isSuccessful
@@ -30,7 +36,7 @@ class UiObjectFlow : Flow() {
         }
     }
 
-    private fun AccessibilityNodeInfo.findFirst(condition: (AccessibilityNodeInfo) -> Boolean)
+    private suspend fun AccessibilityNodeInfo.findFirst(condition: suspend (AccessibilityNodeInfo) -> Boolean)
             : AccessibilityNodeInfo? {
         for (i in 0 until childCount) {
             val child = getChild(i) ?: continue

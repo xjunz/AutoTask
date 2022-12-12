@@ -1,5 +1,8 @@
 package top.xjunz.tasker.task
 
+import android.app.Instrumentation
+import android.app.Instrumentation.ActivityMonitor
+import android.content.Intent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
@@ -18,6 +21,14 @@ class AccessibilityNodeInfo {
             uiAutomation.waitForIdle(100, 500)
             val window = uiAutomation.rootInActiveWindow
         }
+        uiAutomation.setOnAccessibilityEventListener {
+            println(it)
+        }
+        InstrumentationRegistry.getInstrumentation().addMonitor(object : ActivityMonitor() {
+            override fun onStartActivity(intent: Intent?): Instrumentation.ActivityResult {
+                return super.onStartActivity(intent)
+            }
+        })
     }
 
     private fun AccessibilityNodeInfo.findFirst(condition: (AccessibilityNodeInfo) -> Boolean): AccessibilityNodeInfo? {

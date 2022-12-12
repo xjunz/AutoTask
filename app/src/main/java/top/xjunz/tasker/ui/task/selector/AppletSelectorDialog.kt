@@ -29,15 +29,14 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
-import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.inspector.InspectorMode
-import top.xjunz.tasker.ui.ColorSchemes
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Router
 
 /**
@@ -80,9 +79,10 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 val position = adapterPosition
                 val option = viewModel.options[position]
                 if (option.isValid) {
-                    val applet = option.yieldApplet()
+                    val applet = option.yield()
                     onOptionClickListener.onClick(applet, option) {
-                        viewModel.onAppletAdded.value = position to applet
+                        viewModel.appendApplet(applet)
+                        viewModel.onAppletAdded.value = position
                     }
                 }
             }
@@ -95,10 +95,10 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             binding.ibInvert.isInvisible = !option.isInvertible
             if (!option.isValid) {
                 binding.tvLabel.setTextAppearance(TextAppearance_Material3_TitleMedium)
-                binding.tvLabel.setTextColor(ColorSchemes.colorPrimary)
+                binding.tvLabel.setTextColor(ColorScheme.colorPrimary)
             } else {
                 binding.tvLabel.setTextAppearance(TextAppearance_Material3_LabelLarge)
-                binding.tvLabel.setTextColor(ColorSchemes.colorOnSurface)
+                binding.tvLabel.setTextColor(ColorScheme.colorOnSurface)
             }
             if (viewModel.animateItems) {
                 val staggerAnimOffsetMills = 30L
@@ -116,10 +116,6 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     private val bottomAdapter by lazy {
         AppletCandidatesAdapter(viewModel, onOptionClickListener)
-    }
-
-    fun setTitle(title: CharSequence) = doWhenCreated {
-        viewModel.title = title
     }
 
     fun doOnCompletion(block: (List<Applet>) -> Unit) = doWhenCreated {
@@ -170,17 +166,16 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
-        if (viewModel.isScoped)
-            binding.cvHeader.doOnPreDraw {
-                if (isFloatingInspectorShown) {
-                    floatingInspector.viewModel.showExtraOptions = false
-                    val mode = it.tag?.casted<InspectorMode>() ?: return@doOnPreDraw
-                    if (floatingInspector.mode != mode) {
-                        floatingInspector.mode = mode
-                        toast(R.string.format_switch_mode.format(mode.label))
-                    }
+        if (viewModel.isScoped) binding.cvHeader.doOnPreDraw {
+            if (isFloatingInspectorShown) {
+                floatingInspector.viewModel.showExtraOptions = false
+                val mode = it.tag?.casted<InspectorMode>() ?: return@doOnPreDraw
+                if (floatingInspector.mode != mode) {
+                    floatingInspector.mode = mode
+                    toast(R.string.format_switch_mode.format(mode.label))
                 }
             }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -222,22 +217,17 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         observe(viewModel.applets) {
             binding.shoppingCart.btnCount.text =
-                R.string.format_clear_applets.format(viewModel.flow.flatSize)
+                R.string.format_clear_applets.format(it.size)
             if (it.isEmpty())
                 shopCartIntegration.collapse()
             bottomAdapter.submitList(it)
         }
-        mainViewModel.doOnHostRouted(this, Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
-            val prevSize = bottomAdapter.itemCount
-            viewModel.acceptAppletsFromInspector()
-            shopCartIntegration.expand()
-            rvBottom.scrollToPosition(prevSize)
+        observeTransient(viewModel.onAppletChanged) {
+            bottomAdapter.notifyItemChanged(bottomAdapter.currentList.indexOf(it))
         }
         observeTransient(viewModel.onAppletAdded) {
-            viewModel.appendApplet(it.second)
-            val vh = binding.rvRight.findViewHolderForAdapterPosition(it.first)
-            if (vh != null)
-                shopCartIntegration.animateIntoShopCart(vh.itemView)
+            val vh = binding.rvRight.findViewHolderForAdapterPosition(it)
+            if (vh != null) shopCartIntegration.animateIntoShopCart(vh.itemView)
         }
         observeConfirmation(viewModel.showClearDialog, R.string.prompt_clear_all_options) {
             viewModel.clearAllCandidates()
@@ -249,6 +239,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             }
             viewModel.applets.require()[index].toggleRelation()
             bottomAdapter.notifyItemChanged(index)
+        }
+        mainViewModel.doOnHostRouted(this, Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
+            val prevSize = bottomAdapter.itemCount
+            viewModel.acceptAppletsFromInspector()
+            shopCartIntegration.expand()
+            rvBottom.scrollToPosition(prevSize)
         }
     }
 }

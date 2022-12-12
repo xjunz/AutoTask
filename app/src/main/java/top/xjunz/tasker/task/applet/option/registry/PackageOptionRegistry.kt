@@ -8,7 +8,8 @@ import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletCategory
@@ -26,15 +27,15 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         collectionCriterion<PackageInfoContext, String> {
             it.packageName
         }
-    }.withValueDescriber<Collection<String>> {
-        if (it.size == 1) {
-            val first = it.first()
+    }.withValueDescriber<Collection<String>> { value ->
+        if (value.size == 1) {
+            val first = value.first()
             PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first
         } else {
-            R.string.format_pkg_collection_desc.format(
-                it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                    PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name
-                }.joinToString("、"), it.size
+            R.string.format_pkg_collection_desc.formatSpans(
+                value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
+                    (PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name)
+                }.joinToString("、"), value.size.toString().foreColored()
             )
         }
     }
@@ -50,7 +51,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         if (it.size == 1) {
             it.first()
         } else {
-            R.string.format_act_collection_desc.format(it.size)
+            R.string.format_act_collection_desc.formatSpans(it.size.toString().foreColored())
         }
     }
 

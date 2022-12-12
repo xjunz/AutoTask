@@ -1,6 +1,6 @@
 package top.xjunz.tasker.task
 
-import top.xjunz.tasker.engine.AutomatorTask
+import top.xjunz.tasker.engine.task.AutomatorTask
 
 /**
  * @author xjunz 2022/08/05

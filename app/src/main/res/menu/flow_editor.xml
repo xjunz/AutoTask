@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/operation" />
+    <item
+        android:id="@+id/item_split"
+        android:title="@string/split_merged_rules" />
+    <item
+        android:id="@+id/item_edit"
+        android:title="@string/edit" />
+    <item
+        android:id="@+id/item_invert"
+        android:title="@string/invert" />
+    <item
+        android:id="@+id/item_remove"
+        android:title="@string/remove" />
+    <item
+        android:id="@+id/item_toggle_ability"
+        android:title="@string/disable" />
+    <item
+        android:id="@+id/item_select"
+        android:title="@string/select" />
+    <item
+        android:id="@+id/item_add_comment"
+        android:title="@string/add_comment" />
+
     <item android:title="@string/add_rules" />
+
     <item
         android:id="@+id/item_add_inside"
         android:title="@string/add_inside" />

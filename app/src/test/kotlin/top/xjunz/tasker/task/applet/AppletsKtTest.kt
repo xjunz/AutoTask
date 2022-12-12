@@ -2,6 +2,7 @@ package top.xjunz.tasker.task.applet
 
 import org.junit.Test
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
 
 /**
  * @author xjunz 2022/11/30
@@ -23,7 +24,7 @@ internal class AppletsKtTest {
 
     @Test
     fun isAheadOf() {
-        val root = Flow()
+        val root = RootFlow()
         root.add(Flow().apply {
             add(Flow())
         })
@@ -35,15 +36,38 @@ internal class AppletsKtTest {
             })
         })
         root.buildHierarchy()
-        // self
+        // Self
         assert(!root[0].isAheadOf(root[0]))
-        // peer
+        // Peer
         assert(root[0].isAheadOf(root[1]))
-        // parent and child
+        // Parent and child
         assert(root.isAheadOf(root[0]))
         assert(!root.getFlow(0)[0].isAheadOf(root))
-        // cross hierarchy
+        // Cross hierarchy
         assert(!root.getFlow(3).getFlow(0)[0].isAheadOf(root.getFlow(0)[0]))
         assert(root.getFlow(0)[0].isAheadOf(root.getFlow(3)[0]))
+    }
+
+    @Test
+    fun getDepth() {
+        val root = RootFlow()
+        val d1 = Flow()
+        root.add(d1)
+        val d2 = Flow()
+        d1.add(d2)
+        root.buildHierarchy()
+        val standalone = Flow()
+        // Self
+        assert(root.depth == 0)
+        // In self
+        assert(root.depthInAncestor(root) == 0)
+        // Standalone
+        assert(standalone.depthInAncestor(root) == -1)
+        // Descendant
+        println(d1.depth)
+        assert(d1.depth == 1)
+        assert(d2.depth == 2)
+        // Descendant in parent
+        assert(d2.depthInAncestor(d1) == 1)
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.task.applet.depthInAncestor
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 
 /**
@@ -17,6 +18,8 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
     var isReadyOnly: Boolean = false
 
     val applets = MutableLiveData(emptyList<Applet>())
+
+    val onAppletChanged = MutableLiveData<Applet>()
 
     protected val collapsedFlows = mutableSetOf<Flow>()
 
@@ -47,4 +50,22 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
         ref.addAll(flatmapFlow())
     }
 
+    fun removeApplet(applet: Applet) {
+        val parent = applet.requireParent()
+        parent.remove(applet)
+        if (parent.size == 0) {
+            onAppletChanged.value = parent
+        }
+        updateChildrenIndexesIfNeeded(parent)
+        notifyFlowChanged()
+    }
+
+    fun updateChildrenIndexesIfNeeded(flow: Flow) {
+        if (flow.depthInAncestor(this.flow) <= 2) {
+            flow.forEachIndexed { index, applet ->
+                applet.index = index
+                onAppletChanged.value = applet
+            }
+        }
+    }
 }

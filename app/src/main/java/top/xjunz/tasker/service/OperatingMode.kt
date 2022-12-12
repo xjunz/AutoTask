@@ -2,7 +2,7 @@ package top.xjunz.tasker.service
 
 import androidx.annotation.StringRes
 import top.xjunz.shared.utils.runtimeException
-import top.xjunz.tasker.Configurations
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
@@ -34,7 +34,7 @@ sealed class OperatingMode(
 
     companion object {
 
-        val CURRENT get() = fromValue(Configurations.operatingMode)
+        val CURRENT get() = fromValue(Preferences.operatingMode)
 
         private fun fromValue(value: Int): OperatingMode {
             if (value == Shizuku.VALUE) return Shizuku

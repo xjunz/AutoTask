@@ -1,10 +1,11 @@
-package top.xjunz.tasker.engine
+package top.xjunz.tasker.engine.task
 
-import android.os.Handler
-import androidx.annotation.MainThread
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
+import top.xjunz.tasker.engine.runtime.Snapshot
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -15,9 +16,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class AutomatorTask(val name: String) {
 
-    val handlers = mutableMapOf<Int, Handler>()
-
-    lateinit var flow: Flow
+    lateinit var flow: RootFlow
 
     var label: String? = null
 
@@ -26,7 +25,7 @@ class AutomatorTask(val name: String) {
      * its latest [Applet] is completed. You can observe [OnStateChangedListener.onCancelled] to
      * get notified. Inactive tasks will no longer response to any further [Event] from [launch].
      */
-    var isActive = false
+    var isEnabled = false
         private set
 
     var onStateChangedListener: OnStateChangedListener? = null
@@ -38,12 +37,11 @@ class AutomatorTask(val name: String) {
     /**
      * Whether the task is traversing its [flow].
      */
-    private var isExecuting = false
+    private val isExecuting get() = currentRuntime?.isActive == true
+
+    private var currentRuntime: TaskRuntime? = null
 
     class FlowFailureException(reason: String) : RuntimeException(reason)
-
-    class TaskCancellationException(task: AutomatorTask) :
-        RuntimeException("Task '$task' is cancelled due to user request!")
 
     interface OnStateChangedListener {
 
@@ -76,35 +74,23 @@ class AutomatorTask(val name: String) {
         fun onCancelled() {}
     }
 
-    /**
-     * Throws a [TaskCancellationException] if the task is not [active][isActive] at the moment.
-     */
-    fun ensureActive() {
-        if (!isActive)
-            throw TaskCancellationException(this)
-    }
-
     fun activate(stateListener: OnStateChangedListener) {
-        if (isActive) {
+        if (isEnabled) {
             error("Task[$name] has already been activated!")
         }
         onStateChangedListener = stateListener
         startTimestamp = System.currentTimeMillis()
-        isActive = true
+        isEnabled = true
         onStateChangedListener?.onStarted()
     }
 
-    fun deactivate() {
-        if (!isActive) {
-            error("The task[$name] has already been deactivated!")
+    fun disable() {
+        if (!isEnabled) {
+            error("The task[$name] is not enabled!")
         }
-        handlers.forEach {
-            it.value.removeCallbacksAndMessages(null)
-        }
-        handlers.clear()
-        isActive = false
+        isEnabled = false
         if (!isExecuting) {
-            onStateChangedListener?.onCancelled()
+            currentRuntime?.halt()
         }
     }
 
@@ -113,15 +99,22 @@ class AutomatorTask(val name: String) {
      *
      * @return `true` if the task starts executed and `false` otherwise
      */
-    @MainThread
-    fun launch(events: Array<Event>, observer: TaskRuntime.Observer? = null): Boolean {
-        if (!isActive) return false
-        if (isExecuting) return false
-        isExecuting = true
-        val runtime = TaskRuntime.obtain(this, events)
+    suspend fun launch(
+        snapshot: Snapshot,
+        scope: CoroutineScope,
+        events: Array<out Event>,
+        observer: TaskRuntime.Observer? = null
+    ): Boolean {
+        if (!isEnabled) return false
+        // Cancel if still executing //TODO: 单线程情况下，Will this hit?
+        if (isExecuting) {
+            currentRuntime?.halt()
+        }
+        val runtime = TaskRuntime.obtain(snapshot, scope, events)
         if (observer != null)
             runtime.observer = observer
         try {
+            currentRuntime = runtime
             flow.apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
@@ -132,12 +125,12 @@ class AutomatorTask(val name: String) {
         } catch (t: Throwable) {
             when (t) {
                 is FlowFailureException -> onStateChangedListener?.onFailure(runtime)
-                is TaskCancellationException -> onStateChangedListener?.onCancelled()
+                is CancellationException -> onStateChangedListener?.onCancelled()
                 else -> onStateChangedListener?.onError(runtime, t)
             }
             return false
         } finally {
-            isExecuting = false
+            currentRuntime = null
             runtime.recycle()
         }
     }

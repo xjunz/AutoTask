@@ -21,7 +21,7 @@ import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.GlobalFlowEditorViewModel
-import top.xjunz.tasker.util.AntiMonkey.setAntiMoneyClickListener
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import java.util.*
 
 /**
@@ -71,8 +71,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         TextEditorDialog().configEditText { et ->
             et.configInputType(arg.type, true)
             et.maxLines = 5
-        }.setCaption(option.helpText).setArguments(arg.name, applet.value?.toString()) set@{
-            if (it.isEmpty()) return@set R.string.error_empty_input.str
+        }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
             val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
             globalViewModel.tracer.setValue(applet, which, parsed)
             viewModel.onItemChanged.value = arg
@@ -118,19 +117,16 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 val refid = applet.references.getValue(position)
                 TextEditorDialog().setCaption(R.string.prompt_set_refid.text).configEditText {
                     it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
-                }.setArguments(R.string.edit_refid.text, refid) {
-                    if (it == refid) return@setArguments null
-                    if (it.isEmpty()) {
-                        return@setArguments R.string.error_empty_input.text
-                    }
+                }.init(R.string.edit_refid.text, refid) {
+                    if (it == refid) return@init null
                     if (!globalViewModel.isRefidLegalForSelections(it)) {
-                        return@setArguments R.string.error_tag_exists.text
+                        return@init R.string.error_tag_exists.text
                     }
                     // This applet may be not attached to the root
                     globalViewModel.tracer.renameReference(applet, position, it)
                     globalViewModel.renameRefidInRoot(Collections.singleton(refid), it)
                     viewModel.onItemChanged.value = arg
-                    return@setArguments null
+                    return@init null
                 }.show(childFragmentManager)
             }
         }) { binding, pos, arg ->
@@ -156,7 +152,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 binding.tvValue.isEnabled = false
             }
             if (arg.isValueOnly) {
-                binding.ivEnter.setImageResource(R.drawable.ic_baseline_edit_24)
+                binding.ivEnter.setImageResource(R.drawable.ic_edit_24dp)
             } else {
                 binding.ivEnter.setImageResource(R.drawable.ic_baseline_chevron_right_24)
             }

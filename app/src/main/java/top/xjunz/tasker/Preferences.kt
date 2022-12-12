@@ -14,7 +14,7 @@ import kotlin.reflect.jvm.javaType
 /**
  * @author xjunz 2022/04/21
  */
-object Configurations {
+object Preferences {
 
     private val global by lazy {
         app.sharedPrefsOf("global")
@@ -22,7 +22,8 @@ object Configurations {
 
     var operatingMode by global.primitive("operating_mode", OperatingMode.Shizuku.VALUE)
 
-    var showMultiReferenceHelp by global.primitive("show_multi_reference_help", true)
+    var showLongClickToSelectDemo by global.primitive("demo_long_click_to_select", true)
+    var showSwipeToRemoveDemo by global.primitive("demo_swipe_to_remove", true)
 
     private fun <T> SharedPreferences.nullable(
         name: String,

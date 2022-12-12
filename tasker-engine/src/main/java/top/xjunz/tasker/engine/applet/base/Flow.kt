@@ -12,19 +12,28 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Applet(),
     MutableList<Applet> by elements {
 
+    open val minSize = 1
+
+    open val maxSize = MAX_FLOW_CHILD_COUNT
+
+    inline val requiredSize get() = if (minSize == maxSize) minSize else -1
+
     override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
 
     protected open fun shouldSkipAll(runtime: TaskRuntime): Boolean = false
 
     @CallSuper
-    protected open fun doApply(runtime: TaskRuntime) {
-        forEachIndexed _continue@{ index, applet ->
-            runtime.task.ensureActive()
+    protected open suspend fun doApply(runtime: TaskRuntime) {
+        forEachIndexed `continue`@{ index, applet ->
+            if (!applet.isEnabled) {
+                return@`continue`
+            }
+            runtime.ensureActive()
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
             if (index != 0 && applet.isAnd != runtime.isSuccessful) {
                 runtime.observer?.onSkipped(applet, runtime)
-                return@_continue
+                return@`continue`
             }
             applet.parent = this
             applet.index = index
@@ -41,8 +50,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         forEachIndexed { index, applet ->
             applet.parent = this
             applet.index = index
-            if (applet is Flow)
-                applet.performStaticCheck()
+            if (applet is Flow) applet.performStaticCheck()
         }
     }
 
@@ -50,7 +58,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         /* no-op */
     }
 
-    override fun apply(runtime: TaskRuntime) {
+    override suspend fun apply(runtime: TaskRuntime) {
         onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
@@ -69,6 +77,9 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         runtime.tracker.jumpOut()
     }
 
+    /**
+     * Just before the flow execute its elements.
+     */
     protected open fun onPrepare(runtime: TaskRuntime) {
         /* no-op */
     }

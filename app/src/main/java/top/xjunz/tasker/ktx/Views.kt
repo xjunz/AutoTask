@@ -6,6 +6,7 @@ package top.xjunz.tasker.ktx
 
 import android.animation.ObjectAnimator
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.text.InputFilter
 import android.text.InputType
 import android.transition.AutoTransition
@@ -108,10 +109,14 @@ fun View.beginAutoTransition(target: View, transition: Transition = AutoTransiti
 
 fun TextView.setDrawableStart(@DrawableRes res: Int) {
     if (res == View.NO_ID) {
-        setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+        setDrawableStart(null)
     } else {
-        setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(), null, null, null)
+        setDrawableStart(res.getDrawable())
     }
+}
+
+fun TextView.setDrawableStart(drawable: Drawable?) {
+    setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null)
 }
 
 fun View.beginAutoTransition(transition: Transition = AutoTransition()) {

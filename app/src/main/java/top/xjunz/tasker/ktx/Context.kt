@@ -26,7 +26,7 @@ fun Context.viewUrlSafely(url: String) {
  * Returns the [Activity] given a [Context] or throw a exception if there is no [Activity],
  * taking into account the potential hierarchy of [ContextWrappers][ContextWrapper].
  */
-fun Context.getActivity(): AppCompatActivity? {
+fun Context.peekActivity(): AppCompatActivity? {
     var context = this
     if (this is AppCompatActivity) return this
     while (context is ContextWrapper) {
@@ -58,7 +58,7 @@ fun Context.viewFile(file: File) {
 
 fun Context.launchIntentSafely(intent: Intent) {
     runCatching {
-        if (getActivity() == null) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (peekActivity() == null) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }.onFailure {
         it.printStackTrace()
