@@ -91,7 +91,14 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, position, option ->
-            binding.tvLabel.text = option.currentTitle
+            var title = option.currentTitle
+            val m = option.titleModifier
+            if (m != null) {
+                title = title?.plus(
+                    " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
+                )
+            }
+            binding.tvLabel.text = title
             binding.ibInvert.isInvisible = !option.isInvertible
             if (!option.isValid) {
                 binding.tvLabel.setTextAppearance(TextAppearance_Material3_TitleMedium)

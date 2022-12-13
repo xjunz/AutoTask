@@ -9,6 +9,18 @@
         android:background="@drawable/selector_bg_selectable_item"
         android:minHeight="40dp">
 
+        <View
+            android:id="@+id/bullet"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_solid_circle"
+            android:backgroundTint="@color/color_text_control_normal"
+            android:duplicateParentState="true"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintStart_toEndOf="@+id/tv_number"
+            app:layout_constraintTop_toTopOf="@+id/tv_title" />
+
         <TextView
             android:id="@+id/tv_number"
             android:layout_width="wrap_content"
@@ -55,7 +67,7 @@
             android:textStyle="bold"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toTopOf="@+id/tv_desc"
-            app:layout_constraintStart_toEndOf="@+id/tv_number"
+            app:layout_constraintStart_toEndOf="@+id/bullet"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_goneMarginBottom="4dp"
             tools:text="Hello"

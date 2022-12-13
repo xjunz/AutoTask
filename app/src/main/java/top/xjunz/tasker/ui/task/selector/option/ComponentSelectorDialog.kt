@@ -66,7 +66,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             viewModel.selectedPackages, ItemApplicationInfoBinding::class.java,
             {
                 binding.tvApplicationName.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                binding.root.background = R.drawable.bg_selectable_primary_surface.getDrawable()
+                binding.root.background = R.drawable.bg_selectable_surface.getDrawable()
                 binding.root.updateLayoutParams<MarginLayoutParams> {
                     updateMargins(4.dp, 0, 4.dp, 4.dp)
                 }

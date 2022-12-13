@@ -50,13 +50,15 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
         ref.addAll(flatmapFlow())
     }
 
-    fun removeApplet(applet: Applet) {
-        val parent = applet.requireParent()
-        parent.remove(applet)
-        if (parent.size == 0) {
-            onAppletChanged.value = parent
+    fun removeApplets(applets: Iterable<Applet>) {
+        applets.forEach {
+            val parent = it.requireParent()
+            parent.remove(it)
+            if (parent.size == 0) {
+                onAppletChanged.value = parent
+            }
+            updateChildrenIndexesIfNeeded(parent)
         }
-        updateChildrenIndexesIfNeeded(parent)
         notifyFlowChanged()
     }
 

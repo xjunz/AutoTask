@@ -190,7 +190,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         nodeCriterion<String> { t, v ->
             t.contentDescription == v
         }
-    }
+    }.withTitleModifier("Content Description")
 
     // Properties
     @AppletCategory(0x02_00)
@@ -212,42 +212,42 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         nodePropertyCriterion {
             it.isEditable
         }
-    }
+    }.withTitleModifier("Editable")
 
     @AppletCategory(0x02_03)
     val isEnabled = invertibleAppletOption(0xA0, R.string.is_enabled) {
         nodePropertyCriterion {
             it.isEnabled
         }
-    }
+    }.withTitleModifier("Enabled")
 
     @AppletCategory(0x02_04)
     val isCheckable = invertibleAppletOption(0xB0, R.string.is_checkable) {
         nodePropertyCriterion {
             it.isCheckable
         }
-    }
+    }.withTitleModifier("Checkable")
 
     @AppletCategory(0x02_05)
     val isChecked = invertibleAppletOption(0xB1, R.string.is_checked) {
         nodePropertyCriterion {
             it.isChecked
         }
-    }
+    }.withTitleModifier("Checked")
 
     @AppletCategory(0x02_06)
     val isSelected = invertibleAppletOption(0xC0, R.string.is_selected) {
         nodePropertyCriterion {
             it.isSelected
         }
-    }
+    }.withTitleModifier("Selected")
 
     @AppletCategory(0x0207)
     val isScrollable = invertibleAppletOption(0xD0, R.string.is_scrollable) {
         nodePropertyCriterion {
             it.isScrollable
         }
-    }
+    }.withTitleModifier("Scrollable")
 
     // Position
     @AppletCategory(0x0300)

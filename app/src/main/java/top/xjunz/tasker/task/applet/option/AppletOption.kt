@@ -8,7 +8,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.Router.launchAction
 import java.util.*
 
@@ -29,6 +28,8 @@ abstract class AppletOption(
 
         const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
         const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
+
+        //TODO
         const val ACTION_EDIT_VALUE = "AO_EDIT_VAL"
 
         /**
@@ -46,15 +47,6 @@ abstract class AppletOption(
             } else {
                 value?.toString()
             }
-        }
-
-        private fun makeLabelSpan(label: CharSequence): CharSequence {
-            val index = label.indexOf('(')
-            if (index > -1) {
-                return label.subSequence(0, index) + label.substring(index)
-                    .foreColored(ColorScheme.textColorDisabled)
-            }
-            return label
         }
 
         fun makeRelationSpan(
@@ -80,6 +72,7 @@ abstract class AppletOption(
 
     var helpText: CharSequence? = null
         get() = if (helpTextRes != -1) helpTextRes.text else field
+        private set
 
     /**
      * Whether this is an valid option able to yield an applet.
@@ -131,9 +124,15 @@ abstract class AppletOption(
     var results: List<ValueDescriptor> = emptyList()
 
     val rawTitle: CharSequence?
-        get() = if (titleRes == TITLE_NONE) null else makeLabelSpan(titleRes.text)
+        get() = if (titleRes == TITLE_NONE) null else titleRes.text
 
     var valueChecker: ((Any?) -> String?)? = null
+
+    private var titleModifierRes: Int = -1
+
+    var titleModifier: String? = null
+        get() = if (titleModifierRes != -1) titleModifierRes.str else field
+        private set
 
     private val invertedTitleResource: Int by lazy {
         @SuppressLint("DiscouragedApi")
@@ -150,9 +149,7 @@ abstract class AppletOption(
     }
 
     val invertedTitle: CharSequence?
-        get() = if (invertedTitleResource == TITLE_NONE) null else makeLabelSpan(
-            invertedTitleResource.text
-        )
+        get() = if (invertedTitleResource == TITLE_NONE) null else invertedTitleResource.text
 
     val currentTitle get() = getTitle(null, isInverted)
 
@@ -310,6 +307,17 @@ abstract class AppletOption(
     fun withHelperText(@StringRes res: Int): AppletOption {
         helpTextRes = res
         helpText = null
+        return this
+    }
+
+    fun withTitleModifier(@StringRes res: Int): AppletOption {
+        titleModifierRes = res
+        return this
+    }
+
+    fun withTitleModifier(text: String): AppletOption {
+        titleModifier = text
+        titleModifierRes = -1
         return this
     }
 

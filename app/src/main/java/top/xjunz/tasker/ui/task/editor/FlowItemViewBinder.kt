@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
@@ -43,13 +42,14 @@ class FlowItemViewBinder(
             cgRefids.isVisible = false
             root.isEnabled = true
             tvTitle.isEnabled = true
+            bullet.isVisible = false
             var desc = option.describe(applet)
             var title = option.getTitle(applet) ?: applet.comment
             tvTitle.isVisible = true
             if (option.descAsTitle) {
                 title = desc
             } else if (applet.isContainer) {
-                title = if (applet.controlFlowParent is If) {
+                title = if (applet.controlFlow is If) {
                     R.string.matches_rule_set.text
                 } else {
                     R.string.execute_rule_set.text
@@ -57,7 +57,7 @@ class FlowItemViewBinder(
             }
             if (title != null && applet.index != 0 && applet !is ControlFlow) {
                 title = AppletOption.makeRelationSpan(
-                    title, applet, applet.controlFlowParent is If
+                    title, applet, applet.controlFlow is If
                 )
             }
 
@@ -68,8 +68,7 @@ class FlowItemViewBinder(
 
                 2 -> {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
-                    tvTitle.setTextColor(ColorScheme.textColorPrimary)
-                    title = "• ".casted<CharSequence>() + title
+                    bullet.isVisible = true
                 }
                 else -> {
                     dividerTop.isVisible = true
@@ -77,7 +76,7 @@ class FlowItemViewBinder(
                     dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                     tvNumber.text = (applet.index + 1).toString()
                     tvTitle.setTextAppearance(TextAppearance_Material3_LabelLarge)
-                    tvTitle.setTextColor(ColorScheme.textColorPrimary)
+                    // tvTitle.setTextColor(ColorScheme.textColorPrimary)
                     if (applet is Flow) {
                         val size = applet.size.toString().foreColored()
                         desc = R.string.format_applet_count.formatSpans(size)
@@ -86,6 +85,10 @@ class FlowItemViewBinder(
             }
             if (applet is ControlFlow) {
                 tvTitle.setTextColor(R.color.color_text_control_normal.colorStateList)
+            } else {
+                if (depth == 1) {
+                    title = title?.relativeSize(.8F)
+                }
             }
             // Set action
             if (applet is Flow) {

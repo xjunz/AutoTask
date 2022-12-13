@@ -15,19 +15,18 @@ import top.xjunz.tasker.engine.applet.factory.AppletFactory
 inline val Applet.isContainer: Boolean get() = javaClass == Flow::class.java
 
 /**
- * The nearest non-container parent flow.
+ * The nearest non-container parent of this applet, may be itself.
  */
-val Applet.nonContainerParent: Flow?
+val Applet.scopeFlow: Flow
     get() {
-        if (parent == null) return null
-        if (requireParent().isContainer) return requireParent().nonContainerParent
-        return requireParent()
+        if (this is Flow && !isContainer) return this
+        return requireParent().scopeFlow
     }
 
 /**
  * The nearest parent [ControlFlow].
  */
-val Applet.controlFlowParent: ControlFlow?
+val Applet.controlFlow: ControlFlow?
     get() {
         var controlFlow: Flow? = parent
         while (controlFlow != null && controlFlow !is ControlFlow) {

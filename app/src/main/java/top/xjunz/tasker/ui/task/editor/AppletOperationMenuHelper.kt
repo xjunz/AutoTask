@@ -1,10 +1,10 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.view.Gravity
-import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.FragmentManager
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -21,11 +21,12 @@ import top.xjunz.tasker.ui.demo.SwipeToRemoveDemo
 import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.widget.PopupListMenu
+import java.util.*
 
 /**
  * @author xjunz 2022/11/08
  */
-class FlowItemMenuHelper(
+class AppletOperationMenuHelper(
     val viewModel: FlowEditorViewModel,
     val factory: AppletOptionFactory,
     private val fm: FragmentManager
@@ -35,7 +36,19 @@ class FlowItemMenuHelper(
         AppletOptionOnClickListener(fm, factory)
     }
 
-    fun showMenu(anchor: View, applet: Applet): PopupMenu {
+    fun createBatchMenu(anchor: View, applets: List<Applet>): PopupMenu {
+        val popup = PopupListMenu(anchor.context, anchor, Gravity.END)
+        popup.inflate(R.menu.applet_batch_operation)
+        if (applets.size < 2) {
+            popup.menu.removeItem(R.id.item_merge)
+        }
+        popup.setOnMenuItemClickListener {
+            return@setOnMenuItemClickListener onBatchMenuItemClick(applets, it.itemId, it.title)
+        }
+        return popup
+    }
+
+    fun showStandaloneMenu(anchor: View, applet: Applet) {
         val popup = PopupListMenu(
             anchor.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
         )
@@ -58,7 +71,7 @@ class FlowItemMenuHelper(
                 return@l true
             }
         } else {
-            popup.menuInflater.inflate(R.menu.flow_editor, menu)
+            popup.inflate(R.menu.applet_operation)
             // Not container
             if (!applet.isContainer) {
                 menu.removeItem(R.id.item_split)
@@ -72,14 +85,21 @@ class FlowItemMenuHelper(
             if (applet.valueType == AppletValues.VAL_TYPE_IRRELEVANT && option.arguments.isEmpty()) {
                 menu.removeItem(R.id.item_edit)
             }
-            // Not movable
+            // Not removable
             if (applet.requiredIndex != -1) {
                 menu.removeItem(R.id.item_remove)
-                menu.removeItem(R.id.item_toggle_ability)
+                menu.removeItem(R.id.item_move)
+            }
+            // Not movable
+            if (applet is ControlFlow || applet.parent?.size == 1) {
+                menu.removeItem(R.id.item_move)
             }
             // Not child addable
             if (applet !is Flow || applet.size == applet.maxSize) {
                 menu.removeItem(R.id.item_add_inside)
+            }
+            if (applet !is Flow) {
+                menu.removeGroup(R.id.group_more)
             }
             if (applet is ControlFlow) {
                 if (factory.flowRegistry.getPeerOptions(applet, true).isEmpty()) {
@@ -96,66 +116,122 @@ class FlowItemMenuHelper(
                 menu.findItem(R.id.item_toggle_ability).title = R.string.enable.text
             }
             popup.setOnMenuItemClickListener {
-                onFlowMenuItemClick(anchor, applet, it.itemId, it)
+                onMenuItemClick(anchor, applet, it.itemId, it.title)
             }
         }
+        popup.setOnDismissListener {
+            viewModel.singleSelect(-1)
+        }
         popup.show()
-        return popup
     }
 
-    fun onFlowMenuItemClick(
-        anchor: View,
-        applet: Applet,
+    private fun onBatchMenuItemClick(
+        applets: Iterable<Applet>,
         id: Int,
-        item: MenuItem? = null
+        title: CharSequence?
     ): Boolean {
-        if (id == 0) return false
-        when (id) {
-            R.id.item_split -> viewModel.splitContainerFlow(applet as Flow)
-            R.id.item_edit -> optionOnClickListener.onClick(applet) {
-                viewModel.onAppletChanged.value = applet
+        return when (id) {
+            R.id.item_merge -> {
+                if (viewModel.selections.size < 2) {
+                    toast(R.string.error_merge_single_applet)
+                } else {
+                    viewModel.showMergeConfirmation.value = true
+                }
+                true
+            }
+            R.id.item_enable, R.id.item_disable -> {
+                applets.forEach {
+                    it.isEnabled = id == R.id.item_enable
+                    if (it is Flow) {
+                        viewModel.notifyFlowAbilityChanged(it)
+                    } else {
+                        viewModel.onAppletChanged.value = it
+                    }
+                }
+                true
+            }
+            R.id.item_invert -> {
+                applets.forEach {
+                    if (it.isInvertible) {
+                        it.toggleInversion()
+                        viewModel.onAppletChanged.value = it
+                    }
+                }
+                true
+            }
+            R.id.item_remove -> {
+                PreferenceHelpDialog().init(
+                    R.string.tip,
+                    R.string.help_swipe_to_remove,
+                    BuildConfig.DEBUG || Preferences.showSwipeToRemoveDemo
+                ) {
+                    Preferences.showSwipeToRemoveDemo = !it
+                    viewModel.removeApplets(applets)
+                }.setDemonstration {
+                    SwipeToRemoveDemo(it)
+                }.show(fm)
+                true
             }
             R.id.item_add_comment -> {
-                TextEditorDialog().init(item?.title, applet.comment) {
-                    if (it.isEmpty()) {
-                        applet.comment = null
-                    } else {
-                        applet.comment = it
+                val defText = applets.map { it.comment }.distinct()
+                TextEditorDialog().init(title, defText.singleOrNull()) { comment ->
+                    applets.forEach {
+                        if (comment.isEmpty()) {
+                            it.comment = null
+                        } else {
+                            it.comment = comment
+                        }
+                        viewModel.onAppletChanged.value = it
                     }
-                    viewModel.onAppletChanged.value = applet
                     return@init null
                 }.setAllowEmptyInput().configEditText {
                     it.configInputType(String::class.java, true)
                     it.maxLines = 10
                 }.show(fm)
+                true
             }
-            R.id.item_invert -> {
-                applet.toggleInversion()
+            else -> false
+        }
+    }
+
+    fun onMenuItemClick(
+        anchor: View,
+        applet: Applet,
+        id: Int,
+        title: CharSequence? = null
+    ): Boolean {
+        if (id == 0) return false
+        if (onBatchMenuItemClick(Collections.singleton(applet), id, title)) return true
+        when (id) {
+            R.id.item_open_in_new -> {
+                val dialog = FlowEditorDialog().setFlow(
+                    applet as Flow, viewModel.isSelectingRef
+                ).doOnCompletion { edited ->
+                    if (edited.isEmpty() && applet.isContainer) {
+                        // If all children in a container is removed, remove the container as well
+                        applet.requireParent().remove(applet)
+                        viewModel.updateChildrenIndexesIfNeeded(applet.requireParent())
+                    } else {
+                        // We don't need to replace the flow, just refilling it is ok
+                        applet.clear()
+                        applet.addAll(edited)
+                        viewModel.onAppletChanged.value = applet
+                    }
+                    viewModel.notifyFlowChanged()
+                }.doSplit {
+                    viewModel.splitContainerFlow(applet)
+                }
+                if (viewModel.isSelectingRef) {
+                    dialog.doOnReferenceSelected(viewModel.doOnRefSelected)
+                    dialog.setReferenceToSelect(
+                        viewModel.refSelectingApplet, viewModel.refValueDescriptor, null
+                    )
+                }
+                dialog.show(fm)
+            }
+            R.id.item_split -> viewModel.splitContainerFlow(applet as Flow)
+            R.id.item_edit -> optionOnClickListener.onClick(applet) {
                 viewModel.onAppletChanged.value = applet
-            }
-            R.id.item_remove -> {
-                PreferenceHelpDialog().init(
-                    R.string.prompt,
-                    R.string.help_swipe_to_remove,
-                    Preferences.showSwipeToRemoveDemo
-                ) {
-                    Preferences.showSwipeToRemoveDemo = !it
-                    viewModel.removeApplet(applet)
-                }.setDemonstration {
-                    SwipeToRemoveDemo(it)
-                }.show(fm)
-            }
-            R.id.item_select -> {
-                PreferenceHelpDialog().init(
-                    R.string.select,
-                    R.string.help_long_click_to_select,
-                    Preferences.showLongClickToSelectDemo
-                ) {
-                    Preferences.showLongClickToSelectDemo = !it
-                    viewModel.toggleMultiSelection(applet)
-                }.setDemonstration {
-                    LongClickToSelectDemo(it)
-                }.show(fm)
             }
             R.id.item_toggle_ability -> {
                 applet.toggleAbility()
@@ -165,15 +241,26 @@ class FlowItemMenuHelper(
                     viewModel.onAppletChanged.value = applet
                 }
             }
+            R.id.item_select -> PreferenceHelpDialog().init(
+                R.string.tip,
+                R.string.help_long_click_to_select,
+                BuildConfig.DEBUG || Preferences.showLongClickToSelectDemo
+            ) { noMore ->
+                Preferences.showLongClickToSelectDemo = !noMore
+                viewModel.multiSelect(applet)
+            }.setDemonstration {
+                LongClickToSelectDemo(it)
+            }.show(fm)
+
             R.id.item_add_inside -> {
                 val flow = applet as Flow
                 if (flow.size == flow.maxSize) {
-                    toast(R.string.reach_max_applet_size)
+                    toast(R.string.error_reach_max_applet_size)
                     return true
                 }
                 AppletSelectorDialog().doOnCompletion {
                     if (flow.size + it.size > Applet.MAX_FLOW_CHILD_COUNT) {
-                        toast(R.string.over_max_applet_size)
+                        toast(R.string.error_over_max_applet_size)
                         return@doOnCompletion
                     }
                     val last = flow.lastOrNull()
@@ -193,7 +280,7 @@ class FlowItemMenuHelper(
                     val popup = PopupMenu(
                         anchor.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
                     )
-                    popup.menu.add(item?.title)
+                    popup.menu.add(title)
                     val options = viewModel.factory.flowRegistry.getPeerOptions(applet, addBefore)
                     options.forEach {
                         popup.menu.add(it.rawTitle)
@@ -219,12 +306,12 @@ class FlowItemMenuHelper(
                 } else {
                     val flow = applet.requireParent()
                     if (flow.size == flow.maxSize) {
-                        toast(R.string.reach_max_applet_size)
+                        toast(R.string.error_reach_max_applet_size)
                         return true
                     }
                     AppletSelectorDialog().doOnCompletion { applets ->
                         if (flow.size + applets.size > Applet.MAX_FLOW_CHILD_COUNT) {
-                            toast(R.string.over_max_applet_size)
+                            toast(R.string.error_over_max_applet_size)
                             return@doOnCompletion
                         }
                         if (addBefore) {

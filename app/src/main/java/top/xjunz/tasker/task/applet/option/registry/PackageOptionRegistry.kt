@@ -9,6 +9,7 @@ import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
 import top.xjunz.tasker.engine.applet.serialization.AppletValues
 import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
@@ -53,7 +54,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         } else {
             R.string.format_act_collection_desc.formatSpans(it.size.toString().foreColored())
         }
-    }
+    }.withTitleModifier("Activity")
 
     @AppletCategory(0x00_02)
     val paneTitle = appletOption(0x02, R.string.with_pane_title) {
@@ -80,6 +81,19 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     private val versionRange = invertibleAppletOption(0x30, R.string.in_version_range) {
         NumberRangeCriterion<PackageInfoContext, Int> {
             PackageInfoCompat.getLongVersionCode(it.packageInfo).toInt()
+        }
+    }.withValueDescriber<Collection<Int>> {
+        val first = it.firstOrNull()
+        val last = it.lastOrNull()
+        check(first != null || last != null)
+        if (first == last) {
+            first.toString()
+        } else if (first == null && last != null) {
+            R.string.format_less_than.format(last)
+        } else if (first != null && last == null) {
+            R.string.format_larger_than.format(first)
+        } else {
+            R.string.format_range.format(first, last)
         }
     }
 

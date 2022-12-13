@@ -1,5 +1,6 @@
 package top.xjunz.tasker.ui.task.editor
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
@@ -14,10 +15,10 @@ import com.google.android.material.transition.platform.MaterialFadeThrough
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.nonContainerParent
+import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 import top.xjunz.tasker.task.applet.whichReference
@@ -36,8 +37,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     private val globalViewModel by activityViewModels<GlobalFlowEditorViewModel>()
 
+    private inline val factory get() = globalViewModel.factory
+
     private val adapter by lazy {
         TaskFlowAdapter(this)
+    }
+
+    private val menuHelper by lazy {
+        AppletOperationMenuHelper(viewModel, factory, childFragmentManager)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,17 +73,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             v.updatePadding(top = insets.top)
         }
         binding.rvTaskEditor.adapter = adapter
-
-        binding.ibMerge.setOnClickListener {
-            if (viewModel.selections.size < 2) {
-                toast(R.string.error_merge_single_applet)
-            } else {
-                viewModel.showMergeConfirmation.value = true
-            }
-        }
-        viewModel.isFabVisible.value = viewModel.isEditingContainerFlow ||
+        viewModel.isFabVisible.value = viewModel.isInEditionMode ||
                 (viewModel.isSelectingRef && globalViewModel.selectedRefs.isNotEmpty())
-        if (viewModel.isEditingContainerFlow) {
+        if (viewModel.isInEditionMode) {
             binding.fabAction.text = R.string.add_rules.text
             binding.fabAction.setIconResource(R.drawable.ic_baseline_add_24)
         } else if (viewModel.isSelectingRef) {
@@ -88,16 +87,25 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 if (globalViewModel.selectedRefs.isNotEmpty())
                     confirmReferenceSelections()
             } else {
+                val flow = viewModel.flow
+                if (flow.size == flow.requiredSize) {
+                    toast(R.string.error_reach_max_applet_size)
+                    return@setOnClickListener
+                }
                 AppletSelectorDialog().doOnCompletion {
-                    viewModel.flow.addAll(it)
+                    if (flow.size + it.size > Applet.MAX_FLOW_CHILD_COUNT) {
+                        toast(R.string.error_over_max_applet_size)
+                        return@doOnCompletion
+                    }
+                    flow.addAll(it)
                     viewModel.notifyFlowChanged()
-                }.scopedBy(viewModel.flow.nonContainerParent!!).show(childFragmentManager)
+                }.scopedBy(flow).show(childFragmentManager)
             }
         }
         binding.ibDismiss.setOnClickListener {
             onBackPressed()
         }
-        binding.ibSplit.isVisible = viewModel.isEditingContainerFlow && !viewModel.isReadyOnly
+        binding.ibSplit.isVisible = viewModel.flow.isContainer && viewModel.isInEditionMode
         binding.ibSplit.setOnClickListener {
             viewModel.showSplitConfirmation.value = true
         }
@@ -105,6 +113,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         binding.ibCheck.setOnClickListener {
             viewModel.complete()
             dismiss()
+        }
+        if (viewModel.flow is RootFlow) {
+            binding.rvBreadCrumbs.isVisible = false
+        } else {
+            binding.rvBreadCrumbs.isVisible = true
+            binding.rvBreadCrumbs.adapter = FlowCascadeAdapter(viewModel, factory)
         }
     }
 
@@ -140,16 +154,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             dialog.setDropDownData(distinctRefids.toTypedArray())
         }
         dialog.show(childFragmentManager)
-        /*if (applet.referred.containsKey(which)) {
-            // Already a tag for this reference
-            viewModel.doOnRefSelected(applet, which, applet.referred.getValue(which))
-            // Notify ref selected
-            globalViewModel.onReferenceSelected.value = true
-        } else {
-
-        }*/
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun observeLiveData() {
         observeNostalgic(viewModel.selectedApplet) { prev, cur ->
             if (prev != null)
@@ -180,17 +187,25 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 if (viewModel.isNewTask) {
                     binding.tvTitle.text = R.string.create_task.text
                 } else {
-                    binding.tvTitle.text = R.string.edit_task.text
+                    if (viewModel.isBase) {
+                        binding.tvTitle.text = R.string.edit_task.text
+                    } else {
+                        binding.tvTitle.text = R.string.edit_rules.text
+                    }
                 }
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.dismiss.text)
             } else {
                 binding.tvTitle.text = R.string.format_selection_count.format(it.size)
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.quit_multi_selection.text)
             }
-            val showMergeBtn = it.isNotEmpty() && it.first() !is ControlFlow
-            if (binding.ibMerge.isVisible != showMergeBtn) {
-                binding.appBar.beginAutoTransition()
-                binding.ibMerge.isVisible = showMergeBtn
+            binding.appBar.beginAutoTransition()
+            binding.ibMenu.isVisible = it.isNotEmpty()
+            if (it.isNotEmpty()) {
+                val popup = menuHelper.createBatchMenu(binding.ibMenu, it)
+                binding.ibMenu.setOnTouchListener(popup.dragToOpenListener)
+                binding.ibMenu.setOnClickListener {
+                    popup.show()
+                }
             }
         }
         observeConfirmation(viewModel.showSplitConfirmation, R.string.prompt_split_container_flow) {
@@ -233,7 +248,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     it.hashCode() == hashcode
                 } ?: return@doOnAction
                 val refid = split[0]
-                val option = globalViewModel.factory.requireOption(applet)
+                val option = factory.requireOption(applet)
                 val arg = option.arguments[applet.whichReference(refid)]
                 FlowEditorDialog().setFlow(globalViewModel.root, true)
                     .setReferenceToSelect(applet, arg, refid)
@@ -284,6 +299,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     fun setFlow(flow: Flow?, readonly: Boolean) = doWhenCreated {
         val root = flow ?: globalViewModel.generateDefaultFlow()
-        viewModel.initialize(globalViewModel.factory, root, flow == null, readonly)
+        viewModel.initialize(factory, root, flow == null, readonly)
     }
 }

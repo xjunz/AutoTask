@@ -21,6 +21,9 @@
         android:id="@+id/item_select"
         android:title="@string/select" />
     <item
+        android:id="@+id/item_move"
+        android:title="@string/move" />
+    <item
         android:id="@+id/item_add_comment"
         android:title="@string/add_comment" />
 
@@ -35,4 +38,11 @@
     <item
         android:id="@+id/item_add_after"
         android:title="@string/add_after" />
+    <group android:id="@+id/group_more">
+        <item android:title="@string/more" />
+
+        <item
+            android:id="@+id/item_open_in_new"
+            android:title="@string/open_in_new" />
+    </group>
 </menu>

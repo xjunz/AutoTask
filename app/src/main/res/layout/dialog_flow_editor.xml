@@ -18,9 +18,11 @@
             app:liftOnScrollTargetViewId="@id/rv_task_editor">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/app_bar_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:minHeight="?actionBarSize">
+                android:minHeight="?actionBarSize"
+                android:paddingVertical="12dp">
 
                 <TextView
                     android:id="@+id/tv_title"
@@ -29,7 +31,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="4dp"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@+id/ib_dismiss"
                     app:layout_constraintEnd_toStartOf="@+id/ib_split"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -43,7 +45,6 @@
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/complete}"
                     android:src="@drawable/ic_baseline_check_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?colorOnPrimaryContainer" />
@@ -56,22 +57,20 @@
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@android:string/cancel}"
                     android:src="@drawable/ic_baseline_close_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ib_check"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_goneMarginEnd="12dp"
                     app:tint="?colorOnPrimaryContainer" />
 
                 <ImageButton
-                    android:id="@+id/ib_merge"
+                    android:id="@+id/ib_menu"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_selectable_circle"
-                    android:contentDescription="@{@string/merge_rules}"
-                    android:src="@drawable/ic_baseline_merge_type_24"
+                    android:contentDescription="@{@string/more}"
+                    android:src="@drawable/ic_baseline_menu_24"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ib_dismiss"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?colorOnPrimaryContainer"
@@ -86,13 +85,35 @@
                     android:contentDescription="@{@string/split_merged_rules}"
                     android:src="@drawable/ic_baseline_call_split_24"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_merge"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_menu"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?colorOnPrimaryContainer"
                     tools:visibility="visible" />
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_bread_crumbs"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:fadingEdgeLength="16dp"
+                    android:nestedScrollingEnabled="false"
+                    android:orientation="horizontal"
+                    android:overScrollMode="ifContentScrolls"
+                    android:requiresFadingEdge="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ib_check"
+                    tools:listitem="@layout/item_flow_cascade" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                app:dividerColor="@color/material_on_surface_stroke" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -113,6 +134,7 @@
             android:layout_gravity="bottom|center_horizontal"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
             tools:icon="@drawable/ic_baseline_add_24"
+            tools:layout_marginBottom="16dp"
             tools:text="@string/add_rules" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

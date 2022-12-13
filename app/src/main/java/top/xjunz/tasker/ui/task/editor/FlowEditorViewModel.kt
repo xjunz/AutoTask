@@ -27,7 +27,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     inline val isInMultiSelectionMode get() = selections.size > 0
 
-    inline val isEditingContainerFlow get() = flow.parent != null && flow.isContainer && !isReadyOnly
+    inline val isInEditionMode get() = flow.parent != null && !isReadyOnly
 
     lateinit var refSelectingApplet: Applet
 
@@ -53,7 +53,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var doSplit: () -> Unit
 
-    private fun multiSelect(applet: Applet) {
+    fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
             toast(R.string.prompt_applet_multi_selection_depth)
         } else {
@@ -75,7 +75,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
     }
 
-    private fun multiUnselect(applet: Applet) {
+    fun multiUnselect(applet: Applet) {
         selections.remove(applet)
         onAppletChanged.value = applet
         selectionLiveData.notifySelfChanged()

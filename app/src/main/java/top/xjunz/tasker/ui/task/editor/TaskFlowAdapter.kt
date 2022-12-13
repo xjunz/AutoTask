@@ -17,7 +17,6 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.configHeaderTitle
 import top.xjunz.tasker.ktx.indexOf
 import top.xjunz.tasker.ktx.modifyAlpha
-import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
@@ -41,7 +40,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
     private val menuHelper =
-        FlowItemMenuHelper(viewModel, globalViewModel.factory, fragment.childFragmentManager)
+        AppletOperationMenuHelper(viewModel, globalViewModel.factory, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -146,9 +145,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                     viewModel.toggleMultiSelection(applet)
                 } else {
                     viewModel.singleSelect(adapterPosition)
-                    menuHelper.showMenu(view, applet).setOnDismissListener {
-                        viewModel.singleSelect(-1)
-                    }
+                    menuHelper.showStandaloneMenu(view, applet)
                 }
             }
             binding.root.setOnLongClickListener {
@@ -169,30 +166,13 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         notifyItemChanged(adapterPosition)
                     }
                     FlowItemViewBinder.ACTION_EDIT -> {
-                        menuHelper.onFlowMenuItemClick(it, applet, R.id.item_edit)
+                        menuHelper.onMenuItemClick(it, applet, R.id.item_edit)
                     }
                     FlowItemViewBinder.ACTION_ADD -> {
-                        menuHelper.onFlowMenuItemClick(it, applet, R.id.item_add_inside)
+                        menuHelper.onMenuItemClick(it, applet, R.id.item_add_inside)
                     }
                     FlowItemViewBinder.ACTION_ENTER -> {
-                        val dialog = FlowEditorDialog().setFlow(
-                            applet as Flow, viewModel.isSelectingRef
-                        ).doOnCompletion { edited ->
-                            // We don't need to replace the flow, just refilling it is ok
-                            applet.clear()
-                            applet.addAll(edited)
-                            viewModel.regenerateApplets()
-                            viewModel.onAppletChanged.value = applet
-                        }.doSplit {
-                            viewModel.splitContainerFlow(applet)
-                        }
-                        if (viewModel.isSelectingRef) {
-                            dialog.doOnReferenceSelected(viewModel.doOnRefSelected)
-                            dialog.setReferenceToSelect(
-                                viewModel.refSelectingApplet, viewModel.refValueDescriptor, null
-                            )
-                        }
-                        dialog.show(fragment.childFragmentManager)
+                        menuHelper.onMenuItemClick(it, applet, R.id.item_open_in_new)
                     }
                 }
             }

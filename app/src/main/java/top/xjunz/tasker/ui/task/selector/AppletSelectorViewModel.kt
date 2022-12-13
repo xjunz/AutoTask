@@ -9,10 +9,11 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
-import top.xjunz.tasker.task.applet.controlFlowParent
+import top.xjunz.tasker.task.applet.controlFlow
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.applet.scopeFlow
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
 
 /**
@@ -43,26 +44,27 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     var title: CharSequence? = null
 
     fun setScope(flow: Flow) {
+        val scope = flow.scopeFlow
         // Find its control flow, we need its control flow's option title to be shown
-        val controlFlow = if (flow is ControlFlow) flow else flow.controlFlowParent
-        checkNotNull(controlFlow) {
+        val control = if (scope is ControlFlow) scope else scope.controlFlow
+        checkNotNull(control) {
             "ControlFlow not found!"
         }
-        isInCriterionScope = controlFlow is If
-        title = appletOptionFactory.requireOption(controlFlow).rawTitle
-        if (flow !is ScopedFlow<*>) {
-            isScoped = false
-            if (controlFlow is If) {
-                registryOptions = appletOptionFactory.flowRegistry.criterionFlowOptions
-            } else if (controlFlow is Do) {
-                registryOptions = appletOptionFactory.flowRegistry.actionFlowOptions
-            }
-        } else {
+        isInCriterionScope = control is If
+        title = appletOptionFactory.requireOption(control).rawTitle
+        if (scope is ScopedFlow<*>) {
             isScoped = true
-            registryOptions = arrayOf(appletOptionFactory.requireRegistryOption(flow.appletId))
+            registryOptions = arrayOf(appletOptionFactory.requireRegistryOption(scope.appletId))
             // If scoped, do not show extra options from other registry, like showing component
             // options while showing ui object options.
             if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
+        } else {
+            isScoped = false
+            if (control is If) {
+                registryOptions = appletOptionFactory.flowRegistry.criterionFlowOptions
+            } else if (control is Do) {
+                registryOptions = appletOptionFactory.flowRegistry.actionFlowOptions
+            }
         }
     }
 

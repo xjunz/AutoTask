@@ -13,7 +13,7 @@ import top.xjunz.tasker.R
 
 @CheckResult
 inline fun Context.makeSimplePromptDialog(
-    title: Int = R.string.prompt, msg: Int,
+    title: Int = R.string.tip, msg: Int,
     showCancellationBtn: Boolean = true,
     crossinline positiveAction: () -> Unit = {}
 ): AlertDialog.Builder {
@@ -22,7 +22,7 @@ inline fun Context.makeSimplePromptDialog(
 
 @CheckResult
 inline fun Context.makeSimplePromptDialog(
-    title: CharSequence = R.string.prompt.text, msg: CharSequence,
+    title: CharSequence = R.string.tip.text, msg: CharSequence,
     showCancellationBtn: Boolean = true,
     crossinline positiveAction: () -> Unit = {}
 ): AlertDialog.Builder {

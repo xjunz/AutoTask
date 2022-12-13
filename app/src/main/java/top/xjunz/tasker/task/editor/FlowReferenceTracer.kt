@@ -85,10 +85,6 @@ class FlowReferenceTracer {
         return referenceRevocations.keys.map { it.applet }.toSet()
     }
 
-    fun getRefidChangedApplets(): Set<Applet> {
-        return refidRevocations.keys.map { it.applet }.toSet()
-    }
-
     fun reset() {
         referenceRevocations.clear()
         refidRevocations.clear()

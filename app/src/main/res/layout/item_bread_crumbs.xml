@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:clipToPadding="false"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="2dp">
 
-        <TextView
-            android:id="@+id/tv_title"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_bread_crumb"
+            style="@style/Widget.Material3.CardView.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="4dp"
-            android:background="@drawable/bg_selectable_primary_surface"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            tools:text="@tools:sample/lorem" />
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
+            app:strokeColor="@color/material_on_surface_stroke">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:textColor="?colorPrimary"
+                tools:text="@tools:sample/lorem" />
+        </com.google.android.material.card.MaterialCardView>
+
 
         <ImageView
             android:id="@+id/iv_chevron_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_baseline_chevron_right_24"
+            app:tint="?colorPrimary"
             tools:ignore="ContentDescription" />
     </LinearLayout>
 </layout>

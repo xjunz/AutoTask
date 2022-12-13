@@ -33,6 +33,8 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     val onAppletChanged = MutableLiveData<Applet?>()
 
+    val onNavigateFlow = MutableLiveData<Flow>()
+
     val tracer = FlowReferenceTracer()
 
     fun renameRefidInRoot(prev: Set<String>, cur: String) {

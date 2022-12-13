@@ -41,6 +41,7 @@ class ActivitySelectorFragment : BaseComponentFragment() {
         super.onViewCreated(view, savedInstanceState)
         observe(viewModel.selectedPackage) {
             loadingJob?.cancel()
+            loadingJob = null
             loadActivities(it)
         }
         binding.touchEater.setOnTouchListener { _, _ -> true }
