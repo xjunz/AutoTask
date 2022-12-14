@@ -292,10 +292,12 @@
     <string name="disable">禁用</string>
     <string name="comment">说明:&#160;</string>
     <string name="input_repeat_count">请输入重复执行次数。</string>
-    <string name="help_swipe_to_remove">在规则列表中水平滑动某个规则即可将其直接移除哦！</string>
-    <string name="help_long_click_to_select">在规则列表中长按某个规则即可将其选中哦！</string>
+    <string name="tip_swipe_to_remove">在规则列表中水平滑动某个规则即可将其直接移除哦！</string>
+    <string name="tip_long_click_to_select">在规则列表中长按某个规则即可将其选中哦！</string>
     <string name="undo">撤销</string>
     <string name="open_in_new">在新窗口中打开</string>
     <string name="edit_rules">编辑规则</string>
     <string name="move">移动</string>
+    <string name="tip_drag_to_move">长按某一规则，然后上下拖动便可移动其位置哦！</string>
+    <string name="event">触发事件</string>
 </resources>

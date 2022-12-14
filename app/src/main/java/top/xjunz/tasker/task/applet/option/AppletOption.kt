@@ -106,18 +106,24 @@ abstract class AppletOption(
     val categoryIndex: Int get() = categoryId ushr 8
 
     var presetsNameRes: Int = -1
+        private set
 
     var presetsValueRes: Int = -1
+        private set
 
     val hasPresets get() = presetsNameRes != -1 && presetsValueRes != -1
 
     var descAsTitle: Boolean = false
+        private set
 
-    var isComplexTitle: Boolean = false
+    var isTitleComplex: Boolean = false
+        private set
 
     var isShizukuOnly = false
+        private set
 
     var isA11yOnly = false
+        private set
 
     var arguments: List<ValueDescriptor> = emptyList()
 
@@ -126,7 +132,14 @@ abstract class AppletOption(
     val rawTitle: CharSequence?
         get() = if (titleRes == TITLE_NONE) null else titleRes.text
 
+    // TODO
     var valueChecker: ((Any?) -> String?)? = null
+
+    /**
+     * The applet's value is innate and hence not modifiable.
+     */
+    var isValueInnate: Boolean = false
+        private set
 
     private var titleModifierRes: Int = -1
 
@@ -154,7 +167,7 @@ abstract class AppletOption(
     val currentTitle get() = getTitle(null, isInverted)
 
     private fun getTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
-        if (isComplexTitle) {
+        if (isTitleComplex) {
             return getComplexTitle(applet)
         }
         return if (isInverted) invertedTitle else rawTitle
@@ -179,6 +192,11 @@ abstract class AppletOption(
         return this
     }
 
+    fun hasInnateValue(): AppletOption {
+        isValueInnate = true
+        return this
+    }
+
     fun describe(applet: Applet): CharSequence? = describer(applet, applet.value)
 
     val rawDescription: CharSequence?
@@ -196,7 +214,7 @@ abstract class AppletOption(
             it.id = registryId shl 16 or appletId
             it.isInverted = isInverted
             it.isInvertible = isInvertible
-            it.value = value
+            if (!isValueInnate) it.value = value
         }
     }
 
@@ -258,7 +276,7 @@ abstract class AppletOption(
     }
 
     fun hasCompositeTitle(): AppletOption {
-        isComplexTitle = true
+        isTitleComplex = true
         return this
     }
 

@@ -32,18 +32,18 @@ class FlowItemViewBinder(
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
         val option = viewModel.factory.requireOption(applet)
         holder.binding.apply {
-            root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
                     || (viewModel.isSelectingRef && globalViewModel.isRefSelected(applet))
+            root.isEnabled = true
             ibAction.tag = null
             tvNumber.isVisible = false
             dividerTop.isVisible = false
             dividerBott.isVisible = false
             cgRefids.isVisible = false
-            root.isEnabled = true
             tvTitle.isEnabled = true
             bullet.isVisible = false
-            var desc = option.describe(applet)
+            // Don't show innate value
+            var desc = if (option.isValueInnate) null else option.describe(applet)
             var title = option.getTitle(applet) ?: applet.comment
             tvTitle.isVisible = true
             if (option.descAsTitle) {
@@ -114,7 +114,7 @@ class FlowItemViewBinder(
                     }
                 }
             } else {
-                if (option.arguments.isNotEmpty() || applet.value != null) {
+                if (option.arguments.isNotEmpty() || (applet.value != null && !option.isValueInnate)) {
                     ibAction.tag = ACTION_EDIT
                     ibAction.setImageResource(R.drawable.ic_edit_24dp)
                     ibAction.setContentDescriptionAndTooltip(R.string.edit.text)

@@ -4,7 +4,6 @@ import android.view.Gravity
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.FragmentManager
-import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -16,6 +15,7 @@ import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
+import top.xjunz.tasker.ui.demo.DragToMoveDemo
 import top.xjunz.tasker.ui.demo.LongClickToSelectDemo
 import top.xjunz.tasker.ui.demo.SwipeToRemoveDemo
 import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
@@ -89,6 +89,8 @@ class AppletOperationMenuHelper(
             if (applet.requiredIndex != -1) {
                 menu.removeItem(R.id.item_remove)
                 menu.removeItem(R.id.item_move)
+                // Disabled item is regarded as removed, so remove ability toggle
+                menu.removeItem(R.id.item_toggle_ability)
             }
             // Not movable
             if (applet is ControlFlow || applet.parent?.size == 1) {
@@ -97,6 +99,15 @@ class AppletOperationMenuHelper(
             // Not child addable
             if (applet !is Flow || applet.size == applet.maxSize) {
                 menu.removeItem(R.id.item_add_inside)
+            }
+            if (!Preferences.showDragToMoveTip) {
+                menu.removeItem(R.id.item_move)
+            }
+            if (!Preferences.showSwipeToRemoveTip) {
+                menu.removeItem(R.id.item_remove)
+            }
+            if (!Preferences.showLongClickToSelectTip) {
+                menu.removeItem(R.id.item_select)
             }
             if (applet !is Flow) {
                 menu.removeGroup(R.id.group_more)
@@ -130,57 +141,38 @@ class AppletOperationMenuHelper(
         id: Int,
         title: CharSequence?
     ): Boolean {
-        return when (id) {
-            R.id.item_merge -> {
-                if (viewModel.selections.size < 2) {
-                    toast(R.string.error_merge_single_applet)
+        when (id) {
+            R.id.item_merge -> if (viewModel.selections.size < 2) {
+                toast(R.string.error_merge_single_applet)
+            } else {
+                viewModel.showMergeConfirmation.value = true
+            }
+            R.id.item_enable, R.id.item_disable -> applets.forEach {
+                if (it.requiredIndex != -1) return@forEach
+                it.isEnabled = id == R.id.item_enable
+                if (it is Flow) {
+                    viewModel.notifyFlowAbilityChanged(it)
                 } else {
-                    viewModel.showMergeConfirmation.value = true
+                    viewModel.onAppletChanged.value = it
                 }
-                true
             }
-            R.id.item_enable, R.id.item_disable -> {
-                applets.forEach {
-                    it.isEnabled = id == R.id.item_enable
-                    if (it is Flow) {
-                        viewModel.notifyFlowAbilityChanged(it)
-                    } else {
-                        viewModel.onAppletChanged.value = it
-                    }
+            R.id.item_invert -> applets.forEach {
+                if (it.isInvertible) {
+                    it.toggleInversion()
+                    viewModel.onAppletChanged.value = it
                 }
-                true
             }
-            R.id.item_invert -> {
-                applets.forEach {
-                    if (it.isInvertible) {
-                        it.toggleInversion()
-                        viewModel.onAppletChanged.value = it
-                    }
-                }
-                true
-            }
-            R.id.item_remove -> {
-                PreferenceHelpDialog().init(
-                    R.string.tip,
-                    R.string.help_swipe_to_remove,
-                    BuildConfig.DEBUG || Preferences.showSwipeToRemoveDemo
-                ) {
-                    Preferences.showSwipeToRemoveDemo = !it
-                    viewModel.removeApplets(applets)
+            R.id.item_remove ->
+                PreferenceHelpDialog().init(R.string.tip, R.string.tip_swipe_to_remove) {
+                    Preferences.showSwipeToRemoveTip = !it
                 }.setDemonstration {
                     SwipeToRemoveDemo(it)
                 }.show(fm)
-                true
-            }
             R.id.item_add_comment -> {
                 val defText = applets.map { it.comment }.distinct()
                 TextEditorDialog().init(title, defText.singleOrNull()) { comment ->
                     applets.forEach {
-                        if (comment.isEmpty()) {
-                            it.comment = null
-                        } else {
-                            it.comment = comment
-                        }
+                        if (comment.isEmpty()) it.comment = null else it.comment = comment
                         viewModel.onAppletChanged.value = it
                     }
                     return@init null
@@ -188,10 +180,10 @@ class AppletOperationMenuHelper(
                     it.configInputType(String::class.java, true)
                     it.maxLines = 10
                 }.show(fm)
-                true
             }
-            else -> false
+            else -> return false
         }
+        return true
     }
 
     fun onMenuItemClick(
@@ -241,13 +233,15 @@ class AppletOperationMenuHelper(
                     viewModel.onAppletChanged.value = applet
                 }
             }
+            R.id.item_move -> PreferenceHelpDialog().init(R.string.tip, R.string.tip_drag_to_move) {
+                Preferences.showDragToMoveTip = !it
+            }.setDemonstration {
+                DragToMoveDemo(it)
+            }.show(fm)
             R.id.item_select -> PreferenceHelpDialog().init(
-                R.string.tip,
-                R.string.help_long_click_to_select,
-                BuildConfig.DEBUG || Preferences.showLongClickToSelectDemo
-            ) { noMore ->
-                Preferences.showLongClickToSelectDemo = !noMore
-                viewModel.multiSelect(applet)
+                R.string.tip, R.string.tip_long_click_to_select
+            ) {
+                Preferences.showLongClickToSelectTip = !it
             }.setDemonstration {
                 LongClickToSelectDemo(it)
             }.show(fm)
@@ -258,11 +252,7 @@ class AppletOperationMenuHelper(
                     toast(R.string.error_reach_max_applet_size)
                     return true
                 }
-                AppletSelectorDialog().doOnCompletion {
-                    if (flow.size + it.size > Applet.MAX_FLOW_CHILD_COUNT) {
-                        toast(R.string.error_over_max_applet_size)
-                        return@doOnCompletion
-                    }
+                AppletSelectorDialog().init(flow) {
                     val last = flow.lastOrNull()
                     flow.addAll(it)
                     // Notify divider changed
@@ -272,7 +262,7 @@ class AppletOperationMenuHelper(
                         viewModel.onAppletChanged.value = flow
                     }
                     viewModel.notifyFlowChanged()
-                }.scopedBy(flow).show(fm)
+                }.show(fm)
             }
             R.id.item_add_before, R.id.item_add_after -> {
                 val addBefore = id == R.id.item_add_before
@@ -309,11 +299,7 @@ class AppletOperationMenuHelper(
                         toast(R.string.error_reach_max_applet_size)
                         return true
                     }
-                    AppletSelectorDialog().doOnCompletion { applets ->
-                        if (flow.size + applets.size > Applet.MAX_FLOW_CHILD_COUNT) {
-                            toast(R.string.error_over_max_applet_size)
-                            return@doOnCompletion
-                        }
+                    AppletSelectorDialog().init(flow) { applets ->
                         if (addBefore) {
                             flow.addAll(applet.index, applets)
                             viewModel.updateChildrenIndexesIfNeeded(flow)
@@ -323,7 +309,7 @@ class AppletOperationMenuHelper(
                             viewModel.onAppletChanged.value = applet
                         }
                         viewModel.notifyFlowChanged()
-                    }.scopedBy(flow).show(fm)
+                    }.show(fm)
                 }
             }
         }

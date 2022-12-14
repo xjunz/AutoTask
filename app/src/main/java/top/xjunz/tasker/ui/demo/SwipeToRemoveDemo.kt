@@ -26,15 +26,12 @@ class SwipeToRemoveDemo(context: Context) : Demonstration(context) {
 
     private lateinit var animator: AnimatorSet
 
-    private val demoAdapter by lazy {
+    private val demoAdapter =
         inlineAdapter(data, ItemFlowOptDemoBinding::class.java, {}) { b, _, _ ->
             b.root.translationX = 0F
         }
-    }
 
-    private val binding by lazy {
-        LayoutFlowOptDemoBinding.inflate(LayoutInflater.from(context))
-    }
+    private val binding = LayoutFlowOptDemoBinding.inflate(LayoutInflater.from(context))
 
     @SuppressLint("ClickableViewAccessibility")
     override fun getView(): View {
@@ -47,7 +44,7 @@ class SwipeToRemoveDemo(context: Context) : Demonstration(context) {
         return binding.root
     }
 
-    private var multipiler = 1
+    private var multiplier = 1
 
     override fun startDemonstration() {
         val list = binding.rvDemo
@@ -60,23 +57,23 @@ class SwipeToRemoveDemo(context: Context) : Demonstration(context) {
         animator = AnimatorSet()
         val showPointer = ObjectAnimator.ofFloat(binding.pointer, View.ALPHA, 0F, .8F)
         val swipePointer = ObjectAnimator.ofFloat(
-            binding.pointer, View.TRANSLATION_X, 0F, multipiler * item.width / 2F
+            binding.pointer, View.TRANSLATION_X, 0F, multiplier * item.width / 2F
         )
         swipePointer.interpolator = FastOutSlowInInterpolator()
-        swipePointer.duration = 750
+        swipePointer.duration = 500
         val swipeItem = ObjectAnimator.ofFloat(
             item, View.TRANSLATION_X, 0F,
-            multipiler * item.width.toFloat()
+            multiplier * item.width.toFloat()
         )
         swipeItem.interpolator = Motions.EASING_EMPHASIZED
-        swipeItem.duration = 780
+        swipeItem.duration = 530
         val hidePointer = ObjectAnimator.ofFloat(binding.pointer, View.ALPHA, 0F)
         swipeItem.doOnEnd {
             data.removeAt(m)
             demoAdapter.notifyItemRemoved(m)
             data.add(0)
-            multipiler = -multipiler
-            list.postDelayed(1000L) {
+            multiplier = -multiplier
+            list.postDelayed(800L) {
                 item.translationX = 0F
                 startDemonstration()
             }

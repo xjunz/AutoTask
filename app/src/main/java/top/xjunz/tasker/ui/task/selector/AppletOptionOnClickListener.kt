@@ -34,6 +34,8 @@ open class AppletOptionOnClickListener(
     open fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         val title = option.getTitle(applet)!!
         when {
+            option.isValueInnate -> onCompleted()
+
             applet is Action ->
                 actionOptionOnClickListener.onClick(applet, option, onCompleted)
 

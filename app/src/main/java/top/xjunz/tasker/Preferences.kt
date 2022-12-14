@@ -22,8 +22,9 @@ object Preferences {
 
     var operatingMode by global.primitive("operating_mode", OperatingMode.Shizuku.VALUE)
 
-    var showLongClickToSelectDemo by global.primitive("demo_long_click_to_select", true)
-    var showSwipeToRemoveDemo by global.primitive("demo_swipe_to_remove", true)
+    var showLongClickToSelectTip by global.primitive("tip_long_click_to_select", true)
+    var showSwipeToRemoveTip by global.primitive("tip_swipe_to_remove", true)
+    var showDragToMoveTip by global.primitive("tip_drag_to_move", true)
 
     private fun <T> SharedPreferences.nullable(
         name: String,

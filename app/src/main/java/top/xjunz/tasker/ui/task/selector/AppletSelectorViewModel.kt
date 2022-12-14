@@ -2,6 +2,7 @@ package top.xjunz.tasker.ui.task.selector
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.ktx.eq
@@ -9,6 +10,7 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
+import top.xjunz.tasker.task.applet.addSafely
 import top.xjunz.tasker.task.applet.controlFlow
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -43,8 +45,8 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     var title: CharSequence? = null
 
-    fun setScope(flow: Flow) {
-        val scope = flow.scopeFlow
+    fun setScope(origin: Flow) {
+        val scope = origin.scopeFlow
         // Find its control flow, we need its control flow's option title to be shown
         val control = if (scope is ControlFlow) scope else scope.controlFlow
         checkNotNull(control) {
@@ -60,10 +62,14 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
             if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
         } else {
             isScoped = false
-            if (control is If) {
-                registryOptions = appletOptionFactory.flowRegistry.criterionFlowOptions
-            } else if (control is Do) {
-                registryOptions = appletOptionFactory.flowRegistry.actionFlowOptions
+            registryOptions = when (control) {
+                is If -> appletOptionFactory.flowRegistry.criterionFlowOptions
+
+                is Do -> appletOptionFactory.flowRegistry.actionFlowOptions
+
+                is When -> arrayOf(appletOptionFactory.flowRegistry.eventFlow)
+
+                else -> illegalArgument("control flow", control)
             }
         }
     }
@@ -77,39 +83,42 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         selectedFlowRegistry.value = index
     }
 
-    private fun appendOption(option: AppletOption) {
-        appendApplet(option.yield())
+    private fun appendOption(option: AppletOption): Boolean {
+        return appendApplet(option.yield())
     }
 
-    fun appendApplet(applet: Applet) {
+    fun appendApplet(applet: Applet): Boolean {
         val flowOption = appletOptionFactory.requireRegistryOption(applet.registryId)
         val last = flow.lastOrNull()
         if (last !is Flow || (flowOption.appletId != last.appletId)) {
             val newFlow = flowOption.yield() as Flow
             if (newFlow !is PhantomFlow) {
-                flow.add(newFlow)
-                newFlow.add(applet)
+                if (!flow.addSafely(newFlow)) return false
+                if (!newFlow.addSafely(applet)) return false
             } else {
-                flow.add(applet)
+                if (!flow.addSafely(applet)) return false
             }
         } else {
-            last.add(applet)
+            if (!last.addSafely(applet)) return false
             // Divider changed
             onAppletChanged.value = last.getOrNull(last.lastIndex - 1)
         }
         notifyFlowChanged()
+        return true
     }
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
         val flowOption = appletOptionFactory.requireRegistryOption(options.first().registryId)
 
-        flow.add(flowOption.yield() as Flow)
+        if (!flow.addSafely(flowOption.yield() as Flow)) return
+        var count = 0
         options.forEach {
-            appendOption(it)
+            if (!appendOption(it)) return@forEach
+            count++
         }
 
-        toast(R.string.options_from_inspector_added.format(options.size))
+        toast(R.string.options_from_inspector_added.format(count))
         notifyFlowChanged()
     }
 

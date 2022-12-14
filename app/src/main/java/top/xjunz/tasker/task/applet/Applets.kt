@@ -1,18 +1,18 @@
 package top.xjunz.tasker.task.applet
 
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
-import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.ktx.toast
+import java.util.*
 
 /* Helper extension functions for Applet. These functions are not expected to be called in runtime.*/
 
 /**
  * Container flow is a flow, which is only used to hold other applets.
  */
-inline val Applet.isContainer: Boolean get() = javaClass == Flow::class.java
+inline val Applet.isContainer: Boolean get() = this is ContainerFlow
 
 /**
  * The nearest non-container parent of this applet, may be itself.
@@ -70,21 +70,6 @@ fun Applet.isDescendantOf(flow: Flow): Boolean {
     if (parent === flow)
         return true
     return requireParent().isDescendantOf(flow)
-}
-
-
-private fun Flow.findChildrenReferringRefidRecur(ret: MutableMap<Applet, Int>, refid: String) {
-    forEach {
-        for ((which, id) in it.references) {
-            if (id == refid) {
-                ret[it] = which
-                break
-            }
-        }
-        if (it is Flow) {
-            it.findChildrenReferringRefidRecur(ret, refid)
-        }
-    }
 }
 
 fun Flow.iterate(block: (Applet) -> Boolean) {
@@ -243,4 +228,17 @@ fun Applet.removeRefid(which: Int) {
     if (refids === emptyMap<Int, String>()) return
     (refids as MutableMap).remove(which)
     if (refids.isEmpty()) refids = emptyMap()
+}
+
+fun Flow.addSafely(applet: Applet): Boolean {
+    return addAllSafely(Collections.singleton(applet))
+}
+
+fun Flow.addAllSafely(applets: Collection<Applet>): Boolean {
+    if (size + applets.size <= maxSize) {
+        addAll(applets)
+        return true
+    }
+    toast(R.string.error_over_max_applet_size)
+    return false
 }

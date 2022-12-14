@@ -92,14 +92,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     toast(R.string.error_reach_max_applet_size)
                     return@setOnClickListener
                 }
-                AppletSelectorDialog().doOnCompletion {
-                    if (flow.size + it.size > Applet.MAX_FLOW_CHILD_COUNT) {
-                        toast(R.string.error_over_max_applet_size)
-                        return@doOnCompletion
-                    }
+                AppletSelectorDialog().init(flow) {
                     flow.addAll(it)
                     viewModel.notifyFlowChanged()
-                }.scopedBy(flow).show(childFragmentManager)
+                }.show(childFragmentManager)
             }
         }
         binding.ibDismiss.setOnClickListener {

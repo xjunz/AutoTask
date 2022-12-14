@@ -25,6 +25,7 @@ import top.xjunz.tasker.databinding.DialogAppletSelectorBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.ContainerFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
@@ -81,8 +82,8 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 if (option.isValid) {
                     val applet = option.yield()
                     onOptionClickListener.onClick(applet, option) {
-                        viewModel.appendApplet(applet)
-                        viewModel.onAppletAdded.value = position
+                        if (viewModel.appendApplet(applet))
+                            viewModel.onAppletAdded.value = position
                     }
                 }
             }
@@ -112,11 +113,10 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 val easeIn = AnimationUtils.loadAnimation(context, R.anim.mtrl_item_ease_enter)
                 easeIn.startOffset = (staggerAnimOffsetMills + position) * position
                 binding.root.startAnimation(easeIn)
-                if (position == 0)
-                    viewModel.viewModelScope.launch {
-                        delay(staggerAnimOffsetMills)
-                        viewModel.animateItems = false
-                    }
+                if (position == 0) viewModel.viewModelScope.launch {
+                    delay(staggerAnimOffsetMills)
+                    viewModel.animateItems = false
+                }
             }
         }
     }
@@ -125,12 +125,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         AppletCandidatesAdapter(viewModel, onOptionClickListener)
     }
 
-    fun doOnCompletion(block: (List<Applet>) -> Unit) = doWhenCreated {
-        viewModel.onCompletion = block
-    }
-
-    fun scopedBy(flow: Flow): AppletSelectorDialog = doWhenCreated {
-        viewModel.setScope(flow)
+    fun init(origin: Flow, doOnCompletion: (List<Applet>) -> Unit) = doWhenCreated {
+        viewModel.onCompletion = doOnCompletion
+        viewModel.setScope(origin)
+        viewModel.flow = ContainerFlow().also {
+            it.maxSize = origin.maxSize - origin.size
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -138,8 +138,6 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         if (viewModel.selectedFlowRegistry.isNull()) {
             viewModel.selectFlowRegistry(0)
         }
-        if (savedInstanceState == null)
-            viewModel.flow = Flow()
 
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)

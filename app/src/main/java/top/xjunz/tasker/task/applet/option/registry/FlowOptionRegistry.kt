@@ -34,7 +34,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
-        Regex("验证码.*?(\\d+?)")
+        // Regex("验证码.*?(\\d+?)")
         return when (flow) {
             is If -> if (before) emptyArray() else arrayOf(doFlow)
             is When -> if (before) emptyArray() else arrayOf(ifFlow, doFlow)
@@ -59,22 +59,25 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val rootFlow = flowOption<RootFlow>(0, AppletOption.TITLE_NONE)
 
     @AppletCategory(0x0001)
-    val ifFlow = flowOption<If>(1, R.string._if)
+    val whenFlow = flowOption<When>(1, R.string._when)
 
     @AppletCategory(0x0002)
-    val doFlow = flowOption<Do>(2, R.string._do)
+    val ifFlow = flowOption<If>(2, R.string._if)
 
     @AppletCategory(0x0003)
-    val elseIfFlow = flowOption<ElseIf>(3, R.string.else_if)
+    val doFlow = flowOption<Do>(3, R.string._do)
 
     @AppletCategory(0x0004)
-    val elseFlow = flowOption<Else>(4, R.string._else)
+    val elseIfFlow = flowOption<ElseIf>(4, R.string.else_if)
 
     @AppletCategory(0x0005)
-    val containerFlow = flowOption<Flow>(5, AppletOption.TITLE_NONE)
+    val elseFlow = flowOption<Else>(5, R.string._else)
+
+    @AppletCategory(0x0005)
+    val containerFlow = flowOption<ContainerFlow>(6, AppletOption.TITLE_NONE)
 
     @AppletCategory(0x000F)
-    val whenFlow = flowOption<When>(ID_EVENT_FILTER_REGISTRY, R.string._when)
+    val eventFlow = flowOption<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
     @AppletCategory(0x0010)
     val componentFlow = flowOption<PackageFlow>(ID_PKG_OPTION_REGISTRY, R.string.current_app)
@@ -107,5 +110,4 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletCategory(0x0022)
     val controlActionFlow =
         flowOption<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
-
 }

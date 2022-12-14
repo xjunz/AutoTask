@@ -99,7 +99,7 @@ class PreferenceHelpDialog : BaseDialogFragment<DialogPreferenceHelpBinding>() {
     fun init(
         titleRes: Int,
         helpRes: Int,
-        show: Boolean,
+        show: Boolean = true,
         onConfirmation: (Boolean) -> Unit
     ): PreferenceHelpDialog =
         doWhenCreated {
