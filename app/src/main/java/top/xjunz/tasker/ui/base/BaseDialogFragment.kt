@@ -5,10 +5,7 @@
 package top.xjunz.tasker.ui.base
 
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
@@ -45,6 +42,11 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
 
     open fun onBackPressed(): Boolean {
         return false
+    }
+
+    protected fun showSoftInput(view: View? = null) {
+        view?.requestFocus()
+        dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
     }
 
     override fun onCreateView(

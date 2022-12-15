@@ -28,8 +28,6 @@ abstract class AppletOption(
 
         const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
         const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
-
-        //TODO
         const val ACTION_EDIT_VALUE = "AO_EDIT_VAL"
 
         /**

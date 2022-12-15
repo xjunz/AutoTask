@@ -4,6 +4,7 @@ import android.view.Gravity
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.FragmentManager
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -100,13 +101,13 @@ class AppletOperationMenuHelper(
             if (applet !is Flow || applet.size == applet.maxSize) {
                 menu.removeItem(R.id.item_add_inside)
             }
-            if (!Preferences.showDragToMoveTip) {
+            if (!Preferences.showDragToMoveTip && !BuildConfig.DEBUG) {
                 menu.removeItem(R.id.item_move)
             }
-            if (!Preferences.showSwipeToRemoveTip) {
+            if (!Preferences.showSwipeToRemoveTip && !BuildConfig.DEBUG) {
                 menu.removeItem(R.id.item_remove)
             }
-            if (!Preferences.showLongClickToSelectTip) {
+            if (!Preferences.showLongClickToSelectTip && !BuildConfig.DEBUG) {
                 menu.removeItem(R.id.item_select)
             }
             if (applet !is Flow) {
@@ -187,7 +188,7 @@ class AppletOperationMenuHelper(
     }
 
     fun onMenuItemClick(
-        anchor: View,
+        anchor: View?,
         applet: Applet,
         id: Int,
         title: CharSequence? = null
@@ -196,7 +197,7 @@ class AppletOperationMenuHelper(
         if (onBatchMenuItemClick(Collections.singleton(applet), id, title)) return true
         when (id) {
             R.id.item_open_in_new -> {
-                val dialog = FlowEditorDialog().setFlow(
+                val dialog = FlowEditorDialog().init(
                     applet as Flow, viewModel.isSelectingRef
                 ).doOnCompletion { edited ->
                     if (edited.isEmpty() && applet.isContainer) {
@@ -268,7 +269,7 @@ class AppletOperationMenuHelper(
                 val addBefore = id == R.id.item_add_before
                 if (applet is ControlFlow) {
                     val popup = PopupMenu(
-                        anchor.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
+                        anchor!!.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
                     )
                     popup.menu.add(title)
                     val options = viewModel.factory.flowRegistry.getPeerOptions(applet, addBefore)

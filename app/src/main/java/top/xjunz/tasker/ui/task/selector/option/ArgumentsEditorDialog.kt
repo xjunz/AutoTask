@@ -80,7 +80,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     }
 
     private fun showReferenceSelectorDialog(whichArg: Int, arg: ValueDescriptor, id: String?) {
-        FlowEditorDialog().setFlow(globalViewModel.root, true)
+        FlowEditorDialog().init(globalViewModel.root, true)
             .setReferenceToSelect(applet, arg, id)
             .doOnReferenceSelected { refid ->
                 globalViewModel.tracer.setReference(applet, arg, whichArg, refid)

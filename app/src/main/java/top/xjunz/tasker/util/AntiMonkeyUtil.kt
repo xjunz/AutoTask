@@ -9,15 +9,18 @@ import android.view.View.OnClickListener
  */
 object AntiMonkeyUtil {
 
-    fun View.setAntiMoneyClickListener(thresholdInterval: Int = 350, listener: OnClickListener) {
+    inline fun View.setAntiMoneyClickListener(
+        thresholdInterval: Int = 350,
+        crossinline listener: (View) -> Unit
+    ) {
         setOnClickListener(object : OnClickListener {
 
             var prevClickTimestamp = -1L
 
-            override fun onClick(v: View?) {
+            override fun onClick(v: View) {
                 val uptime = SystemClock.uptimeMillis()
                 if (prevClickTimestamp == -1L || uptime - prevClickTimestamp >= thresholdInterval) {
-                    listener.onClick(v)
+                    listener(v)
                     prevClickTimestamp = uptime
                 }
             }

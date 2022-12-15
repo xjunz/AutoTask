@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.task.applet.forEachReference
 import top.xjunz.tasker.task.applet.forEachRefid
@@ -58,8 +59,8 @@ class GlobalFlowEditorViewModel : ViewModel() {
         }
     }
 
-    fun generateDefaultFlow(): Flow {
-        val root = factory.flowRegistry.rootFlow.yield() as Flow
+    fun generateDefaultFlow(): RootFlow {
+        val root = factory.flowRegistry.rootFlow.yield() as RootFlow
         val whenFlow = factory.flowRegistry.whenFlow.yield() as When
         whenFlow.add(factory.eventRegistry.contentChanged.yield())
         root.add(whenFlow)

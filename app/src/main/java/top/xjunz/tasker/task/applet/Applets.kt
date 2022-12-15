@@ -52,18 +52,11 @@ val Applet.rootOrNull: Flow?
         return parent?.rootOrNull
     }
 
-val Flow.flatSize: Int
-    get() {
-        var size = 0
-        forEach {
-            if (it is Flow) {
-                size += it.flatSize
-            } else {
-                size++
-            }
-        }
-        return size
-    }
+val Applet.flatSize: Int
+    get() = if (this is Flow) sumOf { it.flatSize } else 1
+
+val Applet.solidSize: Int
+    get() = 1 + if (this is Flow) sumOf { it.flatSize } else 0
 
 fun Applet.isDescendantOf(flow: Flow): Boolean {
     if (parent == null) return false

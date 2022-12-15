@@ -2,6 +2,8 @@ package top.xjunz.tasker.engine.task
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
@@ -16,7 +18,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class AutomatorTask(val name: String) {
 
-    lateinit var flow: RootFlow
+    var flow: RootFlow? = null
 
     var label: String? = null
 
@@ -74,6 +76,10 @@ class AutomatorTask(val name: String) {
         fun onCancelled() {}
     }
 
+    fun requireFlow(): RootFlow = requireNotNull(flow) {
+        "RootFlow is not initialized!"
+    }
+
     fun activate(stateListener: OnStateChangedListener) {
         if (isEnabled) {
             error("Task[$name] has already been activated!")
@@ -115,7 +121,7 @@ class AutomatorTask(val name: String) {
             runtime.observer = observer
         try {
             currentRuntime = runtime
-            flow.apply(runtime)
+            requireFlow().apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
             } else {
@@ -149,4 +155,14 @@ class AutomatorTask(val name: String) {
     override fun hashCode(): Int {
         return id
     }
+
+    @Serializable
+    data class Metadata(
+        @SerialName("t")
+        var title: String,
+        @SerialName("d")
+        var description: String? = null,
+        @SerialName("c")
+        var creationTimestamp: Long = -1
+    )
 }

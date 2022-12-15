@@ -17,6 +17,7 @@ import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.task.AutomatorTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -27,6 +28,7 @@ import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/08/22
@@ -102,11 +104,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             onBackPressed()
         }
         binding.ibSplit.isVisible = viewModel.flow.isContainer && viewModel.isInEditionMode
-        binding.ibSplit.setOnClickListener {
+        binding.ibSplit.setAntiMoneyClickListener {
             viewModel.showSplitConfirmation.value = true
         }
         binding.ibCheck.isVisible = !viewModel.isReadyOnly
-        binding.ibCheck.setOnClickListener {
+        binding.ibCheck.setAntiMoneyClickListener {
             viewModel.complete()
             dismiss()
         }
@@ -115,6 +117,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         } else {
             binding.rvBreadCrumbs.isVisible = true
             binding.rvBreadCrumbs.adapter = FlowCascadeAdapter(viewModel, factory)
+        }
+        binding.tvSubtitle.setAntiMoneyClickListener {
+            TaskMetadataEditor().init(viewModel.metadata) {
+                viewModel.metadata = it
+                viewModel.selectionLiveData.notifySelfChanged()
+            }.show(childFragmentManager)
         }
     }
 
@@ -180,13 +188,23 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     binding.tvTitle.text = R.string.format_select.format(refName)
                 }
             } else if (it.isEmpty()) {
-                if (viewModel.isNewTask) {
-                    binding.tvTitle.text = R.string.create_task.text
-                } else {
-                    if (viewModel.isBase) {
-                        binding.tvTitle.text = R.string.edit_task.text
+                if (viewModel.isBase) {
+                    binding.tvSubtitle.isVisible = true
+                    binding.tvTitle.text = viewModel.metadata.title
+                    if (viewModel.metadata.description.isNullOrEmpty()) {
+                        binding.tvSubtitle.text = R.string.no_desc_provided.text.italic()
                     } else {
-                        binding.tvTitle.text = R.string.edit_rules.text
+                        binding.tvSubtitle.text = viewModel.metadata.description
+                    }
+                } else {
+                    if (viewModel.isNewTask) {
+                        binding.tvTitle.text = R.string.create_task.text
+                    } else {
+                        if (viewModel.isBase) {
+                            binding.tvTitle.text = R.string.edit_task.text
+                        } else {
+                            binding.tvTitle.text = R.string.edit_rules.text
+                        }
                     }
                 }
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.dismiss.text)
@@ -236,25 +254,32 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 viewModel.onAppletChanged.value = this
             }
         }
-        if (!viewModel.isSelectingRef)
-            mainViewModel.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
-                val split = data.split(Char(0))
-                val hashcode = split[1].toInt()
-                val applet = adapter.currentList.firstOrNull {
-                    it.hashCode() == hashcode
-                } ?: return@doOnAction
-                val refid = split[0]
-                val option = factory.requireOption(applet)
-                val arg = option.arguments[applet.whichReference(refid)]
-                FlowEditorDialog().setFlow(globalViewModel.root, true)
-                    .setReferenceToSelect(applet, arg, refid)
-                    .doOnReferenceSelected {
-                        globalViewModel.tracer.getReferenceChangedApplets().forEach {
-                            viewModel.onAppletChanged.value = it
-                        }
-                        globalViewModel.tracer.reset()
-                    }.show(childFragmentManager)
-            }
+        if (viewModel.isSelectingRef) return
+        mainViewModel.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
+            val split = data.split(Char(0))
+            val hashcode = split[1].toInt()
+            val applet = adapter.currentList.firstOrNull {
+                it.hashCode() == hashcode
+            } ?: return@doOnAction
+            val refid = split[0]
+            val option = factory.requireOption(applet)
+            val arg = option.arguments[applet.whichReference(refid)]
+            FlowEditorDialog().init(globalViewModel.root, true)
+                .setReferenceToSelect(applet, arg, refid)
+                .doOnReferenceSelected {
+                    globalViewModel.tracer.getReferenceChangedApplets().forEach {
+                        viewModel.onAppletChanged.value = it
+                    }
+                    globalViewModel.tracer.reset()
+                }.show(childFragmentManager)
+        }
+        mainViewModel.doOnAction(this, AppletOption.ACTION_EDIT_VALUE) { data ->
+            val hashcode = data.toInt()
+            val applet = adapter.currentList.firstOrNull {
+                it.hashCode() == hashcode
+            } ?: return@doOnAction
+            menuHelper.onMenuItemClick(null, applet, R.id.item_edit)
+        }
     }
 
     override fun onBackPressed(): Boolean {
@@ -289,11 +314,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         viewModel.doSplit = block
     }
 
-    fun asBase() = doWhenCreated {
-        viewModel.isBase = true
+    fun asBase(metadata: AutomatorTask.Metadata) = doWhenCreated {
+        viewModel.metadata = metadata
     }
 
-    fun setFlow(flow: Flow?, readonly: Boolean) = doWhenCreated {
+    fun init(flow: Flow?, readonly: Boolean) = doWhenCreated {
         val root = flow ?: globalViewModel.generateDefaultFlow()
         viewModel.initialize(factory, root, flow == null, readonly)
     }

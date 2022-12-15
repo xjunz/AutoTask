@@ -151,14 +151,14 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x01_01)
-    val textStartsWith = invertibleAppletOption(0x20, R.string.starts_with) {
+    val textStartsWith = invertibleAppletOption(0x20, R.string.pkg_name_starts_with) {
         nodeCriterion<String> { t, v ->
             t.text.startsWith(v)
         }
     }
 
     @AppletCategory(0x01_02)
-    val textEndsWith = invertibleAppletOption(0x30, R.string.ends_with) {
+    val textEndsWith = invertibleAppletOption(0x30, R.string.pkg_name_ends_with) {
         nodeCriterion<String> { t, v ->
             t.text.endsWith(v)
         }
@@ -179,7 +179,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x01_05)
-    val textPattern = invertibleAppletOption(0x60, R.string.matches_pattern) {
+    val textPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
         nodeCriterion<String> { t, v ->
             t.text.matches(Regex(v))
         }

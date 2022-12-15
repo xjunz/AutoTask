@@ -98,14 +98,14 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x02_00)
-    private val startsWith = invertibleAppletOption(0x40, R.string.starts_with) {
+    private val startsWith = invertibleAppletOption(0x40, R.string.pkg_name_starts_with) {
         newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
             t.packageName.startsWith(v)
         }
     }
 
     @AppletCategory(0x02_01)
-    private val endsWith = invertibleAppletOption(0x41, R.string.ends_with) {
+    private val endsWith = invertibleAppletOption(0x41, R.string.pkg_name_ends_with) {
         newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
             t.packageName.endsWith(v)
         }
@@ -119,7 +119,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x02_03)
-    private val matchesPattern = invertibleAppletOption(0x60, R.string.matches_pattern) {
+    private val matchesPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
         newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
             t.packageName.matches(Regex(v))
         }

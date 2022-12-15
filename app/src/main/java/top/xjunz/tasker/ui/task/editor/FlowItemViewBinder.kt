@@ -32,6 +32,7 @@ class FlowItemViewBinder(
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
         val option = viewModel.factory.requireOption(applet)
         holder.binding.apply {
+            root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
                     || (viewModel.isSelectingRef && globalViewModel.isRefSelected(applet))
             root.isEnabled = true
@@ -97,20 +98,18 @@ class FlowItemViewBinder(
                     ibAction.setImageResource(R.drawable.ic_baseline_chevron_right_24)
                     ibAction.setContentDescriptionAndTooltip(R.string.enter.text)
                     tvDesc.isVisible = true
+                } else if (applet.isEmpty()) {
+                    ibAction.tag = ACTION_ADD
+                    ibAction.setContentDescriptionAndTooltip(R.string.add_inside.text)
+                    ibAction.setImageResource(R.drawable.ic_baseline_add_24)
                 } else {
-                    if (applet.isEmpty()) {
-                        ibAction.tag = ACTION_ADD
-                        ibAction.setContentDescriptionAndTooltip(R.string.add_inside.text)
-                        ibAction.setImageResource(R.drawable.ic_baseline_add_24)
+                    ibAction.tag = ACTION_COLLAPSE
+                    if (viewModel.isCollapsed(applet)) {
+                        ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
+                        ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
                     } else {
-                        ibAction.tag = ACTION_COLLAPSE
-                        if (viewModel.isCollapsed(applet)) {
-                            ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
-                            ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
-                        } else {
-                            ibAction.setContentDescriptionAndTooltip(R.string.unfold_less.text)
-                            ibAction.setImageResource(R.drawable.ic_baseline_expand_less_24)
-                        }
+                        ibAction.setContentDescriptionAndTooltip(R.string.unfold_less.text)
+                        ibAction.setImageResource(R.drawable.ic_baseline_expand_less_24)
                     }
                 }
             } else {
@@ -125,7 +124,8 @@ class FlowItemViewBinder(
                 }
             }
             if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
-                desc = desc?.italic()
+                desc = desc?.quoted()
+                tvDesc.setBackgroundColor(ColorScheme.colorPrimaryContainer.alphaModified(.3))
             } else {
                 tvDesc.background = null
             }

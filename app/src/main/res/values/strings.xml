@@ -300,4 +300,18 @@
     <string name="move">移动</string>
     <string name="tip_drag_to_move">长按某一规则，然后上下拖动便可移动其位置哦！</string>
     <string name="event">触发事件</string>
+    <string name="error_not_removable">无法移除此规则！</string>
+    <string name="not_removable">不可移除</string>
+    <string name="long_running_task">常驻任务</string>
+    <string name="desc_long_running_task">长期在后台运行的轻量级任务，由事件驱动。</string>
+    <string name="desc_oneshot_task">单次运行的(耗时)任务，执行完成后即停止，用户可随时启动。</string>
+    <string name="oneshot_task">单次任务</string>
+    <string name="oneshot_task_creation_shortcut">快速创建单次任务</string>
+    <string name="quick_click_mode">连点器</string>
+    <string name="record_gesture">录制手势</string>
+    <string name="tip_edit_task_metadata">* 您稍后仍然可以修改以上信息</string>
+    <string name="task_name">任务名称</string>
+    <string name="task_desc">任务描述（可缺省）</string>
+    <string name="unnamed_task">未命名任务</string>
+    <string name="no_desc_provided">未提供该任务的描述</string>
 </resources>

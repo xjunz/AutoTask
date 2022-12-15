@@ -16,18 +16,16 @@
     <string name="package_name">包名</string>
     <string name="component_info">程序和页面</string>
 
-    <string name="starts_with">以指定文本开始</string>
-    <string name="not_starts_with">不以指定文本开始</string>
-    <string name="ends_with">以指定文本结束</string>
-    <string name="not_ends_with">不以指定文本结束</string>
-    <string name="matches_pattern">满足正则表达式</string>
-    <string name="not_matches_pattern">不满足正则表达式</string>
-    <string name="length_in_range">文本长度在指定范围</string>
-    <string name="not_length_in_range">文本长度不在指定范围</string>
+    <string name="pkg_name_starts_with">包名以指定文本开始</string>
+    <string name="not_pkg_name_starts_with">包名不以指定文本开始</string>
+    <string name="pkg_name_ends_with">包名以指定文本结束</string>
+    <string name="not_pkg_name_ends_with">包名不以指定文本结束</string>
+    <string name="pkg_name_matches_pattern">包名满足正则表达式</string>
+    <string name="not_pkg_name_matches_pattern">包名不满足正则表达式</string>
     <string name="contains_text">包含指定文本</string>
     <string name="not_contains_text">不包含指定文本</string>
-    <string name="in_pkg_collection">指定应用程序</string>
-    <string name="not_in_pkg_collection">排除应用程序</string>
+    <string name="in_pkg_collection">是指定应用程序</string>
+    <string name="not_in_pkg_collection">不是指定应用程序</string>
     <string name="format_range">%s至%s</string>
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
@@ -85,8 +83,8 @@
     <string name="in_hour_min_sec_range">指定时分秒</string>
     <string name="not_in_hour_min_sec_range">指定时分秒以外</string>
     <string name="property">属性</string>
-    <string name="in_activity_collection">指定页面</string>
-    <string name="not_in_activity_collection">排除页面</string>
+    <string name="in_activity_collection">是指定页面</string>
+    <string name="not_in_activity_collection">不是指定页面</string>
 
     <string name="screen_orientation_portrait">屏幕处于竖屏状态</string>
     <string name="not_screen_orientation_portrait">屏幕处于横屏状态</string>

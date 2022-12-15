@@ -14,10 +14,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.configHeaderTitle
 import top.xjunz.tasker.ktx.indexOf
-import top.xjunz.tasker.ktx.modifyAlpha
-import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -66,22 +65,24 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 val isSelected = viewModel.isMultiSelected(origin)
                 if (isSelected) {
                     return viewModel.isMultiSelected(next) || viewModel.selections.any {
-                        it is Flow && next.isDescendantOf(it)
+                        it.requiredIndex == -1 && it is Flow && next.isDescendantOf(it)
                     }
                 }
                 return super.shouldBeInvolvedInSwipe(next, origin)
             }
 
-            override fun doRemove(parent: Flow, from: Applet): Int {
+            override fun doRemove(parent: Flow, from: Applet) {
                 if (viewModel.isMultiSelected(from)) {
-                    val size = viewModel.selections.flatSize
+                    val removed = mutableSetOf<Applet>()
                     viewModel.selections.forEach {
-                        parent.remove(it)
+                        if (it.requiredIndex == -1) {
+                            parent.remove(it)
+                            removed.add(it)
+                        }
                     }
-                    viewModel.selections.clear()
-                    return size
+                    viewModel.selections.removeAll(removed)
                 }
-                return super.doRemove(parent, from)
+                super.doRemove(parent, from)
             }
         }).attachToRecyclerView(recyclerView)
         // Always clear single selection on attached
@@ -115,7 +116,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.tvComment.setBackgroundColor(ColorScheme.colorTertiaryContainer.modifyAlpha(.3))
+            binding.tvComment.setBackgroundColor(ColorScheme.colorTertiaryContainer.alphaModified(.3))
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
                 if (viewModel.isSelectingRef && !applet.isContainer) {

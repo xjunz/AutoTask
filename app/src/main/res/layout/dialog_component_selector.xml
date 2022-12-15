@@ -40,7 +40,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="指定应用程序" />
+                    tools:text="是指定应用程序" />
 
                 <ImageButton
                     android:id="@+id/ib_sort_by"

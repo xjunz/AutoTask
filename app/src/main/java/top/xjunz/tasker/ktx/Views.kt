@@ -80,6 +80,8 @@ inline fun <T : View> T.oneShotApplySystemInsets(
 
 inline val EditText.textString get() = text.toString()
 
+fun EditText.setSelectionToEnd() = setSelection(text.length)
+
 fun EditText.setMaxLength(len: Int) {
     filters += InputFilter.LengthFilter(len)
 }

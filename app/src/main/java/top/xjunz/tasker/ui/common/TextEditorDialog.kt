@@ -7,7 +7,6 @@ package top.xjunz.tasker.ui.common
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
-import android.view.WindowManager
 import android.widget.EditText
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -16,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
 import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.setSelectionToEnd
 import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -85,7 +85,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        showSoftInput(binding.etInput)
         binding.apply {
             tvTitle.text = viewModel.title
             tvCaption.isVisible = !viewModel.caption.isNullOrEmpty()
@@ -118,7 +118,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                             viewModel.dropDownNames!![position]
                         }
                     )
-                    etInput.setSelection(etInput.textString.length)
+                    etInput.setSelectionToEnd()
                 }
             }
             if (!viewModel.defText.isNullOrEmpty()) {
@@ -133,8 +133,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             if (savedInstanceState == null)
                 etInput.setText(viewModel.defText)
 
-            etInput.setSelection(etInput.textString.length)
-            etInput.requestFocus()
+            etInput.setSelectionToEnd()
 
             btnNegative.setOnClickListener {
                 if (viewModel.defText.isNullOrEmpty()) {
@@ -143,7 +142,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     dismiss()
                 } else {
                     etInput.setText(viewModel.defText)
-                    etInput.setSelection(etInput.textString.length)
+                    etInput.setSelectionToEnd()
                 }
             }
             ibDismiss.setOnClickListener {

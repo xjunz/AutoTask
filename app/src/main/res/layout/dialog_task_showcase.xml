@@ -48,22 +48,21 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical|end"
                     android:layout_marginEnd="12dp"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="@{@string/create_task}"
-                    android:src="@drawable/ic_baseline_add_24" />
+                    android:background="?selectableItemBackgroundBorderless" />
             </FrameLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_inspector"
+            android:id="@+id/fab_action"
             style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginEnd="24dp"
+            android:layout_gravity="bottom|center"
             android:layout_marginBottom="32dp"
-            android:text="@string/turn_on_floating_assistant"
-            app:icon="@drawable/ic_twotone_layers_24" />
+            android:alpha=".82"
+            android:text="@string/create_task"
+            app:icon="@drawable/ic_baseline_add_24"
+            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

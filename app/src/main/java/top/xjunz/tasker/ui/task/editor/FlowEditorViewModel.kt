@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.task.AutomatorTask
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
@@ -18,6 +19,8 @@ import top.xjunz.tasker.task.applet.option.ValueDescriptor
  * @author xjunz 2022/09/10
  */
 class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
+
+    lateinit var metadata: AutomatorTask.Metadata
 
     lateinit var factory: AppletOptionFactory
 
@@ -41,7 +44,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     var isNewTask: Boolean = true
 
-    var isBase: Boolean = false
+    val isBase: Boolean get() = ::metadata.isInitialized
 
     var selectedApplet = MutableLiveData<Applet>()
 
@@ -53,7 +56,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var doSplit: () -> Unit
 
-    fun multiSelect(applet: Applet) {
+    private fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
             toast(R.string.prompt_applet_multi_selection_depth)
         } else {

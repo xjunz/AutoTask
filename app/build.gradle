@@ -70,7 +70,7 @@ dependencies {
     // ktx
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.activity:activity-ktx:1.6.1'
-    implementation 'androidx.fragment:fragment-ktx:1.5.4'
+    implementation 'androidx.fragment:fragment-ktx:1.5.5'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design
@@ -82,7 +82,7 @@ dependencies {
     // ktor
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     // lifecycle
-    def lifecycle_version = "2.6.0-alpha02"
+    def lifecycle_version = "2.6.0-alpha03"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"

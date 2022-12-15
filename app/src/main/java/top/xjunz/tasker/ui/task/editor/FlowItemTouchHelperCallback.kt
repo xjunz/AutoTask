@@ -1,19 +1,22 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.graphics.Canvas
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
-import top.xjunz.tasker.task.applet.flatSize
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import java.util.*
+
 
 /**
  * @author xjunz 2022/11/08
@@ -21,10 +24,7 @@ import java.util.*
 open class FlowItemTouchHelperCallback(
     private val rv: RecyclerView,
     private val viewModel: FlowViewModel
-) : ItemTouchHelper.SimpleCallback(
-    ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-) {
+) : SimpleCallback(UP or DOWN, LEFT or RIGHT) {
 
     init {
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -76,9 +76,8 @@ open class FlowItemTouchHelperCallback(
         return false
     }
 
-    protected open fun doRemove(parent: Flow, from: Applet): Int {
+    protected open fun doRemove(parent: Flow, from: Applet) {
         parent.remove(from)
-        return if (from is Flow) from.flatSize else 1
     }
 
     private val layoutManager: LinearLayoutManager by lazy {
@@ -93,6 +92,18 @@ open class FlowItemTouchHelperCallback(
     private var firstVisiblePosition = -1
     private var lastVisiblePosition = -1
 
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        if (viewHolder.adapterPosition == RecyclerView.NO_POSITION) return 0
+        val applet = currentList[viewHolder.adapterPosition]
+        if (applet.requiredIndex != -1) {
+            return makeFlag(ACTION_STATE_DRAG, DOWN or UP) or makeFlag(ACTION_STATE_SWIPE, 0)
+        }
+        return super.getMovementFlags(recyclerView, viewHolder)
+    }
+
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
@@ -105,28 +116,30 @@ open class FlowItemTouchHelperCallback(
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         val position = viewHolder.adapterPosition
         if (position == RecyclerView.NO_POSITION) return
-        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+        if (actionState == ACTION_STATE_DRAG) {
             if (dY != 0F || dX != 0F) {
                 hasDragged = true
             } else if (hasDragged != true) {
                 hasDragged = false
             }
-        } else if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+        } else if (actionState == ACTION_STATE_SWIPE) {
 
             if (firstVisiblePosition == -1)
                 firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
             if (lastVisiblePosition == -1)
                 lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
 
+            val origin = currentList[position]
             for (i in firstVisiblePosition..lastVisiblePosition) {
                 if (i == position) continue
                 val vh = recyclerView.findViewHolderForAdapterPosition(i)
-                if (vh != null
-                    && shouldBeInvolvedInSwipe(
-                        currentList[vh.adapterPosition], currentList[position]
-                    )
-                ) {
-                    vh.itemView.translationX = dX
+                if (vh != null) {
+                    val next = currentList[vh.adapterPosition]
+                    if (origin.requiredIndex == -1 && next.requiredIndex == -1
+                        && shouldBeInvolvedInSwipe(next, origin)
+                    ) {
+                        vh.itemView.translationX = dX
+                    }
                 }
             }
         }
@@ -206,12 +219,8 @@ open class FlowItemTouchHelperCallback(
         val pos = viewHolder.adapterPosition
         val from = currentList[pos]
         val parent = from.requireParent()
-        val count = doRemove(parent, from)
-        if (count == 0) {
-            toast(R.string.removed)
-        } else {
-            toast(R.string.format_applet_is_removed.format(count))
-        }
+        doRemove(parent, from)
+        toast(R.string.removed)
         if (from is Flow) {
             // Update relation text
             if (from.index == 0 && parent.isNotEmpty())
