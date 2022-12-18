@@ -56,7 +56,11 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         title = appletOptionFactory.requireOption(control).rawTitle
         if (scope is ScopedFlow<*>) {
             isScoped = true
-            registryOptions = arrayOf(appletOptionFactory.requireRegistryOption(scope.appletId))
+            registryOptions = arrayOf(
+                appletOptionFactory.requireRegistryOption(scope.appletId),
+                /* Non-scope flow is allowed anywhere */
+                appletOptionFactory.flowRegistry.globalInfoFlow
+            )
             // If scoped, do not show extra options from other registry, like showing component
             // options while showing ui object options.
             if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
@@ -131,18 +135,14 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         if (flow.isEmpty()) {
             toast(R.string.no_rule_added)
         } else {
-            if (isScoped) {
-                onCompletion.invoke(flow.single() as Flow)
-            } else {
-                onCompletion.invoke(mergeCandidates())
-            }
+            onCompletion.invoke(mergeCandidates())
         }
     }
 
     private fun mergeCandidates(): List<Applet> {
         val ret = mutableListOf<Applet>()
         flow.forEach {
-            if (it is PhantomFlow) ret.addAll(it) else ret.add(it)
+            if (isScoped && it is Flow) ret.addAll(it) else ret.add(it)
         }
         return ret
     }

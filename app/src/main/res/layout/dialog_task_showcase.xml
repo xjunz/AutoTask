@@ -18,26 +18,26 @@
             tools:itemCount="10" />
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
             android:stateListAnimator="@animator/sla_appbar"
             app:liftOnScroll="true">
 
             <FrameLayout
-                android:id="@+id/top_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/spacing_unit"
-                android:alpha=".9"
                 android:clickable="true"
+                android:minHeight="?actionBarSize"
                 tools:ignore="KeyboardInaccessibleWidget">
 
                 <TextView
                     android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
-                    android:layout_height="?actionBarSize"
-                    android:layout_marginStart="16dp"
-                    android:alpha=".8"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:gravity="center"
                     android:text="@string/task_list"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
@@ -53,16 +53,13 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_action"
-            style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
-            android:layout_width="wrap_content"
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_bar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_marginBottom="32dp"
-            android:alpha=".82"
-            android:text="@string/create_task"
-            app:icon="@drawable/ic_baseline_add_24"
-            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+            android:layout_gravity="bottom"
+            app:itemIconTint="?colorPrimary"
+            app:menu="@menu/task_bottom_bar" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -18,6 +18,7 @@ import top.xjunz.tasker.task.applet.option.registry.UiObjectOptionRegistry
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Router
 import top.xjunz.tasker.util.Router.launchRoute
 import java.util.*
@@ -47,7 +48,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val adapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(options, ItemNodeInfoBinding::class.java, {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 val option = options[adapterPosition]
                 if (uncheckedOptions.contains(option)) {
                     uncheckedOptions.remove(option)
@@ -141,7 +142,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         binding.btnCancel.setOnClickListener {
             vm.showNodeInfo.value = false
         }
-        binding.btnComplete.setOnClickListener {
+        binding.btnComplete.setAntiMoneyClickListener {
             checkedOptions = options - uncheckedOptions
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false

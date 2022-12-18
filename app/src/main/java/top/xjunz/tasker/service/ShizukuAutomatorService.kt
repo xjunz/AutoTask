@@ -14,8 +14,7 @@ import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
-import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.annotation.LocalAndRemote
+import top.xjunz.tasker.annotation.Crossed
 import top.xjunz.tasker.annotation.LocalOnly
 import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
@@ -24,20 +23,21 @@ import top.xjunz.tasker.isInRemoteProcess
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
-class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
+class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     companion object {
 
-        private var instanceRef: WeakReference<ShizukuAutomatorService>? = null
+        private var instance: WeakReference<ShizukuAutomatorService>? = null
 
+        @RemoteOnly
         fun require(): ShizukuAutomatorService {
-            return requireNotNull(instanceRef?.get()) {
+            return requireNotNull(instance?.get()) {
                 "The ShizukuAutomatorService is not yet started or has dead!"
             }
         }
     }
 
-    private lateinit var delegate: IAutomatorConnection
+    private lateinit var delegate: IRemoteAutomatorService
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
 
@@ -55,17 +55,17 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     private var startTimestamp: Long = -1
 
-    @RemoteOnly
     @Keep
+    @RemoteOnly
     constructor() {
         logcat("Hello from the remote service! My uid is ${Os.getuid()} and my pid is ${Os.getpid()}")
         handlerThread.isDaemon = false
         handlerThread.start()
-        instanceRef = WeakReference(this)
+        instance = WeakReference(this)
     }
 
     @LocalOnly
-    constructor(connection: IAutomatorConnection) {
+    constructor(connection: IRemoteAutomatorService) {
         delegate = connection
     }
 
@@ -75,19 +75,18 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
 
     @RemoteOnly
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        if (isInHostProcess) {
-            unsupportedOperation("UiAutomationBridge is not accessible from local process!")
-        } else {
-            ShizukuUiAutomatorBridge(uiAutomation)
+        check(isInRemoteProcess) {
+            "You cannot access Shizuku UiAutomatorBridge from the host process!"
         }
+        ShizukuUiAutomatorBridge(uiAutomation)
     }
 
-    @LocalAndRemote
+    @Crossed
     override fun getStartTimestamp(): Long {
         return if (isInRemoteProcess) startTimestamp else delegate.startTimestamp
     }
 
-    @LocalAndRemote
+    @Crossed
     override fun createAvailabilityChecker(): IAvailabilityChecker {
         return if (isInRemoteProcess) {
             AvailabilityChecker(this, looper)
@@ -129,7 +128,7 @@ class ShizukuAutomatorService : IAutomatorConnection.Stub, AutomatorService {
         }
     }
 
-    @LocalAndRemote
+    @Crossed
     override fun destroy() {
         if (isInHostProcess) {
             delegate.destroy()

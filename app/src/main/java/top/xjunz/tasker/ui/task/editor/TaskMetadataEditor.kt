@@ -6,7 +6,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskMetadataEditorBinding
-import top.xjunz.tasker.engine.task.AutomatorTask.Metadata
+import top.xjunz.tasker.engine.task.XTask.Metadata
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
@@ -36,7 +36,11 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
         }
         binding.etTaskName.setText(viewModel.metadata.title)
         binding.etTaskDesc.setText(viewModel.metadata.description)
-        binding.etTaskName.setSelectionToEnd()
+        if (viewModel.metadata.title == R.string.unnamed_task.str) {
+            binding.etTaskName.selectAll()
+        } else {
+            binding.etTaskName.setSelectionToEnd()
+        }
         binding.btnComplete.setAntiMoneyClickListener {
             if (binding.etTaskName.textString.isEmpty()) {
                 toast(R.string.error_empty_input)

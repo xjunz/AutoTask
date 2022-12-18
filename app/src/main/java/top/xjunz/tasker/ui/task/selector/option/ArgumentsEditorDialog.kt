@@ -111,12 +111,12 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     showValueInputDialog(which, arg)
                 }
             }
-            binding.tvValue.setOnClickListener {
+            binding.tvValue.setAntiMoneyClickListener {
                 val position = adapterPosition
                 val arg = option.arguments[position]
                 val refid = applet.references.getValue(position)
                 TextEditorDialog().setCaption(R.string.prompt_set_refid.text).configEditText {
-                    it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
+                    it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
                 }.init(R.string.edit_refid.text, refid) {
                     if (it == refid) return@init null
                     if (!globalViewModel.isRefidLegalForSelections(it)) {
@@ -172,7 +172,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             globalViewModel.tracer.revokeAll()
             dismiss()
         }
-        binding.btnComplete.setOnClickListener {
+        binding.btnComplete.setAntiMoneyClickListener {
             val illegal = viewModel.checkForUnspecifiedArgument()
             if (illegal == -1) {
                 viewModel.doOnCompletion()

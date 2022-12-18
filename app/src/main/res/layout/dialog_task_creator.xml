@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="8dp"
                     android:gravity="center"
-                    android:text="@string/long_running_task"
+                    android:text="@string/resident_task"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textColor="?colorPrimary"
                     app:drawableStartCompat="@drawable/ic_hourglass_bottom_24px"

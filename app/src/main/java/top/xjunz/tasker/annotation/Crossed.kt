@@ -13,4 +13,4 @@ package top.xjunz.tasker.annotation
  * @author xjunz 2022/04/30
  */
 @Retention(AnnotationRetention.SOURCE)
-annotation class LocalAndRemote
+annotation class Crossed

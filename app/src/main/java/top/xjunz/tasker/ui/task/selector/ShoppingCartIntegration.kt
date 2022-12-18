@@ -20,6 +20,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.SavedStateViewModel
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Motions
 
 /**
@@ -88,7 +89,7 @@ class ShoppingCartIntegration(
         circularRevealContainer.setCardBackgroundColor(
             ColorUtils.setAlphaComponent(ColorScheme.colorPrimary, (0.32 * 0xFF).toInt())
         )
-        ibExpand.setOnClickListener {
+        ibExpand.setAntiMoneyClickListener {
             if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
                 behavior.state = BottomSheetBehavior.STATE_COLLAPSED
             } else if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {

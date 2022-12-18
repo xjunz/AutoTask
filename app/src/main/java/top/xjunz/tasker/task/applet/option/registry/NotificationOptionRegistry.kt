@@ -3,7 +3,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.NotificationFlow

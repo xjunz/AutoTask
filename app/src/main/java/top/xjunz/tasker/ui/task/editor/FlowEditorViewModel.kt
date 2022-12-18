@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
@@ -20,7 +20,7 @@ import top.xjunz.tasker.task.applet.option.ValueDescriptor
  */
 class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
-    lateinit var metadata: AutomatorTask.Metadata
+    lateinit var metadata: XTask.Metadata
 
     lateinit var factory: AppletOptionFactory
 

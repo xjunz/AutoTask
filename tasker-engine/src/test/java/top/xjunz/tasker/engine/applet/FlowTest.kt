@@ -5,8 +5,9 @@ import kotlinx.coroutines.launch
 import org.junit.Test
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.Event
+import top.xjunz.tasker.engine.runtime.Snapshot
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 import java.util.*
 
 
@@ -15,7 +16,7 @@ import java.util.*
  */
 internal class FlowTest {
 
-    private val mockTask = AutomatorTask("mock-task")
+    private val mockTask = XTask()
 
     @Test
     fun testFlowApply() {
@@ -52,7 +53,7 @@ internal class FlowTest {
                 }
             }
         }
-        mockTask.activate(object : AutomatorTask.OnStateChangedListener {
+        mockTask.enable(object : XTask.OnStateChangedListener {
             override fun onStarted() {
                 println("---- onTaskStarted ----")
             }
@@ -90,7 +91,7 @@ internal class FlowTest {
             }
         }
         GlobalScope.launch {
-            assert(mockTask.launch(this, events,observer))
+            assert(mockTask.launch(Snapshot(), this, events, observer))
         }
     }
 

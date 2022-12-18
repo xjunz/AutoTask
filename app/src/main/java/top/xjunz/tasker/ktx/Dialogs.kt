@@ -6,6 +6,7 @@ import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import top.xjunz.tasker.R
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/07/25
@@ -43,7 +44,7 @@ fun Context.showErrorDialog(stackTrace: String): AlertDialog {
         .setMessage(stackTrace).setPositiveButton(R.string.feedback, null)
         .setNegativeButton(android.R.string.cancel, null).create()
     dialog.show()
-    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setAntiMoneyClickListener {
       //  Feedbacks.showErrorFeedbackDialog(this, stackTrace)
     }
     return dialog

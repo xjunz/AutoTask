@@ -10,7 +10,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory

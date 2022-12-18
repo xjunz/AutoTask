@@ -5,7 +5,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import top.xjunz.tasker.engine.applet.action.Action
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import java.lang.ref.WeakReference
 

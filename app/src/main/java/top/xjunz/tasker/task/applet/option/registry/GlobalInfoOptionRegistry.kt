@@ -5,7 +5,7 @@ import top.xjunz.tasker.bridge.BatteryManagerBridge
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 

@@ -47,11 +47,25 @@ abstract class AppletOption(
             }
         }
 
-        fun makeRelationSpan(
-            origin: CharSequence,
-            applet: Applet,
-            isCriterion: Boolean
-        ): CharSequence {
+        private val DEFAULT_RANGE_FORMATTER: (Applet?, Any?) -> CharSequence? = { _, range ->
+            range as Collection<*>
+            check(range.size == 2)
+            val first = range.firstOrNull()
+            val last = range.lastOrNull()
+            check(first != null || last != null)
+            if (first == last) {
+                first.toString()
+            } else if (first == null) {
+                R.string.format_less_than.format(last)
+            } else if (last == null) {
+                R.string.format_larger_than.format(first)
+            } else {
+                R.string.format_range.format(first, last)
+            }
+        }
+
+        fun makeRelationSpan(origin: CharSequence, applet: Applet, isCriterion: Boolean)
+                : CharSequence {
             val relation = if (isCriterion) {
                 if (applet.isAnd) R.string._and.str else R.string._or.str
             } else {
@@ -97,6 +111,9 @@ abstract class AppletOption(
      * As per [Applet.value].
      */
     var value: Any? = null
+
+    var variantValueType: Int = 0
+        private set
 
     /**
      * The index in all categories.
@@ -202,6 +219,16 @@ abstract class AppletOption(
 
     fun toggleInversion() {
         isInverted = !isInverted
+    }
+
+    fun withVariantType(variantType: Int): AppletOption {
+        variantValueType = variantType
+        return this
+    }
+
+    fun withDefaultRangeDescriber(): AppletOption {
+        describer = DEFAULT_RANGE_FORMATTER
+        return this
     }
 
     fun yield(): Applet {

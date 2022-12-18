@@ -13,6 +13,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/18
@@ -34,7 +35,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
 
     private val breadCrumbAdapter by lazy {
         inlineAdapter(nodeBreadCrumbs, ItemBreadCrumbsBinding::class.java, {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 if (nodeBreadCrumbs.isNotEmpty())
                     vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
             }
@@ -46,12 +47,12 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
 
     private val nodeAdapter by lazy {
         inlineAdapter(childrenNodes, ItemNodeTreeBinding::class.java, {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 vm.emphaticNode.value = childrenNodes[adapterPosition]
                 vm.showNodeTree.value = false
                 vm.makeToast(R.string.navigated_to_selected_node)
             }
-            binding.btnMore.setOnClickListener {
+            binding.btnMore.setAntiMoneyClickListener {
                 vm.currentNodeTree.value = childrenNodes[adapterPosition].children[0]
             }
         }) { b, p, n ->

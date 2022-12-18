@@ -1,6 +1,6 @@
 package top.xjunz.tasker.engine.applet.criterion
 
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 
 /**
  * @author xjunz 2022/08/14
@@ -8,7 +8,7 @@ import top.xjunz.tasker.engine.applet.serialization.AppletValues
 abstract class CollectionCriterion<T : Any, V : Any>(rawType: Int) :
     Criterion<T, Collection<V>>() {
 
-    override var valueType: Int = collectionTypeOf(rawType)
+    override val valueType: Int = collectionTypeOf(rawType)
 
     abstract fun T.getValue(): V?
 

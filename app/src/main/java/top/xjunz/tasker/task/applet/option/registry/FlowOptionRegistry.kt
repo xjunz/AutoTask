@@ -48,7 +48,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
      * Applet flow is a container flow whose child has the same target.
      */
     val criterionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(componentFlow, uiObjectFlow, timeFlow, notificationFlow, globalFlow)
+        arrayOf(componentFlow, uiObjectFlow, timeFlow, notificationFlow, globalInfoFlow)
     }
 
     val actionFlowOptions: Array<AppletOption> by lazy {
@@ -93,7 +93,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val timeFlow = flowOption<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
 
     @AppletCategory(0x0013)
-    val globalFlow = flowOption<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
+    val globalInfoFlow = flowOption<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
 
     @AppletCategory(0x0014)
     val notificationFlow =

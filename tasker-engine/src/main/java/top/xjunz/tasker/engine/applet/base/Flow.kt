@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -94,6 +94,6 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
      * Do something after all [elements] are completed.
      */
     protected open fun onPostApply(runtime: TaskRuntime) {
-        // do nothing by default
+        /* no-op */
     }
 }

@@ -7,9 +7,8 @@ import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.foreColored
-import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
@@ -82,20 +81,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         NumberRangeCriterion<PackageInfoContext, Int> {
             PackageInfoCompat.getLongVersionCode(it.packageInfo).toInt()
         }
-    }.withValueDescriber<Collection<Int>> {
-        val first = it.firstOrNull()
-        val last = it.lastOrNull()
-        check(first != null || last != null)
-        if (first == last) {
-            first.toString()
-        } else if (first == null && last != null) {
-            R.string.format_less_than.format(last)
-        } else if (first != null && last == null) {
-            R.string.format_larger_than.format(first)
-        } else {
-            R.string.format_range.format(first, last)
-        }
-    }
+    }.withDefaultRangeDescriber()
 
     @AppletCategory(0x02_00)
     private val startsWith = invertibleAppletOption(0x40, R.string.pkg_name_starts_with) {

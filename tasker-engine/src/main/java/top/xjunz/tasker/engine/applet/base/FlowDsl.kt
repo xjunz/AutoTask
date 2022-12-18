@@ -11,7 +11,7 @@ import top.xjunz.tasker.engine.runtime.Event
 internal annotation class FlowDsl
 
 @FlowDsl
-internal fun DslFlow(initialTarget: Any? = null, init: Flow.() -> Unit): Flow {
+internal fun DslFlow(initialTarget: Any? = null, init: RootFlow.() -> Unit): RootFlow {
     return DslFlow(initialTarget).apply(init)
 }
 

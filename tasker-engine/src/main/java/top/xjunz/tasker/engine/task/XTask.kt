@@ -1,5 +1,7 @@
 package top.xjunz.tasker.engine.task
 
+import android.os.Parcel
+import android.os.Parcelable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.SerialName
@@ -11,16 +13,24 @@ import top.xjunz.tasker.engine.runtime.Snapshot
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
- * The abstraction of an automator task. Once an [AutomatorTask] is constructed, its [flow] are
- * immutable.
+ * The abstraction of an automator task.
+ *
+ * **XTask** is the abbr of "XJUNZ-TASK", rather cool isn't it? :)
  *
  * @author xjunz 2022/07/12
  */
-class AutomatorTask(val name: String) {
+class XTask {
+
+    companion object {
+        const val TYPE_RESIDENT = 0
+        const val TYPE_ONESHOT = 1
+    }
+
+    val id: Long get() = metadata.checksum
+
+    lateinit var metadata: Metadata
 
     var flow: RootFlow? = null
-
-    var label: String? = null
 
     /**
      * Whether the task is active or not. Even if set to `false`, the task may continue executing until
@@ -31,8 +41,6 @@ class AutomatorTask(val name: String) {
         private set
 
     var onStateChangedListener: OnStateChangedListener? = null
-
-    val id = name.hashCode()
 
     private var startTimestamp: Long = -1
 
@@ -80,9 +88,9 @@ class AutomatorTask(val name: String) {
         "RootFlow is not initialized!"
     }
 
-    fun activate(stateListener: OnStateChangedListener) {
+    fun enable(stateListener: OnStateChangedListener) {
         if (isEnabled) {
-            error("Task[$name] has already been activated!")
+            error("Task has already been activated!")
         }
         onStateChangedListener = stateListener
         startTimestamp = System.currentTimeMillis()
@@ -92,7 +100,7 @@ class AutomatorTask(val name: String) {
 
     fun disable() {
         if (!isEnabled) {
-            error("The task[$name] is not enabled!")
+            error("The task is not enabled!")
         }
         isEnabled = false
         if (!isExecuting) {
@@ -112,7 +120,7 @@ class AutomatorTask(val name: String) {
         observer: TaskRuntime.Observer? = null
     ): Boolean {
         if (!isEnabled) return false
-        // Cancel if still executing //TODO: 单线程情况下，Will this hit?
+        // Cancel if executing //TODO: 单线程情况下，Will this hit?
         if (isExecuting) {
             currentRuntime?.halt()
         }
@@ -141,28 +149,48 @@ class AutomatorTask(val name: String) {
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AutomatorTask
-
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return id
-    }
-
     @Serializable
-    data class Metadata(
-        @SerialName("t")
-        var title: String,
+    class Metadata(@SerialName("t") var title: String) : Parcelable {
+
         @SerialName("d")
-        var description: String? = null,
+        var description: String? = null
+
         @SerialName("c")
         var creationTimestamp: Long = -1
-    )
+
+        @SerialName("tp")
+        var taskType = TYPE_RESIDENT
+
+        @SerialName("s")
+        var checksum: Long = -1
+
+        constructor(parcel: Parcel) : this(parcel.readString()!!) {
+            description = parcel.readString()
+            creationTimestamp = parcel.readLong()
+            taskType = parcel.readInt()
+            checksum = parcel.readLong()
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeString(title)
+            parcel.writeString(description)
+            parcel.writeLong(creationTimestamp)
+            parcel.writeInt(taskType)
+            parcel.writeLong(checksum)
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<Metadata> {
+            override fun createFromParcel(parcel: Parcel): Metadata {
+                return Metadata(parcel)
+            }
+
+            override fun newArray(size: Int): Array<Metadata?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
 }

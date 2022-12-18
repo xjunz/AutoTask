@@ -1,4 +1,4 @@
-package top.xjunz.tasker.engine.applet.serialization
+package top.xjunz.tasker.engine.applet.dto
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -25,27 +25,28 @@ object AppletValues {
     const val VAL_TYPE_LONG = 5
 
     /**
-     * @see Distance
-     */
-    const val VAL_TYPE_DISTANCE = 6
-
-    /**
      * Bit mask for collection value type.
      */
     internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
+
+    /**
+     * @see Distance
+     */
+    const val VAL_TYPE_DISTANCE = 6
 
     private const val SEPARATOR = ","
 
     /**
      * Whether its value is a [Collection].
      */
-    private inline val Applet.isValueCollection: Boolean
-        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
+    private val Applet.isCollectionValue: Boolean
+        get() = valueType and MASK_VAL_TYPE_COLLECTION == 1
 
     /**
      * Unmasked raw type.
      *
      * @see MASK_VAL_TYPE_COLLECTION
+     * @see Applet.valueType
      */
     val Applet.rawType: Int
         get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
@@ -82,7 +83,7 @@ object AppletValues {
         return when {
             value == null -> null
             rawType == VAL_TYPE_IRRELEVANT -> null
-            isValueCollection -> {
+            isCollectionValue -> {
                 value as Collection<*>
                 value.joinToString(SEPARATOR) {
                     serialize(rawType, it!!)
@@ -106,7 +107,7 @@ object AppletValues {
 
     internal fun Applet.deserializeValue(src: String?): Any? {
         if (src == null) return null
-        return if (isValueCollection) {
+        return if (isCollectionValue) {
             val split = src.split(SEPARATOR)
             split.mapTo(ArrayList(split.size)) {
                 deserialize(rawType, src)

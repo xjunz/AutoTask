@@ -17,7 +17,7 @@ import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -84,7 +84,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             binding.fabAction.text = R.string.confirm_ref.text
             binding.fabAction.setIconResource(R.drawable.ic_baseline_add_link_24)
         }
-        binding.fabAction.setOnClickListener {
+        binding.fabAction.setAntiMoneyClickListener {
             if (viewModel.isSelectingRef) {
                 if (globalViewModel.selectedRefs.isNotEmpty())
                     confirmReferenceSelections()
@@ -92,7 +92,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 val flow = viewModel.flow
                 if (flow.size == flow.requiredSize) {
                     toast(R.string.error_reach_max_applet_size)
-                    return@setOnClickListener
+                    return@setAntiMoneyClickListener
                 }
                 AppletSelectorDialog().init(flow) {
                     flow.addAll(it)
@@ -139,7 +139,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             R.string.prompt_set_refid.text
         }
         val dialog = TextEditorDialog().setCaption(caption).configEditText {
-            it.setMaxLength(Applet.Configurator.MAX_REFERENCE_ID_LENGTH)
+            it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
         }.init(R.string.set_refid.text, distinctRefids.singleOrNull()) {
             if (!globalViewModel.isRefidLegalForSelections(it)) {
                 return@init R.string.error_tag_exists.text
@@ -217,7 +217,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             if (it.isNotEmpty()) {
                 val popup = menuHelper.createBatchMenu(binding.ibMenu, it)
                 binding.ibMenu.setOnTouchListener(popup.dragToOpenListener)
-                binding.ibMenu.setOnClickListener {
+                binding.ibMenu.setAntiMoneyClickListener {
                     popup.show()
                 }
             }
@@ -314,7 +314,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         viewModel.doSplit = block
     }
 
-    fun asBase(metadata: AutomatorTask.Metadata) = doWhenCreated {
+    fun asBase(metadata: XTask.Metadata) = doWhenCreated {
         viewModel.metadata = metadata
     }
 

@@ -11,7 +11,7 @@ import java.net.URLEncoder
  */
 object Router {
 
-    private const val SCHEME = "automator"
+    private const val SCHEME = "xtsk"
     const val HOST_ACCEPT_OPTIONS_FROM_INSPECTOR = "options-from-inspector"
     const val HOST_NONE = "no-op"
     const val HOST_ACTION = "action"

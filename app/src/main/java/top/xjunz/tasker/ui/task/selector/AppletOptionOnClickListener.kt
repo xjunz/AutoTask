@@ -8,8 +8,8 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
-import top.xjunz.tasker.engine.applet.serialization.AppletValues.rawType
+import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues.rawType
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isAttached
 import top.xjunz.tasker.task.applet.option.AppletOption

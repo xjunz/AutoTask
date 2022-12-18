@@ -15,7 +15,8 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 /**
  * @author xjunz 2022/10/16
  */
-class ToastOverlay(inspector: FloatingInspector) : FloatingInspectorOverlay<OverlayToastBinding>(inspector) {
+class ToastOverlay(inspector: FloatingInspector) :
+    FloatingInspectorOverlay<OverlayToastBinding>(inspector) {
 
     override fun modifyLayoutParams(base: WindowManager.LayoutParams) {
         super.modifyLayoutParams(base)
@@ -32,6 +33,7 @@ class ToastOverlay(inspector: FloatingInspector) : FloatingInspectorOverlay<Over
             if (binding.tvToast.isVisible) {
                 binding.tvToast.isVisible = false
                 dismissJob?.cancel()
+                dismissJob = null
             }
             rootView.beginAutoTransition(MaterialFadeThrough())
             binding.tvToast.text = it

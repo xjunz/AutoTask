@@ -55,7 +55,9 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     private val lifecycleRegistry = LifecycleRegistry(this)
 
-    private lateinit var overlayA11yEventName: String
+    val exemptionEventClassName: String by lazy {
+        "FloatingInspectorWindow@" + hashCode()
+    }
 
     override fun getLifecycle(): Lifecycle {
         return lifecycleRegistry
@@ -82,13 +84,6 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     fun getSelectedOptions(): List<AppletOption> {
         return nodeInfo.getCheckedOptions()
-    }
-
-    fun getOverlayAccessibilityEventName(): String {
-        if (!::overlayA11yEventName.isInitialized) {
-            overlayA11yEventName = "FloatingInspectorWindow@" + hashCode()
-        }
-        return overlayA11yEventName
     }
 
     /**

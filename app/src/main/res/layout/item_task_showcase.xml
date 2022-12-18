@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.Material3.CardView.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:cardBackgroundColor="?colorSurface"
+        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
+        app:strokeColor="@color/material_on_surface_stroke">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="已运行00分12秒"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_task_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_task_name" />
+
+            <TextView
+                android:id="@+id/tv_task_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary"
+                app:layout_constraintEnd_toStartOf="@+id/textView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@tools:sample/lorem" />
+
+            <TextView
+                android:id="@+id/tv_task_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="5"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_task_name"
+                app:layout_constraintTop_toBottomOf="@id/tv_task_name"
+                tools:text="@tools:sample/lorem/random" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cg_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="@+id/tv_task_desc"
+                app:layout_constraintTop_toBottomOf="@id/tv_task_desc">
+
+
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/resident_task"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:chipBackgroundColor="?colorPrimaryContainer"
+                    app:chipIcon="@drawable/ic_hourglass_bottom_24px"
+                    app:chipIconSize="20dp"
+                    app:chipIconTint="?colorOnPrimaryContainer"
+                    app:chipStrokeWidth="0dp"
+                    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full" />
+
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/build_in_task"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:chipBackgroundColor="?colorPrimaryContainer"
+                    app:chipIcon="@drawable/ic_baseline_widgets_24"
+                    app:chipIconSize="20dp"
+                    app:chipIconTint="?colorOnPrimaryContainer"
+                    app:chipStrokeWidth="0dp"
+                    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full" />
+
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/custom_task"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:chipBackgroundColor="?colorPrimaryContainer"
+                    app:chipIcon="@drawable/ic_baseline_gesture_24"
+                    app:chipIconSize="20dp"
+                    app:chipIconTint="?colorOnPrimaryContainer"
+                    app:chipStrokeWidth="0dp"
+                    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:dividerColor="@color/material_on_surface_stroke"
+                app:layout_constraintTop_toBottomOf="@+id/cg_tags" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_control"
+                style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/start_task"
+                app:icon="@drawable/ic_baseline_play_arrow_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider"
+                app:strokeColor="@color/material_on_surface_stroke" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@{@string/edit_task}"
+                app:icon="@drawable/ic_edit_24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider"
+                app:strokeColor="@color/material_on_surface_stroke"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_track"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@{@string/track_task_flow}"
+                app:icon="@drawable/ic_timeline_24px"
+                app:layout_constraintStart_toEndOf="@+id/btn_edit"
+                app:layout_constraintTop_toBottomOf="@+id/divider"
+                app:strokeColor="@color/material_on_surface_stroke"
+                app:strokeWidth="1dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

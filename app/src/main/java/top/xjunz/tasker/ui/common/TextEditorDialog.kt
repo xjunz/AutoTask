@@ -19,6 +19,7 @@ import top.xjunz.tasker.ktx.setSelectionToEnd
 import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/05/10
@@ -91,10 +92,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             tvCaption.isVisible = !viewModel.caption.isNullOrEmpty()
             tvCaption.text = viewModel.caption
             viewModel.editTextConfig?.invoke(etInput)
-            btnPositive.setOnClickListener {
+            btnPositive.setAntiMoneyClickListener {
                 if (!viewModel.allowEmptyInput && binding.etInput.text.isEmpty()) {
                     toastAndShake(R.string.error_empty_input)
-                    return@setOnClickListener
+                    return@setAntiMoneyClickListener
                 }
                 val error = viewModel.onConfirmed(binding.etInput.textString)
                 if (error == null) {

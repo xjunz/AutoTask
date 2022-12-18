@@ -10,6 +10,7 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isFloatingInspectorShown
 import java.lang.ref.WeakReference
 
 /**
@@ -33,7 +34,7 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
         if (event.eventTime < curEventTime && !event.isFullScreen) return
         val className = event.className?.toString()
         if (className == "android.inputmethodservice.SoftInputWindow") return
-        if (className == floatingInspector.getOverlayAccessibilityEventName()) return
+        if (isFloatingInspectorShown && className == floatingInspector.exemptionEventClassName) return
         curEventTime = event.eventTime
         val firstText = event.text.firstOrNull()?.toString()
         val prevPanelTitle = curPanelTitle

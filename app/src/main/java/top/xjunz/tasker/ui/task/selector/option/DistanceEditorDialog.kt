@@ -14,6 +14,7 @@ import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/24
@@ -74,7 +75,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             )
         }
         binding.tvSubtitleUnit.setHelp(R.string.help_distance_unit.text)
-        binding.btnComplete.setOnClickListener {
+        binding.btnComplete.setAntiMoneyClickListener {
             val min = binding.etMinimum.textString.toFloatOrNull()
             val max = binding.etMaximum.textString.toFloatOrNull()
             if (min == null && max == null) {
@@ -85,7 +86,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         R.string.maximum.str
                     )
                 )
-                return@setOnClickListener
+                return@setAntiMoneyClickListener
             }
             if (max != null && min != null && max < min) {
                 binding.root.rootView.shake()
@@ -95,13 +96,13 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         R.string.maximum.str
                     )
                 )
-                return@setOnClickListener
+                return@setAntiMoneyClickListener
             }
             if (viewModel.unit >= 2
                 && (min != null && min !in 0F..1F || (max != null && max !in 0F..1F))
             ) {
                 toastAndShake(R.string.format_error_min_max_not_in_scope.format(binding.menuUnit.text))
-                return@setOnClickListener
+                return@setAntiMoneyClickListener
             }
             viewModel.distance.let {
                 it.unit = viewModel.unit

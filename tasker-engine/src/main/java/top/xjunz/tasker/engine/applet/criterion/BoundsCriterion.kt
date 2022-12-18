@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.criterion
 
 import kotlinx.serialization.Transient
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.util.NumberRangeUtil
 import top.xjunz.tasker.engine.value.Distance
 
@@ -10,7 +10,7 @@ import top.xjunz.tasker.engine.value.Distance
  */
 abstract class BoundsCriterion<T : Any>(@Transient val direction: Int) : Criterion<T, Distance>() {
 
-    override var valueType: Int = AppletValues.VAL_TYPE_DISTANCE
+    override val valueType: Int = AppletValues.VAL_TYPE_DISTANCE
 
 }
 

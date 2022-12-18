@@ -12,6 +12,7 @@ import top.xjunz.tasker.databinding.OverlayBubbleExpandedBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/17
@@ -37,27 +38,27 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 vm.bubbleX = layoutParams.x
                 vm.bubbleY = layoutParams.y
             }
-            ibConfirm.setOnClickListener {
+            ibConfirm.setAntiMoneyClickListener {
                 if (vm.emphaticNode.isNull()) {
                     vm.makeToast(R.string.no_node_selected)
-                    return@setOnClickListener
+                    return@setAntiMoneyClickListener
                 }
                 vm.showNodeInfo.value = true
             }
-            ibLayers.setOnClickListener {
+            ibLayers.setAntiMoneyClickListener {
                 vm.showNodeTree.value = true
             }
-            ibCenter.setOnClickListener {
+            ibCenter.setAntiMoneyClickListener {
                 vm.showGamePad.value = false
             }
-            ibCollapse.setOnClickListener {
+            ibCollapse.setAntiMoneyClickListener {
                 vm.isCollapsed.toggle()
             }
-            ibGamePad.setOnClickListener {
+            ibGamePad.setAntiMoneyClickListener {
                 vm.showGamePad.value = true
                 vm.makeToast(R.string.pointer_controller_enabled)
             }
-            ibPinScreenshot.setOnClickListener {
+            ibPinScreenshot.setAntiMoneyClickListener {
                 vm.pinScreenShot.toggle()
                 if (vm.pinScreenShot.isTrue) {
                     vm.makeToast(R.string.pin_screenshot)
@@ -65,7 +66,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     vm.makeToast(R.string.cancel_pin_screenshot)
                 }
             }
-            ibShowGrid.setOnClickListener {
+            ibShowGrid.setAntiMoneyClickListener {
                 vm.showGrids.toggle()
                 if (vm.showGrids.isTrue) {
                     vm.makeToast(R.string.show_node_bounds)

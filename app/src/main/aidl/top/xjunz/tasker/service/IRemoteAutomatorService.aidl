@@ -1,4 +1,4 @@
-// IAutomatorConnection.aidl
+// IRemoteAutomatorService.aidl
 package top.xjunz.tasker.service;
 
 import top.xjunz.tasker.service.IAvailabilityChecker;
@@ -7,7 +7,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import java.util.List;
 
-interface IAutomatorConnection {
+interface IRemoteAutomatorService {
 
     void connect() = 1;
 

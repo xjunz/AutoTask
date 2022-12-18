@@ -15,6 +15,7 @@ import top.xjunz.tasker.databinding.ItemMenuBinding
 import top.xjunz.tasker.databinding.LayoutMenuListBinding
 import top.xjunz.tasker.ktx.resolvedId
 import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.ReflectionUtil.invokeSuperMethod
 
 /**
@@ -34,7 +35,7 @@ class PopupListMenu @JvmOverloads constructor(
         ViewHolder(binding.root) {
 
         init {
-            binding.content.setOnClickListener {
+            binding.content.setAntiMoneyClickListener {
                 if (onMenuItemClickListener?.onMenuItemClick(menu[adapterPosition]) == true) {
                     menu.close()
                 }

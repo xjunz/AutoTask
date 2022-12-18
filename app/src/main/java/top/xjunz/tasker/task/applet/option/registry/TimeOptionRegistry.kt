@@ -4,7 +4,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
@@ -17,7 +17,8 @@ import java.util.*
  */
 class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    private inline fun TimeCollectionCriterion(crossinline block: (Calendar) -> Int): CollectionCriterion<Calendar, Int> {
+    private inline fun timeCollectionCriterion(crossinline block: (Calendar) -> Int)
+            : CollectionCriterion<Calendar, Int> {
         return collectionCriterion(AppletValues.VAL_TYPE_INT, block)
     }
 
@@ -41,7 +42,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x00_02)
     val month = invertibleAppletOption(0x11, R.string.in_months) {
-        TimeCollectionCriterion {
+        timeCollectionCriterion {
             it.get(Calendar.MONTH)
         }
     }.withValueDescriber<Collection<Int>> {
@@ -66,7 +67,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x00_03)
     val dayOfWeek = invertibleAppletOption(0x13, R.string.in_day_of_week) {
-        TimeCollectionCriterion {
+        timeCollectionCriterion {
             it.get(Calendar.DAY_OF_WEEK) - 1
         }
     }.withValueDescriber<Collection<Int>> {

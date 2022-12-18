@@ -2,7 +2,7 @@ package top.xjunz.tasker.service
 
 import android.app.UiAutomation
 import androidx.test.uiautomator.UiDevice
-import top.xjunz.tasker.annotation.LocalAndRemote
+import top.xjunz.tasker.annotation.Crossed
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.task.inspector.FloatingInspector
 
@@ -11,7 +11,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
  */
 inline val serviceController get() = OperatingMode.CURRENT.serviceController
 
-@LocalAndRemote
+@Crossed
 inline val currentService: AutomatorService
     get() = if (isInHostProcess) serviceController.requireService() else ShizukuAutomatorService.require()
 

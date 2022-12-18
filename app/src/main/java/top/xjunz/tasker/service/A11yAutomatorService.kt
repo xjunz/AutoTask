@@ -22,7 +22,7 @@ import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.task.AutomatorTaskScheduler
+import top.xjunz.tasker.task.ResidentTaskScheduler
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -44,9 +44,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
         val runningState = MutableLiveData<Boolean>()
 
-        private var instanceRef: WeakReference<A11yAutomatorService>? = null
+        private var instance: WeakReference<A11yAutomatorService>? = null
 
-        fun get() = instanceRef?.get()
+        fun get() = instance?.get()
 
         fun require() = checkNotNull(get()) {
             "The A11yAutomatorService is not yet started or is dead!"
@@ -67,7 +67,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     lateinit var inspector: FloatingInspector
 
-    lateinit var taskScheduler: AutomatorTaskScheduler
+    lateinit var taskScheduler: ResidentTaskScheduler
 
     override val isRunning get() = runningState.isTrue
 
@@ -85,9 +85,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
             } else {
-                taskScheduler = AutomatorTaskScheduler(this, mainLooper)
+                taskScheduler = ResidentTaskScheduler(this, mainLooper)
             }
-            instanceRef = WeakReference(this)
+            instance = WeakReference(this)
             runningState.value = true
             startTimestamp = System.currentTimeMillis()
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -159,7 +159,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     override fun onDestroy() {
         super.onDestroy()
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        instanceRef?.clear()
+        instance?.clear()
         runningState.value = false
         if (isInspectorShown()) inspector.dismiss()
     }
@@ -175,7 +175,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         val windowToken: IBinder = requireFieldFromSuperClass("mWindowToken")
         val connectionId: Int = requireFieldFromSuperClass("mConnectionId")
         callbacks = client.requireFieldFromSuperClass("mCallback")
-        callbacks!!.init(connectionId, windowToken)
+        requireNotNull(callbacks).init(connectionId, windowToken)
     }
 
     override fun disconnect() {

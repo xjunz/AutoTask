@@ -56,7 +56,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
             viewModel.registryOptions, ItemAppletFactoryBinding::class.java, {
-                itemView.setOnClickListener {
+                itemView.setAntiMoneyClickListener {
                     viewModel.selectFlowRegistry(adapterPosition)
                 }
             }) { binding, index, data ->
@@ -75,8 +75,8 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     private val rightAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(viewModel.options, ItemAppletOptionBinding::class.java, {
-            itemView.setOnClickListener {
-                if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
+            itemView.setAntiMoneyClickListener {
+               // if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
                 val position = adapterPosition
                 val option = viewModel.options[position]
                 if (option.isValid) {
@@ -87,7 +87,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     }
                 }
             }
-            binding.ibInvert.setOnClickListener {
+            binding.ibInvert.setAntiMoneyClickListener {
                 viewModel.options[adapterPosition].toggleInversion()
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
@@ -147,11 +147,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         binding.shoppingCart.circularRevealContainer.doOnPreDraw {
             binding.rvRight.updatePadding()
         }
-        binding.shoppingCart.btnCount.setOnClickListener {
+        binding.shoppingCart.btnCount.setAntiMoneyClickListener {
             if (viewModel.flow.isNotEmpty())
                 viewModel.showClearDialog.value = true
         }
-        binding.shoppingCart.btnComplete.setOnClickListener {
+        binding.shoppingCart.btnComplete.setAntiMoneyClickListener {
             viewModel.complete()
             dismiss()
         }

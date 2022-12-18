@@ -93,7 +93,7 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
 
     override fun onInitializeAccessibilityEvent(host: View, event: AccessibilityEvent) {
         super.onInitializeAccessibilityEvent(host, event)
-        event.className = inspector.getOverlayAccessibilityEventName()
+        event.className = inspector.exemptionEventClassName
     }
 
     open fun onOverlayInflated() {

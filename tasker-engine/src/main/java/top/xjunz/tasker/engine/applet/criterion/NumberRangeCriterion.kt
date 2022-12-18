@@ -1,6 +1,6 @@
 package top.xjunz.tasker.engine.applet.criterion
 
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.util.NumberRangeUtil
 
 /**
@@ -11,7 +11,7 @@ class NumberRangeCriterion<R : Any, T : Number>(
     private inline val mapper: (R) -> T
 ) : Criterion<R, List<T>>() {
 
-    override var valueType: Int = collectionTypeOf(rawType)
+    override val valueType: Int = collectionTypeOf(rawType)
 
     override fun matchTarget(target: R, value: List<T>): Boolean {
         return NumberRangeUtil.contains(value[0], value[1]) {

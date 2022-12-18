@@ -5,8 +5,7 @@
 package top.xjunz.tasker.annotation
 
 /**
- * The annotation indicating that its targets are only used in the local process. Only use this inside
- * [LocalAndRemote] annotation devoted classes.
+ * The annotation indicating that its targets are only used in the local process.
  *
  * @author xjunz 2022/05/25
  */

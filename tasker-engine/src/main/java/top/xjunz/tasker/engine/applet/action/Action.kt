@@ -2,7 +2,7 @@ package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**

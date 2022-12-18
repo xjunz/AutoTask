@@ -6,7 +6,7 @@ import android.os.IInterface
 import androidx.lifecycle.MutableLiveData
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.service.IAutomatorConnection
+import top.xjunz.tasker.service.IRemoteAutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.util.ShizukuUtil
 
@@ -31,7 +31,7 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
             .version(BuildConfig.VERSION_CODE)
 
     override fun doOnConnected(serviceInterface: IInterface) {
-        serviceInterface as IAutomatorConnection
+        serviceInterface as IRemoteAutomatorService
         service = ShizukuAutomatorService(serviceInterface)
         if (serviceInterface.isConnected) serviceInterface.connect()
     }
@@ -50,8 +50,8 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
     }
 
-    override fun asInterface(binder: IBinder): IAutomatorConnection {
-        return IAutomatorConnection.Stub.asInterface(binder)
+    override fun asInterface(binder: IBinder): IRemoteAutomatorService {
+        return IRemoteAutomatorService.Stub.asInterface(binder)
     }
 
     override val startTimestamp: Long = doWhenRunning { it.startTimestamp } ?: -1L

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_running_tasks"
+        android:icon="@drawable/ic_baseline_play_arrow_24"
+        android:title="@string/enabled" />
+
+    <item
+        android:id="@+id/item_resident_tasks"
+        android:icon="@drawable/ic_hourglass_bottom_24px"
+        android:title="@string/resident_task" />
+
+    <item
+        android:id="@+id/item_oneshot_tasks"
+        android:icon="@drawable/ic_timer_24px"
+        android:title="@string/oneshot_task" />
+</menu>

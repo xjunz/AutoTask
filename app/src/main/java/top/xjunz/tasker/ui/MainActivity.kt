@@ -23,7 +23,7 @@ import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
-import top.xjunz.tasker.ui.task.editor.TaskShowcaseDialog
+import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
 import top.xjunz.tasker.util.ShizukuUtil
 import java.util.concurrent.TimeoutException
 

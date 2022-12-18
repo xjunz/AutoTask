@@ -14,6 +14,7 @@ import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/27
@@ -51,7 +52,7 @@ class EnumSelectorDialog : BaseDialogFragment<DialogEnumSelectorBinding>() {
 
     private val adapter: Adapter<*> by lazy {
         inlineAdapter(viewModel.enum, ItemEnumSelectorBinding::class.java, {
-            itemView.setOnClickListener {
+            itemView.setAntiMoneyClickListener {
                 viewModel.toggleSelection(adapterPosition)
                 adapter.notifyItemChanged(adapterPosition)
             }
@@ -66,7 +67,7 @@ class EnumSelectorDialog : BaseDialogFragment<DialogEnumSelectorBinding>() {
         (binding.rvEnum.layoutManager as GridLayoutManager).spanCount = viewModel.spanCount
         binding.rvEnum.adapter = adapter
         binding.tvTitle.text = viewModel.title
-        binding.btnComplete.setOnClickListener {
+        binding.btnComplete.setAntiMoneyClickListener {
             if (viewModel.selectedIndexes.isEmpty()) {
                 toastAndShake(R.string.error_no_selection)
             } else {

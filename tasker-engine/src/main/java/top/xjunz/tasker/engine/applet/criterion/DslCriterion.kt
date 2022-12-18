@@ -1,6 +1,6 @@
 package top.xjunz.tasker.engine.applet.criterion
 
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 
 /**
  * @author xjunz 2022/08/14

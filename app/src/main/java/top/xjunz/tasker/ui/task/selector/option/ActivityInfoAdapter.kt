@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import top.xjunz.tasker.databinding.ItemActivityInfoBinding
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/09
@@ -20,7 +21,7 @@ class ActivityInfoAdapter(
     inner class ActivityInfoViewHolder(val binding: ItemActivityInfoBinding) :
         ViewHolder(binding.root) {
         init {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 host.onActivityItemClicked(activitiesInfo[adapterPosition], binding)
             }
         }

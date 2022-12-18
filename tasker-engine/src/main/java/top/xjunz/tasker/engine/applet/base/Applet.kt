@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -10,12 +10,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  * @author xjunz 2022/08/04
  */
 abstract class Applet {
-
-    object Configurator {
-
-        const val MAX_REFERENCE_ID_LENGTH = 12
-
-    }
 
     companion object {
 
@@ -43,6 +37,11 @@ abstract class Applet {
          * The max nested depth allowed in the root flow.
          */
         const val MAX_FLOW_NESTED_DEPTH = Long.SIZE_BITS / FLOW_CHILD_COUNT_BITS
+
+        const val MAX_REFERENCE_ID_LENGTH = 12
+
+        fun collectionTypeOf(type: Int) = type or AppletValues.MASK_VAL_TYPE_COLLECTION
+
     }
 
     /**
@@ -94,7 +93,11 @@ abstract class Applet {
         }
 
     /**
-     * The masked type of value for `serialization`.
+     * The masked type of value for `serialization`, which is composed as following:
+     *
+     * |0|│|0000 0000|
+     * |  :----: |:----: | :----:  |
+     * |is collection|│|raw type|
      */
     abstract val valueType: Int
 
@@ -149,8 +152,6 @@ abstract class Applet {
             return ret
         return null
     }
-
-    protected fun collectionTypeOf(rawType: Int) = rawType or AppletValues.MASK_VAL_TYPE_COLLECTION
 
     override fun toString(): String {
         if (comment == null) {

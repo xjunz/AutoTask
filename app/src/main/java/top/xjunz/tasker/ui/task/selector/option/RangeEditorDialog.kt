@@ -10,9 +10,10 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogRangeEditorBinding
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/26
@@ -116,7 +117,7 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         binding.btnNoMinLimit.setOnClickListener {
             binding.etMinimum.text.clear()
         }
-        binding.btnComplete.setOnClickListener {
+        binding.btnComplete.setAntiMoneyClickListener {
             val min: Number? = binding.etMinimum.textString.toNumberOrNull()
             val max: Number? = binding.etMaximum.textString.toNumberOrNull()
             if (!hasError(min, max)) {

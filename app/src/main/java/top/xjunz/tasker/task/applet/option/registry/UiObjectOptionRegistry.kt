@@ -7,7 +7,7 @@ import androidx.annotation.GravityInt
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.*
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
@@ -169,7 +169,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         NumberRangeCriterion<AccessibilityNodeInfo, Int> {
             it.text.length
         }
-    }
+    }.withDefaultRangeDescriber()
 
     @AppletCategory(0x01_04)
     val textContains = appletOption(0x50, R.string.contains_text) {

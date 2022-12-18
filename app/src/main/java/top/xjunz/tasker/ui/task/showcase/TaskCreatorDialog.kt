@@ -1,4 +1,4 @@
-package top.xjunz.tasker.ui.task.creator
+package top.xjunz.tasker.ui.task.showcase
 
 import android.os.Bundle
 import android.view.View
@@ -6,7 +6,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.databinding.DialogTaskCreatorBinding
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.toast
@@ -24,7 +24,7 @@ class TaskCreatorDialog : BaseDialogFragment<DialogTaskCreatorBinding>() {
 
     private class InnerViewModel : ViewModel() {
 
-        val onMetadataEdited = MutableLiveData<AutomatorTask.Metadata>()
+        val onMetadataEdited = MutableLiveData<XTask.Metadata>()
     }
 
     private val viewModel by viewModels<InnerViewModel>()
@@ -38,6 +38,9 @@ class TaskCreatorDialog : BaseDialogFragment<DialogTaskCreatorBinding>() {
         }
         binding.containerOneshot.setAntiMoneyClickListener {
 
+        }
+        binding.ibDismiss.setOnClickListener {
+            dismiss()
         }
         observeTransient(viewModel.onMetadataEdited) {
             FlowEditorDialog().init(null, false).doOnCompletion {

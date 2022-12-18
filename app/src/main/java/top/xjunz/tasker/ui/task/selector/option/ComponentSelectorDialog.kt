@@ -20,6 +20,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/07
@@ -78,7 +79,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 binding.tvApplicationName.updateLayoutParams<MarginLayoutParams> {
                     marginStart = 8.dp
                 }
-                binding.root.setOnClickListener {
+                binding.root.setAntiMoneyClickListener {
                     val pkgName = viewModel.selectedPackages.reversed()[adapterPosition]
                     viewModel.removedItem.value = pkgName
                     viewModel.selectedPackages.remove(pkgName)
@@ -100,7 +101,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 binding.tvActivityName.isVisible = false
                 binding.tvBadge.isVisible = false
                 binding.root.updatePadding(bottom = 12.dp, top = 12.dp)
-                binding.root.setOnClickListener {
+                binding.root.setAntiMoneyClickListener {
                     val comp = viewModel.selectedActivities.reversed()[adapterPosition]
                     viewModel.removedItem.value = comp
                     viewModel.selectedActivities.remove(comp)
@@ -175,7 +176,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         }
         binding.ibSortBy.setOnTouchListener(popupMenu.dragToOpenListener)
-        binding.ibSortBy.setOnClickListener {
+        binding.ibSortBy.setAntiMoneyClickListener {
             popupMenu.show()
             popupMenu.menu.findItem(R.id.item_reverse_order).isChecked = viewModel.isOrderReversed
             popupMenu.menu.findItem(R.id.item_show_system_app).isChecked = viewModel.showSystemApps
@@ -185,11 +186,11 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.viewPager.doOnItemSelected {
             viewModel.currentItem.value = it
         }
-        binding.shoppingCart.btnCount.setOnClickListener {
+        binding.shoppingCart.btnCount.setAntiMoneyClickListener {
             if (viewModel.selectedCount notEq 0)
                 viewModel.showClearAllDialog.value = true
         }
-        binding.shoppingCart.btnComplete.setOnClickListener {
+        binding.shoppingCart.btnComplete.setAntiMoneyClickListener {
             if (viewModel.complete()) {
                 dismiss()
             } else {

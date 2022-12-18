@@ -12,7 +12,7 @@
         • 支持开机自启\n
         • 不需要在通知栏显示通知以保持后台运行\n
         • 无需保活，后台常驻\n
-        • 省电且占用系统资源少\n\n除此之外，本应用是<a href='automator://about'>开源</a>应用，您不必担心此应用在后台“做坏事”。
+        • 省电且占用系统资源少\n\n除此之外，本应用是<a href='xtsk://about'>开源</a>应用，您不必担心此应用在后台“做坏事”。
     </string>
     <string name="more">更多</string>
     <string name="service_is_running">服务正在运行…</string>
@@ -112,7 +112,7 @@
     <string name="checked">通过</string>
     <string name="failed">失败</string>
     <string name="no_more_items">没有更多了</string>
-    <string name="custom_task">任务列表</string>
+    <string name="custom_task">自定义任务</string>
     <string name="caption_custom_task">管理或创建自定义任务</string>
     <string name="task_list">任务列表</string>
     <string name="create_task">创建任务</string>
@@ -302,7 +302,7 @@
     <string name="event">触发事件</string>
     <string name="error_not_removable">无法移除此规则！</string>
     <string name="not_removable">不可移除</string>
-    <string name="long_running_task">常驻任务</string>
+    <string name="resident_task">常驻任务</string>
     <string name="desc_long_running_task">长期在后台运行的轻量级任务，由事件驱动。</string>
     <string name="desc_oneshot_task">单次运行的(耗时)任务，执行完成后即停止，用户可随时启动。</string>
     <string name="oneshot_task">单次任务</string>
@@ -314,4 +314,8 @@
     <string name="task_desc">任务描述（可缺省）</string>
     <string name="unnamed_task">未命名任务</string>
     <string name="no_desc_provided">未提供该任务的描述</string>
+    <string name="enabled">已启用</string>
+    <string name="start_task">启动任务</string>
+    <string name="preload_task">预置任务</string>
+    <string name="track_task_flow">任务追踪</string>
 </resources>

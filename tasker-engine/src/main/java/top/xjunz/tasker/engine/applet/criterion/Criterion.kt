@@ -3,7 +3,7 @@ package top.xjunz.tasker.engine.applet.criterion
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -42,7 +42,7 @@ inline fun <T : Any, V : Any> newCriterion(
 ): Criterion<T, V> {
     return object : Criterion<T, V>() {
 
-        override var valueType: Int = valueType
+        override val valueType: Int = valueType
 
         override fun matchTarget(target: T, value: V): Boolean {
             return matcher(target, value)

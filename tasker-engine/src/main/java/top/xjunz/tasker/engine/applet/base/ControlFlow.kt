@@ -2,7 +2,7 @@ package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 
 /**
  * @author xjunz 2022/11/04
@@ -15,7 +15,7 @@ abstract class ControlFlow : Flow() {
      * Throw an exception to halt the whole flow. This is regarded as a normal termination.
      */
     protected fun stopship(runtime: TaskRuntime): Nothing {
-        throw AutomatorTask.FlowFailureException("Stopship at ${runtime.tracker.formatTrace()}!")
+        throw XTask.FlowFailureException("Stopship at ${runtime.tracker.formatTrace()}!")
     }
 
     override fun staticCheckMySelf() {

@@ -8,11 +8,11 @@ import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.task.AutomatorTask
+import top.xjunz.tasker.engine.task.XTask
 
 
 /**
- * The structure storing runtime information of a running [AutomatorTask].
+ * The structure storing runtime information of a running [XTask].
  *
  * @author xjunz 2022/08/09
  */
@@ -31,8 +31,6 @@ class TaskRuntime private constructor() {
 
     companion object {
 
-        private val globalVariableRegistry = mutableMapOf<Int, Any>()
-
         fun obtain(
             snapshot: Snapshot,
             coroutineScope: CoroutineScope,
@@ -40,8 +38,8 @@ class TaskRuntime private constructor() {
         ): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
             instance.coroutineScope = coroutineScope
-            instance._events = events
             instance.target = events
+            instance._events = events
             instance._snapshot = snapshot
             return instance
         }
@@ -131,8 +129,8 @@ class TaskRuntime private constructor() {
 
     fun recycle() {
         _snapshot = null
-        coroutineScope = null
         _events = null
+        coroutineScope = null
         results.clear()
         tracker.reset()
         observer = null

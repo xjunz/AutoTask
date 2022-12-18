@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentManager
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.configInputType
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.show

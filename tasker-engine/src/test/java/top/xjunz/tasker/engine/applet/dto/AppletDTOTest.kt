@@ -1,4 +1,4 @@
-package top.xjunz.tasker.engine.applet.serialization
+package top.xjunz.tasker.engine.applet.dto
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -7,7 +7,7 @@ import top.xjunz.tasker.engine.applet.base.DslFlow
 import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.engine.applet.base.UnaryCriterion
 import top.xjunz.tasker.engine.applet.base.When
-import top.xjunz.tasker.engine.applet.serialization.AppletDTO.Companion.toDTO
+import top.xjunz.tasker.engine.applet.dto.AppletDTO.Companion.toDTO
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.value.Distance
 

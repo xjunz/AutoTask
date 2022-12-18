@@ -15,10 +15,11 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import java.util.*
 
 /**
@@ -38,7 +39,7 @@ class AppletCandidatesAdapter(
     inner class AppletViewHolder(val binding: ItemAppletCandidateBinding) :
         ViewHolder(binding.root) {
         init {
-            binding.root.setOnClickListener {
+            binding.root.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
@@ -49,11 +50,11 @@ class AppletCandidatesAdapter(
                     }
                 }
             }
-            binding.tvTitle.setOnClickListener {
+            binding.tvTitle.setAntiMoneyClickListener {
                 currentList[adapterPosition].toggleRelation()
                 notifyItemChanged(adapterPosition, true)
             }
-            binding.ibAction.setOnClickListener {
+            binding.ibAction.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)

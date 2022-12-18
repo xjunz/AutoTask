@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption

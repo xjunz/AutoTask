@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.applet.criterion
 
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -13,7 +13,7 @@ class EventCriterion(eventType: Int) : Applet() {
         value = eventType
     }
 
-    override var valueType: Int = AppletValues.VAL_TYPE_INT
+    override val valueType: Int = AppletValues.VAL_TYPE_INT
 
     override suspend fun apply(runtime: TaskRuntime) {
         val hit = runtime.events.find { it.type == value }

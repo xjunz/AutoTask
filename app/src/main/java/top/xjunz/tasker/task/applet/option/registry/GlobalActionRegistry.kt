@@ -5,7 +5,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
-import top.xjunz.tasker.engine.applet.serialization.AppletValues
+import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.firstGroupValue
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.task.applet.anno.AppletCategory
