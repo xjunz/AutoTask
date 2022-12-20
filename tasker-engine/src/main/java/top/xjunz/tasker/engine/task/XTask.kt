@@ -6,6 +6,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import top.xjunz.shared.ktx.md5
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
@@ -26,11 +27,13 @@ class XTask {
         const val TYPE_ONESHOT = 1
     }
 
-    val id: Long get() = metadata.checksum
+    val checksum: Long get() = metadata.checksum
 
     lateinit var metadata: Metadata
 
     var flow: RootFlow? = null
+
+    var isPreload = false
 
     /**
      * Whether the task is active or not. Even if set to `false`, the task may continue executing until
@@ -41,8 +44,6 @@ class XTask {
         private set
 
     var onStateChangedListener: OnStateChangedListener? = null
-
-    private var startTimestamp: Long = -1
 
     /**
      * Whether the task is traversing its [flow].
@@ -88,19 +89,18 @@ class XTask {
         "RootFlow is not initialized!"
     }
 
-    fun enable(stateListener: OnStateChangedListener) {
-        if (isEnabled) {
-            error("Task has already been activated!")
+    fun enable(stateListener: OnStateChangedListener? = null) {
+        check(!isEnabled) {
+            "Task has already been activated!"
         }
         onStateChangedListener = stateListener
-        startTimestamp = System.currentTimeMillis()
         isEnabled = true
         onStateChangedListener?.onStarted()
     }
 
     fun disable() {
-        if (!isEnabled) {
-            error("The task is not enabled!")
+        check(isEnabled) {
+            "The task is not enabled!"
         }
         isEnabled = false
         if (!isExecuting) {
@@ -149,8 +149,26 @@ class XTask {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as XTask
+
+        if (checksum != other.checksum) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return checksum.hashCode()
+    }
+
     @Serializable
-    class Metadata(@SerialName("t") var title: String) : Parcelable {
+    class Metadata(
+        @SerialName("ti") var title: String,
+        @SerialName("ty") var taskType: Int = TYPE_RESIDENT
+    ) : Parcelable {
 
         @SerialName("d")
         var description: String? = null
@@ -158,25 +176,36 @@ class XTask {
         @SerialName("c")
         var creationTimestamp: Long = -1
 
-        @SerialName("tp")
-        var taskType = TYPE_RESIDENT
+        @SerialName("m")
+        var modificationTimestamp: Long = -1
 
         @SerialName("s")
         var checksum: Long = -1
 
-        constructor(parcel: Parcel) : this(parcel.readString()!!) {
+        @SerialName("a")
+        var author: String? = null
+
+        inline val identifier get() = checksum.toString().md5.substring(0, 7)
+
+        constructor(parcel: Parcel) : this(
+            parcel.readString()!!,
+            parcel.readInt()
+        ) {
             description = parcel.readString()
             creationTimestamp = parcel.readLong()
-            taskType = parcel.readInt()
+            modificationTimestamp = parcel.readLong()
             checksum = parcel.readLong()
+            author = parcel.readString()
         }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeString(title)
+            parcel.writeInt(taskType)
             parcel.writeString(description)
             parcel.writeLong(creationTimestamp)
-            parcel.writeInt(taskType)
+            parcel.writeLong(modificationTimestamp)
             parcel.writeLong(checksum)
+            parcel.writeString(author)
         }
 
         override fun describeContents(): Int {
@@ -192,5 +221,6 @@ class XTask {
                 return arrayOfNulls(size)
             }
         }
+
     }
 }

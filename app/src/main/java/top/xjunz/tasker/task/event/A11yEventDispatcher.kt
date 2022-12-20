@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.view.accessibility.AccessibilityEvent
 import kotlinx.coroutines.*
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
@@ -31,6 +32,8 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
 
     suspend fun processAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
+        // Do not send events from the host application!
+        if (packageName == BuildConfig.APPLICATION_ID) return
         if (event.eventTime < curEventTime && !event.isFullScreen) return
         val className = event.className?.toString()
         if (className == "android.inputmethodservice.SoftInputWindow") return

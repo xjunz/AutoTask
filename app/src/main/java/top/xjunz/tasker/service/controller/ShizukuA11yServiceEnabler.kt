@@ -6,17 +6,17 @@ import android.os.IInterface
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.service.IAutomatorConnection
+import top.xjunz.tasker.service.IRemoteAutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 
 /**
  * @author xjunz 2022/10/10
  */
-class ShizukuA11yServiceEnabler : ShizukuServiceController<IAutomatorConnection>() {
+class ShizukuA11yServiceEnabler : ShizukuServiceController<IRemoteAutomatorService>() {
 
     override val tag: String = "ShizukuA11yEnabler"
 
-    override var service: IAutomatorConnection? = null
+    override var service: IRemoteAutomatorService? = null
 
     override val userServiceStandaloneProcessArgs: Shizuku.UserServiceArgs =
         Shizuku.UserServiceArgs(
@@ -29,11 +29,11 @@ class ShizukuA11yServiceEnabler : ShizukuServiceController<IAutomatorConnection>
     override val startTimestamp: Long = -1
 
     override fun asInterface(binder: IBinder): IInterface {
-        return IAutomatorConnection.Stub.asInterface(binder)
+        return IRemoteAutomatorService.Stub.asInterface(binder)
     }
 
     override fun doOnConnected(serviceInterface: IInterface) {
-        service = serviceInterface as IAutomatorConnection
+        service = serviceInterface as IRemoteAutomatorService
     }
 
     fun enableA11yService(exitOnFinally: Boolean) {

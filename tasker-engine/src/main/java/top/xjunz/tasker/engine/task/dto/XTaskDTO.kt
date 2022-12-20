@@ -41,8 +41,6 @@ class XTaskDTO(
         metadata.description?.let {
             crc32.update(it.toByteArray())
         }
-        crc32.update((metadata.creationTimestamp and 0xFFFF_FFFF).toInt())
-        crc32.update((metadata.creationTimestamp ushr Long.SIZE_BITS / 2).toInt())
         return crc32.value
     }
 

@@ -1,56 +1,101 @@
 package top.xjunz.tasker.task
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import top.xjunz.shared.ktx.md5
+import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.dto.XTaskDTO.Serializer.toDTO
 import java.io.File
 import java.io.FileFilter
+import java.util.zip.ZipInputStream
 
 /**
  * @author xjunz 2022/08/05
  */
-class TaskStorage(storageDirPath: String) {
+object TaskStorage {
 
-    companion object {
-        private const val X_TASK_FILE_SUFFIX = ".xtsk"
+    private const val X_TASK_FILE_SUFFIX = ".xtsk"
+
+    var customTaskLoaded = false
+
+    var preloadTaskLoaded = false
+
+    val allTasks = mutableListOf<XTask>()
+
+    val preloadTasks = mutableListOf<XTask>()
+
+    private val storageDir: File = app.getExternalFilesDir("xtsk")!!
+
+    private fun getTaskFileOnStorage(task: XTask, isEnabled: Boolean): File {
+        val flag = if (isEnabled) "1" else "0"
+        return File(storageDir, task.metadata.identifier + flag + X_TASK_FILE_SUFFIX)
     }
-
-    private val allTasks = mutableSetOf<XTask>()
-
-    private val storageDir: File = File(storageDirPath)
 
     private val XTask.fileOnStorage: File
         get() {
-            val flag = if (isEnabled) "1" else "0"
-            return File(storageDir, metadata.checksum.toString().md5.substring(0, 7) + flag)
+            return getTaskFileOnStorage(this, isEnabled)
         }
 
     fun removeTask(task: XTask): Boolean {
+        check(allTasks.contains(task))
+        check(!task.isEnabled)
         val file = task.fileOnStorage
-        return file.exists() && file.delete()
+        if (file.exists() && file.delete()) {
+            allTasks.remove(task)
+            return true
+        }
+        return false
     }
 
-    suspend fun persistTask(task: XTask): Boolean {
+    fun toggleTaskFilename(task: XTask): Boolean {
+        val file = getTaskFileOnStorage(task, !task.isEnabled)
+        if (file.exists()) {
+            file.renameTo(getTaskFileOnStorage(task, task.isEnabled))
+            return true
+        }
+        return false
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun preloadTasks(factory: AppletFactory) {
+        withContext(Dispatchers.IO) {
+            ZipInputStream(app.assets.open("prextsks")).use {
+                var entry = it.nextEntry
+                while (entry != null) {
+                    val task = Json.decodeFromStream<XTaskDTO>(it).toAutomatorTask(factory)
+                    task.isPreload = true
+                    preloadTasks.add(task)
+                    entry = it.nextEntry
+                }
+            }
+        }
+    }
+
+    suspend fun persistTask(task: XTask): Int {
         return withContext(Dispatchers.IO) {
             val dto = task.toDTO()
-            val file = task.fileOnStorage
-            if (file.exists() || file.createNewFile()) {
-                file.outputStream().bufferedWriter().use {
-                    it.write(Json.encodeToString(dto))
-                }
-                allTasks.add(task)
-                return@withContext true
+            // There is already an identical task!
+            if (findTask(dto.metadata.checksum) != null) {
+                return@withContext -3
             }
-            return@withContext false
+            val file = task.fileOnStorage
+            if (file.parentFile?.exists() == true || file.parentFile?.mkdirs() == true) {
+                if (file.exists() || file.createNewFile()) {
+                    file.outputStream().bufferedWriter().use {
+                        it.write(Json.encodeToString(dto))
+                    }
+                    allTasks.add(task)
+                    return@withContext 0
+                }
+                return@withContext -1
+            }
+            return@withContext -2
         }
     }
 
@@ -59,18 +104,15 @@ class TaskStorage(storageDirPath: String) {
         if (!storageDir.isDirectory) return
         if (!storageDir.exists()) return
         val uppercaseSuffix = X_TASK_FILE_SUFFIX.uppercase()
-        Dispatchers.IO.invoke {
+        withContext(Dispatchers.IO) {
             storageDir.listFiles(
-                FileFilter filter@{
-                    if (it.name.length == 13
-                        && (it.name.endsWith(X_TASK_FILE_SUFFIX) || it.name.endsWith(uppercaseSuffix))
-                    ) {
-                        val flag = it.name[7].digitToIntOrNull()
-                        return@filter flag == 0 || flag == 1
-                    }
-                    return@filter false
+                FileFilter {
+                    it.name.length == 13 && (it.name.endsWith(X_TASK_FILE_SUFFIX)
+                            || it.name.endsWith(uppercaseSuffix))
                 }
             )?.forEach { file ->
+                val flag = file.name[7].digitToIntOrNull()
+                val isEnabled = if (flag == 0) false else if (flag == 1) true else return@forEach
                 file.inputStream().use {
                     runCatching {
                         val task = Json.decodeFromStream<XTaskDTO>(it).apply {
@@ -78,16 +120,23 @@ class TaskStorage(storageDirPath: String) {
                                 "Checksum failure to xtsk file $file?!"
                             }
                         }.toAutomatorTask(factory)
-                        if (file.name[7].digitToInt() == 1) {
-                            TaskManager.addNewEnabledResidentTask(task)
-                        }
                         allTasks.add(task)
+                        if (isEnabled) task.enable()
                     }.onFailure {
                         it.printStackTrace()
                     }
                 }
             }
         }
+    }
+
+    private fun findTask(checksum: Long): XTask? {
+        return allTasks.find { it.checksum == checksum }
+    }
+
+    suspend fun updateExistingTask(task: XTask): Int {
+        check(allTasks.contains(task))
+        return persistTask(task)
     }
 
     fun getResidentTasks(): List<XTask> {

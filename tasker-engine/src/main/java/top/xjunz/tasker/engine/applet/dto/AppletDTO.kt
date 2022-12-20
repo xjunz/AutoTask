@@ -115,9 +115,9 @@ class AppletDTO(
                 comment
             )
             if (this is Flow) {
-                check(size != 0) {
+               /* check(size != 0) {
                     "No element!"
-                }
+                }*/
                 dto.elements = Array(size) {
                     this[it].toDTO()
                 }

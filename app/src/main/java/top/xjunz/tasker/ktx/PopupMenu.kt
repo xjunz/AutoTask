@@ -1,5 +1,6 @@
 package top.xjunz.tasker.ktx
 
+import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ListView
@@ -30,6 +31,6 @@ fun PopupMenu.configHeaderTitle() {
     }
 }
 
-fun PopupMenu.indexOf(item: MenuItem): Int {
-    return menu.children.indexOf(item)
+fun Menu.indexOf(item: MenuItem): Int {
+    return children.indexOf(item)
 }

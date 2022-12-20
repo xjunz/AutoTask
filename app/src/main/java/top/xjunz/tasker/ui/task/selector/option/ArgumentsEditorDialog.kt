@@ -99,7 +99,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     popup.menu.add(R.string.specify_value.format(arg.name))
                     popup.show()
                     popup.setOnMenuItemClickListener set@{ item ->
-                        when (popup.indexOf(item)) {
+                        when (popup.menu.indexOf(item)) {
                             0 -> showReferenceSelectorDialog(which, arg, null)
                             1 -> showValueInputDialog(which, arg)
                         }

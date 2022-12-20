@@ -303,8 +303,8 @@
     <string name="error_not_removable">无法移除此规则！</string>
     <string name="not_removable">不可移除</string>
     <string name="resident_task">常驻任务</string>
-    <string name="desc_long_running_task">长期在后台运行的轻量级任务，由事件驱动。</string>
-    <string name="desc_oneshot_task">单次运行的(耗时)任务，执行完成后即停止，用户可随时启动。</string>
+    <string name="desc_long_running_task">长期在后台运行的轻量级任务，由事件驱动</string>
+    <string name="desc_oneshot_task">单次运行的(耗时)任务，执行完成后即停止，用户可随时启动</string>
     <string name="oneshot_task">单次任务</string>
     <string name="oneshot_task_creation_shortcut">快速创建单次任务</string>
     <string name="quick_click_mode">连点器</string>
@@ -318,4 +318,17 @@
     <string name="start_task">启动任务</string>
     <string name="preload_task">预置任务</string>
     <string name="track_task_flow">任务追踪</string>
+    <string name="format_error_code">发生错误(%d)</string>
+    <string name="import_tasks">导入任务</string>
+    <string name="desc_import_tasks">从本地文件中导入任务</string>
+    <string name="prompt_disable_task">你确定要禁用该任务吗？</string>
+    <string name="prompt_enable_task">你确定要启用该任务吗？</string>
+    <string name="nothing_here">空空如也</string>
+    <string name="desc_preload_tasks">添加程序内预置的任务</string>
+    <string name="error_add_repeated_task">创建失败，已经存在完全相同的任务</string>
+    <string name="add">添加</string>
+    <string name="added">已添加</string>
+    <string name="format_new_task_added">已添加任务⌈%s⌋</string>
+    <string name="format_task_removed">已移除任务⌈%s⌋</string>
+    <string name="prompt_delete_task">你确定要删除此任务吗？此操作不可撤销。</string>
 </resources>

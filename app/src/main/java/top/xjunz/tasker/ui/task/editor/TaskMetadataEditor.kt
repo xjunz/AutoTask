@@ -54,13 +54,9 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
         }
     }
 
-    fun init(initialMetadata: Metadata? = null, doOnCompletion: (Metadata) -> Unit) =
+    fun init(initialMetadata: Metadata, doOnCompletion: (Metadata) -> Unit) =
         doWhenCreated {
-            if (initialMetadata != null) {
-                viewModel.metadata = initialMetadata
-            } else {
-                viewModel.metadata = Metadata(R.string.unnamed_task.str)
-            }
+            viewModel.metadata = initialMetadata
             viewModel.onCompletion = doOnCompletion
         }
 }

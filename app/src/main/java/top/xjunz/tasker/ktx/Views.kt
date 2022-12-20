@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ktx
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.text.InputFilter
@@ -12,12 +13,11 @@ import android.text.InputType
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.DrawableRes
 import androidx.core.graphics.Insets
 import androidx.core.graphics.applyCanvas
@@ -153,4 +153,31 @@ fun View.shake() {
         this, View.TRANSLATION_X,
         0F, 20F, -20F, 15F, -15F, 10F, -10F, 5F, -5F, 0F
     ).start()
+}
+
+/**
+ * Set the listener to be notified when the [CompoundButton] changes its checked state because of
+ * user interaction (via touch or keyboard).
+ */
+@SuppressLint("ClickableViewAccessibility")
+fun CompoundButton.setOnInteractiveCheckedChangedListener(listener: (v: CompoundButton, isChecked: Boolean) -> Unit) {
+    var fromInteraction = false
+    setOnTouchListener { _, event ->
+        if (event.action == MotionEvent.ACTION_UP) {
+            fromInteraction = true
+        }
+        return@setOnTouchListener false
+    }
+    setOnKeyListener { _, keyCode, event ->
+        if (event.action == MotionEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
+            fromInteraction = true
+        }
+        return@setOnKeyListener false
+    }
+    setOnCheckedChangeListener { v, isChecked ->
+        if (fromInteraction) {
+            listener.invoke(v, isChecked)
+        }
+        fromInteraction = false
+    }
 }

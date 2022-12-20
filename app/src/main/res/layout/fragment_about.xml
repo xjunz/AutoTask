@@ -21,7 +21,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="@dimen/spacing_normal"
-            android:background="@drawable/bg_tinted_selectable_circle"
+            android:background="@drawable/bg_selectable_tinted_circle"
             android:outlineProvider="background"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

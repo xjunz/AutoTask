@@ -165,7 +165,7 @@
                             android:insetBottom="4dp"
                             android:stateListAnimator="@null"
                             android:textColor="@color/color_text_control_normal"
-                            app:icon="@drawable/ic_baseline_touch_app_24"
+                            app:icon="@drawable/touch_app_24px"
                             app:iconGravity="textStart"
                             app:iconTint="@color/color_status_icon"
                             app:strokeColor="@color/color_status_stroke"
@@ -238,7 +238,7 @@
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/custom_task"
                         android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_gesture_24" />
+                        android:src="@drawable/gesture_24px" />
 
                     <TextView
                         android:id="@+id/tv_custom"
@@ -319,7 +319,7 @@
                         android:id="@+id/iv_config"
                         style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
-                        android:background="@drawable/bg_tinted_selectable_circle"
+                        android:background="@drawable/bg_selectable_tinted_circle"
                         android:contentDescription="@string/settings"
                         android:src="@drawable/ic_baseline_settings_24" />
 

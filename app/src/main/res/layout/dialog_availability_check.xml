@@ -121,7 +121,7 @@
                 android:minWidth="120dp"
                 android:paddingVertical="16dp"
                 android:text="@string/exam"
-                app:icon="@drawable/ic_baseline_touch_app_24"
+                app:icon="@drawable/touch_app_24px"
                 app:iconGravity="textStart"
                 app:iconPadding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"

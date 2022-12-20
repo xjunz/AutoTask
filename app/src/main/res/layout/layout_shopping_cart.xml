@@ -104,7 +104,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="16dp"
-                android:background="@drawable/bg_tinted_selectable_circle"
+                android:background="@drawable/bg_selectable_tinted_circle"
                 android:contentDescription="@{@string/expand_more}"
                 app:layout_constraintBottom_toBottomOf="@+id/btn_group"
                 app:layout_constraintStart_toStartOf="parent"

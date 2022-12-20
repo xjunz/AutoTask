@@ -85,7 +85,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
             } else {
-                taskScheduler = ResidentTaskScheduler(this, mainLooper)
+                taskScheduler = ResidentTaskScheduler(mainLooper)
             }
             instance = WeakReference(this)
             runningState.value = true

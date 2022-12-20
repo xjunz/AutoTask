@@ -104,7 +104,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 popup.menu.add(it.name)
             }
             popup.setOnMenuItemClickListener {
-                onSelected(popup.indexOf(it) - 1)
+                onSelected(popup.menu.indexOf(it) - 1)
                 return@setOnMenuItemClickListener true
             }
             popup.configHeaderTitle()

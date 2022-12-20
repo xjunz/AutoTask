@@ -28,7 +28,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_tinted_selectable_circle"
+            android:background="@drawable/bg_selectable_tinted_circle"
             android:contentDescription="@{@string/invert}"
             android:src="@drawable/ic_baseline_switch_24"
             app:layout_constraintBottom_toBottomOf="parent"

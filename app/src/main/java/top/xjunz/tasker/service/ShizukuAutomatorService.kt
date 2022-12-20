@@ -14,7 +14,7 @@ import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
-import top.xjunz.tasker.annotation.Crossed
+import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.LocalOnly
 import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
@@ -81,12 +81,12 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         ShizukuUiAutomatorBridge(uiAutomation)
     }
 
-    @Crossed
+    @LocalAndRemote
     override fun getStartTimestamp(): Long {
         return if (isInRemoteProcess) startTimestamp else delegate.startTimestamp
     }
 
-    @Crossed
+    @LocalAndRemote
     override fun createAvailabilityChecker(): IAvailabilityChecker {
         return if (isInRemoteProcess) {
             AvailabilityChecker(this, looper)
@@ -128,7 +128,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    @Crossed
+    @LocalAndRemote
     override fun destroy() {
         if (isInHostProcess) {
             delegate.destroy()

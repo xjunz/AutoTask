@@ -100,12 +100,12 @@ inline fun <V> LifecycleOwner.observeNotNull(
 
 inline fun <V> LifecycleOwner.observeDialog(
     ld: MutableLiveData<V>,
-    crossinline block: (V) -> Dialog
+    crossinline block: (V) -> Dialog?
 ) {
     ld.observe(this) {
         if (it == null) return@observe
         if (it is Boolean && !it) return@observe
-        val dialog = block.invoke(it)
+        val dialog = block.invoke(it) ?: return@observe
         if (!dialog.isShowing) dialog.show()
         dialog.setOnDismissListener {
             ld.value = null

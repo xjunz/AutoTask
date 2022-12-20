@@ -1,6 +1,6 @@
 package top.xjunz.tasker.task
 
-import top.xjunz.tasker.annotation.Crossed
+import top.xjunz.tasker.annotation.LocalAndRemote
 import top.xjunz.tasker.annotation.LocalOnly
 import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.engine.runtime.IRemoteTaskManager
@@ -9,7 +9,6 @@ import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.isInRemoteProcess
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import java.util.*
 
 /**
  * @author xjunz 2022/12/17
@@ -20,18 +19,28 @@ object TaskManager : IRemoteTaskManager.Stub() {
 
     private val allTasks = mutableSetOf<XTask>()
 
-    private var enabledTasks: MutableList<XTask> = Collections.emptyList()
+    private var enabledTasks = mutableListOf<XTask>()
 
-    @Crossed
+    @RemoteOnly
     override fun enableResidentTask(id: Long) {
-        delegate?.enableResidentTask(id)
-        enabledTasks.add(allTasks.first { it.id == id })
+        enabledTasks.add(allTasks.first { it.checksum == id })
     }
 
-    @Crossed
+    @LocalOnly
+    fun enableResidentTask(task: XTask) {
+        delegate?.enableResidentTask(task.checksum)
+        enabledTasks.add(task)
+    }
+
+    @RemoteOnly
     override fun disableResidentTask(id: Long) {
-        delegate?.disableResidentTask(id)
-        enabledTasks.removeIf { it.id == id }
+        enabledTasks.removeIf { it.checksum == id }
+    }
+
+    @LocalOnly
+    fun disableResidentTask(task: XTask) {
+        delegate?.disableResidentTask(task.checksum)
+        enabledTasks.remove(task)
     }
 
     @RemoteOnly
@@ -51,13 +60,8 @@ object TaskManager : IRemoteTaskManager.Stub() {
         enabledTasks.add(task)
     }
 
-    @Crossed
+    @LocalAndRemote
     fun getEnabledResidentTasks(): List<XTask> {
-        if (enabledTasks == Collections.EMPTY_LIST) {
-            enabledTasks = allTasks.filter {
-                it.isEnabled
-            }.toMutableList()
-        }
         return enabledTasks
     }
 

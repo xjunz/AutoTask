@@ -7,7 +7,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="tint">?colorPrimary</item>
         <item name="backgroundTint">@color/icon_background</item>
-        <item name="android:background">@drawable/bg_tinted_selectable_circle</item>
+        <item name="android:background">@drawable/bg_selectable_tinted_circle</item>
     </style>
 
     <style name="TintedIcon.Main">

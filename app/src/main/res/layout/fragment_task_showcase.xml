@@ -1,30 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_task"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_action"
-            style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_marginBottom="32dp"
-            android:alpha=".82"
-            android:text="@string/create_task"
-            app:icon="@drawable/ic_baseline_add_24"
-            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        <ImageView
+            android:id="@+id/iv_placeholder"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@drawable/bg_solid_circle"
+            android:contentDescription="@string/nothing_here"
+            android:padding="16dp"
+            android:src="@drawable/ic_playlist_add_24px"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.40"
+            app:tint="?colorPrimary" />
+
+        <TextView
+            android:id="@+id/tv_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:alpha=".92"
+            android:text="@string/nothing_here"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+            app:layout_constraintEnd_toEndOf="@+id/iv_placeholder"
+            app:layout_constraintStart_toStartOf="@+id/iv_placeholder"
+            app:layout_constraintTop_toBottomOf="@+id/iv_placeholder" />
+
+        <androidx.constraintlayout.widget.Group
+
+            android:id="@+id/group_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="tv_placeholder,iv_placeholder"
+            tools:visibility="visible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_task_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="10"
+            tools:listitem="@layout/item_task_showcase"
+            tools:paddingTop="60dp"
+            tools:visibility="gone" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

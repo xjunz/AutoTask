@@ -62,7 +62,7 @@ class AppletOperationMenuHelper(
                 menu.add(0, index + 1, index, appletOption.rawTitle)
             }
             popup.setOnMenuItemClickListener l@{
-                val index = popup.indexOf(it) - 1
+                val index = menu.indexOf(it) - 1
                 if (index >= 0) {
                     val newApplet = registry.allOptions[index].yield()
                     parent[applet.index] = newApplet
@@ -277,7 +277,7 @@ class AppletOperationMenuHelper(
                         popup.menu.add(it.rawTitle)
                     }
                     popup.setOnMenuItemClickListener {
-                        val index = popup.indexOf(it) - 1
+                        val index = popup.menu.indexOf(it) - 1
                         if (index >= 0) {
                             val parent = applet.requireParent()
                             val yielded = options[index].yield()
