@@ -82,7 +82,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
         }
     }
 
-    fun toastAndShake(any: Any?) {
+    protected fun toastAndShake(any: Any?) {
         toast(any)
         binding.root.rootView.shake()
     }

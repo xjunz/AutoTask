@@ -10,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.transition.platform.MaterialFadeThrough
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
 import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
@@ -51,11 +50,10 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             }
             binding.ibEdit.setAntiMoneyClickListener {
                 val task = taskList[adapterPosition]
-                FlowEditorDialog().init(task.flow, false).asBase(task.metadata)
-                    .doOnCompletion { flow ->
-                        task.flow = flow.casted()
-                        viewModel.updateTask(task)
-                    }
+                val prevChecksum = task.checksum
+                FlowEditorDialog().init(task).doOnTaskEdited {
+                    viewModel.updateTask(prevChecksum, task)
+                }.show(childFragmentManager)
             }
         }
     }
@@ -129,6 +127,9 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             }
         }
         observeTransient(viewModel.onTaskToggled) {
+            adapter.notifyItemChanged(taskList.indexOf(it), true)
+        }
+        observeTransient(viewModel.onTaskUpdated) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)
         }
     }

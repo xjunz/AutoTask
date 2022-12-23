@@ -7,7 +7,7 @@ import top.xjunz.tasker.engine.applet.base.DslFlow
 import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.engine.applet.base.UnaryCriterion
 import top.xjunz.tasker.engine.applet.base.When
-import top.xjunz.tasker.engine.applet.dto.AppletDTO.Companion.toDTO
+import top.xjunz.tasker.engine.applet.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.value.Distance
 
@@ -23,7 +23,6 @@ internal class AppletDTOTest {
             comment = "RootFlow"
             When(Event.EVENT_ON_PACKAGE_ENTERED)
             If {
-                refids = "If"
                 id = 3
                 UnaryCriterion<String> {
                     value = "hello"

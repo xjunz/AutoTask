@@ -3,12 +3,11 @@ package top.xjunz.tasker.ui.task.showcase
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.format
-import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.TaskManager
 import top.xjunz.tasker.task.TaskStorage
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -58,36 +57,52 @@ class TaskShowcaseViewModel : ViewModel() {
 
     fun deleteRequestedTask() {
         val task = requestDeleteTask.require()
-        if (TaskStorage.removeTask(task)) {
+        runCatching {
+            TaskStorage.removeTask(task)
             onTaskDeleted.value = task
             toast(R.string.format_task_removed.format(task.metadata.title))
-        } else {
-            toast(R.string.format_error_code.format(-1))
+        }.onFailure {
+            toastUnexpectedError(it)
         }
     }
 
     fun addRequestedTask() {
         val task = requestAddNewTask.require()
-        viewModelScope.launch {
-            val errorCode = TaskStorage.persistTask(task)
-            if (errorCode == -3) {
-                toast(R.string.error_add_repeated_task)
-            } else if (errorCode != 0) {
-                toast(R.string.format_error_code.format(errorCode))
-            } else {
-                onNewTaskAdded.value = task
-                toast(R.string.format_new_task_added.format(task.metadata.title))
-            }
+        if (TaskStorage.allTasks.contains(task)) {
+            toast(R.string.error_add_repeated_task)
+            return
+        }
+        viewModelScope.async {
+            TaskStorage.persistTask(task)
+            onNewTaskAdded.value = task
+            toast(R.string.format_new_task_added.format(task.metadata.title))
+        }.invokeOnError {
+            toastUnexpectedError(it)
         }
     }
 
-    fun updateTask(task: XTask) {
+    fun updateTask(prevChecksum: Long, task: XTask) {
         viewModelScope.launch {
-            val errorCode = TaskStorage.updateExistingTask(task)
-            if (errorCode == -3) {
-                
+            val currentChecksum = task.checksum
+            var removed = false
+            // Assign to old checksum temporarily to remove the old file
+            task.metadata.checksum = prevChecksum
+            try {
+                TaskStorage.removeTask(task)
+                removed = true
+            } catch (t: Throwable) {
+                toastUnexpectedError(t)
             }
-            onTaskUpdated.value = task
+            // Restore checksum to current one
+            task.metadata.checksum = currentChecksum
+            if (!removed) return@launch
+            try {
+                TaskStorage.persistTask(task)
+                onTaskUpdated.value = task
+            } catch (t: Throwable) {
+                onTaskDeleted.value = task
+                toastUnexpectedError(t)
+            }
         }
     }
 

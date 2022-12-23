@@ -5,7 +5,6 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskCreatorBinding
 import top.xjunz.tasker.engine.task.XTask
@@ -36,15 +35,15 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.containerResidentTasks.setAntiMoneyClickListener {
-            TaskMetadataEditor().init(XTask.Metadata(R.string.unnamed_task.str)) {
-                viewModel.onMetadataEdited.value = it
+            val metadata = XTask.Metadata(R.string.unnamed_task.str)
+            TaskMetadataEditor().init(metadata) {
+                viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
         }
         binding.containerOneshot.setAntiMoneyClickListener {
-            TaskMetadataEditor().init(
-                XTask.Metadata(R.string.unnamed_task.str, XTask.TYPE_ONESHOT)
-            ) {
-                viewModel.onMetadataEdited.value = it
+            val metadata = XTask.Metadata(R.string.unnamed_task.str, XTask.TYPE_ONESHOT)
+            TaskMetadataEditor().init(metadata) {
+                viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
         }
         binding.containerImportTasks.setAntiMoneyClickListener {
@@ -60,15 +59,11 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
             PreloadTaskDialog().show(requireParentFragment().childFragmentManager)
         }
         observeTransient(viewModel.onMetadataEdited) { metadata ->
-            FlowEditorDialog().init(null, false).doOnCompletion { flow ->
-                XTask().let {
-                    metadata.creationTimestamp = System.currentTimeMillis()
-                    metadata.modificationTimestamp = metadata.creationTimestamp
-                    it.metadata = metadata
-                    it.flow = flow.casted()
-                    parentViewModel.requestAddNewTask.value = it
-                }
-            }.asBase(metadata).show(parentFragmentManager)
+            val task = XTask()
+            task.metadata = metadata
+            FlowEditorDialog().init(task).doOnTaskEdited {
+                parentViewModel.requestAddNewTask.value = task
+            }.show(parentFragmentManager)
         }
         observeTransient(parentViewModel.onNewTaskAdded) {
             dismiss()

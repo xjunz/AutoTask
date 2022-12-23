@@ -2,13 +2,18 @@ package top.xjunz.tasker.ui.task.editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.StaticError
+import top.xjunz.tasker.engine.applet.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
+import top.xjunz.tasker.engine.util.ChecksumUtil
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.task.TaskStorage
 import top.xjunz.tasker.task.applet.clone
 import top.xjunz.tasker.task.applet.depth
 import top.xjunz.tasker.task.applet.isContainer
@@ -20,7 +25,11 @@ import top.xjunz.tasker.task.applet.option.ValueDescriptor
  */
 class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
-    lateinit var metadata: XTask.Metadata
+    lateinit var task: XTask
+
+    val metadata: XTask.Metadata by lazy {
+        task.metadata.copy()
+    }
 
     lateinit var factory: AppletOptionFactory
 
@@ -42,19 +51,21 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showMergeConfirmation = MutableLiveData<Boolean>()
 
-    var isNewTask: Boolean = true
+    val isBase: Boolean get() = ::task.isInitialized
 
-    val isBase: Boolean get() = ::metadata.isInitialized
-
-    var selectedApplet = MutableLiveData<Applet>()
+    val selectedApplet = MutableLiveData<Applet>()
 
     val isFabVisible = MutableLiveData<Boolean>()
 
-    lateinit var doOnCompletion: (Flow) -> Unit
+    lateinit var onFlowEdited: (Flow) -> Unit
+
+    lateinit var onTaskEdited: () -> Unit
 
     lateinit var doOnRefSelected: (String) -> Unit
 
     lateinit var doSplit: () -> Unit
+
+    var staticError: StaticError? = null
 
     private fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
@@ -78,7 +89,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
     }
 
-    fun multiUnselect(applet: Applet) {
+    private fun multiUnselect(applet: Applet) {
         selections.remove(applet)
         onAppletChanged.value = applet
         selectionLiveData.notifySelfChanged()
@@ -114,20 +125,6 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
             if (applet is Flow && depth < 2) {
                 ret.addAll(flatmapFlow(applet, depth + 1))
             }
-            /*if (applet is ControlFlow) {
-                ret.add(applet)
-                if (depth < 1)
-                    ret.addAll(flatmapFlow(applet, depth + 1))
-            } else if (applet is Flow) {
-                ret.add(applet)
-                applet.forEachIndexed { i, a ->
-                    a.index = i
-                    a.parent = applet
-                    ret.add(a)
-                }
-            } else {
-                ret.add(applet)
-            }*/
         }
         return ret
     }
@@ -180,22 +177,35 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     fun initialize(
         appletOptionFactory: AppletOptionFactory,
         initialFlow: Flow,
-        newTask: Boolean,
         readonly: Boolean,
     ) {
         factory = appletOptionFactory
         isReadyOnly = readonly
-        flow = if (readonly || newTask) initialFlow else initialFlow.clone(factory)
-        isNewTask = newTask
+        flow = if (readonly) initialFlow else initialFlow.clone(factory)
         notifyFlowChanged()
     }
 
-    fun complete() {
-        doOnCompletion.invoke(flow)
-    }
-
-    fun notifySplit() {
-        doSplit.invoke()
+    fun complete(): Boolean {
+        if (isBase) {
+            val checksum = ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
+            if (checksum != metadata.checksum) {
+                if (TaskStorage.allTasks.any { it.checksum == checksum }) {
+                    toast(R.string.error_add_repeated_task)
+                    return false
+                }
+                metadata.modificationTimestamp = System.currentTimeMillis()
+                if (metadata.checksum == -1L) {
+                    metadata.creationTimestamp = metadata.modificationTimestamp
+                }
+                metadata.checksum = checksum
+                task.metadata = metadata
+                task.flow = flow.casted()
+                onTaskEdited.invoke()
+            }
+        } else {
+            onFlowEdited.invoke(flow)
+        }
+        return true
     }
 
     private fun Applet.hasResultWithDescriptor(): Boolean {
@@ -226,5 +236,49 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 onAppletChanged.value = it
             }
         }
+    }
+
+    fun clearStaticErrorIfNeeded(target: Applet, prompt: Int): Boolean {
+        if (staticError?.victim === target && staticError?.prompt == prompt) {
+            staticError = null
+            return true
+        }
+        return false
+    }
+
+    fun addBefore(target: Applet, peers: List<Applet>) {
+        val parent = target.requireParent()
+        parent.addAll(target.index, peers)
+        val removed = clearStaticErrorIfNeeded(target, StaticError.PROMPT_ADD_BEFORE)
+        if (!updateChildrenIndexesIfNeeded(parent) && removed) {
+            onAppletChanged.value = target
+        }
+        notifyFlowChanged()
+    }
+
+    fun addAfter(target: Applet, peers: List<Applet>) {
+        val parent = target.requireParent()
+        if (target.index == parent.lastIndex) {
+            parent.addAll(peers)
+        } else {
+            parent.addAll(target.index + 1, peers)
+        }
+        clearStaticErrorIfNeeded(target, StaticError.PROMPT_ADD_AFTER)
+        // Divider changed
+        onAppletChanged.value = target
+        notifyFlowChanged()
+    }
+
+    fun addInside(target: Flow, children: List<Applet>) {
+        val last = target.lastOrNull()
+        target.addAll(children)
+        clearStaticErrorIfNeeded(target, StaticError.PROMPT_ADD_INSIDE)
+        // Notify divider changed
+        onAppletChanged.value = last
+        // Notify action icon changed
+        if (target.size == children.size) {
+            onAppletChanged.value = target
+        }
+        notifyFlowChanged()
     }
 }

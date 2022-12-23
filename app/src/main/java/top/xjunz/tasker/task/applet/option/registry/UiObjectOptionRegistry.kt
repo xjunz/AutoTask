@@ -101,7 +101,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
                     R.string.format_less_than.format(stop.toIntOrKeep())
                 stop == null && start != null ->
                     R.string.format_larger_than.format(start.toIntOrKeep())
-                start == stop -> start!!.toIntOrKeep()
+                start == stop -> R.string.format_equals_to.format(start!!.toIntOrKeep())
                 else -> R.string.format_range.format(start!!.toIntOrKeep(), stop!!.toIntOrKeep())
             }
             val unit = when (d.unit) {

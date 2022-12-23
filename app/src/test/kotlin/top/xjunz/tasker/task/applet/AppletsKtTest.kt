@@ -9,17 +9,23 @@ import top.xjunz.tasker.engine.applet.base.RootFlow
  */
 internal class AppletsKtTest {
 
-    private fun Flow.buildHierarchy() {
-        forEachIndexed { index, applet ->
-            applet.parent = this
-            applet.index = index
-            if (applet is Flow)
-                applet.buildHierarchy()
-        }
-    }
-
     private fun Flow.getFlow(index: Int): Flow {
         return get(index) as Flow
+    }
+
+    @Test
+    fun requireChild() {
+        val root = RootFlow()
+        val d1 = Flow()
+        val d1i1 = Flow()
+        root.add(d1)
+        root.add(d1i1)
+        val d2 = Flow()
+        d1.add(d2)
+        root.buildHierarchy()
+        assert(root.requireChild(d2.hierarchy) === d2)
+        assert(root.requireChild(d1i1.hierarchy) === d1i1)
+        assert(root.requireChild(0) === root)
     }
 
     @Test

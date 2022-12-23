@@ -13,6 +13,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogArgumentsEditorBinding
 import top.xjunz.tasker.databinding.ItemArgumentEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.StaticError
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
@@ -20,6 +21,7 @@ import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
+import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
 import top.xjunz.tasker.ui.task.editor.GlobalFlowEditorViewModel
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import java.util.*
@@ -59,32 +61,36 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         }
     }
 
-    private inline val option get() = viewModel.option
+    private inline val option get() = vm.option
 
-    private inline val applet get() = viewModel.applet
+    private inline val applet get() = vm.applet
 
-    private val viewModel by viewModels<InnerViewModel>()
+    private val vm by viewModels<InnerViewModel>()
 
-    private val globalViewModel by activityViewModels<GlobalFlowEditorViewModel>()
+    private val gvm by activityViewModels<GlobalFlowEditorViewModel>()
+
+    private val pvm by lazy {
+        requireParentFragment().viewModels<FlowEditorViewModel>().value
+    }
 
     private fun showValueInputDialog(which: Int, arg: ValueDescriptor) {
         TextEditorDialog().configEditText { et ->
             et.configInputType(arg.type, true)
-            et.maxLines = 5
+            et.maxLines = 10
         }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
             val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
-            globalViewModel.tracer.setValue(applet, which, parsed)
-            viewModel.onItemChanged.value = arg
+            gvm.refEditor.setValue(applet, which, parsed)
+            vm.onItemChanged.value = arg
             return@set null
         }.show(parentFragmentManager)
     }
 
     private fun showReferenceSelectorDialog(whichArg: Int, arg: ValueDescriptor, id: String?) {
-        FlowEditorDialog().init(globalViewModel.root, true)
+        FlowEditorDialog().init(gvm.root, true)
             .setReferenceToSelect(applet, arg, id)
             .doOnReferenceSelected { refid ->
-                globalViewModel.tracer.setReference(applet, arg, whichArg, refid)
-                viewModel.onItemChanged.value = arg
+                gvm.refEditor.setReference(applet, arg, whichArg, refid)
+                vm.onItemChanged.value = arg
             }.show(childFragmentManager)
     }
 
@@ -119,13 +125,13 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
                 }.init(R.string.edit_refid.text, refid) {
                     if (it == refid) return@init null
-                    if (!globalViewModel.isRefidLegalForSelections(it)) {
+                    if (!gvm.isRefidLegalForSelections(it)) {
                         return@init R.string.error_tag_exists.text
                     }
                     // This applet may be not attached to the root
-                    globalViewModel.tracer.renameReference(applet, position, it)
-                    globalViewModel.renameRefidInRoot(Collections.singleton(refid), it)
-                    viewModel.onItemChanged.value = arg
+                    gvm.refEditor.renameReference(applet, position, it)
+                    gvm.renameRefidInRoot(Collections.singleton(refid), it)
+                    vm.onItemChanged.value = arg
                     return@init null
                 }.show(childFragmentManager)
             }
@@ -161,7 +167,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        globalViewModel.tracer.revokeAll()
+        gvm.refEditor.revokeAll()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -169,35 +175,35 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         binding.rvArgument.adapter = adapter
         binding.tvTitle.text = option.currentTitle
         binding.btnCancel.setOnClickListener {
-            globalViewModel.tracer.revokeAll()
+            gvm.refEditor.revokeAll()
             dismiss()
         }
         binding.btnComplete.setAntiMoneyClickListener {
-            val illegal = viewModel.checkForUnspecifiedArgument()
+            val illegal = vm.checkForUnspecifiedArgument()
             if (illegal == -1) {
-                viewModel.doOnCompletion()
-                globalViewModel.tracer.getReferenceChangedApplets().forEach {
-                    globalViewModel.onAppletChanged.value = it
+                vm.doOnCompletion()
+                pvm.clearStaticErrorIfNeeded(vm.applet, StaticError.PROMPT_RESET_REFERENCE)
+                gvm.refEditor.getReferenceChangedApplets().forEach {
+                    gvm.onAppletChanged.value = it
                 }
-                globalViewModel.tracer.reset()
+                gvm.refEditor.reset()
                 dismiss()
             } else {
-                val item = binding.rvArgument.findViewHolderForAdapterPosition(illegal)?.itemView
-                item?.shake()
+                binding.rvArgument.findViewHolderForAdapterPosition(illegal)?.itemView?.shake()
                 toast(R.string.format_not_specified.format(option.arguments[illegal].name))
             }
         }
-        observeTransient(viewModel.onItemChanged) {
+        observeTransient(vm.onItemChanged) {
             adapter.notifyItemChanged(option.arguments.indexOf(it), true)
         }
     }
 
     fun setAppletOption(applet: Applet, option: AppletOption) = doWhenCreated {
-        viewModel.option = option
-        viewModel.applet = applet
+        vm.option = option
+        vm.applet = applet
     }
 
     fun doOnCompletion(block: () -> Unit) = doWhenCreated {
-        viewModel.doOnCompletion = block
+        vm.doOnCompletion = block
     }
 }

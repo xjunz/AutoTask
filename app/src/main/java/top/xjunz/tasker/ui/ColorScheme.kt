@@ -11,6 +11,10 @@ import top.xjunz.tasker.ktx.attrColorStateList
 object ColorScheme {
 
     @get:ColorInt
+    val colorError: Int
+        get() = com.google.android.material.R.attr.colorError.attrColor
+
+    @get:ColorInt
     val textColorDisabled: Int
         get() = android.R.attr.textColorTertiary.attrColorStateList.getColorForState(
             intArrayOf(-android.R.attr.state_enabled), -1

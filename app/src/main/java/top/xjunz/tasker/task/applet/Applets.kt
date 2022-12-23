@@ -83,19 +83,43 @@ inline fun Flow.forEachRefid(crossinline block: (Applet, which: Int, refid: Stri
     }
 }
 
-private inline val Applet.hierarchy: Int
-    get() {
-        var hierarchy = 0
-        var p: Applet? = this
-        var d = 0
-        while (p != null) {
-            // Note: We need index + 1, because the index starts from 0. Zero does not change
-            // hierarchy value when it's left shifted.
-            hierarchy = hierarchy or (p.index + 1 shl d++ * Applet.FLOW_CHILD_COUNT_BITS)
-            p = p.parent
-        }
-        return hierarchy
+fun Flow.buildHierarchy() {
+    forEachIndexed { index, applet ->
+        applet.parent = this
+        applet.index = index
+        if (applet is Flow)
+            applet.buildHierarchy()
     }
+}
+
+inline val Applet.hierarchy: Long get() = hierarchyInAncestor(null)
+
+fun Applet.hierarchyInAncestor(ancestor: Flow?): Long {
+    var hierarchy = 0L
+    var p: Applet? = this
+    var d = 0
+    while (p != null && p != ancestor) {
+        // Note: We need index + 1, because the index starts from 0. Zero does not change
+        // hierarchy value when it's left shifted.
+        hierarchy = hierarchy or (p.index + 1 shl d++ * Applet.FLOW_CHILD_COUNT_BITS).toLong()
+        p = p.parent
+    }
+    return hierarchy
+}
+
+fun Flow.requireChild(hierarchy: Long): Applet {
+    var child: Applet = this
+    for (d in 0 until Applet.MAX_FLOW_NESTED_DEPTH) {
+        val index =
+            (hierarchy ushr d * Applet.FLOW_CHILD_COUNT_BITS and Applet.MAX_FLOW_CHILD_COUNT.toLong()).toInt()
+        if (index != 0) {
+            child = child.casted<Flow>()[index - 1]
+        } else {
+            break
+        }
+    }
+    return child
+}
 
 fun Applet.isAheadOf(applet: Applet): Boolean {
     return hierarchy < applet.hierarchy
@@ -182,45 +206,14 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     }
     if (this is Flow) {
         cloned as Flow
-        forEach {
-            cloned.add(it.clone(factory))
+        forEachIndexed { index, applet ->
+            val clonedChild = applet.clone(factory, false)
+            clonedChild.parent = cloned
+            clonedChild.index = index
+            cloned.add(clonedChild)
         }
     }
     return cloned.casted()
-}
-
-fun Applet.setRefid(whichRet: Int, id: String?) {
-    if (id == null) {
-        removeRefid(whichRet)
-    } else {
-        if (refids === emptyMap<Int, String>()) {
-            refids = mutableMapOf()
-        }
-        (refids as MutableMap)[whichRet] = id
-    }
-}
-
-fun Applet.setReference(whichArg: Int, ref: String?) {
-    if (ref == null) {
-        removeReference(whichArg)
-    } else {
-        if (references === emptyMap<Int, String>()) {
-            references = mutableMapOf()
-        }
-        (references as MutableMap)[whichArg] = ref
-    }
-}
-
-fun Applet.removeReference(which: Int) {
-    if (references === emptyMap<Int, String>()) return
-    (references as MutableMap).remove(which)
-    if (references.isEmpty()) references = emptyMap()
-}
-
-fun Applet.removeRefid(which: Int) {
-    if (refids === emptyMap<Int, String>()) return
-    (refids as MutableMap).remove(which)
-    if (refids.isEmpty()) refids = emptyMap()
 }
 
 fun Flow.addSafely(applet: Applet): Boolean {

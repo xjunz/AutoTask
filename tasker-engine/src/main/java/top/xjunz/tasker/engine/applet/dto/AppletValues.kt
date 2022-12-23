@@ -34,13 +34,13 @@ object AppletValues {
      */
     const val VAL_TYPE_DISTANCE = 6
 
-    private const val SEPARATOR = ","
+    private val SEPARATOR = Char(0).toString()
 
     /**
      * Whether its value is a [Collection].
      */
     private val Applet.isCollectionValue: Boolean
-        get() = valueType and MASK_VAL_TYPE_COLLECTION == 1
+        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
 
     /**
      * Unmasked raw type.
@@ -110,7 +110,7 @@ object AppletValues {
         return if (isCollectionValue) {
             val split = src.split(SEPARATOR)
             split.mapTo(ArrayList(split.size)) {
-                deserialize(rawType, src)
+                deserialize(rawType, it)
             }
         } else {
             deserialize(rawType, src)

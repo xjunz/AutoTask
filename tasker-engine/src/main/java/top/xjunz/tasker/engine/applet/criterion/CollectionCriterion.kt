@@ -18,10 +18,10 @@ abstract class CollectionCriterion<T : Any, V : Any>(rawType: Int) :
 }
 
 inline fun <T : Any, V : Any> collectionCriterion(
-    type: Int = AppletValues.VAL_TYPE_TEXT,
+    rawType: Int = AppletValues.VAL_TYPE_TEXT,
     crossinline block: (T) -> V?
 ): CollectionCriterion<T, V> {
-    return object : CollectionCriterion<T, V>(type) {
+    return object : CollectionCriterion<T, V>(rawType) {
         override fun T.getValue(): V? {
             return block(this)
         }

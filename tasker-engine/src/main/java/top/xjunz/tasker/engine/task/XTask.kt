@@ -27,13 +27,13 @@ class XTask {
         const val TYPE_ONESHOT = 1
     }
 
-    val checksum: Long get() = metadata.checksum
+    inline val checksum get() = metadata.checksum
+
+    inline val isPreload get() = metadata.isPreload
 
     lateinit var metadata: Metadata
 
     var flow: RootFlow? = null
-
-    var isPreload = false
 
     /**
      * Whether the task is active or not. Even if set to `false`, the task may continue executing until
@@ -165,38 +165,42 @@ class XTask {
     }
 
     @Serializable
-    class Metadata(
+    data class Metadata(
         @SerialName("ti") var title: String,
-        @SerialName("ty") var taskType: Int = TYPE_RESIDENT
-    ) : Parcelable {
+
+        @SerialName("ty") var taskType: Int = TYPE_RESIDENT,
 
         @SerialName("d")
-        var description: String? = null
+        var description: String? = null,
 
         @SerialName("c")
-        var creationTimestamp: Long = -1
+        var creationTimestamp: Long = -1,
 
         @SerialName("m")
-        var modificationTimestamp: Long = -1
+        var modificationTimestamp: Long = -1,
 
         @SerialName("s")
-        var checksum: Long = -1
+        var checksum: Long = -1,
 
         @SerialName("a")
-        var author: String? = null
+        var author: String? = null,
+
+        @SerialName("p")
+        var isPreload: Boolean = false
+    ) : Parcelable {
 
         inline val identifier get() = checksum.toString().md5.substring(0, 7)
 
         constructor(parcel: Parcel) : this(
             parcel.readString()!!,
-            parcel.readInt()
-        ) {
-            description = parcel.readString()
-            creationTimestamp = parcel.readLong()
-            modificationTimestamp = parcel.readLong()
-            checksum = parcel.readLong()
-            author = parcel.readString()
-        }
+            parcel.readInt(),
+            parcel.readString(),
+            parcel.readLong(),
+            parcel.readLong(),
+            parcel.readLong(),
+            parcel.readString(),
+            parcel.readByte() != 0.toByte()
+        )
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeString(title)
@@ -206,6 +210,7 @@ class XTask {
             parcel.writeLong(modificationTimestamp)
             parcel.writeLong(checksum)
             parcel.writeString(author)
+            parcel.writeByte(if (isPreload) 1 else 0)
         }
 
         override fun describeContents(): Int {

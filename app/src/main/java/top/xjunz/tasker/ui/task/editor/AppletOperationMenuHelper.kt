@@ -7,9 +7,7 @@ import androidx.fragment.app.FragmentManager
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isContainer
@@ -19,7 +17,7 @@ import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.demo.DragToMoveDemo
 import top.xjunz.tasker.ui.demo.LongClickToSelectDemo
 import top.xjunz.tasker.ui.demo.SwipeToRemoveDemo
-import top.xjunz.tasker.ui.task.selector.AppletOptionOnClickListener
+import top.xjunz.tasker.ui.task.selector.AppletOptionClickHandler
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.widget.PopupListMenu
 import java.util.*
@@ -28,13 +26,13 @@ import java.util.*
  * @author xjunz 2022/11/08
  */
 class AppletOperationMenuHelper(
-    val viewModel: FlowEditorViewModel,
-    val factory: AppletOptionFactory,
+    private val viewModel: FlowEditorViewModel,
+    private val factory: AppletOptionFactory,
     private val fm: FragmentManager
 ) {
 
     private val optionOnClickListener by lazy {
-        AppletOptionOnClickListener(fm, factory)
+        AppletOptionClickHandler(fm, factory)
     }
 
     fun createBatchMenu(anchor: View, applets: List<Applet>): PopupMenu {
@@ -117,6 +115,11 @@ class AppletOperationMenuHelper(
                 if (factory.flowRegistry.getPeerOptions(applet, true).isEmpty()) {
                     menu.removeItem(R.id.item_add_before)
                 }
+                if (applet is Do
+                    && applet.requireParent().getOrNull(applet.index - 1) !is If
+                ) {
+                    menu.removeItem(R.id.item_add_after)
+                }
                 if (factory.flowRegistry.getPeerOptions(applet, false).isEmpty()) {
                     menu.removeItem(R.id.item_add_after)
                 }
@@ -191,7 +194,7 @@ class AppletOperationMenuHelper(
         anchor: View?,
         applet: Applet,
         id: Int,
-        title: CharSequence? = null
+        title: CharSequence? = null,
     ): Boolean {
         if (id == 0) return false
         if (onBatchMenuItemClick(Collections.singleton(applet), id, title)) return true
@@ -199,7 +202,7 @@ class AppletOperationMenuHelper(
             R.id.item_open_in_new -> {
                 val dialog = FlowEditorDialog().init(
                     applet as Flow, viewModel.isSelectingRef
-                ).doOnCompletion { edited ->
+                ).doOnFlowEdited { edited ->
                     if (edited.isEmpty() && applet.isContainer) {
                         // If all children in a container is removed, remove the container as well
                         applet.requireParent().remove(applet)
@@ -208,10 +211,13 @@ class AppletOperationMenuHelper(
                         // We don't need to replace the flow, just refilling it is ok
                         applet.clear()
                         applet.addAll(edited)
+                        if (edited.isNotEmpty()) viewModel.clearStaticErrorIfNeeded(
+                            applet, StaticError.PROMPT_ADD_INSIDE
+                        )
                         viewModel.onAppletChanged.value = applet
                     }
                     viewModel.notifyFlowChanged()
-                }.doSplit {
+                }.setStaticError(viewModel.staticError).doSplit {
                     viewModel.splitContainerFlow(applet)
                 }
                 if (viewModel.isSelectingRef) {
@@ -254,15 +260,7 @@ class AppletOperationMenuHelper(
                     return true
                 }
                 AppletSelectorDialog().init(flow) {
-                    val last = flow.lastOrNull()
-                    flow.addAll(it)
-                    // Notify divider changed
-                    viewModel.onAppletChanged.value = last
-                    // Notify action icon changed
-                    if (flow.size == it.size) {
-                        viewModel.onAppletChanged.value = flow
-                    }
-                    viewModel.notifyFlowChanged()
+                    viewModel.addInside(flow, it)
                 }.show(fm)
             }
             R.id.item_add_before, R.id.item_add_after -> {
@@ -279,16 +277,12 @@ class AppletOperationMenuHelper(
                     popup.setOnMenuItemClickListener {
                         val index = popup.menu.indexOf(it) - 1
                         if (index >= 0) {
-                            val parent = applet.requireParent()
                             val yielded = options[index].yield()
                             if (addBefore) {
-                                parent.add(applet.index, yielded)
-                            } else if (applet.index == parent.lastIndex) {
-                                parent.add(yielded)
+                                viewModel.addBefore(applet, Collections.singletonList(yielded))
                             } else {
-                                parent.add(applet.index + 1, yielded)
+                                viewModel.addAfter(applet, Collections.singletonList(yielded))
                             }
-                            viewModel.notifyFlowChanged()
                         }
                         return@setOnMenuItemClickListener true
                     }
@@ -300,16 +294,12 @@ class AppletOperationMenuHelper(
                         toast(R.string.error_reach_max_applet_size)
                         return true
                     }
-                    AppletSelectorDialog().init(flow) { applets ->
+                    AppletSelectorDialog().init(flow) { peers ->
                         if (addBefore) {
-                            flow.addAll(applet.index, applets)
-                            viewModel.updateChildrenIndexesIfNeeded(flow)
+                            viewModel.addBefore(applet, peers)
                         } else {
-                            flow.addAll(applets)
-                            // Divider changed
-                            viewModel.onAppletChanged.value = applet
+                            viewModel.addAfter(applet, peers)
                         }
-                        viewModel.notifyFlowChanged()
                     }.show(fm)
                 }
             }

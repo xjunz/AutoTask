@@ -45,17 +45,34 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         }
     }
 
-    fun performStaticCheck() {
-        staticCheckMySelf()
-        forEachIndexed { index, applet ->
-            applet.parent = this
-            applet.index = index
-            if (applet is Flow) applet.performStaticCheck()
+    open fun performStaticCheck(): StaticError? {
+        val errorCode = staticCheckMyself()
+        if (errorCode != StaticError.ERR_NONE) {
+            return StaticError(this, errorCode)
         }
+        forEach {
+            if (it is Flow) {
+                val error = it.performStaticCheck()
+                if (error != null)
+                    return error
+            }
+        }
+        return null
     }
 
-    protected open fun staticCheckMySelf() {
-        /* no-op */
+    @CallSuper
+    protected open fun staticCheckMyself(): Int {
+        // Code layer checks: find bugs
+        check(size <= maxSize)
+        if (requiredSize != -1) {
+            check(size == requiredSize)
+            check(isEnabled)
+        }
+        // User layer checks: find improper operations
+        if (isEmpty()) {
+            return StaticError.ERR_FLOW_NO_ELEMENT
+        }
+        return StaticError.ERR_NONE
     }
 
     override suspend fun apply(runtime: TaskRuntime) {

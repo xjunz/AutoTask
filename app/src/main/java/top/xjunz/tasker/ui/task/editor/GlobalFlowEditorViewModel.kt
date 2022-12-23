@@ -6,11 +6,12 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.base.When
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.forEachReference
 import top.xjunz.tasker.task.applet.forEachRefid
 import top.xjunz.tasker.task.applet.isAheadOf
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.editor.FlowReferenceTracer
+import top.xjunz.tasker.task.editor.AppletReferenceEditor
 
 /**
  * A global view model serving all [FlowEditorDialog]s, this view model is expected to
@@ -20,34 +21,32 @@ import top.xjunz.tasker.task.editor.FlowReferenceTracer
  */
 class GlobalFlowEditorViewModel : ViewModel() {
 
-    private var _root: Flow? = null
+    private var _root: RootFlow? = null
 
     private val selected = mutableSetOf<Pair<Applet, Int>>()
 
     val selectedRefs: Set<Pair<Applet, Int>> get() = selected
 
-    val root: Flow get() = _root!!
+    val root: RootFlow get() = _root!!
 
     val factory = AppletOptionFactory()
 
     val onReferenceSelected = MutableLiveData<Boolean>()
 
-    val onAppletChanged = MutableLiveData<Applet?>()
+    val onAppletChanged = MutableLiveData<Applet>()
 
-    val onNavigateFlow = MutableLiveData<Flow>()
-
-    val tracer = FlowReferenceTracer()
+    val refEditor = AppletReferenceEditor()
 
     fun renameRefidInRoot(prev: Set<String>, cur: String) {
         root.forEachRefid { applet, which, refid ->
             if (prev.contains(refid)) {
-                tracer.setRefid(applet, which, cur)
+                refEditor.setRefid(applet, which, cur)
             }
             false
         }
         root.forEachReference { applet, which, refid ->
             if (prev.contains(refid)) {
-                tracer.renameReference(applet, which, cur)
+                refEditor.renameReference(applet, which, cur)
             }
             false
         }
@@ -55,21 +54,23 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     fun setRefidForSelections(refid: String) {
         selected.forEach { (applet, which) ->
-            tracer.setRefid(applet, which, refid)
+            refEditor.setRefid(applet, which, refid)
         }
     }
 
-    fun generateDefaultFlow(): RootFlow {
+    fun generateDefaultFlow(taskType: Int): RootFlow {
         val root = factory.flowRegistry.rootFlow.yield() as RootFlow
-        val whenFlow = factory.flowRegistry.whenFlow.yield() as When
-        whenFlow.add(factory.eventRegistry.contentChanged.yield())
-        root.add(whenFlow)
+        if (taskType == XTask.TYPE_RESIDENT) {
+            val whenFlow = factory.flowRegistry.whenFlow.yield() as When
+            whenFlow.add(factory.eventRegistry.contentChanged.yield())
+            root.add(whenFlow)
+        }
         root.add(factory.flowRegistry.ifFlow.yield())
         root.add(factory.flowRegistry.doFlow.yield())
         return root
     }
 
-    fun setRoot(flow: Flow) {
+    fun setRoot(flow: RootFlow) {
         _root = flow
     }
 

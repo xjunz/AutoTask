@@ -76,7 +76,7 @@ class TaskRuntime private constructor() {
      */
     private lateinit var target: Any
 
-    val tracker = AppletTracker()
+    val tracker = AppletIndexer()
 
     var observer: Observer? = null
 

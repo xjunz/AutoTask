@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.DialogCompat
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.viewbinding.ViewBinding
@@ -48,25 +49,24 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         return binding.root
     }
 
-    private lateinit var bottomSheetBehaviour: BottomSheetBehavior<*>
-
     @SuppressLint("RestrictedApi", "VisibleForTests")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bottomSheetBehaviour = (dialog as BottomSheetDialog).behavior
-        val bottomSheet = dialog?.findViewById<View>(
-            com.google.android.material.R.id.design_bottom_sheet
-        )!!
+        val behaviour = (dialog as BottomSheetDialog).behavior
+        behaviour.skipCollapsed = true
+        val bottomSheet = DialogCompat.requireViewById(
+            dialog!!, com.google.android.material.R.id.design_bottom_sheet
+        )
         bottomSheet.doOnPreDraw {
             val bg = bottomSheet.background as? MaterialShapeDrawable
             // keep full corner all the time
             if (bg != null && bottomSheet.height != ((bottomSheet.parent) as View).height) {
-                bottomSheetBehaviour.disableShapeAnimations()
+                behaviour.disableShapeAnimations()
                 bg.interpolation = 1F
             }
         }
         // always expand the dialog the first time being shown
-        bottomSheetBehaviour.state = BottomSheetBehavior.STATE_EXPANDED
+        behaviour.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun getDefaultViewModelProviderFactory() = InnerViewModelFactory

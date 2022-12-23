@@ -9,7 +9,7 @@ import top.xjunz.tasker.engine.applet.dto.AppletDTO
 import top.xjunz.tasker.engine.applet.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.task.XTask
-import java.util.zip.CRC32
+import top.xjunz.tasker.engine.util.ChecksumUtil.calculateChecksum
 
 /**
  * Data Transfer Object for [XTask].
@@ -26,23 +26,11 @@ class XTaskDTO(
     object Serializer {
 
         fun XTask.toDTO(): XTaskDTO {
-            val dto = XTaskDTO(requireFlow().toDTO(), metadata)
-            metadata.checksum = dto.calculateChecksum()
-            return dto
+            return XTaskDTO(requireFlow().toDTO(), metadata)
         }
     }
 
     constructor(parcel: Parcel) : this(parcel.requireParcelable(), parcel.requireParcelable())
-
-    private fun calculateChecksum(): Long {
-        val crc32 = CRC32()
-        flow.calculateChecksum(crc32)
-        crc32.update(metadata.title.toByteArray())
-        metadata.description?.let {
-            crc32.update(it.toByteArray())
-        }
-        return crc32.value
-    }
 
     fun verifyChecksum(): Boolean {
         return metadata.checksum == calculateChecksum()

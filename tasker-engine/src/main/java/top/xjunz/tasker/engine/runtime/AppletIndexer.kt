@@ -2,11 +2,13 @@ package top.xjunz.tasker.engine.runtime
 
 import androidx.annotation.IntRange
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.Applet.Companion.FLOW_CHILD_COUNT_BITS
+import top.xjunz.tasker.engine.applet.base.Applet.Companion.MAX_FLOW_CHILD_COUNT
 
 /**
  * @author xjunz 2022/11/01
  */
-class AppletTracker {
+class AppletIndexer {
 
     /**
      * The depth of currently executed applet starting from 0, which means the flow is not yet started
@@ -21,8 +23,8 @@ class AppletTracker {
      */
     private var trace: Long = 0
 
-    fun moveTo(@IntRange(from = 0, to = Applet.MAX_FLOW_CHILD_COUNT - 1L) index: Int) {
-        check(index in 0 until Applet.MAX_FLOW_CHILD_COUNT) {
+    fun moveTo(@IntRange(from = 0, to = MAX_FLOW_CHILD_COUNT - 1L) index: Int) {
+        check(index in 0 until MAX_FLOW_CHILD_COUNT) {
             "Too many children!"
         }
         check(depth > 0) {
@@ -32,7 +34,7 @@ class AppletTracker {
             "Too deeply nested!"
         }
         clearIndex()
-        trace = index.toLong() shl (depthIndex * Applet.FLOW_CHILD_COUNT_BITS) or trace
+        trace = index + 1L shl (depthIndex * FLOW_CHILD_COUNT_BITS) or trace
     }
 
     /**
@@ -40,8 +42,8 @@ class AppletTracker {
      */
     private fun clearIndex() {
         // Bit clear the tracked index in this depth
-        trace = trace and ((Applet.MAX_FLOW_CHILD_COUNT - 1L) shl
-                (depthIndex * Applet.FLOW_CHILD_COUNT_BITS)).inv()
+        trace =
+            trace and (MAX_FLOW_CHILD_COUNT.toLong() shl depthIndex * FLOW_CHILD_COUNT_BITS).inv()
     }
 
     fun jumpIn() {
@@ -59,18 +61,24 @@ class AppletTracker {
         depth--
     }
 
-    private fun parseTrace(): IntArray {
+    fun getIndexInDepth(
+        @IntRange(from = 1, to = Applet.MAX_FLOW_NESTED_DEPTH.toLong()) depth: Int
+    ): Int {
         check(depth > 0)
+        return (trace ushr (depth - 1) * FLOW_CHILD_COUNT_BITS and MAX_FLOW_CHILD_COUNT.toLong()).toInt() - 1
+    }
+
+    fun parseIndexes(): IntArray {
         return IntArray(depth) {
-            (trace ushr (it * Applet.FLOW_CHILD_COUNT_BITS) and (Applet.MAX_FLOW_CHILD_COUNT - 1L)).toInt()
+            getIndexInDepth(it + 1)
         }
     }
 
-    fun formatTrace(): String {
+    fun formatHierarchy(): String {
         if (depth <= 0) {
             return "-"
         }
-        return parseTrace().joinToString(" > ")
+        return parseIndexes().joinToString(" > ")
     }
 
     fun reset() {

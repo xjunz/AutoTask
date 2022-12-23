@@ -37,7 +37,7 @@
                     app:layout_constraintBottom_toBottomOf="@+id/ib_dismiss"
                     app:layout_constraintEnd_toStartOf="@+id/ib_split"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
                     tools:text="@string/edit_task" />
 
                 <TextView
@@ -45,23 +45,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:background="@drawable/bg_selectable_item"
                     android:drawablePadding="8dp"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="3"
-                    android:visibility="gone"
+                    android:textAppearance="@style/TextAppearance.Material3.ActionBar.Subtitle"
                     app:drawableEndCompat="@drawable/ic_drive_file_rename_outline_20px"
-                    app:drawableTint="?colorPrimary"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                    tools:text="@tools:sample/lorem"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toBottomOf="@+id/ib_dismiss"
+                    tools:text="@tools:sample/lorem" />
 
                 <ImageButton
                     android:id="@+id/ib_check"
@@ -72,7 +69,7 @@
                     android:contentDescription="@{@string/complete}"
                     android:src="@drawable/ic_baseline_check_24"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
                     app:tint="?colorOnPrimaryContainer" />
 
                 <ImageButton
@@ -98,7 +95,7 @@
                     android:src="@drawable/ic_baseline_menu_24"
                     android:visibility="gone"
                     app:layout_constraintEnd_toStartOf="@+id/ib_dismiss"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
                     app:tint="?colorOnPrimaryContainer"
                     tools:visibility="visible" />
 
@@ -112,7 +109,7 @@
                     android:src="@drawable/ic_baseline_call_split_24"
                     android:visibility="gone"
                     app:layout_constraintEnd_toStartOf="@+id/ib_menu"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/ib_menu"
                     app:tint="?colorOnPrimaryContainer"
                     tools:visibility="visible" />
 
@@ -137,6 +134,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 app:dividerColor="@color/material_on_surface_stroke" />

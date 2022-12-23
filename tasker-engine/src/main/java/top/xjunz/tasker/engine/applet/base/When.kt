@@ -20,9 +20,10 @@ class When : ControlFlow() {
         }
     }
 
-    override fun staticCheckMySelf() {
-        super.staticCheckMySelf()
-        check(index == 0)
-        check(isEnabled)
+    override fun staticCheckMyself(): Int {
+        if (requireParent().getOrNull(index + 1) == null) {
+            return StaticError.ERR_WHEN_NO_FELLOW
+        }
+        return super.staticCheckMyself()
     }
 }

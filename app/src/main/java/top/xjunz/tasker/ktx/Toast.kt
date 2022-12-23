@@ -7,6 +7,7 @@ package top.xjunz.tasker.ktx
 import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import java.lang.ref.WeakReference
 
@@ -21,6 +22,10 @@ fun toast(any: Any?, length: Int = Toast.LENGTH_SHORT) {
     }
     toast.show()
     previousToast = WeakReference(toast)
+}
+
+fun toastUnexpectedError(t: Throwable) {
+    longToast(R.string.format_error_occurred.format("${t.javaClass.simpleName}: ${t.message}"))
 }
 
 suspend fun postToast(any: Any?, length: Int = Toast.LENGTH_SHORT) {

@@ -13,10 +13,4 @@ class Else : Do() {
             if (value) unsupportedOperation("Else flow must not have its [isAnd] field true!")
             field = value
         }
-
-    override fun staticCheckMySelf() {
-        check(index >= 0 || requireParent()[index - 1] is Do) {
-            "Else flow must follow a Then flow!"
-        }
-    }
 }

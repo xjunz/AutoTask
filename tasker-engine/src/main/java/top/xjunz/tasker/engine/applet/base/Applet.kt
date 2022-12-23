@@ -21,17 +21,18 @@ abstract class Applet {
          * The bit count used to store the applet index in a flow. We use a `LONG` to track depths
          * and indexes. Considering the race between the max depth and the max index, we choose 7
          * as the bit count to store indexes. Therefore, the max nested depth allowed in a flow is
-         * limited to 9 (64/7) and the max child count of a flow is 128 (2^7). Also there is only 1
-         * (64%7) bit remaining unused.
+         * limited to 9 `(64/7)` and the max child count of a flow is 127 `(2^7-1)`. Also there is
+         * only 1 `(64%7)` bit remaining unused.
          *
+         * @see MAX_FLOW_CHILD_COUNT
          * @see TaskRuntime
          */
         const val FLOW_CHILD_COUNT_BITS = 7
 
         /**
-         * The max child count allowed in a flow.
+         * The max child count allowed in a flow. We need to minus 1 which is preserved.
          */
-        const val MAX_FLOW_CHILD_COUNT = 1 shl FLOW_CHILD_COUNT_BITS
+        const val MAX_FLOW_CHILD_COUNT = (1 shl FLOW_CHILD_COUNT_BITS) - 1
 
         /**
          * The max nested depth allowed in the root flow.

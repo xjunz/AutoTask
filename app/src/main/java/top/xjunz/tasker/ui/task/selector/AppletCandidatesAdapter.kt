@@ -27,7 +27,7 @@ import java.util.*
  */
 class AppletCandidatesAdapter(
     private val viewModel: AppletSelectorViewModel,
-    private val onClickListener: AppletOptionOnClickListener,
+    private val onClickListener: AppletOptionClickHandler,
 ) : ListAdapter<Applet, AppletCandidatesAdapter.AppletViewHolder>(FlowItemTouchHelperCallback.DiffCallback) {
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

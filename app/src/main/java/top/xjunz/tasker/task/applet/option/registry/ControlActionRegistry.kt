@@ -11,6 +11,7 @@ import top.xjunz.tasker.task.applet.flow.DelayAction
 import top.xjunz.tasker.task.applet.flow.RepeatFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.util.formatMinSecMills
 
 /**
  * @author xjunz 2022/12/04
@@ -25,8 +26,8 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x0001)
     val delayAction = appletOption(1, R.string.delay) {
         DelayAction()
-    }.withHelperText(R.string.help_delay_flow).withDescriber<Int> { applet, t ->
-        R.string.format_delay.formatSpans(t.toString().foreColored().clickable {
+    }.withDescriber<Int> { applet, t ->
+        R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
             app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())
         })
     }.descAsTitle()

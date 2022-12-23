@@ -66,7 +66,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     }
 
     private val onOptionClickListener by lazy {
-        AppletOptionOnClickListener(childFragmentManager, viewModel.appletOptionFactory)
+        AppletOptionClickHandler(childFragmentManager, viewModel.appletOptionFactory)
     }
 
     private val shopCartIntegration by lazy {

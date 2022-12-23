@@ -34,42 +34,6 @@
         <item>android.widget.LinearLayout</item>
         <item>android.widget.RelativeLayout</item>
     </string-array>
-    <string-array name="node_attr_names">
-        <item>Package</item>
-        <item>Class</item>
-        <item>Text</item>
-        <item>Desc</item>
-        <item>Id</item>
-        <item>Checked</item>
-        <item>Checkable</item>
-        <item>Clickable</item>
-        <item>Enabled</item>
-        <item>Focused</item>
-        <item>Focusable</item>
-        <item>LongClickable</item>
-        <item>Scrollable</item>
-        <item>Selected</item>
-    </string-array>
-    <string-array name="node_attr_methods">
-        <item>getPackageName</item>
-        <item>getClassName</item>
-        <item>getText</item>
-        <item>getContentDescription</item>
-        <item>getViewIdResourceName</item>
-        <item>isChecked</item>
-        <item>isCheckable</item>
-        <item>isClickable</item>
-        <item>isEnabled</item>
-        <item>isFocused</item>
-        <item>isFocusable</item>
-        <item>isLongClickable</item>
-        <item>isScrollable</item>
-        <item>isSelected</item>
-    </string-array>
-    <string-array name="applet_relations">
-        <item>且</item>
-        <item>或</item>
-    </string-array>
     <string-array name="directions">
         <item>左</item>
         <item>上</item>
@@ -107,5 +71,13 @@
         <item>周四</item>
         <item>周五</item>
         <item>周六</item>
+    </string-array>
+    <string-array name="static_error_prompts">
+        <item>请在该规则内部添加子规则</item>
+        <item>请移除无效的引用(引用不存在或超前引用): %s</item>
+        <item>请在该规则后添加规则</item>
+        <item>请在该规则前添加规则</item>
+        <item>请在该规则前添加规则</item>
+        <item>请在该规则后添加规则</item>
     </string-array>
 </resources>

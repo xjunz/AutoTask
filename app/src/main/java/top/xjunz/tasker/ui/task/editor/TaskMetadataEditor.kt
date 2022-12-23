@@ -20,7 +20,7 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
 
     private class InnerViewModel : ViewModel() {
 
-        lateinit var onCompletion: (Metadata) -> Unit
+        lateinit var onCompletion: () -> Unit
 
         lateinit var metadata: Metadata
     }
@@ -49,12 +49,12 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
             }
             viewModel.metadata.title = binding.etTaskName.textString
             viewModel.metadata.description = binding.etTaskDesc.textString
-            viewModel.onCompletion(viewModel.metadata)
+            viewModel.onCompletion()
             dismiss()
         }
     }
 
-    fun init(initialMetadata: Metadata, doOnCompletion: (Metadata) -> Unit) =
+    fun init(initialMetadata: Metadata, doOnCompletion: () -> Unit) =
         doWhenCreated {
             viewModel.metadata = initialMetadata
             viewModel.onCompletion = doOnCompletion

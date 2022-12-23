@@ -35,7 +35,17 @@
                         <corners android:radius="8dp" />
                     </shape>
                 </item>
-                <item android:state_selected="false">
+                <item android:state_activated="true">
+                    <shape android:shape="rectangle">
+                        <stroke
+                            android:width="1.5dp"
+                            android:color="?colorError"
+                            android:dashWidth="6dp"
+                            android:dashGap="4dp" />
+                        <corners android:radius="8dp" />
+                    </shape>
+                </item>
+                <item>
                     <shape android:shape="rectangle">
                         <corners android:radius="8dp" />
                     </shape>

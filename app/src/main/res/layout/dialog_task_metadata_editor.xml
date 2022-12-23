@@ -13,7 +13,7 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/create_task"
+            android:text="@string/edit_task_metadata"
             android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
             android:textColor="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"

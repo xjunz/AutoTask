@@ -13,11 +13,10 @@ class ElseIf : If() {
             field = value
         }
 
-    override fun staticCheckMySelf() {
-        super.staticCheckMySelf()
-        // Require its previous peer to be a `Then` flow.
-        check(index >= 0 || requireParent()[index - 1] is Do) {
-            "ElseIf flow must follow a Then flow!"
+    override fun staticCheckMyself(): Int {
+        if (requireParent().getOrNull(index - 1) !is Do) {
+            return StaticError.ERR_ELSEIF_NOT_FOLLOWING_DO
         }
+        return super.staticCheckMyself()
     }
 }

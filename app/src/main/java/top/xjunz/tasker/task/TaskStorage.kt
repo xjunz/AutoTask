@@ -6,6 +6,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.task.XTask
@@ -42,15 +43,15 @@ object TaskStorage {
             return getTaskFileOnStorage(this, isEnabled)
         }
 
-    fun removeTask(task: XTask): Boolean {
+    fun removeTask(task: XTask) {
         check(allTasks.contains(task))
         check(!task.isEnabled)
         val file = task.fileOnStorage
-        if (file.exists() && file.delete()) {
+        if (!file.exists() || file.delete()) {
             allTasks.remove(task)
-            return true
+        } else {
+            runtimeException("Failed to delete file!")
         }
-        return false
     }
 
     fun toggleTaskFilename(task: XTask): Boolean {
@@ -69,7 +70,7 @@ object TaskStorage {
                 var entry = it.nextEntry
                 while (entry != null) {
                     val task = Json.decodeFromStream<XTaskDTO>(it).toAutomatorTask(factory)
-                    task.isPreload = true
+                    task.metadata.isPreload = true
                     preloadTasks.add(task)
                     entry = it.nextEntry
                 }
@@ -77,25 +78,21 @@ object TaskStorage {
         }
     }
 
-    suspend fun persistTask(task: XTask): Int {
-        return withContext(Dispatchers.IO) {
-            val dto = task.toDTO()
-            // There is already an identical task!
-            if (findTask(dto.metadata.checksum) != null) {
-                return@withContext -3
-            }
+    suspend fun persistTask(task: XTask) {
+        withContext(Dispatchers.IO) {
             val file = task.fileOnStorage
             if (file.parentFile?.exists() == true || file.parentFile?.mkdirs() == true) {
                 if (file.exists() || file.createNewFile()) {
                     file.outputStream().bufferedWriter().use {
-                        it.write(Json.encodeToString(dto))
+                        it.write(Json.encodeToString(task.toDTO()))
                     }
                     allTasks.add(task)
-                    return@withContext 0
+                } else {
+                    runtimeException("Failed to create new file!")
                 }
-                return@withContext -1
+            } else {
+                runtimeException("Failed to mkdirs!")
             }
-            return@withContext -2
         }
     }
 
@@ -132,11 +129,6 @@ object TaskStorage {
 
     private fun findTask(checksum: Long): XTask? {
         return allTasks.find { it.checksum == checksum }
-    }
-
-    suspend fun updateExistingTask(task: XTask): Int {
-        check(allTasks.contains(task))
-        return persistTask(task)
     }
 
     fun getResidentTasks(): List<XTask> {

@@ -47,7 +47,6 @@
     <string name="illegal_location">非法位置</string>
     <string name="illegal_size">非法大小</string>
     <string name="cannot_find">未找到元素</string>
-    <string name="error">错误</string>
     <string name="unknown_problem">未知问题</string>
     <string name="icon">图标</string>
     <string name="format_count">%d次</string>
@@ -281,17 +280,17 @@
     <string name="help_multi_references">您已选中来自多个规则的引用，这些引用将会被设置同一个标识，其中最后执行成功的规则将会被引用。</string>
     <string name="edit">编辑</string>
     <string name="delay">延时</string>
-    <string name="format_delay">延时%s毫秒后</string>
+    <string name="format_delay">延时%s后</string>
     <string name="repeat">重复</string>
     <string name="format_repeat">重复执行%d次</string>
     <string name="control_actions">流程控制</string>
-    <string name="help_delay_flow">设置延时时间，单位为毫秒，1秒等于1000毫秒。</string>
     <string name="remove">移除</string>
     <string name="add_comment">添加说明</string>
     <string name="edit_comment">编辑说明</string>
     <string name="disable">禁用</string>
     <string name="comment">说明:&#160;</string>
-    <string name="input_repeat_count">请输入重复执行次数。</string>
+    <string name="error">错误:&#160;</string>
+    <string name="input_repeat_count">请输入重复执行次数</string>
     <string name="tip_swipe_to_remove">在规则列表中水平滑动某个规则即可将其直接移除哦！</string>
     <string name="tip_long_click_to_select">在规则列表中长按某个规则即可将其选中哦！</string>
     <string name="undo">撤销</string>
@@ -319,16 +318,25 @@
     <string name="preload_task">预置任务</string>
     <string name="track_task_flow">任务追踪</string>
     <string name="format_error_code">发生错误(%d)</string>
+    <string name="format_error_occurred">发生错误: %s</string>
     <string name="import_tasks">导入任务</string>
     <string name="desc_import_tasks">从本地文件中导入任务</string>
     <string name="prompt_disable_task">你确定要禁用该任务吗？</string>
     <string name="prompt_enable_task">你确定要启用该任务吗？</string>
     <string name="nothing_here">空空如也</string>
     <string name="desc_preload_tasks">添加程序内预置的任务</string>
-    <string name="error_add_repeated_task">创建失败，已经存在完全相同的任务</string>
+    <string name="error_add_repeated_task">操作失败，已经存在完全相同的任务</string>
     <string name="add">添加</string>
     <string name="added">已添加</string>
     <string name="format_new_task_added">已添加任务⌈%s⌋</string>
     <string name="format_task_removed">已移除任务⌈%s⌋</string>
     <string name="prompt_delete_task">你确定要删除此任务吗？此操作不可撤销。</string>
+    <string name="format_equals_to">等于%s</string>
+    <string name="error_require_positive_num">请输入大于0的数</string>
+    <string name="hint_millisecond">毫秒(1秒=1000毫秒)</string>
+    <string name="millisecond">毫秒</string>
+    <string name="second">秒</string>
+    <string name="minute">分钟</string>
+    <string name="prompt_fix_static_error">操作失败，请先消除错误。</string>
+    <string name="edit_task_metadata">编辑任务信息</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
@@ -56,8 +57,8 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             val max = binding.etMaximum.textString.toFloatOrNull()
             val min = binding.etMinimum.textString.toFloatOrNull()
             if (viewModel.unit == Distance.UNIT_PX && it == Distance.UNIT_DP) {
-                if (max != null) binding.etMaximum.setText((max / top.xjunz.tasker.bridge.DisplayManagerBridge.density).asString())
-                if (min != null) binding.etMinimum.setText((min / top.xjunz.tasker.bridge.DisplayManagerBridge.density).asString())
+                if (max != null) binding.etMaximum.setText((max / DisplayManagerBridge.density).asString())
+                if (min != null) binding.etMinimum.setText((min / DisplayManagerBridge.density).asString())
             } else if (viewModel.unit == Distance.UNIT_DP && it == Distance.UNIT_PX) {
                 if (max != null) binding.etMaximum.setText(max.dp.toString())
                 if (min != null) binding.etMinimum.setText(min.dp.toString())
@@ -67,7 +68,6 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             }
             viewModel.unit = it
         }
-
         binding.rgScope.setOnCheckedChangeListener { _, checkedId ->
             binding.tvTitle.text = R.string.format_scoped_distance_name.format(
                 binding.rgScope.findViewById<RadioButton>(checkedId).text,
@@ -129,6 +129,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                 Distance.SCOPE_PARENT -> binding.rgScope.check(R.id.rb_scope_parent)
                 Distance.SCOPE_SCREEN -> binding.rgScope.check(R.id.rb_scope_screen)
             }
+            binding.menuUnit.setText(R.array.distance_units.array[it.unit])
         }
     }
 

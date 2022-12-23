@@ -38,7 +38,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    private val menuHelper =
+    val menuHelper =
         AppletOperationMenuHelper(viewModel, globalViewModel.factory, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

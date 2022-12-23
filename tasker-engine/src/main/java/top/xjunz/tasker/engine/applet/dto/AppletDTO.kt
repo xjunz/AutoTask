@@ -16,7 +16,7 @@ import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import java.util.zip.CRC32
 
 /**
- * Data Transfer Object for [applets][Applet].
+ * Data Transfer Object for [Applet].
  *
  * @author xjunz 2022/10/28
  */
@@ -93,7 +93,7 @@ class AppletDTO(
         }
     }
 
-    internal object Serializer {
+    object Serializer {
 
         private fun <K, V> Map<K, V>.emptyToNull(): Map<K, V>? {
             if (isEmpty()) return null
@@ -115,9 +115,7 @@ class AppletDTO(
                 comment
             )
             if (this is Flow) {
-               /* check(size != 0) {
-                    "No element!"
-                }*/
+                check(size != 0)
                 dto.elements = Array(size) {
                     this[it].toDTO()
                 }

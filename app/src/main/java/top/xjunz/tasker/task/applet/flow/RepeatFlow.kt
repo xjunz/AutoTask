@@ -14,12 +14,11 @@ class RepeatFlow : Flow() {
 
     private var count: Int = 0
 
-
-    override fun staticCheckMySelf() {
-        super.staticCheckMySelf()
+    override fun staticCheckMyself(): Int {
         check(value != null && value!!.casted<Int>() > 0) {
             "Repeat count must be specified!"
         }
+        return super.staticCheckMyself()
     }
 
     override suspend fun doApply(runtime: TaskRuntime) {

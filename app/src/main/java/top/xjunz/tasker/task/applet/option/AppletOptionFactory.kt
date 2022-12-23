@@ -35,9 +35,8 @@ class AppletOptionFactory : AppletFactory {
     private val uiObjectActionRegistry =
         UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
-    private val controlActionRegistry =
+    val controlActionRegistry =
         ControlActionRegistry(FlowOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
-
 
     private val allRegistries = arrayOf(
         // meta

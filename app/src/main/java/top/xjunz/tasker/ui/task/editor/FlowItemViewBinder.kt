@@ -28,6 +28,10 @@ class FlowItemViewBinder(
         const val ACTION_ADD = 4
     }
 
+    private val errorPrompts by lazy {
+        R.array.static_error_prompts.array
+    }
+
     @SuppressLint("SetTextI18n")
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
         val option = viewModel.factory.requireOption(applet)
@@ -35,11 +39,15 @@ class FlowItemViewBinder(
             root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
                     || (viewModel.isSelectingRef && globalViewModel.isRefSelected(applet))
+            root.isActivated = viewModel.staticError?.victim === applet
             root.isEnabled = true
+
             ibAction.tag = null
+
             tvNumber.isVisible = false
             dividerTop.isVisible = false
             dividerBott.isVisible = false
+
             cgRefids.isVisible = false
             tvTitle.isEnabled = true
             bullet.isVisible = false
@@ -86,10 +94,8 @@ class FlowItemViewBinder(
             }
             if (applet is ControlFlow) {
                 tvTitle.setTextColor(R.color.color_text_control_normal.colorStateList)
-            } else {
-                if (depth == 1) {
-                    title = title?.relativeSize(.8F)
-                }
+            } else if (depth == 1) {
+                title = title?.relativeSize(.8F)
             }
             // Set action
             if (applet is Flow) {
@@ -130,9 +136,10 @@ class FlowItemViewBinder(
                 tvDesc.background = null
             }
             if (viewModel.isSelectingRef) {
-                // Clear spans
                 title = title?.toString()
-                desc = desc?.toString()
+                if (!tvDesc.isEnabled) {
+                    desc = desc?.toString()
+                }
                 val isAhead = viewModel.refSelectingApplet.parent == null
                         || applet.isAheadOf(viewModel.refSelectingApplet)
                 // When selecting ref, only enable valid targets
@@ -149,8 +156,7 @@ class FlowItemViewBinder(
                 if (ref != null) {
                     val refid = applet.refids[option.results.indexOf(ref)]
                     if (refid != null) {
-                        tvBadge.text =
-                            ref.name + "[$refid]".foreColored(ColorScheme.colorTertiary)
+                        tvBadge.text = ref.name + " [$refid]".foreColored(ColorScheme.colorTertiary)
                     } else {
                         tvBadge.text = ref.name
                     }
@@ -166,10 +172,19 @@ class FlowItemViewBinder(
             tvTitle.text = title
             tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
             tvDesc.text = desc
-            tvComment.isVisible = applet.comment != null
-            if (applet.comment != null)
+            tvComment.isVisible = applet.comment != null || root.isActivated
+            if (root.isActivated) {
+                var prompt = errorPrompts[viewModel.staticError!!.code]
+                viewModel.staticError?.arg?.let {
+                    prompt = prompt.toString().format(it)
+                }
+                tvComment.text = (R.string.error.text.bold() + prompt).foreColored(
+                    ColorScheme.colorError
+                )
+            } else if (applet.comment != null) {
                 tvComment.text = (R.string.comment.text.bold() + applet.comment!!)
                     .quoted(ColorScheme.colorTertiaryContainer)
+            }
         }
     }
 }
