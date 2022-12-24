@@ -29,7 +29,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     protected abstract fun asInterface(binder: IBinder): IInterface
 
-    protected abstract fun doOnConnected(serviceInterface: IInterface)
+    protected abstract fun onServiceConnected(serviceInterface: IInterface)
 
     private var bindingJob: Job? = null
 
@@ -54,7 +54,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
                     ibinder.linkToDeath(deathRecipient, 0)
                     asInterface(ibinder).also {
                         serviceInterface = it
-                        doOnConnected(it)
+                        onServiceConnected(it)
                     }
                     listener?.onServiceBound()
                 }

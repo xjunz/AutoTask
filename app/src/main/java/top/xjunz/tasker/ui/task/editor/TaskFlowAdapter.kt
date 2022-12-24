@@ -116,7 +116,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.tvComment.setBackgroundColor(ColorScheme.colorTertiaryContainer.alphaModified(.3))
+            binding.tvComment.setBackgroundColor(ColorScheme.colorTertiaryContainer.alphaModified(.3F))
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
                 if (viewModel.isSelectingRef && !applet.isContainer) {

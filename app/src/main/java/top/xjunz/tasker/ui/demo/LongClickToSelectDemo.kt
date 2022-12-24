@@ -12,7 +12,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
 import androidx.recyclerview.widget.LinearLayoutManager
 import top.xjunz.tasker.databinding.ItemFlowOptDemoBinding
-import top.xjunz.tasker.databinding.LayoutFlowOptDemoBinding
+import top.xjunz.tasker.databinding.LayoutFlowOperationDemoBinding
 import top.xjunz.tasker.ui.base.inlineAdapter
 import java.util.*
 
@@ -28,7 +28,7 @@ class LongClickToSelectDemo(context: Context) : Demonstration(context) {
     private val demoAdapter =
         inlineAdapter(data, ItemFlowOptDemoBinding::class.java, {}) { _, _, _ -> }
 
-    private val binding = LayoutFlowOptDemoBinding.inflate(LayoutInflater.from(context))
+    private val binding = LayoutFlowOperationDemoBinding.inflate(LayoutInflater.from(context))
 
     @SuppressLint("ClickableViewAccessibility")
     override fun getView(): View {

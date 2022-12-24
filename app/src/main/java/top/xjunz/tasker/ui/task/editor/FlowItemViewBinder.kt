@@ -131,7 +131,7 @@ class FlowItemViewBinder(
             }
             if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
                 desc = desc?.quoted()
-                tvDesc.setBackgroundColor(ColorScheme.colorPrimaryContainer.alphaModified(.3))
+                tvDesc.setBackgroundColor(ColorScheme.colorPrimaryContainer.alphaModified(.3F))
             } else {
                 tvDesc.background = null
             }

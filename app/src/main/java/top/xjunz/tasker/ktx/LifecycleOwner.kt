@@ -7,19 +7,12 @@ package top.xjunz.tasker.ktx
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.view.LayoutInflater
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.core.view.doOnAttach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import top.xjunz.tasker.R
-import top.xjunz.tasker.databinding.LayoutProgressBinding
 
 /**
  * @author xjunz 2022/05/09
@@ -34,19 +27,6 @@ fun LifecycleOwner.peekActivity(): Activity {
     if (this is Activity) return this
     if (this is Fragment) return requireActivity()
     error("This LifecycleOwner is not an Activity or a Fragment!")
-}
-
-fun LifecycleOwner.makeProgressDialog(config: ((ProgressBar, percent: TextView) -> Unit)? = null):
-        MaterialAlertDialogBuilder {
-    val binding = LayoutProgressBinding.inflate(LayoutInflater.from(peekContext()))
-    if (config != null) {
-        binding.root.doOnAttach {
-            config(binding.progressIndicator, binding.tvCurrentPercent)
-        }
-    }
-    return MaterialAlertDialogBuilder(peekContext()).setView(binding.root)
-        .setCancelable(false)
-        .setTitle(R.string.pls_wait)
 }
 
 fun <V> LifecycleOwner.observe(ld: LiveData<V>, observer: Observer<in V>) {
@@ -127,7 +107,7 @@ fun LifecycleOwner.observePrompt(
 fun <V : Throwable> LifecycleOwner.observeError(ld: MutableLiveData<V>) {
     ld.observe(this) {
         if (it == null) return@observe
-        peekContext().showErrorDialog(it).setOnDismissListener {
+        showErrorDialog(it).setOnDismissListener {
             ld.value = null
         }
     }

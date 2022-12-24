@@ -17,7 +17,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -66,8 +68,13 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 viewModel.bottomBarHeight.value = it.height
             }
         }
-        binding.ibCreateTask.setAntiMoneyClickListener {
-
+        val mvm = peekMainViewModel()
+        binding.btnServiceControl.setAntiMoneyClickListener {
+            if (it.isActivated) {
+                mvm.showStopConfirmation.value = true
+            } else {
+                ServiceStarterDialog().show(childFragmentManager)
+            }
         }
         binding.fabAction.setAntiMoneyClickListener {
             TaskCreatorDialog().show(childFragmentManager)
@@ -101,7 +108,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeDialog(viewModel.requestToggleTask) {
             val title = if (it.isEnabled) R.string.prompt_disable_task.text
             else R.string.prompt_enable_task.text
-            requireActivity().makeSimplePromptDialog(msg = title) {
+            requireContext().makeSimplePromptDialog(msg = title) {
                 viewModel.toggleRequestedTask()
             }.show()
         }
@@ -116,6 +123,16 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         }
         observeTransient(viewModel.requestAddNewTask) {
             viewModel.addRequestedTask()
+        }
+        observe(peekMainViewModel().isRunning) {
+            binding.btnServiceControl.isActivated = it
+            if (it) {
+                binding.btnServiceControl.setText(R.string.stop_service)
+                binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_stop_24)
+            } else {
+                binding.btnServiceControl.setText(R.string.start_service)
+                binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_play_arrow_24)
+            }
         }
     }
 

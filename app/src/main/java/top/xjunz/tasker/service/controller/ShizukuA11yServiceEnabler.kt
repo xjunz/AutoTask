@@ -32,7 +32,7 @@ class ShizukuA11yServiceEnabler : ShizukuServiceController<IRemoteAutomatorServi
         return IRemoteAutomatorService.Stub.asInterface(binder)
     }
 
-    override fun doOnConnected(serviceInterface: IInterface) {
+    override fun onServiceConnected(serviceInterface: IInterface) {
         service = serviceInterface as IRemoteAutomatorService
     }
 

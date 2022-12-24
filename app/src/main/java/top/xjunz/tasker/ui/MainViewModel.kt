@@ -28,7 +28,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val onNewIntent = MutableLiveData<Uri>()
 
-    val stopConfirmation = MutableLiveData<Boolean>()
+    val showStopConfirmation = MutableLiveData<Boolean>()
 
     val isRunning = MutableLiveData(false)
 

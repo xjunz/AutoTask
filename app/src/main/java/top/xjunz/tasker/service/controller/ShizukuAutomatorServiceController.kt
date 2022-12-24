@@ -16,7 +16,7 @@ import top.xjunz.tasker.util.ShizukuUtil
  */
 object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutomatorService>() {
 
-    override val tag = " ShizukuAutomatorService"
+    override val tag = "ShizukuAutomatorService"
 
     private const val SERVICE_NAME_SUFFIX = "service"
 
@@ -30,10 +30,10 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         ).processNameSuffix(SERVICE_NAME_SUFFIX).debuggable(BuildConfig.DEBUG)
             .version(BuildConfig.VERSION_CODE)
 
-    override fun doOnConnected(serviceInterface: IInterface) {
+    override fun onServiceConnected(serviceInterface: IInterface) {
         serviceInterface as IRemoteAutomatorService
         service = ShizukuAutomatorService(serviceInterface)
-        if (serviceInterface.isConnected) serviceInterface.connect()
+        if (!serviceInterface.isConnected) serviceInterface.connect()
     }
 
     val isShizukuInstalled = MutableLiveData<Boolean>()

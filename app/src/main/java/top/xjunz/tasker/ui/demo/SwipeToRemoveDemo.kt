@@ -12,7 +12,7 @@ import androidx.core.view.postDelayed
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import top.xjunz.tasker.databinding.ItemFlowOptDemoBinding
-import top.xjunz.tasker.databinding.LayoutFlowOptDemoBinding
+import top.xjunz.tasker.databinding.LayoutFlowOperationDemoBinding
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.Motions
 import java.util.*
@@ -31,7 +31,7 @@ class SwipeToRemoveDemo(context: Context) : Demonstration(context) {
             b.root.translationX = 0F
         }
 
-    private val binding = LayoutFlowOptDemoBinding.inflate(LayoutInflater.from(context))
+    private val binding = LayoutFlowOperationDemoBinding.inflate(LayoutInflater.from(context))
 
     @SuppressLint("ClickableViewAccessibility")
     override fun getView(): View {

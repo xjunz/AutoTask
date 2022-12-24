@@ -49,10 +49,10 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
         binding.containerImportTasks.setAntiMoneyClickListener {
 
         }
-        binding.containerClickMode.setAntiMoneyClickListener {
+        binding.tvClickMode.setAntiMoneyClickListener {
 
         }
-        binding.containerRecordGesture.setAntiMoneyClickListener {
+        binding.tvRecordGesture.setAntiMoneyClickListener {
 
         }
         binding.containerPreloadTasks.setAntiMoneyClickListener {

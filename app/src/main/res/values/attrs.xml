@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MaterialButtonSpreadContainer">
+        <attr name="spreadHorizontal" format="dimension" />
+        <attr name="spreadVertical" format="dimension" />
+        <attr name="spreadColor" format="dimension" />
+        <attr name="spreadCenterColor" format="color" />
+        <attr name="spreadAutoStart" format="boolean" />
+        <attr name="spreadStyle" format="enum">
+            <enum name="stroke" value="0" />
+            <enum name="fill" value="1" />
+        </attr>
+        <attr name="spreadCount" format="integer" />
+        <attr name="spreadDuration" format="integer" />
+        <attr name="spreadAlpha" format="float" />
+    </declare-styleable>
+</resources>

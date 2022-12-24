@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_service"
+            android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
+
+        <LinearLayout
+            android:id="@+id/container_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_selectable_surface"
+            android:clipToPadding="false"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:id="@+id/tv_state"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/service_not_started"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+            <top.xjunz.tasker.ui.widget.MaterialButtonSpreadContainer
+                android:id="@+id/spread_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:spreadAlpha="0.28"
+                app:spreadCenterColor="?colorSurface"
+                app:spreadColor="?colorPrimary"
+                app:spreadCount="3"
+                app:spreadHorizontal="16dp"
+                app:spreadStyle="fill"
+                app:spreadVertical="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_start"
+                    style="@style/Widget.Material3.Button.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:insetTop="6dp"
+                    android:insetBottom="6dp"
+                    android:text="@string/start"
+                    app:icon="@drawable/ic_baseline_play_arrow_24" />
+            </top.xjunz.tasker.ui.widget.MaterialButtonSpreadContainer>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/container_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_selectable_surface"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/select_operating_mode"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary" />
+
+            <RadioGroup
+                android:id="@+id/rg_modes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/rb_mode_shizuku"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/shizuku"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/rb_mode_a11y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/a11y_service"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_selectable_surface"
+            android:clipToPadding="false"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:id="@+id/tv_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/grant_by_shizuku"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary" />
+
+            <TextView
+                android:id="@+id/tv_mode_intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/intro_to_shizuku"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/container_overlay_permission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_selectable_surface"
+            android:clipToPadding="false"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/overlay_permission"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary" />
+
+            <TextView
+                android:id="@+id/tv_desc_overlay_permission"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/tip_overlay_permission_for_task" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_grant_overlay"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:insetTop="6dp"
+                android:insetBottom="6dp"
+                android:paddingHorizontal="16dp"
+                android:text="@string/goto_grant"
+                app:icon="@drawable/ic_baseline_chevron_right_24"
+                app:iconGravity="textEnd" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+</layout>

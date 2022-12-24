@@ -30,7 +30,7 @@ object ShizukuUtil {
         }
     }
 
-    fun ensureShizukuEnv(onPrepared: () -> Unit) {
+    inline fun ensureShizukuEnv(crossinline onPrepared: () -> Unit) {
         if (isShizukuAvailable) {
             // Shizuku is prepared!
             onPrepared()

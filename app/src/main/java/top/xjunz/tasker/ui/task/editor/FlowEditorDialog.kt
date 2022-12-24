@@ -193,6 +193,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         observe(viewModel.applets) {
             adapter.submitList(it)
+            if (binding.containerPlaceholder.isVisible != it.isEmpty()) {
+                if(it.isEmpty()) {
+                    binding.root.beginAutoTransition(
+                        binding.containerPlaceholder, MaterialFadeThrough()
+                    )
+                }
+                binding.containerPlaceholder.isVisible = it.isEmpty()
+            }
         }
         observeTransient(viewModel.onAppletChanged) {
             adapter.notifyItemChanged(adapter.currentList.indexOf(it), true)

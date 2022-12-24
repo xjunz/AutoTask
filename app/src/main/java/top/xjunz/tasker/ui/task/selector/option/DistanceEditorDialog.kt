@@ -82,8 +82,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                 binding.root.rootView.shake()
                 toast(
                     R.string.format_error_no_limit.format(
-                        R.string.minimum.str,
-                        R.string.maximum.str
+                        R.string.minimum.str, R.string.maximum.str
                     )
                 )
                 return@setAntiMoneyClickListener

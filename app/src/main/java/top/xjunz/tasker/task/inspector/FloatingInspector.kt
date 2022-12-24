@@ -42,7 +42,6 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
     private val nodeInfo = NodeInfoOverlay(this)
 
     private val overlays: Array<FloatingInspectorOverlay<*>> = arrayOf(
-        BoundsDetectorOverlay(this),
         trashBin,
         InspectorViewOverlay(this),
         ComponentOverlay(this),

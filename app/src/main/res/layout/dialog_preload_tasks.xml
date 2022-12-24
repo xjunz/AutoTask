@@ -26,7 +26,6 @@
             android:layout_marginTop="16dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintTop_toBottomOf="@id/tv_title"
-            tools:layout_editor_absoluteX="16dp"
             tools:listitem="@layout/item_preload_task" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

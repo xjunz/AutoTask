@@ -63,11 +63,9 @@
                         android:stateListAnimator="@null"
                         android:textColor="@color/color_text_control_normal"
                         app:backgroundTint="@color/color_status_tint"
-                        app:cornerRadius="@dimen/corner_btn"
                         app:icon="@drawable/ic_status_control"
                         app:iconTint="@color/color_status_icon"
-                        app:rippleColor="@color/color_status_ripple"
-                        app:strokeColor="@color/color_status_stroke"
+                        app:strokeColor="@color/color_status_text"
                         tools:ignore="RelativeOverlap"
                         tools:text="@string/run" />
                 </RelativeLayout>
@@ -168,7 +166,7 @@
                             app:icon="@drawable/touch_app_24px"
                             app:iconGravity="textStart"
                             app:iconTint="@color/color_status_icon"
-                            app:strokeColor="@color/color_status_stroke"
+                            app:strokeColor="@color/color_status_text"
                             tools:text="@string/grant" />
 
                         <com.google.android.material.button.MaterialButton

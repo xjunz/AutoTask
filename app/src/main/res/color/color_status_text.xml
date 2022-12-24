@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="?colorOnPrimaryContainer" android:state_activated="false" android:state_enabled="true" />
+    <item android:color="?colorTertiary" android:state_activated="true" android:state_enabled="true" />
+    <item android:color="@color/material_on_surface_stroke" android:state_enabled="false" />
+</selector>

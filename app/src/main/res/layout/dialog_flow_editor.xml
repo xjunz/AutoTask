@@ -8,6 +8,43 @@
         android:layout_height="match_parent"
         android:background="?colorSurface">
 
+        <LinearLayout
+            android:id="@+id/container_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            tools:ignore="UseCompoundDrawables">
+
+            <ImageView
+                android:id="@+id/iv_placeholder"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/bg_solid_circle"
+                android:contentDescription="@string/nothing_here"
+                android:padding="16dp"
+                android:src="@drawable/ic_playlist_add_24px"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.40"
+                app:tint="?colorPrimary" />
+
+            <TextView
+                android:id="@+id/tv_placeholder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:alpha=".92"
+                android:text="@string/nothing_here"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                app:layout_constraintEnd_toEndOf="@+id/iv_placeholder"
+                app:layout_constraintStart_toStartOf="@+id/iv_placeholder"
+                app:layout_constraintTop_toBottomOf="@+id/iv_placeholder" />
+        </LinearLayout>
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar"
             android:layout_width="match_parent"

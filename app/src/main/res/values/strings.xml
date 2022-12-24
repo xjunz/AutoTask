@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">自动任务</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
-    <string name="grant_by_shizuku">使用<b> Shizuku </b>授权</string>
-    <string name="intro_to_shizuku">我们需要先取得Shizuku的授权才能正常启动服务，Shizuku权限用于且仅用于使应用正常工作。</string>
+    <string name="grant_by_shizuku"><b>Shizuku </b>权限</string>
+    <string name="intro_to_shizuku">我们需要Shizuku权限才能启动服务，请放心，Shizuku权限用于且仅用于使应用正常工作。
+    \n\n该模式下，所有功能可用，推荐使用该模式。</string>
     <string name="m_restriction">在<b> Android 6.0 </b>上的限制</string>
     <string name="intro_m_restriction">由于系统限制，在Android 6.0中，本应用与无障碍服务冲突。
         在服务启动之后，无障碍服务将会结束运行；并且在停止服务之后，无障碍服务才会重新启动。</string>
@@ -90,7 +91,7 @@
     <string name="app_not_found">找不到打开方式</string>
     <string name="select_operating_mode">选择工作模式</string>
     <string name="accessibility_service_summary">允许应用获取屏幕信息以及执行自定义任务,\n该功能用于且仅用于使应用正常工作。</string>
-    <string name="shizuku">Shizuku</string>
+    <string name="shizuku"><b>Shizuku</b></string>
     <string name="a11y_service">辅助功能</string>
     <string name="desc_shizuku_mode">Shizuku模式下，可使用全部功能，推荐使用该模式</string>
     <string name="desc_a11y_mode">辅助功能模式下，部分功能将受限</string>
@@ -150,6 +151,7 @@
     <string name="enable">启用</string>
     <string name="goto_grant">去授权</string>
     <string name="overlay_permission">悬浮窗权限</string>
+    <string name="overlay_permission_optional">悬浮窗权限(可选)</string>
     <string name="grant_failed">授权失败</string>
     <string name="prompt_start_shizuku_service">请先启动Shizuku服务</string>
     <string name="prompt_install_shizuku">请先下载并安装Shizuku</string>
@@ -339,4 +341,10 @@
     <string name="minute">分钟</string>
     <string name="prompt_fix_static_error">操作失败，请先消除错误。</string>
     <string name="edit_task_metadata">编辑任务信息</string>
+    <string name="start_service">启动服务</string>
+    <string name="stop_service">停止服务</string>
+    <string name="start">启动</string>
+    <string name="starting">正在启动…</string>
+    <string name="tip_overlay_permission_for_task">用于在后台显示通知，未授权会导致相关任务运行失败。</string>
+    <string name="service_started">服务已启动</string>
 </resources>

@@ -2,10 +2,16 @@ package top.xjunz.tasker.ktx
 
 import android.content.Context
 import android.content.DialogInterface
+import android.view.LayoutInflater
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.doOnAttach
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import top.xjunz.tasker.R
+import top.xjunz.tasker.databinding.LayoutProgressBinding
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -35,8 +41,8 @@ inline fun Context.makeSimplePromptDialog(
     return builder
 }
 
-fun Context.showErrorDialog(t: Throwable): AlertDialog {
-    return showErrorDialog(t.stackTraceToString())
+fun LifecycleOwner.showErrorDialog(t: Throwable): AlertDialog {
+    return peekContext().showErrorDialog(t.stackTraceToString())
 }
 
 fun Context.showErrorDialog(stackTrace: String): AlertDialog {
@@ -48,4 +54,18 @@ fun Context.showErrorDialog(stackTrace: String): AlertDialog {
       //  Feedbacks.showErrorFeedbackDialog(this, stackTrace)
     }
     return dialog
+}
+
+
+fun LifecycleOwner.makeProgressDialog(config: ((ProgressBar, percent: TextView) -> Unit)? = null):
+        MaterialAlertDialogBuilder {
+    val binding = LayoutProgressBinding.inflate(LayoutInflater.from(peekContext()))
+    if (config != null) {
+        binding.root.doOnAttach {
+            config(binding.progressIndicator, binding.tvCurrentPercent)
+        }
+    }
+    return MaterialAlertDialogBuilder(peekContext()).setView(binding.root)
+        .setCancelable(false)
+        .setTitle(R.string.pls_wait)
 }

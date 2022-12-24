@@ -18,6 +18,7 @@
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipToPadding="false"
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp"
             android:stateListAnimator="@animator/sla_appbar"
@@ -27,6 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clickable="true"
+                android:clipChildren="false"
                 android:minHeight="?actionBarSize"
                 tools:ignore="KeyboardInaccessibleWidget">
 
@@ -39,13 +41,23 @@
                     android:text="@string/task_list"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
 
-                <ImageButton
-                    android:id="@+id/ib_create_task"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_service_control"
+                    style="@style/Widget.Material3.Button.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_marginEnd="12dp"
-                    android:background="?selectableItemBackgroundBorderless" />
+                    android:layout_marginEnd="4dp"
+                    android:insetTop="6dp"
+                    android:insetBottom="6dp"
+                    android:text="@string/start_service"
+                    android:textColor="@color/color_status_text"
+                    app:backgroundTint="@color/color_status_tint"
+                    app:icon="@drawable/ic_status_control"
+                    app:iconTint="@color/color_status_text"
+                    app:rippleColor="?colorControlHighlight"
+                    tools:icon="@drawable/ic_baseline_play_arrow_24"
+                    tools:text="启动服务" />
             </FrameLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
