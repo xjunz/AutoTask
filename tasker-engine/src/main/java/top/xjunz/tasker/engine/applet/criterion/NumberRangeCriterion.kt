@@ -19,3 +19,8 @@ class NumberRangeCriterion<R : Any, T : Number>(
         }
     }
 }
+
+inline fun <R : Any, reified T : Number> newNumberRangeCriterion(noinline mapper: (R) -> T)
+        : NumberRangeCriterion<R, T> {
+    return NumberRangeCriterion(AppletValues.judgeValueType<T>(), mapper)
+}

@@ -25,14 +25,15 @@ object AppletValues {
     const val VAL_TYPE_LONG = 5
 
     /**
-     * Bit mask for collection value type.
-     */
-    internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
-
-    /**
      * @see Distance
      */
     const val VAL_TYPE_DISTANCE = 6
+
+
+    /**
+     * Bit mask for collection value type.
+     */
+    internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
 
     private val SEPARATOR = Char(0).toString()
 
@@ -50,6 +51,17 @@ object AppletValues {
      */
     val Applet.rawType: Int
         get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
+
+    inline fun <reified T> judgeValueType(): Int {
+        return when (val clz = T::class.java) {
+            Int::class.java -> VAL_TYPE_LONG
+            String::class.java -> VAL_TYPE_TEXT
+            Float::class.java -> VAL_TYPE_FLOAT
+            Long::class.java -> VAL_TYPE_LONG
+            Distance::class.java -> VAL_TYPE_DISTANCE
+            else -> illegalArgument("type", clz.name)
+        }
+    }
 
     private fun Applet.judgeType(value: Any, knownCollection: Boolean = false): Int {
         return when (value) {

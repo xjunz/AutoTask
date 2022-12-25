@@ -5,25 +5,19 @@ import top.xjunz.tasker.engine.applet.dto.AppletValues
 /**
  * @author xjunz 2022/08/14
  */
-abstract class CollectionCriterion<T : Any, V : Any>(rawType: Int) :
-    Criterion<T, Collection<V>>() {
+class CollectionCriterion<T : Any, V : Any>(
+    rawType: Int,
+    private inline val getValue: T.() -> V?
+) : Criterion<T, Collection<V>>() {
 
     override val valueType: Int = collectionTypeOf(rawType)
 
-    abstract fun T.getValue(): V?
-
-    final override fun matchTarget(target: T, value: Collection<V>): Boolean {
+    override fun matchTarget(target: T, value: Collection<V>): Boolean {
         return value.contains(target.getValue())
     }
 }
 
-inline fun <T : Any, V : Any> collectionCriterion(
-    rawType: Int = AppletValues.VAL_TYPE_TEXT,
-    crossinline block: (T) -> V?
-): CollectionCriterion<T, V> {
-    return object : CollectionCriterion<T, V>(rawType) {
-        override fun T.getValue(): V? {
-            return block(this)
-        }
-    }
+inline fun <T : Any, reified V : Any> collectionCriterion(noinline block: (T) -> V?)
+        : CollectionCriterion<T, V> {
+    return CollectionCriterion(AppletValues.judgeValueType<V>(), block)
 }

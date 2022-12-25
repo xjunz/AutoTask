@@ -22,11 +22,12 @@ import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.task.ResidentTaskScheduler
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import java.lang.ref.WeakReference
 
@@ -85,7 +86,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
             } else {
-                taskScheduler = ResidentTaskScheduler(mainLooper)
+                taskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
             }
             instance = WeakReference(this)
             runningState.value = true

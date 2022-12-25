@@ -1,13 +1,26 @@
 package top.xjunz.tasker.task.applet
 
 import org.junit.Test
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/11/30
  */
 internal class AppletsKtTest {
+
+    private class EmptyApplet : Applet() {
+
+        override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
+
+        override suspend fun apply(runtime: TaskRuntime) {
+            /* no-op */
+        }
+
+    }
 
     private fun Flow.getFlow(index: Int): Flow {
         return get(index) as Flow
@@ -34,11 +47,11 @@ internal class AppletsKtTest {
         root.add(Flow().apply {
             add(Flow())
         })
-        root.add(Flow())
-        root.add(Flow())
+        root.add(EmptyApplet())
+        root.add(EmptyApplet())
         root.add(Flow().apply {
             add(Flow().apply {
-                add(Flow())
+                add(EmptyApplet())
             })
         })
         root.buildHierarchy()

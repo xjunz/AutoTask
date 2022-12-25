@@ -167,8 +167,9 @@ class FlowItemViewBinder(
 
             if (!applet.isEnabledInHierarchy) title = title?.strikeThrough()
 
-            ibAction.isGone =
-                ibAction.tag == null || (viewModel.isSelectingRef && ibAction.tag != ACTION_COLLAPSE)
+            ibAction.isGone = ibAction.tag == null
+                    || (viewModel.isSelectingRef && ibAction.tag != ACTION_COLLAPSE
+                    && ibAction.tag != ACTION_ENTER)
             tvTitle.text = title
             tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
             tvDesc.text = desc

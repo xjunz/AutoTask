@@ -1,6 +1,5 @@
 package top.xjunz.tasker.engine.applet.criterion
 
-import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.dto.AppletValues
@@ -14,7 +13,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  *
  * @author xjunz 2022/08/06
  */
-@Serializable
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
     /**
@@ -22,7 +20,7 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
      */
     open lateinit var defaultValue: V
 
-    override suspend fun apply(runtime: TaskRuntime) {
+    final override suspend fun apply(runtime: TaskRuntime) {
         runtime.isSuccessful =
             isInverted != matchTarget(runtime.getTarget(), value?.casted() ?: defaultValue)
     }
@@ -33,19 +31,17 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
     protected abstract fun matchTarget(target: T, value: V): Boolean
 }
 
-/**
- * Create a criterion from a lambda.
- */
-inline fun <T : Any, V : Any> newCriterion(
-    valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT,
-    crossinline matcher: ((T, V) -> Boolean)
-): Criterion<T, V> {
-    return object : Criterion<T, V>() {
+class LambdaCriterion<T : Any, V : Any>(
+    override val valueType: Int,
+    private inline val matcher: ((T, V) -> Boolean)
+) : Criterion<T, V>() {
 
-        override val valueType: Int = valueType
-
-        override fun matchTarget(target: T, value: V): Boolean {
-            return matcher(target, value)
-        }
+    override fun matchTarget(target: T, value: V): Boolean {
+        return matcher(target, value)
     }
+}
+
+inline fun <T : Any, reified V : Any> newCriterion(noinline matcher: ((T, V) -> Boolean))
+        : Criterion<T, V> {
+    return LambdaCriterion(AppletValues.judgeValueType<V>(), matcher)
 }

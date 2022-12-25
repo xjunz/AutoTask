@@ -29,7 +29,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     protected abstract fun asInterface(binder: IBinder): IInterface
 
-    protected abstract fun onServiceConnected(serviceInterface: IInterface)
+    protected abstract fun onServiceConnected(remote: IInterface)
 
     private var bindingJob: Job? = null
 
@@ -38,8 +38,8 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
     private val deathRecipient: IBinder.DeathRecipient by lazy {
         IBinder.DeathRecipient {
             Log.w(tag, "The remote service is dead!")
-            listener?.onServiceDisconnected()
             serviceInterface?.asBinder()?.unlinkToDeath(deathRecipient, 0)
+            listener?.onServiceDisconnected()
         }
     }
 

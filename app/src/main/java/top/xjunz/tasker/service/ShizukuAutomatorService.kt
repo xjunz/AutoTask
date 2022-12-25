@@ -20,8 +20,12 @@ import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
+import top.xjunz.tasker.task.runtime.IRemoteTaskManager
+import top.xjunz.tasker.task.runtime.RemoteTaskManager
+import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
+
 
 class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
@@ -105,6 +109,10 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             error(ret.getStderr())
     }
 
+    override fun getTaskManager(): IRemoteTaskManager {
+        return RemoteTaskManager
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
@@ -116,12 +124,16 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
                 eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
-                        AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                        AccessibilityEvent.TYPE_WINDOWS_CHANGED or
+                        AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
+                        AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED or
+                        AccessibilityEvent.TYPE_ANNOUNCEMENT
                 notificationTimeout = 100
                 flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                         AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS and
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
+            ResidentTaskScheduler(looper, RemoteTaskManager).scheduleTasks()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             error(t)

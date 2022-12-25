@@ -42,8 +42,13 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
             val child = getChild(i) ?: continue
             // Need this?
             if (!child.isVisibleToUser) continue
-            return try {
-                if (condition(child)) child else child.findFirst(condition)
+            try {
+                if (condition(child)) {
+                    return child
+                } else if (child.childCount > 0) {
+                    val ret = child.findFirst(condition)
+                    if (ret != null) return ret
+                }
             } finally {
                 @Suppress("DEPRECATION")
                 child.recycle()

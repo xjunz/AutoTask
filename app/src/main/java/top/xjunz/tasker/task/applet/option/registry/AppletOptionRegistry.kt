@@ -4,6 +4,7 @@ import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOption.Companion.TITLE_NONE
 
 /**
  * The abstract registry storing [AppletOption]s.
@@ -27,34 +28,22 @@ abstract class AppletOptionRegistry(val id: Int) {
     }
 
     private fun appletCategoryOption(label: Int): AppletOption {
-        return invertibleAppletOption(-1, label, AppletOption.TITLE_NONE) {
+        return invertibleAppletOption(-1, label, TITLE_NONE) {
             unsupportedOperation()
         }
     }
 
-    protected inline fun invertibleAppletOption(
+    protected fun invertibleAppletOption(
         appletId: Int,
         title: Int,
         invertedTitle: Int = AppletOption.TITLE_AUTO_INVERTED,
-        crossinline creator: () -> Applet
+        creator: () -> Applet
     ): AppletOption {
-        return object : AppletOption(appletId, id, title, invertedTitle) {
-            override fun rawCreateApplet(): Applet {
-                return creator.invoke()
-            }
-        }
+        return AppletOption(appletId, id, title, invertedTitle, creator)
     }
 
-    protected inline fun appletOption(
-        appletId: Int,
-        title: Int,
-        crossinline creator: () -> Applet
-    ): AppletOption {
-        return object : AppletOption(appletId, id, title, TITLE_NONE) {
-            override fun rawCreateApplet(): Applet {
-                return creator.invoke()
-            }
-        }
+    protected fun appletOption(appletId: Int, title: Int, creator: () -> Applet): AppletOption {
+        return AppletOption(appletId, id, title, TITLE_NONE, creator)
     }
 
     val allOptions: List<AppletOption> by lazy {
@@ -67,7 +56,7 @@ abstract class AppletOptionRegistry(val id: Int) {
         allOptions.forEach {
             if (it.categoryIndex != previousCategory) {
                 val name = categoryNames?.getOrNull(it.categoryIndex)
-                if (name != null && name != AppletOption.TITLE_NONE) {
+                if (name != null && name != TITLE_NONE) {
                     ret.add(appletCategoryOption(name))
                 }
             }

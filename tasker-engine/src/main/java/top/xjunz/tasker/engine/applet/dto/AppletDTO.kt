@@ -32,12 +32,12 @@ class AppletDTO(
     private val isInverted: Boolean = false,
     @SerialName("v")
     private val literal: String? = null,
+    @SerialName("c")
+    private val comment: String? = null,
     @SerialName("q")
     private val refids: Map<Int, String>? = null,
     @SerialName("r")
     private val references: Map<Int, String>? = null,
-    @SerialName("c")
-    private val comment: String? = null
 ) : Parcelable {
 
     @SerialName("e")
@@ -59,8 +59,9 @@ class AppletDTO(
         parcel.readBool(),
         parcel.readBool(),
         parcel.readString(),
+        parcel.readString(),
         parcel.readMap(),
-        parcel.readMap()
+        parcel.readMap(),
     ) {
         elements = parcel.createTypedArray(CREATOR)
     }
@@ -110,9 +111,9 @@ class AppletDTO(
                 isEnabled,
                 isInverted,
                 serializeValue(value),
+                comment,
                 refids.emptyToNull(),
                 references.emptyToNull(),
-                comment
             )
             if (this is Flow) {
                 check(size != 0)
@@ -139,7 +140,6 @@ class AppletDTO(
         }
         if (literal != null)
             prototype.value = prototype.deserializeValue(literal)
-
         return prototype
     }
 
@@ -150,6 +150,8 @@ class AppletDTO(
         parcel.writeBool(isInverted)
         parcel.writeString(literal)
         parcel.writeString(comment)
+        parcel.writeMap(refids)
+        parcel.writeMap(references)
         parcel.writeTypedArray(elements, flags)
     }
 

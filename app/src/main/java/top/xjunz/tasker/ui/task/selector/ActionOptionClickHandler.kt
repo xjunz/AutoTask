@@ -25,7 +25,7 @@ class ActionOptionClickHandler(
 ) {
 
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
-        applet as Action
+        applet as Action<*>
         when {
             option.arguments.isEmpty() && applet.valueType == AppletValues.VAL_TYPE_IRRELEVANT -> onCompleted()
 

@@ -95,4 +95,10 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+      //  TaskStorage.allTasks.clear()
+      //  TaskStorage.customTaskLoaded = false
+    }
 }

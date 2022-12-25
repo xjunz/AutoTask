@@ -31,12 +31,13 @@ class TaskRuntime private constructor() {
 
     companion object {
 
-        fun obtain(
+        fun XTask.obtainRuntime(
             snapshot: Snapshot,
             coroutineScope: CoroutineScope,
             events: Array<out Event>
         ): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
+            instance.task = this
             instance.coroutineScope = coroutineScope
             instance.target = events
             instance._events = events
@@ -60,6 +61,8 @@ class TaskRuntime private constructor() {
     fun halt() {
         coroutineScope?.cancel()
     }
+
+    lateinit var task: XTask
 
     private var _snapshot: Snapshot? = null
 
@@ -89,7 +92,7 @@ class TaskRuntime private constructor() {
         if (initializer == null) {
             return snapshot.registry.getValue(key).casted()
         }
-        return snapshot.registry.getOrDefault(key, initializer).casted()
+        return snapshot.registry.getOrPut(key, initializer).casted()
     }
 
     /**

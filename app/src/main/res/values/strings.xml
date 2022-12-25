@@ -347,4 +347,5 @@
     <string name="starting">正在启动…</string>
     <string name="tip_overlay_permission_for_task">用于在后台显示通知，未授权会导致相关任务运行失败。</string>
     <string name="service_started">服务已启动</string>
+    <string name="retry">重试</string>
 </resources>

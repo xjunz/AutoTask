@@ -36,7 +36,7 @@ open class AppletOptionClickHandler(
         when {
             option.isValueInnate -> onCompleted()
 
-            applet is Action ->
+            applet is Action<*> ->
                 actionOptionClickHandler.onClick(applet, option, onCompleted)
 
             option == factory.packageRegistry.pkgCollection

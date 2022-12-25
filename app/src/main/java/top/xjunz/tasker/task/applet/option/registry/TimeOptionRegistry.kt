@@ -4,7 +4,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
-import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.criterion.newNumberRangeCriterion
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
@@ -17,14 +17,14 @@ import java.util.*
  */
 class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    private inline fun timeCollectionCriterion(crossinline block: (Calendar) -> Int)
+    private fun timeCollectionCriterion(block: (Calendar) -> Int)
             : CollectionCriterion<Calendar, Int> {
-        return collectionCriterion(AppletValues.VAL_TYPE_INT, block)
+        return collectionCriterion(block)
     }
 
     @AppletCategory(0x00_00)
     val timeRange = appletOption(0, R.string.time_range) {
-        NumberRangeCriterion<Calendar, Long> {
+        newNumberRangeCriterion<Calendar, Long>{
             it.timeInMillis
         }
     }.withValueDescriber<Collection<Long>> {

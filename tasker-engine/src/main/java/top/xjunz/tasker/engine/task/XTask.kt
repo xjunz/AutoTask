@@ -12,6 +12,7 @@ import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.Snapshot
 import top.xjunz.tasker.engine.runtime.TaskRuntime
+import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
 
 /**
  * The abstraction of an automator task.
@@ -56,7 +57,7 @@ class XTask {
 
     interface OnStateChangedListener {
 
-        fun onStarted() {}
+        fun onStarted(task: XTask) {}
 
         /**
          * When the task completes due to an unexpected error.
@@ -82,7 +83,7 @@ class XTask {
         /**
          * When the task is cancelled.
          */
-        fun onCancelled() {}
+        fun onCancelled(runtime: TaskRuntime) {}
     }
 
     fun requireFlow(): RootFlow = requireNotNull(flow) {
@@ -95,7 +96,7 @@ class XTask {
         }
         onStateChangedListener = stateListener
         isEnabled = true
-        onStateChangedListener?.onStarted()
+        onStateChangedListener?.onStarted(this)
     }
 
     fun disable() {
@@ -119,16 +120,16 @@ class XTask {
         events: Array<out Event>,
         observer: TaskRuntime.Observer? = null
     ): Boolean {
-        if (!isEnabled) return false
+        // if (!isEnabled) return false
         // Cancel if executing //TODO: 单线程情况下，Will this hit?
         if (isExecuting) {
             currentRuntime?.halt()
         }
-        val runtime = TaskRuntime.obtain(snapshot, scope, events)
-        if (observer != null)
-            runtime.observer = observer
+        val runtime = obtainRuntime(snapshot, scope, events)
+        runtime.observer = observer
         try {
             currentRuntime = runtime
+            onStateChangedListener?.onStarted(this)
             requireFlow().apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
@@ -139,7 +140,7 @@ class XTask {
         } catch (t: Throwable) {
             when (t) {
                 is FlowFailureException -> onStateChangedListener?.onFailure(runtime)
-                is CancellationException -> onStateChangedListener?.onCancelled()
+                is CancellationException -> onStateChangedListener?.onCancelled(runtime)
                 else -> onStateChangedListener?.onError(runtime, t)
             }
             return false

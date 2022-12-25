@@ -17,11 +17,12 @@ import java.util.*
  *
  * @author xjunz 2022/09/22
  */
-abstract class AppletOption(
+class AppletOption(
     val appletId: Int,
     val registryId: Int,
     private val titleRes: Int,
-    private val invertedTitleRes: Int
+    private val invertedTitleRes: Int,
+    private inline val rawCreateApplet: () -> Applet
 ) : Comparable<AppletOption> {
 
     companion object {
@@ -370,8 +371,6 @@ abstract class AppletOption(
         return this
     }
 
-    protected abstract fun rawCreateApplet(): Applet
-
     override fun compareTo(other: AppletOption): Int {
         check(registryId == other.registryId) {
             "Only applets with the same factory id are comparable!"
@@ -396,16 +395,5 @@ abstract class AppletOption(
         var result = appletId
         result = 31 * result + registryId
         return result
-    }
-
-    /**
-     * Clone the option clean (without cloning late init variables, such as [value]).
-     */
-    fun cloned(): AppletOption {
-        return object : AppletOption(appletId, registryId, titleRes, invertedTitleRes) {
-            override fun rawCreateApplet(): Applet {
-                return yield()
-            }
-        }.withDescriber(describer)
     }
 }

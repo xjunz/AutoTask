@@ -65,9 +65,12 @@ fun Applet.isDescendantOf(flow: Flow): Boolean {
     return requireParent().isDescendantOf(flow)
 }
 
+/**
+ * @param block returns `true` to stop the iteration.
+ */
 fun Flow.iterate(block: (Applet) -> Boolean) {
     forEach {
-        if (block(it)) return@forEach
+        if (block(it)) return
         if (it is Flow) {
             it.iterate(block)
         }
@@ -121,8 +124,34 @@ fun Flow.requireChild(hierarchy: Long): Applet {
     return child
 }
 
+/**
+ * Check whether the receiver applet is executed ahead of the argument [applet] at runtime.
+ * If these applets are equal, returns `false`. Please make sure that these two applets have
+ * the same [root].
+ */
 fun Applet.isAheadOf(applet: Applet): Boolean {
-    return hierarchy < applet.hierarchy
+    // Quick check
+    if (this === applet) return false
+    if (parent == null) return true
+    if (applet.parent == null) return false
+    if (parent === applet.parent) return index < applet.index
+    if (parent === applet) return false
+    if (this === applet.parent) return true
+    // Full check
+    var common = root
+    var p1 = this
+    var p2 = applet
+    while (true) {
+        while (p1.parent !== common) {
+            p1 = p1.requireParent()
+        }
+        while (p2.parent !== common) {
+            p2 = p2.requireParent()
+        }
+        if (p1 !== p2) break
+        common = common[p1.index] as Flow
+    }
+    return p1.index < p2.index
 }
 
 fun Applet.whichRefid(refid: String): Int {

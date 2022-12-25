@@ -4,21 +4,23 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import rikka.shizuku.ShizukuBinderWrapper
+import rikka.shizuku.SystemServiceHelper
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
@@ -27,8 +29,6 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
-import top.xjunz.tasker.service.controller.ServiceController
-import top.xjunz.tasker.service.controller.ShizukuA11yServiceEnabler
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -44,9 +44,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     private lateinit var accessibilitySettingsLauncher: ActivityResultLauncher<Intent>
 
-    private class InnerViewModel : ViewModel(), ServiceController.ServiceStateListener {
-
-        val enabler = ShizukuA11yServiceEnabler()
+    private class InnerViewModel : ViewModel() {
 
         var checkedViewId: Int = R.id.rb_mode_shizuku
 
@@ -58,47 +56,29 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
         lateinit var doOnSucceeded: Runnable
 
-        override fun onStartBinding() {
-            isBinding.postValue(true)
+        fun enableA11yServiceRemoteExecCmd() {
+            val className = "${BuildConfig.APPLICATION_ID}/${A11yAutomatorService::class.java.name}"
+            ShizukuBinderWrapper(SystemServiceHelper.getSystemService("settings"))
+                .execShellCmd("put", "secure", "enabled_accessibility_services", className)
         }
 
-        override fun onError(t: Throwable) {
-            onError.postValue(t)
-            isBinding.postValue(false)
-        }
-
-        override fun onServiceBound() {
-            enableA11yService()
-        }
-
-        override fun onServiceDisconnected() {
-        }
-
-        fun connectToEnabler() {
-            if (!A11yAutomatorServiceController.isServiceRunning) {
-                enabler.setStateListener(this)
-                enabler.bindService()
-            } else {
-                isBinding.postValue(false)
-            }
-        }
-
-        private fun enableA11yService() {
-            viewModelScope.launch(Dispatchers.Default) {
+        fun enableA11yService() {
+            viewModelScope.launch {
                 try {
-                    enabler.enableA11yService(true)
-                    // Delay 500ms to wait for the a11y service to be pulled up?
-                    delay(500)
+                    isBinding.value = true
+                    enableA11yServiceRemoteExecCmd()
+                    // Wait for the service to be pulled up
+                    val start = SystemClock.uptimeMillis()
+                    while (A11yAutomatorService.get() == null
+                        || SystemClock.uptimeMillis() - start <= 500
+                    ) {
+                        delay(32)
+                    }
                 } catch (t: Throwable) {
-                    onError.postValue(t)
+                    onError.value = t
                 }
-                isBinding.postValue(false)
+                isBinding.value = false
             }
-        }
-
-        override fun onCleared() {
-            super.onCleared()
-            enabler.unbindService()
         }
     }
 
@@ -113,21 +93,19 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        overlaySettingLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                updateOverlayGrantButton()
-                if (FloatingInspector.isReady())
-                    showInspectorAndDismissSelf()
-                if (!Settings.canDrawOverlays(app))
-                    toast(R.string.grant_failed)
-            }
-        accessibilitySettingsLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (FloatingInspector.isReady())
-                    showInspectorAndDismissSelf()
-                if (A11yAutomatorService.get() == null)
-                    toast(R.string.grant_failed)
-            }
+        overlaySettingLauncher = registerForActivityResult(StartActivityForResult()) {
+            updateOverlayGrantButton()
+            if (FloatingInspector.isReady())
+                showInspectorAndDismissSelf()
+            if (!Settings.canDrawOverlays(app))
+                toast(R.string.grant_failed)
+        }
+        accessibilitySettingsLauncher = registerForActivityResult(StartActivityForResult()) {
+            if (FloatingInspector.isReady())
+                showInspectorAndDismissSelf()
+            if (A11yAutomatorService.get() == null)
+                toast(R.string.grant_failed)
+        }
     }
 
     fun doOnSucceeded(block: Runnable) = doWhenCreated {
@@ -202,7 +180,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                 launchOverlaySettings()
             } else {
                 if (viewModel.checkedViewId == R.id.rb_mode_shizuku) {
-                    viewModel.connectToEnabler()
+                    viewModel.enableA11yService()
                 } else if (viewModel.checkedViewId == R.id.rb_mode_a11y) {
                     launchAccessibilitySettings()
                 }
@@ -222,8 +200,9 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                         showInspectorAndDismissSelf()
                         return@observeNotNull
                     }
+                } else {
+                    toast(R.string.launch_failed)
                 }
-                toast(R.string.launch_failed)
             }
         }
     }

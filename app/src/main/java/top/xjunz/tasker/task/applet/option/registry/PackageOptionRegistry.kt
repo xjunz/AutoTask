@@ -3,11 +3,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.content.ComponentName
 import androidx.core.content.pm.PackageInfoCompat
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
-import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
-import top.xjunz.tasker.engine.applet.criterion.newCriterion
-import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.criterion.*
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
@@ -57,7 +53,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x00_02)
     val paneTitle = appletOption(0x02, R.string.with_pane_title) {
-        newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+        newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle == v
         }
     }
@@ -85,28 +81,28 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x02_00)
     private val startsWith = invertibleAppletOption(0x40, R.string.pkg_name_starts_with) {
-        newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+        newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.startsWith(v)
         }
     }
 
     @AppletCategory(0x02_01)
     private val endsWith = invertibleAppletOption(0x41, R.string.pkg_name_ends_with) {
-        newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+        newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.endsWith(v)
         }
     }
 
     @AppletCategory(0x02_02)
     private val containsText = invertibleAppletOption(0x50, R.string.contains_text) {
-        newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+        newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.contains(v)
         }
     }
 
     @AppletCategory(0x02_03)
     private val matchesPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
-        newCriterion<PackageInfoContext, String>(AppletValues.VAL_TYPE_TEXT) { t, v ->
+        newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.matches(Regex(v))
         }
     }

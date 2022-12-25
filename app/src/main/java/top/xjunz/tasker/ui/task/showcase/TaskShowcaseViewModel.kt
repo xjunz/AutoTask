@@ -8,9 +8,9 @@ import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.TaskManager
-import top.xjunz.tasker.task.TaskStorage
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.storage.TaskStorage
 
 /**
  * @author xjunz 2022/12/20
@@ -51,6 +51,9 @@ class TaskShowcaseViewModel : ViewModel() {
         } else viewModelScope.launch {
             TaskStorage.loadAllTasks(AppletOptionFactory())
             TaskStorage.customTaskLoaded = true
+            LocalTaskManager.initialize(TaskStorage.allTasks.filter {
+                it.isEnabled
+            })
             allTaskLoaded.value = true
         }
     }
@@ -59,6 +62,7 @@ class TaskShowcaseViewModel : ViewModel() {
         val task = requestDeleteTask.require()
         runCatching {
             TaskStorage.removeTask(task)
+            LocalTaskManager.removeRemoteCache(task.checksum)
             onTaskDeleted.value = task
             toast(R.string.format_task_removed.format(task.metadata.title))
         }.onFailure {
@@ -89,6 +93,7 @@ class TaskShowcaseViewModel : ViewModel() {
             task.metadata.checksum = prevChecksum
             try {
                 TaskStorage.removeTask(task)
+                LocalTaskManager.removeRemoteCache(prevChecksum)
                 removed = true
             } catch (t: Throwable) {
                 toastUnexpectedError(t)
@@ -110,10 +115,10 @@ class TaskShowcaseViewModel : ViewModel() {
         val it = requestToggleTask.require()
         if (it.isEnabled) {
             it.disable()
-            TaskManager.disableResidentTask(it)
+            LocalTaskManager.removeResidentTask(it)
         } else {
             it.enable()
-            TaskManager.addNewEnabledResidentTask(it)
+            LocalTaskManager.addResidentTask(it)
         }
         TaskStorage.toggleTaskFilename(it)
         onTaskToggled.value = it

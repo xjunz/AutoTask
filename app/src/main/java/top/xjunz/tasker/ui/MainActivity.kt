@@ -135,8 +135,10 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             if (it is TimeoutException) {
                 makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out)
                     .setTitle(R.string.error_occurred)
-                    .setPositiveButton(R.string.launch_shizuku_manager) { _, _ ->
+                    .setNegativeButton(R.string.launch_shizuku_manager) { _, _ ->
                         ShizukuUtil.launchShizukuManager()
+                    }.setPositiveButton(R.string.retry) { _, _ ->
+                        serviceController.bindService()
                     }.show()
             } else {
                 showErrorDialog(it)

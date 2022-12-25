@@ -24,6 +24,10 @@ inline fun <reified K, reified V> Parcel.readMap(): Map<K, V>? {
     )
 }
 
+fun Parcel.writeStringArgs(vararg args: String) {
+    writeStringArray(args)
+}
+
 fun Parcel.readBool(): Boolean = ParcelCompat.readBoolean(this)
 
 fun Parcel.writeBool(bool: Boolean) = ParcelCompat.writeBoolean(this, bool)

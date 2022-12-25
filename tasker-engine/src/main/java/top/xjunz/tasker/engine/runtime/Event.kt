@@ -1,7 +1,7 @@
 package top.xjunz.tasker.engine.runtime
 
 import androidx.annotation.IntDef
-import androidx.core.util.Pools.SimplePool
+import androidx.core.util.Pools.SynchronizedPool
 
 /**
  * @author xjunz 2022/10/30
@@ -12,7 +12,7 @@ class Event private constructor() {
 
     val componentInfo = ComponentInfo()
 
-    private object Pool : SimplePool<Event>(5)
+    private object Pool : SynchronizedPool<Event>(5)
 
     companion object {
         /**

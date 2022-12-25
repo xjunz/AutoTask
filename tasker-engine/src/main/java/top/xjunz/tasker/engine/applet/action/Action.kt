@@ -8,28 +8,31 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 /**
  * @author xjunz 2022/08/11
  */
-abstract class Action : Applet()
+abstract class Action<V>(override val valueType: Int) : Applet() {
 
-inline fun <V> newAction(
-    valueType: Int, crossinline block: (V?, TaskRuntime) -> Boolean
-): Action {
-    return object : Action() {
+    abstract suspend fun doAction(value: V?, runtime: TaskRuntime): Boolean
 
-        override val valueType: Int = valueType
-
-        override suspend fun apply(runtime: TaskRuntime) {
-            runtime.isSuccessful = block.invoke(value?.casted(), runtime)
-        }
+    final override suspend fun apply(runtime: TaskRuntime) {
+        runtime.isSuccessful = doAction(value?.casted(), runtime)
     }
 }
 
-inline fun simpleAction(crossinline block: (TaskRuntime) -> Boolean): Action {
-    return newAction<Any>(AppletValues.VAL_TYPE_IRRELEVANT) { _, runtime ->
+open class LambdaAction<V>(
+    valueType: Int,
+    private inline val action: suspend (V?, TaskRuntime) -> Boolean
+) : Action<V>(valueType) {
+    override suspend fun doAction(value: V?, runtime: TaskRuntime): Boolean {
+        return action(value, runtime)
+    }
+}
+
+inline fun simpleAction(crossinline block: (TaskRuntime) -> Boolean): Action<*> {
+    return LambdaAction<Any>(AppletValues.VAL_TYPE_IRRELEVANT) { _, runtime ->
         block(runtime)
     }
 }
 
-inline fun pureAction(crossinline block: (TaskRuntime) -> Unit): Action {
+inline fun pureAction(crossinline block: (TaskRuntime) -> Unit): Action<*> {
     return simpleAction {
         block(it)
         true

@@ -1,4 +1,4 @@
-package top.xjunz.tasker.task
+package top.xjunz.tasker.task.storage
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -69,7 +69,7 @@ object TaskStorage {
             ZipInputStream(app.assets.open("prextsks")).use {
                 var entry = it.nextEntry
                 while (entry != null) {
-                    val task = Json.decodeFromStream<XTaskDTO>(it).toAutomatorTask(factory)
+                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory)
                     task.metadata.isPreload = true
                     preloadTasks.add(task)
                     entry = it.nextEntry
@@ -116,9 +116,11 @@ object TaskStorage {
                             check(verifyChecksum()) {
                                 "Checksum failure to xtsk file $file?!"
                             }
-                        }.toAutomatorTask(factory)
+                        }.toXTask(factory)
                         allTasks.add(task)
-                        if (isEnabled) task.enable()
+                        if (isEnabled) {
+                            task.enable()
+                        }
                     }.onFailure {
                         it.printStackTrace()
                     }

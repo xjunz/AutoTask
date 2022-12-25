@@ -23,7 +23,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         valueType: Int = AppletValues.VAL_TYPE_TEXT,
         crossinline matcher: (AccessibilityNodeInfo, V) -> Boolean
     ): Criterion<UiObjectContext, V> {
-        return newCriterion(valueType) { ctx, v ->
+        return LambdaCriterion(valueType) { ctx, v ->
             matcher(ctx.source, v)
         }
     }
@@ -36,7 +36,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     private fun uiObjectBoundsCriterion(@GravityInt direction: Int): BoundsCriterion<UiObjectContext> {
-        return boundsCriterion(direction) { ctx, scope, unit ->
+        return BoundsCriterion(direction) { ctx, scope, unit ->
             val childRect = Rect()
             var parentRect: Rect? = null
             val node = ctx.source
@@ -153,35 +153,35 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x01_01)
     val textStartsWith = invertibleAppletOption(0x20, R.string.pkg_name_starts_with) {
         nodeCriterion<String> { t, v ->
-            t.text.startsWith(v)
+            t.text?.startsWith(v) == true
         }
     }
 
     @AppletCategory(0x01_02)
     val textEndsWith = invertibleAppletOption(0x30, R.string.pkg_name_ends_with) {
         nodeCriterion<String> { t, v ->
-            t.text.endsWith(v)
+            t.text?.endsWith(v) == true
         }
     }
 
     @AppletCategory(0x01_03)
     val textLengthRange = appletOption(0x40, R.string.in_length_range) {
         NumberRangeCriterion<AccessibilityNodeInfo, Int> {
-            it.text.length
+            it.text?.length ?: -1
         }
     }.withDefaultRangeDescriber()
 
     @AppletCategory(0x01_04)
     val textContains = appletOption(0x50, R.string.contains_text) {
         nodeCriterion<String> { t, v ->
-            t.text.contains(v)
+            t.text?.contains(v) == true
         }
     }
 
     @AppletCategory(0x01_05)
     val textPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
         nodeCriterion<String> { t, v ->
-            t.text.matches(Regex(v))
+            t.text?.matches(Regex(v)) == true
         }
     }
 

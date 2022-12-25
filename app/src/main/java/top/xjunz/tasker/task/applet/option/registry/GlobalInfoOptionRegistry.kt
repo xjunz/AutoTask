@@ -5,7 +5,6 @@ import top.xjunz.tasker.bridge.BatteryManagerBridge
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 
@@ -33,7 +32,7 @@ class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x0011)
     val batteryCapacityRange = invertibleAppletOption(0x11, R.string.in_battery_capacity_range) {
-        NumberRangeCriterion<Unit, Int>(AppletValues.VAL_TYPE_INT) {
+        NumberRangeCriterion<Unit, Int> {
             BatteryManagerBridge.capacity
         }
     }.withValueDescriber<Collection<Int?>> {
