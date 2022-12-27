@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/item_auto_start"

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package android.hardware.input;
 
 import android.os.IBinder;

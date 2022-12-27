@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.tasker.ui.demo
 
 import android.content.Context

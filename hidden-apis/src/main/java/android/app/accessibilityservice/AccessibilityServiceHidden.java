@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package android.app.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityService;

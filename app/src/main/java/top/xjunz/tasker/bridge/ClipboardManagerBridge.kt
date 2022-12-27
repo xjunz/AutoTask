@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.tasker.bridge
 
 import android.content.ClipData

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.hidden_api;
 
 import org.junit.Test;

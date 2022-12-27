@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.tasker.engine.value
 
 import org.junit.Test

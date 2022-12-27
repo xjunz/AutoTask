@@ -1,4 +1,8 @@
 
+<!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+
 <resources>
     <color name="seed">#005eb7</color>
     <color name="md_theme_light_primary">#005DB6</color>

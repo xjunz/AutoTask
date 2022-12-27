@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+
 <resources>
     <string name="app_name">自动任务</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>

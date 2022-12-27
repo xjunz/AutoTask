@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="?colorPrimaryContainer" android:state_activated="false" android:state_enabled="true" />
     <item android:color="?colorTertiaryContainer" android:state_activated="true" android:state_enabled="true" />

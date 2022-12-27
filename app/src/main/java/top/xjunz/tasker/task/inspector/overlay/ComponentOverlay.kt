@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.tasker.task.inspector.overlay
 
 import androidx.core.view.doOnPreDraw

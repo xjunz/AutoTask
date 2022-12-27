@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+
 <resources>
     <color name="color_checked">#4CAF50</color>
 </resources>

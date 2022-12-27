@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package androidx.test.uiautomator;
 
 import static org.junit.Assert.assertEquals;

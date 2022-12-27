@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2022 xjunz. All rights reserved.
+ */
+
 package top.xjunz.tasker.task.applet.flow
 
 import top.xjunz.tasker.engine.applet.base.ScopedFlow
