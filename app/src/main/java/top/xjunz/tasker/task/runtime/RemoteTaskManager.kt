@@ -18,8 +18,6 @@ object RemoteTaskManager : IRemoteTaskManager.Stub(), TaskManager<Long, XTaskDTO
 
     override val enabledTasks = ArraySet<XTask>()
 
-    private val factory = AppletOptionFactory()
-
     override fun initialize(dtos: List<XTaskDTO>) {
         super.initialize(dtos)
         cachedTasks.addAll(enabledTasks)
@@ -63,7 +61,7 @@ object RemoteTaskManager : IRemoteTaskManager.Stub(), TaskManager<Long, XTaskDTO
     }
 
     override fun XTaskDTO.asTask(): XTask {
-        return toXTask(factory)
+        return toXTask(AppletOptionFactory)
     }
 
 

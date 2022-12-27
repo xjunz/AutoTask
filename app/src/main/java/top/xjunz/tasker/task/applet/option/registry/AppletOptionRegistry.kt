@@ -15,12 +15,18 @@ abstract class AppletOptionRegistry(val id: Int) {
 
     abstract val categoryNames: IntArray?
 
-    private fun parseDeclaredOptions(): List<AppletOption> {
-        return javaClass.declaredFields.mapNotNull m@{
+    fun parseDeclaredOptions() {
+        val registeredId = mutableSetOf<Int>()
+        allOptions = javaClass.declaredFields.mapNotNull m@{
             val anno = it.getDeclaredAnnotation(AppletCategory::class.java) ?: return@m null
             val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
+            // There may be preset appletId
+            val appletId = if (option.appletId != -1) option.appletId
+            else it.name.hashCode() and 0xFFFF
+            check(registeredId.add(appletId))
+            option.appletId = appletId
             option.categoryId = anno.categoryId
             it.isAccessible = accessible
             return@m option
@@ -28,27 +34,20 @@ abstract class AppletOptionRegistry(val id: Int) {
     }
 
     private fun appletCategoryOption(label: Int): AppletOption {
-        return invertibleAppletOption(-1, label, TITLE_NONE) {
+        return AppletOption(id, label, TITLE_NONE) {
             unsupportedOperation()
         }
     }
 
-    protected fun invertibleAppletOption(
-        appletId: Int,
-        title: Int,
-        invertedTitle: Int = AppletOption.TITLE_AUTO_INVERTED,
-        creator: () -> Applet
-    ): AppletOption {
-        return AppletOption(appletId, id, title, invertedTitle, creator)
+    protected fun invertibleAppletOption(title: Int, creator: () -> Applet): AppletOption {
+        return AppletOption(id, title, AppletOption.TITLE_AUTO_INVERTED, creator)
     }
 
-    protected fun appletOption(appletId: Int, title: Int, creator: () -> Applet): AppletOption {
-        return AppletOption(appletId, id, title, TITLE_NONE, creator)
+    protected fun appletOption(title: Int, creator: () -> Applet): AppletOption {
+        return AppletOption(id, title, TITLE_NONE, creator)
     }
 
-    val allOptions: List<AppletOption> by lazy {
-        parseDeclaredOptions()
-    }
+    lateinit var allOptions: List<AppletOption>
 
     val categorizedOptions: List<AppletOption> by lazy {
         val ret = ArrayList<AppletOption>()

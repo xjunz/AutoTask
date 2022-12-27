@@ -85,8 +85,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (!launchedInInspectorMode) {
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
-            } else {
                 taskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
+                taskScheduler.scheduleTasks()
             }
             instance = WeakReference(this)
             runningState.value = true
@@ -162,6 +162,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         instance?.clear()
         runningState.value = false
+        if (::taskScheduler.isInitialized) {
+            taskScheduler.destroy()
+        }
         if (isInspectorShown()) inspector.dismiss()
     }
 

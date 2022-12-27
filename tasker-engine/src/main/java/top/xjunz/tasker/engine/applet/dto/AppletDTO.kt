@@ -116,8 +116,7 @@ class AppletDTO(
                 references.emptyToNull(),
             )
             if (this is Flow) {
-                check(size != 0)
-                dto.elements = Array(size) {
+                dto.elements = if (size == 0) null else Array(size) {
                     this[it].toDTO()
                 }
             }

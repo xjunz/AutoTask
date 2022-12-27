@@ -327,7 +327,7 @@
     <string name="prompt_enable_task">你确定要启用该任务吗？</string>
     <string name="nothing_here">空空如也</string>
     <string name="desc_preload_tasks">添加程序内预置的任务</string>
-    <string name="error_add_repeated_task">操作失败，已经存在完全相同的任务</string>
+    <string name="prompt_repeated_task">操作失败，因为已经存在完全相同的任务，请修改当前任务的<b>名称、描述或规则</b>。</string>
     <string name="add">添加</string>
     <string name="added">已添加</string>
     <string name="format_new_task_added">已添加任务⌈%s⌋</string>
@@ -348,4 +348,6 @@
     <string name="tip_overlay_permission_for_task">用于在后台显示通知，未授权会导致相关任务运行失败。</string>
     <string name="service_started">服务已启动</string>
     <string name="retry">重试</string>
+    <string name="prompt_discard_flow_changes">当前任务内容已修改，确定要放弃这些更改吗？</string>
+    <string name="do_not_save">不保存更改直接退出</string>
 </resources>

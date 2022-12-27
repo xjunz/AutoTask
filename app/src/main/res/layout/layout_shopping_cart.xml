@@ -15,6 +15,7 @@
             app:behavior_draggable="true"
             app:behavior_fitToContents="true"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_peekHeight="?actionBarSize"
             app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet">
 
             <View

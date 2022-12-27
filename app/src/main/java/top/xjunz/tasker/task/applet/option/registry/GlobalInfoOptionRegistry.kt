@@ -16,7 +16,7 @@ class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     override val categoryNames: IntArray? = null
 
     @AppletCategory(0x0000)
-    val isScreenPortrait = invertibleAppletOption(0x0, R.string.screen_orientation_portrait) {
+    val isScreenPortrait = invertibleAppletOption(R.string.screen_orientation_portrait) {
         PropertyCriterion<Unit> {
             val realSize = DisplayManagerBridge.size
             realSize.x > realSize.y
@@ -24,14 +24,14 @@ class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x0010)
-    val isBatteryCharging = invertibleAppletOption(0x10, R.string.is_charging) {
+    val isBatteryCharging = invertibleAppletOption(R.string.is_charging) {
         PropertyCriterion<Unit> {
             BatteryManagerBridge.isCharging
         }
     }
 
     @AppletCategory(0x0011)
-    val batteryCapacityRange = invertibleAppletOption(0x11, R.string.in_battery_capacity_range) {
+    val batteryCapacityRange = invertibleAppletOption(R.string.in_battery_capacity_range) {
         NumberRangeCriterion<Unit, Int> {
             BatteryManagerBridge.capacity
         }

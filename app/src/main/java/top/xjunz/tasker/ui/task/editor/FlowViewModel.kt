@@ -21,6 +21,8 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
 
     val onAppletChanged = MutableLiveData<Applet>()
 
+    val onAppletLongClicked = MutableLiveData<Applet>()
+
     protected val collapsedFlows = mutableSetOf<Flow>()
 
     abstract fun flatmapFlow(): List<Applet>

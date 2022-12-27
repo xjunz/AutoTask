@@ -12,6 +12,7 @@ import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import java.io.File
 import java.io.FileFilter
 import java.util.zip.ZipInputStream
@@ -45,7 +46,9 @@ object TaskStorage {
 
     fun removeTask(task: XTask) {
         check(allTasks.contains(task))
-        check(!task.isEnabled)
+        check(!task.isEnabled) {
+            "Not enabled!"
+        }
         val file = task.fileOnStorage
         if (!file.exists() || file.delete()) {
             allTasks.remove(task)
@@ -97,7 +100,7 @@ object TaskStorage {
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun loadAllTasks(factory: AppletFactory) {
+    suspend fun loadAllTasks() {
         if (!storageDir.isDirectory) return
         if (!storageDir.exists()) return
         val uppercaseSuffix = X_TASK_FILE_SUFFIX.uppercase()
@@ -116,7 +119,7 @@ object TaskStorage {
                             check(verifyChecksum()) {
                                 "Checksum failure to xtsk file $file?!"
                             }
-                        }.toXTask(factory)
+                        }.toXTask(AppletOptionFactory)
                         allTasks.add(task)
                         if (isEnabled) {
                             task.enable()

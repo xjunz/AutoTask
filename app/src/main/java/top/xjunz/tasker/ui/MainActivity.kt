@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         initViews()
         observeData()
         initServiceController()
+        viewModel.init()
     }
 
     private fun initServiceController() {

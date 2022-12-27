@@ -18,7 +18,6 @@ import java.util.*
  * @author xjunz 2022/09/22
  */
 class AppletOption(
-    val appletId: Int,
     val registryId: Int,
     private val titleRes: Int,
     private val invertedTitleRes: Int,
@@ -79,6 +78,14 @@ class AppletOption(
 
     }
 
+    var appletId: Int = -1
+        set(value) {
+            check(value == field || field == -1) {
+                "appletId is already set. Pls do not set again!"
+            }
+            field = value
+        }
+
     private var describer: (Applet?, Any?) -> CharSequence? = DEFAULT_DESCRIBER
 
     private var helpTextRes: Int = -1
@@ -90,7 +97,7 @@ class AppletOption(
     /**
      * Whether this is an valid option able to yield an applet.
      */
-    val isValid = appletId != -1
+    val isValid get() = appletId != -1
 
     /**
      * The category id identifying the option's category and its position in the category.

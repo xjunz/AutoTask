@@ -36,9 +36,11 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_left"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:nestedScrollingEnabled="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constrainedHeight="true"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/rv_right"
                 app:layout_constraintHorizontal_weight=".3"
                 app:layout_constraintStart_toStartOf="parent"
@@ -59,34 +61,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="8dp"
-                app:rippleColor="?colorControlHighlight"
                 app:cardBackgroundColor="?colorTertiaryContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/rv_left"
-                app:layout_constraintTop_toBottomOf="@id/tv_title">
+                app:layout_constraintTop_toBottomOf="@id/tv_title"
+                app:rippleColor="?colorControlHighlight">
 
                 <TextView
                     android:id="@+id/tv_header"
-                    android:paddingVertical="16dp"
-                    android:textColor="?colorTertiary"
-                    android:paddingHorizontal="8dp"
-                    android:gravity="center_vertical"
-                    android:drawablePadding="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    tools:text="@string/format_enable_floating_inspector"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="16dp"
+                    android:textColor="?colorTertiary"
+                    app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24"
                     app:drawableStartCompat="@drawable/ic_twotone_layers_24"
-                    app:drawableTint="?colorTertiary"
-                    app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24" />
+                    app:drawableTint="?colorTertiary" />
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_right"
-                android:transitionGroup="true"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:clipToPadding="false"
-                android:paddingTop="8dp"
                 android:nestedScrollingEnabled="false"
+                android:paddingTop="8dp"
+                android:transitionGroup="true"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

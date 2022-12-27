@@ -29,7 +29,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         valueType: Int,
         crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
     ): AppletOption {
-        return appletOption(id, title) {
+        return appletOption(title) {
             singleArgAction<AccessibilityNodeInfo, V>(valueType) { node, value ->
                 requireNotNull(node) {
                     "Node is not captured!"

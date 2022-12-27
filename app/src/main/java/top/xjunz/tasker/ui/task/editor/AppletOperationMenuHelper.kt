@@ -27,12 +27,13 @@ import java.util.*
  */
 class AppletOperationMenuHelper(
     private val viewModel: FlowEditorViewModel,
-    private val factory: AppletOptionFactory,
     private val fm: FragmentManager
 ) {
 
+    private val factory = AppletOptionFactory
+
     private val optionOnClickListener by lazy {
-        AppletOptionClickHandler(fm, factory)
+        AppletOptionClickHandler(fm)
     }
 
     fun createBatchMenu(anchor: View, applets: List<Applet>): PopupMenu {

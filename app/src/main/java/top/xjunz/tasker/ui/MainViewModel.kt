@@ -5,6 +5,8 @@ import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.ktx.observeTransient
@@ -12,6 +14,9 @@ import top.xjunz.tasker.ktx.peekActivity
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.util.Router
 
 /**
@@ -26,6 +31,8 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         }
     }
 
+    val allTaskLoaded = MutableLiveData<Boolean>()
+
     val onNewIntent = MutableLiveData<Uri>()
 
     val showStopConfirmation = MutableLiveData<Boolean>()
@@ -37,6 +44,20 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     val bindingError = MutableLiveData<Throwable>()
 
     val operatingMode = MutableLiveData(OperatingMode.CURRENT)
+
+    fun init() {
+        AppletOptionFactory.preloadIfNeeded()
+        if (TaskStorage.customTaskLoaded) {
+            allTaskLoaded.value = true
+        } else viewModelScope.launch {
+            TaskStorage.loadAllTasks()
+            TaskStorage.customTaskLoaded = true
+            LocalTaskManager.initialize(TaskStorage.allTasks.filter {
+                it.isEnabled
+            })
+            allTaskLoaded.value = true
+        }
+    }
 
     fun setCurrentOperatingMode(mode: OperatingMode) {
         serviceController.removeStateListener()
@@ -98,7 +119,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     override fun onCleared() {
         super.onCleared()
-      //  TaskStorage.allTasks.clear()
-      //  TaskStorage.customTaskLoaded = false
+        //  TaskStorage.allTasks.clear()
+        //  TaskStorage.customTaskLoaded = false
     }
 }

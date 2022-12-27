@@ -128,7 +128,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // Type
     @AppletCategory(0x00_00)
-    val isType = appletOption(0x0, R.string.with_type) {
+    val isType = appletOption(R.string.with_type) {
         nodeCriterion<String> { t, v ->
             t.className == v
         }
@@ -136,7 +136,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // ID
     @AppletCategory(0x00_01)
-    val withId = appletOption(0x1, R.string.with_id) {
+    val withId = appletOption(R.string.with_id) {
         nodeCriterion<String> { t, v ->
             t.viewIdResourceName == v
         }
@@ -144,49 +144,49 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // Text
     @AppletCategory(0x01_00)
-    val textEquals = invertibleAppletOption(0x10, R.string.with_text) {
+    val textEquals = invertibleAppletOption(R.string.with_text) {
         nodeCriterion<String> { t, v ->
             t.className == v
         }
     }
 
     @AppletCategory(0x01_01)
-    val textStartsWith = invertibleAppletOption(0x20, R.string.pkg_name_starts_with) {
+    val textStartsWith = invertibleAppletOption(R.string.pkg_name_starts_with) {
         nodeCriterion<String> { t, v ->
             t.text?.startsWith(v) == true
         }
     }
 
     @AppletCategory(0x01_02)
-    val textEndsWith = invertibleAppletOption(0x30, R.string.pkg_name_ends_with) {
+    val textEndsWith = invertibleAppletOption(R.string.pkg_name_ends_with) {
         nodeCriterion<String> { t, v ->
             t.text?.endsWith(v) == true
         }
     }
 
     @AppletCategory(0x01_03)
-    val textLengthRange = appletOption(0x40, R.string.in_length_range) {
+    val textLengthRange = appletOption(R.string.in_length_range) {
         NumberRangeCriterion<AccessibilityNodeInfo, Int> {
             it.text?.length ?: -1
         }
     }.withDefaultRangeDescriber()
 
     @AppletCategory(0x01_04)
-    val textContains = appletOption(0x50, R.string.contains_text) {
+    val textContains = appletOption(R.string.contains_text) {
         nodeCriterion<String> { t, v ->
             t.text?.contains(v) == true
         }
     }
 
     @AppletCategory(0x01_05)
-    val textPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
+    val textPattern = invertibleAppletOption(R.string.pkg_name_matches_pattern) {
         nodeCriterion<String> { t, v ->
             t.text?.matches(Regex(v)) == true
         }
     }
 
     @AppletCategory(0x01_06)
-    val contentDesc = appletOption(0x70, R.string.content_desc) {
+    val contentDesc = appletOption(R.string.content_desc) {
         nodeCriterion<String> { t, v ->
             t.contentDescription == v
         }
@@ -194,56 +194,56 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // Properties
     @AppletCategory(0x02_00)
-    val isClickable = invertibleAppletOption(0x80, R.string.is_clickable) {
+    val isClickable = invertibleAppletOption(R.string.is_clickable) {
         nodePropertyCriterion {
             it.isClickable
         }
     }
 
     @AppletCategory(0x02_01)
-    val isLongClickable = invertibleAppletOption(0x81, R.string.is_long_clickable) {
+    val isLongClickable = invertibleAppletOption(R.string.is_long_clickable) {
         nodePropertyCriterion {
             it.isLongClickable
         }
     }
 
     @AppletCategory(0x02_02)
-    val isEditable = invertibleAppletOption(0x90, R.string.is_editable) {
+    val isEditable = invertibleAppletOption(R.string.is_editable) {
         nodePropertyCriterion {
             it.isEditable
         }
     }.withTitleModifier("Editable")
 
     @AppletCategory(0x02_03)
-    val isEnabled = invertibleAppletOption(0xA0, R.string.is_enabled) {
+    val isEnabled = invertibleAppletOption(R.string.is_enabled) {
         nodePropertyCriterion {
             it.isEnabled
         }
     }.withTitleModifier("Enabled")
 
     @AppletCategory(0x02_04)
-    val isCheckable = invertibleAppletOption(0xB0, R.string.is_checkable) {
+    val isCheckable = invertibleAppletOption(R.string.is_checkable) {
         nodePropertyCriterion {
             it.isCheckable
         }
     }.withTitleModifier("Checkable")
 
     @AppletCategory(0x02_05)
-    val isChecked = invertibleAppletOption(0xB1, R.string.is_checked) {
+    val isChecked = invertibleAppletOption(R.string.is_checked) {
         nodePropertyCriterion {
             it.isChecked
         }
     }.withTitleModifier("Checked")
 
     @AppletCategory(0x02_06)
-    val isSelected = invertibleAppletOption(0xC0, R.string.is_selected) {
+    val isSelected = invertibleAppletOption(R.string.is_selected) {
         nodePropertyCriterion {
             it.isSelected
         }
     }.withTitleModifier("Selected")
 
     @AppletCategory(0x0207)
-    val isScrollable = invertibleAppletOption(0xD0, R.string.is_scrollable) {
+    val isScrollable = invertibleAppletOption(R.string.is_scrollable) {
         nodePropertyCriterion {
             it.isScrollable
         }
@@ -251,32 +251,32 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // Position
     @AppletCategory(0x0300)
-    val left = appletOption(0xE0, R.string.left_margin) {
+    val left = appletOption(R.string.left_margin) {
         uiObjectBoundsCriterion(Gravity.START)
     }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0301)
-    val right = appletOption(0xE1, R.string.right_margin) {
+    val right = appletOption(R.string.right_margin) {
         uiObjectBoundsCriterion(Gravity.END)
     }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0302)
-    val top = appletOption(0xE2, R.string.top_margin) {
+    val top = appletOption(R.string.top_margin) {
         uiObjectBoundsCriterion(Gravity.TOP)
     }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0303)
-    val bottom = appletOption(0xE3, R.string.bottom_margin) {
+    val bottom = appletOption(R.string.bottom_margin) {
         uiObjectBoundsCriterion(Gravity.BOTTOM)
     }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0304)
-    val width = appletOption(0xE4, R.string.width) {
+    val width = appletOption(R.string.width) {
         uiObjectBoundsCriterion(Gravity.FILL_HORIZONTAL)
     }.withValueDescriber(distanceDescriber)
 
     @AppletCategory(0x0305)
-    val height = appletOption(0xE5, R.string.height) {
+    val height = appletOption(R.string.height) {
         uiObjectBoundsCriterion(Gravity.FILL_VERTICAL)
     }.withValueDescriber(distanceDescriber)
 /*

@@ -12,9 +12,7 @@ import top.xjunz.tasker.task.applet.anno.AppletCategory
 class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun eventFilterOption(@Event.EventType event: Int, label: Int) =
-        appletOption(event, label) {
-            EventCriterion(event)
-        }.hasInnateValue()
+        appletOption(label) { EventCriterion(event) }.hasInnateValue()
 
     @AppletCategory(0)
     val pkgEntered =

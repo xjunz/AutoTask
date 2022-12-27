@@ -25,15 +25,15 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     private val selected = mutableSetOf<Pair<Applet, Int>>()
 
+    private val factory = AppletOptionFactory
+
     val selectedRefs: Set<Pair<Applet, Int>> get() = selected
 
     val root: RootFlow get() = _root!!
 
-    val factory = AppletOptionFactory()
-
     val onReferenceSelected = MutableLiveData<Boolean>()
 
-    val onAppletChanged = MutableLiveData<Applet>()
+    val onAppletChanged = MutableLiveData<Applet?>()
 
     val refEditor = AppletReferenceEditor()
 

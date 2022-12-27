@@ -18,7 +18,7 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     override val categoryNames: IntArray? = null
 
     @AppletCategory(0x00_00)
-    val pkgCollection = invertibleAppletOption(0x00, R.string.in_notification_pkg_names) {
+    val pkgCollection = invertibleAppletOption(R.string.in_notification_pkg_names) {
         collectionCriterion<NotificationFlow.NotificationInfo, String> {
             it.packageName
         }
@@ -36,14 +36,14 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_01)
-    val contentContains = invertibleAppletOption(0x02, R.string.notification_contains) {
+    val contentContains = invertibleAppletOption(R.string.notification_contains) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle?.contains(v) == true
         }
     }
 
     @AppletCategory(0x00_03)
-    val contentMatches = invertibleAppletOption(0x03, R.string.notification_matches) {
+    val contentMatches = invertibleAppletOption(R.string.notification_matches) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle?.matches(Regex(v)) == true
         }

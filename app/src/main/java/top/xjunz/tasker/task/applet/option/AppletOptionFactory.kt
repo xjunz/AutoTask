@@ -1,8 +1,10 @@
 package top.xjunz.tasker.task.applet.option
 
+import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.task.applet.option.registry.*
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -10,7 +12,9 @@ import top.xjunz.tasker.task.applet.option.registry.*
  *
  * @author xjunz 2022/08/09
  */
-class AppletOptionFactory : AppletFactory {
+object AppletOptionFactory : AppletFactory {
+
+    private var preloaded = false
 
     val flowRegistry = FlowOptionRegistry()
 
@@ -68,6 +72,18 @@ class AppletOptionFactory : AppletFactory {
         val registryId = id ushr 16
         val appletId = id and 0xFFFF
         return requireRegistryById(registryId).createAppletFromId(appletId)
+    }
+
+    fun preloadIfNeeded() {
+        if (!preloaded) {
+            logcat("preload time:" +
+                    measureTimeMillis {
+                        allRegistries.forEach {
+                            it.parseDeclaredOptions()
+                        }
+                    })
+            preloaded = true
+        }
     }
 
     /**

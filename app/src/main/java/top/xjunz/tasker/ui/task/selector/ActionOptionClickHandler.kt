@@ -19,10 +19,9 @@ import top.xjunz.tasker.ui.task.selector.option.TimeIntervalEditorDialog
 /**
  * @author xjunz 2022/11/22
  */
-class ActionOptionClickHandler(
-    private val fragmentManager: FragmentManager,
-    private val factory: AppletOptionFactory
-) {
+class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
+
+    private val factory = AppletOptionFactory
 
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         applet as Action<*>

@@ -20,10 +20,8 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 /**
  * @author xjunz 2022/12/13
  */
-class FlowCascadeAdapter(
-    private val viewModel: FlowEditorViewModel,
-    val factory: AppletOptionFactory
-) : RecyclerView.Adapter<FlowCascadeAdapter.FlowCascadeViewHolder>() {
+class FlowCascadeAdapter(private val viewModel: FlowEditorViewModel) :
+    RecyclerView.Adapter<FlowCascadeAdapter.FlowCascadeViewHolder>() {
 
     private lateinit var context: Context
 
@@ -45,7 +43,7 @@ class FlowCascadeAdapter(
                         }
                     )
                 } else {
-                    ret.add(factory.requireOption(flow).getTitle(flow)!!)
+                    ret.add(AppletOptionFactory.requireOption(flow).getTitle(flow)!!)
                 }
             }
             flow = flow.parent

@@ -49,6 +49,7 @@ class TaskRuntime private constructor() {
             while (Pool.acquire() != null) {
                 /* no-op */
             }
+            Event.drainPool()
         }
     }
 

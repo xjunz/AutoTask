@@ -19,7 +19,7 @@ import top.xjunz.tasker.util.PackageInfoLoader
 class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x00_00)
-    val pkgCollection = invertibleAppletOption(0x00, R.string.in_pkg_collection) {
+    val pkgCollection = invertibleAppletOption(R.string.in_pkg_collection) {
         collectionCriterion<PackageInfoContext, String> {
             it.packageName
         }
@@ -37,7 +37,7 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_01)
-    val activityCollection = invertibleAppletOption(0x01, R.string.in_activity_collection) {
+    val activityCollection = invertibleAppletOption(R.string.in_activity_collection) {
         collectionCriterion<PackageInfoContext, String> {
             it.activityName?.run {
                 ComponentName.unflattenFromString(it.activityName)?.className
@@ -52,56 +52,56 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withTitleModifier("Activity")
 
     @AppletCategory(0x00_02)
-    val paneTitle = appletOption(0x02, R.string.with_pane_title) {
+    val paneTitle = appletOption(R.string.with_pane_title) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle == v
         }
     }
 
     @AppletCategory(0x01_00)
-    private val isSystem = invertibleAppletOption(0x10, R.string.is_system) {
+    private val isSystem = invertibleAppletOption(R.string.is_system) {
         PropertyCriterion<PackageInfoContext> {
             it.packageInfo.applicationInfo.isSystemApp
         }
     }
 
     @AppletCategory(0x01_01)
-    private val isLauncher = invertibleAppletOption(0x11, R.string.is_launcher) {
+    private val isLauncher = invertibleAppletOption(R.string.is_launcher) {
         PropertyCriterion<PackageInfoContext> {
             it.packageName == uiAutomatorBridge.launcherPackageName
         }
     }
 
     @AppletCategory(0x01_02)
-    private val versionRange = invertibleAppletOption(0x30, R.string.in_version_range) {
+    private val versionRange = invertibleAppletOption(R.string.in_version_range) {
         NumberRangeCriterion<PackageInfoContext, Int> {
             PackageInfoCompat.getLongVersionCode(it.packageInfo).toInt()
         }
     }.withDefaultRangeDescriber()
 
     @AppletCategory(0x02_00)
-    private val startsWith = invertibleAppletOption(0x40, R.string.pkg_name_starts_with) {
+    private val startsWith = invertibleAppletOption(R.string.pkg_name_starts_with) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.startsWith(v)
         }
     }
 
     @AppletCategory(0x02_01)
-    private val endsWith = invertibleAppletOption(0x41, R.string.pkg_name_ends_with) {
+    private val endsWith = invertibleAppletOption(R.string.pkg_name_ends_with) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.endsWith(v)
         }
     }
 
     @AppletCategory(0x02_02)
-    private val containsText = invertibleAppletOption(0x50, R.string.contains_text) {
+    private val containsText = invertibleAppletOption(R.string.contains_text) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.contains(v)
         }
     }
 
     @AppletCategory(0x02_03)
-    private val matchesPattern = invertibleAppletOption(0x60, R.string.pkg_name_matches_pattern) {
+    private val matchesPattern = invertibleAppletOption(R.string.pkg_name_matches_pattern) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.packageName.matches(Regex(v))
         }

@@ -18,8 +18,8 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     override val categoryNames: IntArray? = null
 
-    private fun globalActionOption(id: Int, title: Int, action: Int): AppletOption {
-        return appletOption(id, title) {
+    private fun globalActionOption(title: Int, action: Int): AppletOption {
+        return appletOption(title) {
             simpleAction {
                 uiAutomation.performGlobalAction(action)
             }
@@ -27,29 +27,27 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x0000)
-    val pressBack = globalActionOption(
-        0x0000, R.string.press_back, AccessibilityService.GLOBAL_ACTION_BACK
-    )
+    val pressBack = globalActionOption(R.string.press_back, AccessibilityService.GLOBAL_ACTION_BACK)
 
     @AppletCategory(0x0001)
     val pressRecents = globalActionOption(
-        0x0001, R.string.press_recent, AccessibilityService.GLOBAL_ACTION_RECENTS
+        R.string.press_recent, AccessibilityService.GLOBAL_ACTION_RECENTS
     )
 
     @AppletCategory(0x0002)
     val pressHome = globalActionOption(
-        0x0002, R.string.press_home, AccessibilityService.GLOBAL_ACTION_HOME
+        R.string.press_home, AccessibilityService.GLOBAL_ACTION_HOME
     )
 
     @AppletCategory(0x0003)
-    val forceStop = appletOption(0x0010, R.string.force_stop_current_pkg) {
+    val forceStop = appletOption(R.string.force_stop_current_pkg) {
         pureAction {
             ActivityManagerBridge.forceStopPackage(it.hitEvent.componentInfo.pkgName)
         }
     }.shizukuOnly()
 
     @AppletCategory(0x0004)
-    val extractText = appletOption(0x0020, R.string.format_extract_text) {
+    val extractText = appletOption(R.string.format_extract_text) {
         unaryArgProcessor<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
             if (v == null) null else arg?.firstGroupValue(v)
         }
@@ -60,7 +58,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .hasCompositeTitle()
 
     @AppletCategory(0x0005)
-    val copyText = appletOption(0x0021, R.string.format_copy_text) {
+    val copyText = appletOption(R.string.format_copy_text) {
         singleArgAction<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
             if (arg == null && v == null) {
                 false

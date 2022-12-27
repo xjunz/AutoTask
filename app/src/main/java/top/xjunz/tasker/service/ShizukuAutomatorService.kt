@@ -20,6 +20,7 @@ import top.xjunz.tasker.annotation.RemoteOnly
 import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isInHostProcess
 import top.xjunz.tasker.isInRemoteProcess
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager
 import top.xjunz.tasker.task.runtime.RemoteTaskManager
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
@@ -133,6 +134,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS and
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
+            AppletOptionFactory.preloadIfNeeded()
             ResidentTaskScheduler(looper, RemoteTaskManager).scheduleTasks()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {

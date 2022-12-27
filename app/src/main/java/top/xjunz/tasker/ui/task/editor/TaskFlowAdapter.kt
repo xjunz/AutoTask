@@ -20,6 +20,7 @@ import top.xjunz.tasker.ktx.indexOf
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
@@ -38,8 +39,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    val menuHelper =
-        AppletOperationMenuHelper(viewModel, globalViewModel.factory, fragment.childFragmentManager)
+    val menuHelper = AppletOperationMenuHelper(viewModel, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -53,11 +53,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                     if (viewModel.selections.size != 1) return
                     val selection = currentList[position]
                     if (viewModel.selections.first() === selection)
-                        viewModel.toggleMultiSelection(selection)
-                } else {
-                    val applet = currentList[position]
-                    if (!viewModel.isMultiSelected(applet))
-                        viewModel.toggleMultiSelection(applet)
+                        viewModel.multiUnselect(selection)
                 }
             }
 
@@ -125,7 +121,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         if (globalViewModel.selectedRefs.isEmpty())
                             viewModel.isFabVisible.value = false
                     } else {
-                        val option = globalViewModel.factory.requireOption(applet)
+                        val option = AppletOptionFactory.requireOption(applet)
                         val candidates = option.results.filter {
                             viewModel.refValueDescriptor.type == it.type
                         }
@@ -148,12 +144,6 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                     viewModel.singleSelect(adapterPosition)
                     menuHelper.showStandaloneMenu(view, applet)
                 }
-            }
-            binding.root.setOnLongClickListener {
-                if (!viewModel.isReadyOnly && !viewModel.isInMultiSelectionMode) {
-                    viewModel.toggleMultiSelection(currentList[adapterPosition])
-                }
-                return@setOnLongClickListener true
             }
             binding.ibAction.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]

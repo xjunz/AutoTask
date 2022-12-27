@@ -1,5 +1,6 @@
 package top.xjunz.tasker.task.applet.flow
 
+import android.os.IBinderHidden
 import top.xjunz.tasker.engine.applet.base.ScopedFlow
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -16,6 +17,7 @@ class NotificationFlow : ScopedFlow<NotificationFlow.NotificationInfo>() {
         if (shouldSkip) {
             runtime.isSuccessful = false
         }
+        IBinderHidden.SHELL_COMMAND_TRANSACTION
         return shouldSkip
     }
 

@@ -21,11 +21,12 @@ import top.xjunz.tasker.ui.task.selector.option.*
  * @author xjunz 2022/10/08
  */
 open class AppletOptionClickHandler(
-    private val fragmentManager: FragmentManager,
-    private val factory: AppletOptionFactory
+    private val fragmentManager: FragmentManager
 ) {
 
-    private val actionOptionClickHandler = ActionOptionClickHandler(fragmentManager, factory)
+    private val factory = AppletOptionFactory
+
+    private val actionOptionClickHandler = ActionOptionClickHandler(fragmentManager)
 
     fun onClick(applet: Applet, onCompleted: () -> Unit) {
         onClick(applet, factory.requireOption(applet), onCompleted)

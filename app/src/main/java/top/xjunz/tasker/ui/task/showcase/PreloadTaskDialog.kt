@@ -34,7 +34,7 @@ class PreloadTaskDialog : BaseBottomSheetDialog<DialogPreloadTasksBinding>() {
             if (TaskStorage.preloadTaskLoaded) {
                 taskLoaded.value = true
             } else viewModelScope.async {
-                TaskStorage.preloadTasks(AppletOptionFactory())
+                TaskStorage.preloadTasks(AppletOptionFactory)
                 TaskStorage.preloadTaskLoaded = true
                 taskLoaded.value = true
             }.invokeOnError {

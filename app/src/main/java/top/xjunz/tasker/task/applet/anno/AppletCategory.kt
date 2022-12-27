@@ -1,5 +1,7 @@
 package top.xjunz.tasker.task.applet.anno
 
+import androidx.annotation.Keep
+
 /**
  * |0000 0000|│|0000 0000|
  * |  :----: |:----: | :----:  |
@@ -12,4 +14,5 @@ package top.xjunz.tasker.task.applet.anno
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD)
+@Keep
 annotation class AppletCategory(val categoryId: Int)

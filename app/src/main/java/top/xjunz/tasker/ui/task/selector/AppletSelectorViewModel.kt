@@ -23,7 +23,7 @@ import top.xjunz.tasker.ui.task.editor.FlowViewModel
  */
 class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
-    val appletOptionFactory = AppletOptionFactory()
+    private val factory = AppletOptionFactory
 
     var animateItems = true
 
@@ -53,13 +53,13 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
             "ControlFlow not found!"
         }
         isInCriterionScope = control is If
-        title = appletOptionFactory.requireOption(control).rawTitle
+        title = factory.requireOption(control).rawTitle
         if (scope is ScopedFlow<*>) {
             isScoped = true
             registryOptions = arrayOf(
-                appletOptionFactory.requireRegistryOption(scope.appletId),
+                factory.requireRegistryOption(scope.appletId),
                 /* Non-scope flow is allowed anywhere */
-                appletOptionFactory.flowRegistry.globalInfoFlow
+                factory.flowRegistry.globalInfoFlow
             )
             // If scoped, do not show extra options from other registry, like showing component
             // options while showing ui object options.
@@ -67,11 +67,11 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         } else {
             isScoped = false
             registryOptions = when (control) {
-                is If -> appletOptionFactory.flowRegistry.criterionFlowOptions
+                is If -> factory.flowRegistry.criterionFlowOptions
 
-                is Do -> appletOptionFactory.flowRegistry.actionFlowOptions
+                is Do -> factory.flowRegistry.actionFlowOptions
 
-                is When -> arrayOf(appletOptionFactory.flowRegistry.eventFlow)
+                is When -> arrayOf(factory.flowRegistry.eventFlow)
 
                 else -> illegalArgument("control flow", control)
             }
@@ -82,7 +82,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         if (selectedFlowRegistry eq index) return
         options.clear()
         options.addAll(
-            appletOptionFactory.requireRegistryById(registryOptions[index].appletId).categorizedOptions
+            factory.requireRegistryById(registryOptions[index].appletId).categorizedOptions
         )
         selectedFlowRegistry.value = index
     }
@@ -92,7 +92,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     }
 
     fun appendApplet(applet: Applet): Boolean {
-        val flowOption = appletOptionFactory.requireRegistryOption(applet.registryId)
+        val flowOption = factory.requireRegistryOption(applet.registryId)
         val last = flow.lastOrNull()
         if (last !is Flow || (flowOption.appletId != last.appletId)) {
             val newFlow = flowOption.yield() as Flow
@@ -113,7 +113,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
-        val flowOption = appletOptionFactory.requireRegistryOption(options.first().registryId)
+        val flowOption = factory.requireRegistryOption(options.first().registryId)
 
         if (!flow.addSafely(flowOption.yield() as Flow)) return
         var count = 0

@@ -2,8 +2,7 @@ package top.xjunz.tasker.engine.task
 
 import android.os.Parcel
 import android.os.Parcelable
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
@@ -121,7 +120,7 @@ class XTask {
         observer: TaskRuntime.Observer? = null
     ): Boolean {
         // if (!isEnabled) return false
-        // Cancel if executing //TODO: 单线程情况下，Will this hit?
+        // Cancel if executing
         if (isExecuting) {
             currentRuntime?.halt()
         }

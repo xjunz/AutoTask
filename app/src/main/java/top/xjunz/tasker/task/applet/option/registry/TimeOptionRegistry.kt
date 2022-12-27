@@ -23,7 +23,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_00)
-    val timeRange = appletOption(0, R.string.time_range) {
+    val timeRange = appletOption(R.string.time_range) {
         newNumberRangeCriterion<Calendar, Long>{
             it.timeInMillis
         }
@@ -41,7 +41,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_02)
-    val month = invertibleAppletOption(0x11, R.string.in_months) {
+    val month = invertibleAppletOption( R.string.in_months) {
         timeCollectionCriterion {
             it.get(Calendar.MONTH)
         }
@@ -53,7 +53,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_03)
-    val dayOfMonth = invertibleAppletOption(0x12, R.string.in_day_of_month) {
+    val dayOfMonth = invertibleAppletOption(R.string.in_day_of_month) {
         NumberRangeCriterion<Calendar, Int> {
             // The first day has value 1
             it.get(Calendar.DAY_OF_MONTH) - 1
@@ -66,7 +66,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_03)
-    val dayOfWeek = invertibleAppletOption(0x13, R.string.in_day_of_week) {
+    val dayOfWeek = invertibleAppletOption(R.string.in_day_of_week) {
         timeCollectionCriterion {
             it.get(Calendar.DAY_OF_WEEK) - 1
         }
@@ -78,7 +78,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletCategory(0x00_04)
-    val hourMinSec = invertibleAppletOption(0x20, R.string.in_hour_min_sec_range) {
+    val hourMinSec = invertibleAppletOption(R.string.in_hour_min_sec_range) {
         NumberRangeCriterion<Calendar, Int> {
             it.get(Calendar.HOUR) shl 16 or it.get(Calendar.MINUTE) shl 8 or it.get(Calendar.SECOND)
         }

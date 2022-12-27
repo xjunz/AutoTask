@@ -31,6 +31,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
@@ -66,7 +67,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     }
 
     private val onOptionClickListener by lazy {
-        AppletOptionClickHandler(childFragmentManager, viewModel.appletOptionFactory)
+        AppletOptionClickHandler(childFragmentManager)
     }
 
     private val shopCartIntegration by lazy {
@@ -203,7 +204,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             transition.addTransition(ChangeBounds().addTarget(binding.rvRight))
             transition.addTransition(MaterialFadeThrough().addTarget(binding.cvHeader))
             binding.rootView.beginAutoTransition(transition)
-            val flowRegistry = viewModel.appletOptionFactory.flowRegistry
+            val flowRegistry = AppletOptionFactory.flowRegistry
             when (viewModel.registryOptions[it]) {
                 flowRegistry.componentFlow -> {
                     binding.cvHeader.tag = InspectorMode.COMPONENT

@@ -54,7 +54,7 @@ class Event private constructor() {
             }
         }
 
-        fun drainPool() {
+        internal fun drainPool() {
             while (Pool.acquire() != null) {
                 /* no-op */
             }

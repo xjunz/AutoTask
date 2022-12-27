@@ -21,10 +21,10 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     override val categoryNames: IntArray? = null
 
     @AppletCategory(0x0000)
-    val ifAction = appletOption(0, R.string._if) { If() }
+    val ifAction = appletOption(R.string._if) { If() }
 
     @AppletCategory(0x0001)
-    val delayAction = appletOption(1, R.string.delay) {
+    val delayAction = appletOption(R.string.delay) {
         DelayAction()
     }.withDescriber<Int> { applet, t ->
         R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
@@ -33,7 +33,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.descAsTitle()
 
     @AppletCategory(0x0002)
-    val repeatFlow = appletOption(2, R.string.repeat) {
+    val repeatFlow = appletOption(R.string.repeat) {
         RepeatFlow()
     }.withDescriber<Int> { applet, t ->
         R.string.format_repeat.formatSpans(t.toString().foreColored().clickable {

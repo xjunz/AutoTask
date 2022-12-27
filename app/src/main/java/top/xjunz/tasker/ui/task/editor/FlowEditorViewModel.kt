@@ -57,6 +57,10 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val isFabVisible = MutableLiveData<Boolean>()
 
+    val showQuitConfirmation = MutableLiveData<Boolean>()
+
+    val showTaskRepeatedPrompt = MutableLiveData<Boolean>()
+
     lateinit var onFlowEdited: (Flow) -> Unit
 
     lateinit var onTaskEdited: () -> Unit
@@ -89,7 +93,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         }
     }
 
-    private fun multiUnselect(applet: Applet) {
+    fun multiUnselect(applet: Applet) {
         selections.remove(applet)
         onAppletChanged.value = applet
         selectionLiveData.notifySelfChanged()
@@ -190,7 +194,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
             val checksum = ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
             if (checksum != metadata.checksum) {
                 if (TaskStorage.allTasks.any { it.checksum == checksum }) {
-                    toast(R.string.error_add_repeated_task)
+                    showTaskRepeatedPrompt.value = true
                     return false
                 }
                 metadata.modificationTimestamp = System.currentTimeMillis()
@@ -280,5 +284,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
             onAppletChanged.value = target
         }
         notifyFlowChanged()
+    }
+
+    fun isTaskChanged(): Boolean {
+        return ChecksumUtil.calculateChecksum(flow.toDTO(), metadata) != task.checksum
     }
 }

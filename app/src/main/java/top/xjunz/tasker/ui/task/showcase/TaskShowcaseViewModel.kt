@@ -8,7 +8,6 @@ import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.storage.TaskStorage
 
@@ -20,8 +19,6 @@ class TaskShowcaseViewModel : ViewModel() {
     val requestDeleteTask = MutableLiveData<XTask>()
 
     val onTaskDeleted = MutableLiveData<XTask>()
-
-    val allTaskLoaded = MutableLiveData<Boolean>()
 
     val appbarHeight = MutableLiveData<Int>()
 
@@ -45,19 +42,6 @@ class TaskShowcaseViewModel : ViewModel() {
 
     val liftedStates = booleanArrayOf(false, false, false)
 
-    fun init() {
-        if (TaskStorage.customTaskLoaded) {
-            allTaskLoaded.value = true
-        } else viewModelScope.launch {
-            TaskStorage.loadAllTasks(AppletOptionFactory())
-            TaskStorage.customTaskLoaded = true
-            LocalTaskManager.initialize(TaskStorage.allTasks.filter {
-                it.isEnabled
-            })
-            allTaskLoaded.value = true
-        }
-    }
-
     fun deleteRequestedTask() {
         val task = requestDeleteTask.require()
         runCatching {
@@ -73,7 +57,7 @@ class TaskShowcaseViewModel : ViewModel() {
     fun addRequestedTask() {
         val task = requestAddNewTask.require()
         if (TaskStorage.allTasks.contains(task)) {
-            toast(R.string.error_add_repeated_task)
+            toast(R.string.prompt_repeated_task)
             return
         }
         viewModelScope.async {
@@ -81,6 +65,7 @@ class TaskShowcaseViewModel : ViewModel() {
             onNewTaskAdded.value = task
             toast(R.string.format_new_task_added.format(task.metadata.title))
         }.invokeOnError {
+            it.printStackTrace()
             toastUnexpectedError(it)
         }
     }
@@ -93,9 +78,10 @@ class TaskShowcaseViewModel : ViewModel() {
             task.metadata.checksum = prevChecksum
             try {
                 TaskStorage.removeTask(task)
-                LocalTaskManager.removeRemoteCache(prevChecksum)
                 removed = true
+                LocalTaskManager.removeRemoteCache(prevChecksum)
             } catch (t: Throwable) {
+                t.printStackTrace()
                 toastUnexpectedError(t)
             }
             // Restore checksum to current one

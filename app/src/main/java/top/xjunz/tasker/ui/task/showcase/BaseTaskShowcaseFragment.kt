@@ -15,6 +15,7 @@ import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
 import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
@@ -110,7 +111,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         observe(viewModel.bottomBarHeight) {
             binding.rvTaskList.updatePadding(bottom = it)
         }
-        observe(viewModel.allTaskLoaded) {
+        observe(peekMainViewModel().allTaskLoaded) {
             taskList.clear()
             taskList.addAll(initTaskList())
             binding.rvTaskList.adapter = adapter

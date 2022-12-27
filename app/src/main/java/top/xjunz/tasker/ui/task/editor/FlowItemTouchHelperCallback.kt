@@ -104,6 +104,15 @@ open class FlowItemTouchHelperCallback(
         return super.getMovementFlags(recyclerView, viewHolder)
     }
 
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+        if (viewHolder == null) return
+        if (actionState != ACTION_STATE_DRAG) return
+        if (viewHolder.adapterPosition == RecyclerView.NO_POSITION) return
+        val applet = currentList[viewHolder.adapterPosition]
+        viewModel.onAppletLongClicked.value = applet
+    }
+
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,

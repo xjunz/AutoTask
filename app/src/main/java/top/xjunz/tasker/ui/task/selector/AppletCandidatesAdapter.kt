@@ -18,6 +18,7 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import java.util.*
@@ -82,7 +83,7 @@ class AppletCandidatesAdapter(
         holder.itemView.translationX = 0F
         holder.binding.let {
             val showRelation = position != 0 && applet.index != 0
-            val option = viewModel.appletOptionFactory.requireOption(applet)
+            val option = AppletOptionFactory.requireOption(applet)
             val title = if (option.descAsTitle) option.describe(applet) else option.getTitle(applet)
             if (title != null && showRelation) {
                 it.tvTitle.text = AppletOption.makeRelationSpan(
