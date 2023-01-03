@@ -140,6 +140,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        AppletOptionFactory.resetAll()
         if (viewModel.selectedFlowRegistry.isNull()) {
             viewModel.selectFlowRegistry(0)
         }

@@ -37,6 +37,13 @@ abstract class AppletOptionRegistry(val id: Int) {
         }.sorted()
     }
 
+    fun reset() {
+        allOptions.forEach {
+            it.isInverted = false
+            it.value = null
+        }
+    }
+
     private fun appletCategoryOption(label: Int): AppletOption {
         return AppletOption(id, label, TITLE_NONE) {
             unsupportedOperation()

@@ -11,7 +11,7 @@ import android.os.Build
 import android.system.Os
 import rikka.shizuku.SystemServiceHelper
 import top.xjunz.tasker.app
-import top.xjunz.tasker.isInHostProcess
+import top.xjunz.tasker.isAppProcess
 
 /**
  * @author xjunz 2022/10/02
@@ -27,7 +27,7 @@ class PackageInfoContext(
     }
 
     private fun getPackageInfo(packageName: String): PackageInfo {
-        return if (isInHostProcess) {
+        return if (isAppProcess) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 app.packageManager.getPackageInfo(
                     packageName, PackageManager.PackageInfoFlags.of(0L)

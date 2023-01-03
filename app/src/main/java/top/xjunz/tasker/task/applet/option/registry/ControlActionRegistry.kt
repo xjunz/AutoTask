@@ -6,12 +6,12 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
+import top.xjunz.tasker.engine.applet.action.DelayAction
 import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletCategory
-import top.xjunz.tasker.task.applet.flow.DelayAction
 import top.xjunz.tasker.task.applet.flow.RepeatFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.util.Router.launchAction

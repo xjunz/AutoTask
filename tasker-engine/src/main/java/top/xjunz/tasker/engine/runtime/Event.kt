@@ -16,7 +16,7 @@ class Event private constructor() {
 
     val componentInfo = ComponentInfo()
 
-    private object Pool : SynchronizedPool<Event>(5)
+    private object Pool : SynchronizedPool<Event>(10)
 
     companion object {
         /**

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.bridge
+package top.xjunz.tasker.uiautomator
 
 import android.graphics.Point
 import android.view.MotionEvent
@@ -10,7 +10,6 @@ import androidx.test.uiautomator.InteractionController
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.util.GestureGenerator
 
 /**
  * @author xjunz 2022/07/21

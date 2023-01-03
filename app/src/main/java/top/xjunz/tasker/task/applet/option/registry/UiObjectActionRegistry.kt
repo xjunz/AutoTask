@@ -22,13 +22,12 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     private inline fun simpleUiObjectActionOption(
         id: Int, title: Int, crossinline block: (AccessibilityNodeInfo) -> Boolean
     ): AppletOption {
-        return uiObjectActionOption<Any>(id, title, AppletValues.VAL_TYPE_IRRELEVANT) { node, _ ->
+        return uiObjectActionOption<Any>(title, AppletValues.VAL_TYPE_IRRELEVANT) { node, _ ->
             block(node)
         }
     }
 
     private inline fun <V> uiObjectActionOption(
-        id: Int,
         title: Int,
         valueType: Int,
         crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
@@ -65,7 +64,6 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletCategory(0x0010)
     val setText = uiObjectActionOption<String>(
-        0x0010,
         R.string.format_perform_input_text,
         AppletValues.VAL_TYPE_TEXT
     ) { node, value ->

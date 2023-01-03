@@ -31,6 +31,8 @@ class XTask {
         const val TYPE_ONESHOT = 1
     }
 
+    inline val title get() = metadata.title
+
     inline val checksum get() = metadata.checksum
 
     inline val isPreload get() = metadata.isPreload
@@ -60,7 +62,7 @@ class XTask {
 
     interface OnStateChangedListener {
 
-        fun onStarted(task: XTask) {}
+        fun onStarted(runtime: TaskRuntime) {}
 
         /**
          * When the task completes due to an unexpected error.
@@ -99,7 +101,6 @@ class XTask {
         }
         onStateChangedListener = stateListener
         isEnabled = true
-        onStateChangedListener?.onStarted(this)
     }
 
     fun disable() {
@@ -125,14 +126,11 @@ class XTask {
     ): Boolean {
         // if (!isEnabled) return false
         // Cancel if executing
-        if (isExecuting) {
-            currentRuntime?.halt()
-        }
         val runtime = obtainRuntime(snapshot, scope, events)
         runtime.observer = observer
         try {
             currentRuntime = runtime
-            onStateChangedListener?.onStarted(this)
+            onStateChangedListener?.onStarted(runtime)
             requireFlow().apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)

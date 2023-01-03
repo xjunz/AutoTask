@@ -112,7 +112,7 @@ class AppletOption(
     /**
      * As per [Applet.isInverted].
      */
-    private var isInverted = false
+    var isInverted = false
 
     /**
      * As per [Applet.isInvertible].

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.util
+package top.xjunz.tasker.uiautomator
 
 import android.accessibilityservice.GestureDescription
 import android.accessibilityservice.GestureDescription.StrokeDescription

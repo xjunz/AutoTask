@@ -18,12 +18,12 @@ import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
-import top.xjunz.tasker.annotation.LocalAndRemote
-import top.xjunz.tasker.annotation.LocalOnly
-import top.xjunz.tasker.annotation.RemoteOnly
+import top.xjunz.tasker.annotation.Anywhere
+import top.xjunz.tasker.annotation.Local
+import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
-import top.xjunz.tasker.isInHostProcess
-import top.xjunz.tasker.isInRemoteProcess
+import top.xjunz.tasker.isAppProcess
+import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager
 import top.xjunz.tasker.task.runtime.RemoteTaskManager
@@ -38,13 +38,15 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
         private var instance: WeakReference<ShizukuAutomatorService>? = null
 
-        @RemoteOnly
+        @Privileged
         fun require(): ShizukuAutomatorService {
             return requireNotNull(instance?.get()) {
                 "The ShizukuAutomatorService is not yet started or has dead!"
             }
         }
     }
+
+    val binder: Binder = Binder()
 
     private lateinit var delegate: IRemoteAutomatorService
 
@@ -65,7 +67,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     private var startTimestamp: Long = -1
 
     @Keep
-    @RemoteOnly
+    @Privileged
     constructor() {
         logcat("Hello from the remote service! My uid is ${Os.getuid()} and my pid is ${Os.getpid()}")
         handlerThread.isDaemon = false
@@ -73,31 +75,31 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         instance = WeakReference(this)
     }
 
-    @LocalOnly
+    @Local
     constructor(connection: IRemoteAutomatorService) {
         delegate = connection
     }
 
-    @LocalOnly
+    @Local
     override val isRunning: Boolean
         get() = delegate.asBinder().pingBinder() && delegate.asBinder().isBinderAlive
 
-    @RemoteOnly
+    @Privileged
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        check(isInRemoteProcess) {
+        check(isPrivilegedProcess) {
             "You cannot access Shizuku UiAutomatorBridge from the host process!"
         }
-        ShizukuUiAutomatorBridge(uiAutomation)
+        ShizukuUiAutomatorBridge()
     }
 
-    @LocalAndRemote
+    @Anywhere
     override fun getStartTimestamp(): Long {
-        return if (isInRemoteProcess) startTimestamp else delegate.startTimestamp
+        return if (isPrivilegedProcess) startTimestamp else delegate.startTimestamp
     }
 
-    @LocalAndRemote
+    @Anywhere
     override fun createAvailabilityChecker(): IAvailabilityChecker {
-        return if (isInRemoteProcess) {
+        return if (isPrivilegedProcess) {
             AvailabilityChecker(this, looper)
         } else {
             delegate.createAvailabilityChecker()
@@ -146,9 +148,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    @LocalAndRemote
+    @Anywhere
     override fun destroy() {
-        if (isInHostProcess) {
+        if (isAppProcess) {
             delegate.destroy()
         } else try {
             handler.removeCallbacksAndMessages(null)

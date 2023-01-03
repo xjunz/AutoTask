@@ -117,16 +117,21 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     fun acceptAppletsFromInspector() {
         val options = floatingInspector.getSelectedOptions()
-        val flowOption = factory.requireRegistryOption(options.first().registryId)
+        try {
+            val flowOption = factory.requireRegistryOption(options.first().registryId)
 
-        if (!flow.addSafely(flowOption.yield() as Flow)) return
-        var count = 0
-        options.forEach {
-            if (!appendOption(it)) return@forEach
-            count++
+            if (!flow.addSafely(flowOption.yield() as Flow)) return
+            var count = 0
+            options.forEach {
+                if (!appendOption(it)) return@forEach
+                count++
+            }
+            toast(R.string.options_from_inspector_added.format(count))
+        } finally {
+            options.forEach {
+                it.value = null
+            }
         }
-
-        toast(R.string.options_from_inspector_added.format(count))
         notifyFlowChanged()
     }
 

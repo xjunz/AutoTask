@@ -5,12 +5,9 @@
 package top.xjunz.tasker.bridge
 
 import android.graphics.Point
-import android.hardware.display.DisplayManagerGlobal
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.WindowManager
-import top.xjunz.tasker.app
-import top.xjunz.tasker.isInHostProcess
 
 /**
  * @author xjunz 2022/10/25
@@ -18,17 +15,13 @@ import top.xjunz.tasker.isInHostProcess
 object DisplayManagerBridge {
 
     private val windowManager by lazy {
-        app.getSystemService(WindowManager::class.java)
+        ContextBridge.getContext().getSystemService(WindowManager::class.java)
     }
 
     val defaultDisplay: Display
         get() {
-            return if (isInHostProcess) {
-                @Suppress("DEPRECATION")
-                windowManager.defaultDisplay
-            } else {
-                DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
-            }
+            @Suppress("DEPRECATION")
+            return windowManager.defaultDisplay
         }
 
     private val point = Point()

@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcat
@@ -85,43 +84,46 @@ class ResidentTaskScheduler(
     }
 
     private val listener = object : XTask.OnStateChangedListener {
-        override fun onStarted(task: XTask) {
-            super.onStarted(task)
-            logcat("\n-------- 【${task.metadata.title}】 --------")
+        override fun onStarted(runtime: TaskRuntime) {
+            super.onStarted(runtime)
+            logcat("\n-------- $runtime Started --------")
         }
 
         override fun onError(runtime: TaskRuntime, t: Throwable) {
             super.onError(runtime, t)
             logcat(t.message)
-            logcat("-------- Error --------")
+            logcat("-------- $runtime Error --------")
         }
 
         override fun onFailure(runtime: TaskRuntime) {
             super.onFailure(runtime)
-            logcat("-------- Failure --------")
+            logcat("-------- $runtime Failure --------")
         }
 
         override fun onSuccess(runtime: TaskRuntime) {
             super.onSuccess(runtime)
-            logcat("-------- Success --------")
+            logcat("-------- $runtime Success --------")
         }
 
         override fun onCancelled(runtime: TaskRuntime) {
             super.onCancelled(runtime)
-            logcat("-------- Cancelled --------")
+            logcat("-------- $runtime Cancelled --------")
         }
     }
 
     override fun onEvents(events: Array<out Event>) {
-        async {
+        launch {
             val snapshot = Snapshot()
-            for (task in taskManager.enabledTasks) {
-                task.onStateChangedListener = listener
-                task.launch(snapshot, this, events, observer)
+            try {
+                for (task in taskManager.enabledTasks) {
+                    task.onStateChangedListener = listener
+                    task.launch(snapshot, this, events, observer)
+                }
+            } finally {
+                events.forEach {
+                    it.recycle()
+                }
             }
-        }.invokeOnCompletion {
-            for (event in events)
-                event.recycle()
         }
     }
 

@@ -144,4 +144,8 @@ class TaskRuntime private constructor() {
         observer = null
         Pool.release(this)
     }
+
+    override fun toString(): String {
+        return "TaskRuntime@${hashCode().toString(16)}(${task.title})"
+    }
 }

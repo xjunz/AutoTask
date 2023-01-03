@@ -22,6 +22,9 @@ import com.google.android.material.button.MaterialButton
 import top.xjunz.tasker.R
 
 /**
+ * A container [ViewGroup] wrapping a [MaterialButton] to perform a spreading ripple animation,
+ * whose effect can be configured as per [R.styleable.MaterialButtonSpreadContainer].
+ *
  * @author xjunz 2022/12/24
  */
 class MaterialButtonSpreadContainer @JvmOverloads constructor(

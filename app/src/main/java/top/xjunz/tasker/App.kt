@@ -15,9 +15,9 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 /**
  * @author xjunz 2021/6/25
  */
-val isInHostProcess: Boolean get() = App.instance != null
+val isAppProcess: Boolean get() = App.instance != null
 
-val isInRemoteProcess: Boolean get() = !isInHostProcess
+val isPrivilegedProcess: Boolean get() = !isAppProcess
 
 val app: App get() = requireNotNull(App.instance)
 

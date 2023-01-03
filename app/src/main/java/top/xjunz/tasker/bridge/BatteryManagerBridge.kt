@@ -5,10 +5,6 @@
 package top.xjunz.tasker.bridge
 
 import android.os.BatteryManager
-import android.os.BatteryManagerHidden
-import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.app
-import top.xjunz.tasker.isInHostProcess
 
 /**
  * @author xjunz 2022/11/10
@@ -16,14 +12,10 @@ import top.xjunz.tasker.isInHostProcess
 object BatteryManagerBridge {
 
     private val batteryManager: BatteryManager by lazy {
-        if (isInHostProcess) {
-            app.getSystemService(BatteryManager::class.java)
-        } else {
-            BatteryManagerHidden().casted()
-        }
+        ContextBridge.getContext().getSystemService(BatteryManager::class.java)
     }
 
-    val isCharging: Boolean get()  = batteryManager.isCharging
+    val isCharging: Boolean get() = batteryManager.isCharging
 
     val capacity: Int
         get() {

@@ -5,7 +5,7 @@
 package top.xjunz.tasker.task.runtime
 
 import android.util.ArraySet
-import top.xjunz.tasker.annotation.RemoteOnly
+import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -13,7 +13,7 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 /**
  * @author xjunz 2022/12/25
  */
-@RemoteOnly
+@Privileged
 object RemoteTaskManager : IRemoteTaskManager.Stub(), TaskManager<Long, XTaskDTO> {
 
     private var initialized: Boolean = false

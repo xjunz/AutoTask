@@ -10,4 +10,4 @@ package top.xjunz.tasker.annotation
  * @author xjunz 2022/05/25
  */
 @Retention(AnnotationRetention.SOURCE)
-annotation class LocalOnly
+annotation class Local

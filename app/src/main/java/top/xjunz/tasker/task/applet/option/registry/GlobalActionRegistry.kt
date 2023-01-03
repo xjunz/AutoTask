@@ -6,11 +6,11 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import android.accessibilityservice.AccessibilityService
 import top.xjunz.tasker.R
-import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.firstGroupValue
+import top.xjunz.tasker.privileged.ActivityManagerUtil
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -46,7 +46,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletCategory(0x0003)
     val forceStop = appletOption(R.string.force_stop_current_pkg) {
         pureAction {
-            ActivityManagerBridge.forceStopPackage(it.hitEvent.componentInfo.pkgName)
+            ActivityManagerUtil.forceStopPackage(it.hitEvent.componentInfo.pkgName)
         }
     }.shizukuOnly()
 

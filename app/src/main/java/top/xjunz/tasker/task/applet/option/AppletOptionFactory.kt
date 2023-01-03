@@ -26,7 +26,7 @@ object AppletOptionFactory : AppletFactory {
 
     val packageRegistry = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_OPTION_REGISTRY)
 
-    private val uiObjectRegistry =
+    val uiObjectRegistry =
         UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
 
     val timeRegistry = TimeOptionRegistry(FlowOptionRegistry.ID_TIME_OPTION_REGISTRY)
@@ -87,6 +87,12 @@ object AppletOptionFactory : AppletFactory {
                         }
                     })
             preloaded = true
+        }
+    }
+
+    fun resetAll() {
+        allRegistries.forEach {
+            it.reset()
         }
     }
 

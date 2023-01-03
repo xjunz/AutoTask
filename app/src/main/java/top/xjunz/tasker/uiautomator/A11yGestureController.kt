@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.bridge
+package top.xjunz.tasker.uiautomator
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
@@ -12,7 +12,7 @@ import androidx.test.uiautomator.PointerGesture
 import androidx.test.uiautomator.UiDevice
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.util.GestureGenerator.convertToStrokes
+import top.xjunz.tasker.uiautomator.GestureGenerator.convertToStrokes
 import kotlin.math.ceil
 
 /**

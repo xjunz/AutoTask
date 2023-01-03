@@ -77,7 +77,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     override val isRunning get() = runningState.isTrue
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        A11yUiAutomatorBridge(this, uiAutomation)
+        A11yUiAutomatorBridge()
     }
 
     private var launchedInInspectorMode = false

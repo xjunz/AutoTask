@@ -128,7 +128,7 @@ class AvailabilityCheckDialog : BaseDialogFragment<DialogAvailabilityCheckBindin
                     viewModel.showList.toggle()
                 }
             }) { binding, index, data ->
-            binding.tvName.text = data.label
+            binding.tvName.text = data.nameRes.text
             binding.ivState.setImageResource(data.stateImageRes)
             binding.root.isSelected = viewModel.currentIndex eq index
         }
@@ -150,7 +150,7 @@ class AvailabilityCheckDialog : BaseDialogFragment<DialogAvailabilityCheckBindin
             binding.root.beginAutoTransition()
             binding.btnTarget.isVisible = it.isButtonVisible
             binding.viewDropTarget.isVisible = it.isDropTargetVisible
-            binding.tvName.text = it.label
+            binding.tvName.text = it.nameRes.text
             binding.tvDesc.text = R.string.format_check_case_desc_prefix.format(it.descRes.str)
             viewModel.generatePosition(it.isButtonRandomPosition)
             viewModel.generateRandomText()

@@ -16,9 +16,7 @@ import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
 import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.registry.FlowOptionRegistry
-import top.xjunz.tasker.task.applet.option.registry.PackageOptionRegistry
-import top.xjunz.tasker.task.applet.option.registry.UiObjectOptionRegistry
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
@@ -35,10 +33,9 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val uncheckedOptions = mutableSetOf<AppletOption>()
 
-    private val uiObjectFactory =
-        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
+    private val uiObjectRegistry = AppletOptionFactory.uiObjectRegistry
 
-    private val pkgFactory = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_OPTION_REGISTRY)
+    private val pkgRegistry = AppletOptionFactory.packageRegistry
 
     private val options = mutableListOf<AppletOption>()
 
@@ -71,73 +68,73 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     private fun collectProperties() {
         if (vm.currentMode eq InspectorMode.COMPONENT || vm.showExtraOptions) {
             vm.currentComp.value?.let {
-                options.add(pkgFactory.pkgCollection.withValue(Collections.singleton(it.pkgName)))
+                options.add(pkgRegistry.pkgCollection.withValue(Collections.singleton(it.pkgName)))
 
                 if (it.actName != null) {
                     val compName = ComponentName(it.pkgName, it.actName!!).flattenToShortString()
                     options.add(
-                        pkgFactory.activityCollection.withValue(Collections.singleton(compName))
+                        pkgRegistry.activityCollection.withValue(Collections.singleton(compName))
                     )
                 }
 
                 if (it.paneTitle != null)
-                    options.add(pkgFactory.paneTitle.withValue(it.paneTitle))
+                    options.add(pkgRegistry.paneTitle.withValue(it.paneTitle))
             }
         }
         if (vm.currentMode eq InspectorMode.COMPONENT) return
 
         val node = vm.emphaticNode.require().source
         if (node.className != null)
-            options.add(uiObjectFactory.isType.withValue(node.className))
+            options.add(uiObjectRegistry.isType.withValue(node.className))
 
         if (node.viewIdResourceName != null)
-            options.add(uiObjectFactory.withId.withValue(node.viewIdResourceName))
+            options.add(uiObjectRegistry.withId.withValue(node.viewIdResourceName))
 
         if (node.text != null)
-            options.add(uiObjectFactory.textEquals.withValue(node.text))
+            options.add(uiObjectRegistry.textEquals.withValue(node.text))
 
         if (node.contentDescription != null)
-            options.add(uiObjectFactory.contentDesc.withValue(node.contentDescription))
+            options.add(uiObjectRegistry.contentDesc.withValue(node.contentDescription))
 
         if (node.isClickable)
-            options.add(uiObjectFactory.isClickable.withValue(true))
+            options.add(uiObjectRegistry.isClickable.withValue(true))
 
         if (node.isLongClickable)
-            options.add(uiObjectFactory.isLongClickable.withValue(true))
+            options.add(uiObjectRegistry.isLongClickable.withValue(true))
 
         if (!node.isEnabled)
-            options.add(uiObjectFactory.isEnabled.withValue(node.isEnabled))
+            options.add(uiObjectRegistry.isEnabled.withValue(node.isEnabled))
 
         if (node.isCheckable)
-            options.add(uiObjectFactory.isCheckable.withValue(true))
+            options.add(uiObjectRegistry.isCheckable.withValue(true))
 
         if (node.isChecked || node.isCheckable)
-            options.add(uiObjectFactory.isChecked.withValue(node.isChecked))
+            options.add(uiObjectRegistry.isChecked.withValue(node.isChecked))
 
         if (node.isEditable)
-            options.add(uiObjectFactory.isEditable.withValue(true))
+            options.add(uiObjectRegistry.isEditable.withValue(true))
 
-        options.add(uiObjectFactory.isSelected.withValue(node.isSelected))
+        options.add(uiObjectRegistry.isSelected.withValue(node.isSelected))
         if (!node.isSelected)
             uncheckedOptions.add(options.last())
 
-        options.add(uiObjectFactory.isScrollable.withValue(node.isScrollable))
+        options.add(uiObjectRegistry.isScrollable.withValue(node.isScrollable))
         if (!node.isScrollable)
             uncheckedOptions.add(options.last())
 
         val rScreen = Rect()
         node.getBoundsInScreen(rScreen)
 
-        options.add(uiObjectFactory.left.withValue(Distance.exactPxInScreen(rScreen.left)))
+        options.add(uiObjectRegistry.left.withValue(Distance.exactPxInScreen(rScreen.left)))
 
-        options.add(uiObjectFactory.right.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.x - rScreen.right)))
+        options.add(uiObjectRegistry.right.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.x - rScreen.right)))
 
-        options.add(uiObjectFactory.top.withValue(Distance.exactPxInScreen(rScreen.top)))
+        options.add(uiObjectRegistry.top.withValue(Distance.exactPxInScreen(rScreen.top)))
 
-        options.add(uiObjectFactory.bottom.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.y - rScreen.bottom)))
+        options.add(uiObjectRegistry.bottom.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.y - rScreen.bottom)))
 
-        options.add(uiObjectFactory.width.withValue(Distance.exactPx(rScreen.width())))
-        options.add(uiObjectFactory.height.withValue(Distance.exactPx(rScreen.height())))
+        options.add(uiObjectRegistry.width.withValue(Distance.exactPx(rScreen.width())))
+        options.add(uiObjectRegistry.height.withValue(Distance.exactPx(rScreen.height())))
     }
 
     @SuppressLint("NotifyDataSetChanged")
