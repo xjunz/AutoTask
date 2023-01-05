@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -19,7 +18,8 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical"
-            tools:ignore="UseCompoundDrawables">
+            tools:ignore="UseCompoundDrawables"
+            tools:visibility="gone">
 
             <ImageView
                 android:id="@+id/iv_placeholder"
@@ -62,6 +62,7 @@
                 android:id="@+id/app_bar_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipToPadding="false"
                 android:minHeight="?actionBarSize"
                 android:paddingVertical="12dp">
 
@@ -75,51 +76,105 @@
                     android:marqueeRepeatLimit="marquee_forever"
                     android:maxLines="1"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
+                    android:textColor="?colorPrimary"
                     app:layout_constraintBottom_toBottomOf="@+id/ib_dismiss"
                     app:layout_constraintEnd_toStartOf="@+id/ib_split"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
                     tools:text="@string/edit_task" />
 
-                <TextView
-                    android:id="@+id/tv_subtitle"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cv_metadata"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/bg_selectable_item"
-                    android:drawablePadding="8dp"
-                    android:ellipsize="end"
-                    android:gravity="center_vertical"
-                    android:maxLines="3"
-                    android:textAppearance="@style/TextAppearance.Material3.ActionBar.Subtitle"
-                    app:drawableEndCompat="@drawable/ic_drive_file_rename_outline_20px"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_marginTop="8dp"
+                    app:contentPaddingBottom="12dp"
+                    app:contentPaddingLeft="12dp"
+                    app:contentPaddingRight="12dp"
+                    app:contentPaddingTop="12dp"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ib_dismiss"
-                    tools:text="@tools:sample/lorem" />
+                    app:layout_constraintTop_toBottomOf="@+id/ib_dismiss">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/iv_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/edit_task_metadata"
+                            android:src="@drawable/info_24px"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="?colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/tv_task_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:maxLines="3"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textColor="?colorPrimary"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@+id/ib_edit"
+                            app:layout_constraintStart_toEndOf="@+id/iv_info"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="@tools:sample/lorem" />
+
+                        <TextView
+                            android:id="@+id/tv_task_desc"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:maxLines="1"
+                            app:layout_constraintEnd_toEndOf="@+id/tv_task_name"
+                            app:layout_constraintStart_toStartOf="@+id/tv_task_name"
+                            app:layout_constraintTop_toBottomOf="@id/tv_task_name"
+                            tools:text="@tools:sample/lorem/random" />
+
+                        <ImageButton
+                            android:id="@+id/ib_edit"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_selectable_circle"
+                            android:contentDescription="@{@string/edit}"
+                            android:src="@drawable/ic_edit_24dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="?colorPrimary" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <ImageButton
                     android:id="@+id/ib_check"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/complete}"
                     android:src="@drawable/ic_baseline_check_24"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
-                    app:tint="?colorOnPrimaryContainer" />
+                    app:tint="?colorPrimary" />
 
                 <ImageButton
                     android:id="@+id/ib_dismiss"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_selectable_circle"
-                    android:contentDescription="@{@android:string/cancel}"
+                    android:contentDescription="@{@string/dismiss}"
                     android:src="@drawable/ic_baseline_close_24"
                     app:layout_constraintEnd_toStartOf="@+id/ib_check"
                     app:layout_constraintTop_toTopOf="parent"
@@ -128,8 +183,8 @@
 
                 <ImageButton
                     android:id="@+id/ib_menu"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/more}"
@@ -142,8 +197,8 @@
 
                 <ImageButton
                     android:id="@+id/ib_split"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/split_merged_rules}"
@@ -159,6 +214,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:fadingEdgeLength="16dp"
                     android:nestedScrollingEnabled="false"
@@ -168,7 +224,7 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_subtitle"
+                    app:layout_constraintTop_toBottomOf="@+id/cv_metadata"
                     app:layout_goneMarginTop="8dp"
                     tools:listitem="@layout/item_flow_cascade" />
 
@@ -177,7 +233,7 @@
             <com.google.android.material.divider.MaterialDivider
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="0dp"
                 app:dividerColor="@color/material_on_surface_stroke" />
         </com.google.android.material.appbar.AppBarLayout>
 

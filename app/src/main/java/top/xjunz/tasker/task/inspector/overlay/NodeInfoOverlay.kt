@@ -83,7 +83,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         }
         if (vm.currentMode eq InspectorMode.COMPONENT) return
 
-        val node = vm.emphaticNode.require().source
+        val node = vm.highlightNode.require().source
         if (node.className != null)
             options.add(uiObjectRegistry.isType.withValue(node.className))
 

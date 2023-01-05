@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/selector_bg_selectable_item"
-        android:minHeight="40dp">
+        android:minHeight="48dp">
 
         <View
             android:id="@+id/bullet"
@@ -114,11 +114,11 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ib_action"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/bg_selectable_circle"
             android:contentDescription="@{@string/invert}"
-            android:scaleType="fitCenter"
+            android:scaleType="centerInside"
             app:contentPadding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

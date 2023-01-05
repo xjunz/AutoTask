@@ -77,7 +77,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     override val isRunning get() = runningState.isTrue
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        A11yUiAutomatorBridge()
+        A11yUiAutomatorBridge(uiAutomation)
     }
 
     private var launchedInInspectorMode = false
@@ -86,13 +86,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         super.onServiceConnected()
         try {
             launchedInInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
+            instance = WeakReference(this)
             if (!launchedInInspectorMode) {
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
                 taskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
                 taskScheduler.scheduleTasks()
             }
-            instance = WeakReference(this)
             runningState.value = true
             startTimestamp = System.currentTimeMillis()
             lifecycleRegistry.currentState = Lifecycle.State.STARTED

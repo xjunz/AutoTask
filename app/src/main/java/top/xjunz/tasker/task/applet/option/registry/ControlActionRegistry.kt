@@ -22,8 +22,6 @@ import top.xjunz.tasker.util.formatMinSecMills
  */
 class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    override val categoryNames: IntArray? = null
-
     @AppletCategory(0x0000)
     val ifAction = appletOption(R.string._if) { If() }
 

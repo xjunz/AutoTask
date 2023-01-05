@@ -27,9 +27,9 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         const val ID_GLOBAL_ACTION_REGISTRY = 0x50
         const val ID_UI_OBJECT_ACTION_REGISTRY = 0x51
         const val ID_CONTROL_ACTION_REGISTRY = 0x52
+        const val ID_APP_ACTION_REGISTRY = 0x53
+        const val ID_TEXT_ACTION_REGISTRY = 0x54
     }
-
-    override val categoryNames: IntArray? = null
 
     private inline fun <reified F : Flow> presetFlowOption(
         appletId: Int,
@@ -66,7 +66,13 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     val actionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(globalActionFlow, uiObjectActionFlow, controlActionFlow)
+        arrayOf(
+            globalActionFlow,
+            uiObjectActionFlow,
+            textActionFlow,
+            appActionFlow,
+            controlActionFlow
+        )
     }
 
     @AppletCategory(0x0000)
@@ -111,11 +117,9 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         presetFlowOption<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
 
     @AppletCategory(0x0014)
-    val notificationFlow =
-        presetFlowOption<NotificationFlow>(
-            ID_NOTIFICATION_OPTION_REGISTRY,
-            R.string.current_notification
-        )
+    val notificationFlow = presetFlowOption<NotificationFlow>(
+        ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification
+    )
 
     @AppletCategory(0x0020)
     val globalActionFlow =
@@ -126,6 +130,15 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         presetFlowOption<PhantomFlow>(ID_UI_OBJECT_ACTION_REGISTRY, R.string.ui_object_operations)
 
     @AppletCategory(0x0022)
+    val textActionFlow =
+        presetFlowOption<PhantomFlow>(ID_TEXT_ACTION_REGISTRY, R.string.text_operations)
+
+    @AppletCategory(0x0023)
+    val appActionFlow =
+        presetFlowOption<PhantomFlow>(ID_APP_ACTION_REGISTRY, R.string.app_operations)
+
+    @AppletCategory(0x0024)
     val controlActionFlow =
         presetFlowOption<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
+
 }

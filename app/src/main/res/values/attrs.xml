@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -18,5 +17,12 @@
         <attr name="spreadCount" format="integer" />
         <attr name="spreadDuration" format="integer" />
         <attr name="spreadAlpha" format="float" />
+    </declare-styleable>
+    <declare-styleable name="LayoutInspectorView">
+        <attr name="inspectorStrokeWidthNormal" format="dimension" />
+        <attr name="inspectorStrokeWidthHighlight" format="dimension" />
+        <attr name="inspectorStrokeColorNormal" format="color" />
+        <attr name="inspectorStrokeColorHighlight" format="color" />
+        <attr name="inspectorCoordinateTextSize" format="dimension" />
     </declare-styleable>
 </resources>

@@ -105,5 +105,5 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    override val categoryNames: IntArray? = null
+
 }

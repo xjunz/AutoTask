@@ -36,6 +36,8 @@ class FlowItemViewBinder(
         R.array.static_error_prompts.array
     }
 
+    private val controlFlowTextTint = R.color.color_text_control_normal.colorStateList
+
     @SuppressLint("SetTextI18n")
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
         val option = viewModel.factory.requireOption(applet)
@@ -97,7 +99,7 @@ class FlowItemViewBinder(
                 }
             }
             if (applet is ControlFlow) {
-                tvTitle.setTextColor(R.color.color_text_control_normal.colorStateList)
+                tvTitle.setTextColor(controlFlowTextTint)
             } else if (depth == 1) {
                 title = title?.relativeSize(.8F)
             }

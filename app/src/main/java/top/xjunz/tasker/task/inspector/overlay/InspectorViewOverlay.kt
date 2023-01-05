@@ -8,6 +8,7 @@ import android.accessibilityservice.AccessibilityService
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
+import android.view.Choreographer
 import android.view.Display
 import android.view.WindowManager
 import androidx.core.view.doOnPreDraw
@@ -42,14 +43,11 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
 
     override fun onOverlayInflated() {
         binding.apply {
-            btnDismiss.setOnClickListener {
-                nodePanel.isVisible = false
-            }
             inspectorView.onNodeClickedListener = {
-                vm.emphaticNode.setValueIfDistinct(it)
+                vm.highlightNode.setValueIfDistinct(it)
             }
             inspectorView.onNodeSelectedListener = {
-                vm.emphaticNode.setValueIfDistinct(it)
+                vm.highlightNode.setValueIfDistinct(it)
             }
             inspector.observeTransient(vm.onKeyLongPressed) {
                 inspectorView.onKeyLongPress(it, null)
@@ -82,7 +80,7 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                     rootView.isVisible = false
                     screenshot = null
                     windowNode = null
-                    vm.emphaticNode.value = null
+                    vm.highlightNode.value = null
                     inspectorView.clearNode()
                     inspectorView.background = null
                 } else {
@@ -91,12 +89,13 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                         captureWindowSnapshot()
                 }
             }
-            inspector.observe(vm.emphaticNode) {
-                inspectorView.emphaticNode = it
+            inspector.observe(vm.highlightNode) {
+                inspectorView.highlightNode = it
                 inspectorView.invalidate()
             }
             inspector.observe(vm.currentMode) {
                 inspectorView.isVisible = it != InspectorMode.COMPONENT
+                gestureOverlayView.isVisible = it == InspectorMode.GESTURE_RECORDER
             }
         }
     }
@@ -116,34 +115,31 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             rootView.isVisible = false
             rootView.doOnPreDraw {
-                it.post {
+                Choreographer.getInstance().postFrameCallback {
                     a11yAutomatorService.takeScreenshot(
-                        Display.DEFAULT_DISPLAY, Dispatchers.IO.asExecutor(),
+                        Display.DEFAULT_DISPLAY, Dispatchers.Main.asExecutor(),
                         object : AccessibilityService.TakeScreenshotCallback {
                             override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
                                 try {
                                     result.hardwareBuffer.use { buffer ->
-                                        val raw = Bitmap.wrapHardwareBuffer(
+                                        screenshot = Bitmap.wrapHardwareBuffer(
                                             buffer, result.colorSpace
-                                        )
-                                        screenshot =
-                                            raw?.clip(binding.inspectorView.visibleBounds)
-                                        vm.pinScreenShot.notifySelfChanged(true)
+                                        )?.clip(binding.inspectorView.visibleBounds)
                                     }
                                 } catch (t: Throwable) {
                                     t.printStackTrace()
-                                    vm.toastText.postValue(R.string.screenshot_failed.str)
+                                    vm.makeToast(R.string.screenshot_failed.str)
                                 }
+                                vm.pinScreenShot.notifySelfChanged()
+                                rootView.isVisible = true
                             }
 
                             override fun onFailure(errorCode: Int) {
-                                vm.toastText.postValue(
-                                    R.string.format_screenshot_failed.format(errorCode)
-                                )
-                                vm.pinScreenShot.notifySelfChanged(true)
+                                vm.makeToast(R.string.format_screenshot_failed.format(errorCode))
+                                vm.pinScreenShot.notifySelfChanged()
+                                rootView.isVisible = true
                             }
                         })
-                    rootView.isVisible = true
                 }
             }
         }

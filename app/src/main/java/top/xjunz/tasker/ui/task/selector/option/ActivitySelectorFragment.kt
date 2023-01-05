@@ -15,8 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.ktx.observe
-import top.xjunz.tasker.util.PackageInfoLoader
 
 /**
  * @author xjunz 2022/10/08
@@ -58,7 +58,7 @@ class ActivitySelectorFragment : BaseComponentFragment() {
             binding.touchEater.isVisible = true
             activities.clear()
             with(Dispatchers.IO) {
-                PackageInfoLoader.loadPackageInfo(
+                PackageManagerBridge.loadPackageInfo(
                     info.packageName, PackageManager.GET_ACTIVITIES
                 )!!.activities.mapTo(activities) {
                     ensureActive()

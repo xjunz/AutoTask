@@ -149,7 +149,7 @@
     <string name="sort_by_install_time">按首次安装时间</string>
     <string name="reverse_order">倒序</string>
     <string name="show_system_apps">显示系统应用</string>
-    <string name="launch_activity">启动页</string>
+    <string name="launcher_activity">启动页</string>
     <string name="format_enable_floating_inspector"><![CDATA[使用<b>悬浮助手</b>帮助您快速选择%s]]></string>
     <string name="enable_floating_inspector">启用悬浮助手</string>
     <string name="enable">启用</string>
@@ -354,4 +354,8 @@
     <string name="retry">重试</string>
     <string name="prompt_discard_flow_changes">当前任务内容已修改，确定要放弃这些更改吗？</string>
     <string name="do_not_save">不保存更改直接退出</string>
+    <string name="activity">页面</string>
+    <string name="take_screenshot">屏幕截图</string>
+    <string name="text_operations">文本操作</string>
+    <string name="app_operations">应用操作</string>
 </resources>

@@ -12,9 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginVertical="4dp"
-        app:cardBackgroundColor="?colorSurface"
-        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
-        app:strokeColor="@color/material_on_surface_stroke">
+        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -37,10 +35,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textColor="?colorPrimary"
+                app:drawableStartCompat="@drawable/ic_hourglass_bottom_24px"
+                app:drawableTint="?colorPrimary"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintEnd_toStartOf="@+id/tv_badge"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -54,7 +55,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:ellipsize="end"
                 android:maxLines="5"
@@ -83,14 +84,14 @@
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 app:dividerColor="@color/material_on_surface_stroke"
                 app:layout_constraintTop_toBottomOf="@+id/tv_task_desc" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/ms_enabled"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
@@ -100,11 +101,11 @@
 
             <ImageButton
                 android:id="@+id/ib_edit"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginStart="16dp"
                 android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@{@string/edit_task}"
+                android:contentDescription="@string/edit"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/ms_enabled"
                 app:srcCompat="@drawable/ic_edit_24dp"
@@ -112,11 +113,11 @@
 
             <ImageButton
                 android:id="@+id/ib_track"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@{@string/track_task_flow}"
+                android:contentDescription="@string/track_task_flow"
                 app:layout_constraintStart_toEndOf="@+id/ib_delete"
                 app:layout_constraintTop_toTopOf="@+id/ms_enabled"
                 app:layout_goneMarginStart="16dp"
@@ -125,11 +126,11 @@
 
             <ImageButton
                 android:id="@+id/ib_delete"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@{@string/delete}"
+                android:contentDescription="@string/delete"
                 app:layout_constraintBottom_toBottomOf="@+id/ib_edit"
                 app:layout_constraintStart_toEndOf="@+id/ib_edit"
                 app:layout_constraintTop_toTopOf="@+id/ms_enabled"

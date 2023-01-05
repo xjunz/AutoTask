@@ -127,6 +127,8 @@ class AppletOption(
     var variantValueType: Int = 0
         private set
 
+    var minApiLevel: Int = -1
+
     /**
      * The index in all categories.
      */
@@ -310,6 +312,11 @@ class AppletOption(
             title += rep + s
         }
         return title
+    }
+
+    fun restrictApiLevel(minApiLevel: Int): AppletOption {
+        this.minApiLevel = minApiLevel
+        return this
     }
 
     fun hasCompositeTitle(): AppletOption {

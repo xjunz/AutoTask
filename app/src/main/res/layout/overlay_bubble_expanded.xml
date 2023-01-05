@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -79,22 +78,33 @@
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_game_pad"
                     style="@style/FloatingControllerImageButton"
-                    android:src="@drawable/ic_baseline_gamepad_24" />
+                    android:src="@drawable/ic_baseline_gamepad_24"
+                    android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_show_grid"
                     style="@style/FloatingControllerImageButton"
-                    android:src="@drawable/ic_baseline_grid_on_24" />
+                    android:contentDescription="@{@string/show_node_bounds}"
+                    android:src="@drawable/ic_baseline_grid_on_24"
+                    android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_pin_screenshot"
                     style="@style/FloatingControllerImageButton"
-                    android:src="@drawable/ic_outline_image_24" />
+                    android:src="@drawable/ic_outline_image_24"
+                    android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_layers"
                     style="@style/FloatingControllerImageButton"
-                    android:src="@drawable/ic_twotone_layers_24" />
+                    android:src="@drawable/ic_twotone_layers_24"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/ib_record"
+                    style="@style/FloatingControllerImageButton"
+                    android:src="@drawable/ic_baseline_play_arrow_24"
+                    android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_confirm"

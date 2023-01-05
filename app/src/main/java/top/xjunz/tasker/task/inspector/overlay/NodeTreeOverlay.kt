@@ -39,7 +39,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
 
     private val breadCrumbAdapter by lazy {
         inlineAdapter(nodeBreadCrumbs, ItemBreadCrumbsBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
+            binding.cvBreadCrumb.setAntiMoneyClickListener {
                 if (nodeBreadCrumbs.isNotEmpty())
                     vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
             }
@@ -52,7 +52,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
     private val nodeAdapter by lazy {
         inlineAdapter(childrenNodes, ItemNodeTreeBinding::class.java, {
             binding.root.setAntiMoneyClickListener {
-                vm.emphaticNode.value = childrenNodes[adapterPosition]
+                vm.highlightNode.value = childrenNodes[adapterPosition]
                 vm.showNodeTree.value = false
                 vm.makeToast(R.string.navigated_to_selected_node)
             }
@@ -68,7 +68,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             b.btnMore.isVisible = n.children.isNotEmpty()
             b.btnMore.text = n.children.size.toString()
             b.root.isSelected =
-                n == vm.emphaticNode.value || vm.emphaticNode.value?.isChildOf(n) == true
+                n == vm.highlightNode.value || vm.highlightNode.value?.isChildOf(n) == true
             if (!vm.shouldAnimateItems) return@inlineAdapter
             val staggerAnimOffsetMills = 30L
             val easeIn = AnimationUtils.loadAnimation(context, R.anim.mtrl_item_ease_enter)
@@ -92,8 +92,8 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
         inspector.observe(vm.showNodeTree) {
             if (rootView.isVisible == it) return@observe
             if (it) {
-                if (vm.emphaticNode.value != null) {
-                    vm.currentNodeTree.value = vm.emphaticNode.value
+                if (vm.highlightNode.value != null) {
+                    vm.currentNodeTree.value = vm.highlightNode.value
                     vm.makeToast(R.string.navigated_to_selected_node)
                 }
                 animateShow()

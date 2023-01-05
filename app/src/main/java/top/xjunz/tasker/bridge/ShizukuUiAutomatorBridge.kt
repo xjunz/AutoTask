@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.bridge
 
+import android.app.UiAutomation
 import androidx.test.uiautomator.GestureController
 import androidx.test.uiautomator.InteractionController
 import androidx.test.uiautomator.UiDevice
@@ -11,7 +12,7 @@ import androidx.test.uiautomator.UiDevice
 /**
  * @author xjunz 2022/09/30
  */
-class ShizukuUiAutomatorBridge : ContextUiAutomatorBridge() {
+class ShizukuUiAutomatorBridge(uiAutomation: UiAutomation) : ContextUiAutomatorBridge(uiAutomation) {
 
     override fun getInteractionController(): InteractionController {
         return InteractionController(this)

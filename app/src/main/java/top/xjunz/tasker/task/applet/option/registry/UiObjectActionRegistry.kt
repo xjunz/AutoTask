@@ -7,7 +7,6 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.singleArgAction
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -17,33 +16,27 @@ import top.xjunz.tasker.task.applet.option.AppletOption
  */
 class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    override val categoryNames: IntArray? = null
-
     private inline fun simpleUiObjectActionOption(
-        id: Int, title: Int, crossinline block: (AccessibilityNodeInfo) -> Boolean
+        title: Int, crossinline block: (AccessibilityNodeInfo) -> Boolean
     ): AppletOption {
-        return uiObjectActionOption<Any>(title, AppletValues.VAL_TYPE_IRRELEVANT) { node, _ ->
+        return uiObjectActionOption<Unit>(title) { node, _ ->
             block(node)
         }
     }
 
-    private inline fun <V> uiObjectActionOption(
-        title: Int,
-        valueType: Int,
-        crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
-    ): AppletOption {
-        return appletOption(title) {
-            singleArgAction<AccessibilityNodeInfo, V>(valueType) { node, value ->
-                requireNotNull(node) {
-                    "Node is not captured!"
-                }
-                if (node.refresh()) block(node, value) else false
+    private inline fun <reified V> uiObjectActionOption(
+        title: Int, crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
+    ) = appletOption(title) {
+        singleArgAction<AccessibilityNodeInfo, V> { node, value ->
+            requireNotNull(node) {
+                "Node is not captured!"
             }
+            if (node.refresh()) block(node, value) else false
         }
     }
 
     @AppletCategory(0x0001)
-    val click = simpleUiObjectActionOption(0x0001, R.string.format_perform_click) {
+    val click = simpleUiObjectActionOption(R.string.format_perform_click) {
         if (it.isClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_CLICK)
         } else {
@@ -53,7 +46,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
     @AppletCategory(0x0002)
-    val longClick = simpleUiObjectActionOption(0x0002, R.string.format_perform_long_click) {
+    val longClick = simpleUiObjectActionOption(R.string.format_perform_long_click) {
         if (it.isLongClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_LONG_CLICK)
         } else {
@@ -63,10 +56,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
     @AppletCategory(0x0010)
-    val setText = uiObjectActionOption<String>(
-        R.string.format_perform_input_text,
-        AppletValues.VAL_TYPE_TEXT
-    ) { node, value ->
+    val setText = uiObjectActionOption<String>(R.string.format_perform_input_text) { node, value ->
         if (!node.isEditable) false
         else {
             uiDevice.wrapUiObject2(node).text = value

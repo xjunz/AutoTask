@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.applet.anno.AppletCategory
  */
 class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    override val categoryNames: IntArray? = null
+
 
     @AppletCategory(0x0000)
     val isScreenPortrait = invertibleAppletOption(R.string.screen_orientation_portrait) {

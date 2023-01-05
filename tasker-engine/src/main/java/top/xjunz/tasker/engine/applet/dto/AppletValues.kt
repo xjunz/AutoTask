@@ -58,11 +58,12 @@ object AppletValues {
 
     inline fun <reified T> judgeValueType(): Int {
         return when (val clz = T::class.java) {
-            Int::class.java -> VAL_TYPE_LONG
+            Int::class.java, Int::class.javaObjectType -> VAL_TYPE_INT
             String::class.java -> VAL_TYPE_TEXT
-            Float::class.java -> VAL_TYPE_FLOAT
-            Long::class.java -> VAL_TYPE_LONG
+            Float::class.java, Float::class.javaObjectType -> VAL_TYPE_FLOAT
+            Long::class.java, Long::class.javaObjectType -> VAL_TYPE_LONG
             Distance::class.java -> VAL_TYPE_DISTANCE
+            Unit::class.java -> VAL_TYPE_IRRELEVANT
             else -> illegalArgument("type", clz.name)
         }
     }

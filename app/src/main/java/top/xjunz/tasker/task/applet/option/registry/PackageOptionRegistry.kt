@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.content.ComponentName
 import androidx.core.content.pm.PackageInfoCompat
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.*
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
@@ -15,7 +16,6 @@ import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.PackageInfoContext
 import top.xjunz.tasker.ui.task.selector.option.PackageInfoWrapper.Companion.wrapped
-import top.xjunz.tasker.util.PackageInfoLoader
 
 /**
  * @author xjunz 2022/09/22
@@ -30,11 +30,11 @@ class PackageOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueDescriber<Collection<String>> { value ->
         if (value.size == 1) {
             val first = value.first()
-            PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first
+            PackageManagerBridge.loadPackageInfo(first)?.wrapped()?.label ?: first
         } else {
             R.string.format_pkg_collection_desc.formatSpans(
                 value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                    (PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name)
+                    (PackageManagerBridge.loadPackageInfo(name)?.wrapped()?.label ?: name)
                 }.joinToString("、"), value.size.toString().foreColored()
             )
         }

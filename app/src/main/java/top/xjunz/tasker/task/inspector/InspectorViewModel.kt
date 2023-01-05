@@ -39,7 +39,7 @@ class InspectorViewModel {
 
     val showNodeTree = MutableLiveData(false)
 
-    val emphaticNode = MutableLiveData<StableNodeInfo>()
+    val highlightNode = MutableLiveData<StableNodeInfo>()
 
     var showExtraOptions: Boolean = true
 

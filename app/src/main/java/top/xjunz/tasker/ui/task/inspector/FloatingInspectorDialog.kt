@@ -38,6 +38,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ShizukuUtil
 
 /**
  * @author xjunz 2022/10/09
@@ -58,7 +59,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
         var mode = InspectorMode.COMPONENT
 
-        lateinit var doOnSucceeded: Runnable
+        var doOnSucceeded: Runnable? = null
 
         fun enableA11yServiceRemoteExecCmd() {
             val className = "${BuildConfig.APPLICATION_ID}/${A11yAutomatorService::class.java.name}"
@@ -90,7 +91,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     private fun showInspectorAndDismissSelf() {
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
-        viewModel.doOnSucceeded.run()
+        viewModel.doOnSucceeded?.run()
         dismiss()
         toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
     }
@@ -130,7 +131,8 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         toast(R.string.pls_enable_overlay_manually)
         launchIntentSafely(
             overlaySettingLauncher,
-            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).setData(Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                .setData(Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
         )
     }
 
@@ -184,7 +186,9 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                 launchOverlaySettings()
             } else {
                 if (viewModel.checkedViewId == R.id.rb_mode_shizuku) {
-                    viewModel.enableA11yService()
+                    ShizukuUtil.ensureShizukuEnv {
+                        viewModel.enableA11yService()
+                    }
                 } else if (viewModel.checkedViewId == R.id.rb_mode_a11y) {
                     launchAccessibilitySettings()
                 }

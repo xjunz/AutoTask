@@ -1,8 +1,4 @@
 
-<!--
-  ~ Copyright (c) 2022 xjunz. All rights reserved.
-  -->
-
 <resources>
     <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/md_theme_light_primary</item>

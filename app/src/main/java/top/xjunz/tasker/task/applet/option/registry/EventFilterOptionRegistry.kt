@@ -34,6 +34,4 @@ class EventFilterOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     val notificationReceived =
         eventFilterOption(Event.EVENT_ON_NOTIFICATION_RECEIVED, R.string.on_notification_received)
             .withResult<String>(R.string.notification_content)
-
-    override val categoryNames: IntArray? = null
 }

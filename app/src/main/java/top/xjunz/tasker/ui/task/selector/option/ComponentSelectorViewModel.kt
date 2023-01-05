@@ -10,10 +10,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.util.ApplicationIconLoader
-import top.xjunz.tasker.util.PackageInfoLoader
 
 /**
  * @author xjunz 2022/10/09
@@ -74,7 +74,7 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
         if (what == sortBy) return
         viewModelScope.launch(Dispatchers.Default) {
             if (!::allPackages.isInitialized) {
-                allPackages = PackageInfoLoader.loadAllPackages().map {
+                allPackages = PackageManagerBridge.loadAllPackages().map {
                     PackageInfoWrapper(it).also { pkgInfo ->
                         pkgInfo.selectedActCount = selectedActivities.count { comp ->
                             comp.packageName == pkgInfo.packageName

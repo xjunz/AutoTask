@@ -13,7 +13,12 @@ import android.graphics.Rect
 import android.os.Looper
 import android.text.TextPaint
 import android.util.AttributeSet
-import android.view.*
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewConfiguration
+import androidx.core.content.res.getColorOrThrow
+import androidx.core.content.res.getDimensionOrThrow
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.os.HandlerCompat
@@ -36,24 +41,18 @@ class LayoutInspectorView @JvmOverloads constructor(
     /**
      * The node which is currently being touched or being focused.
      */
-    var emphaticNode: StableNodeInfo? = null
+    var highlightNode: StableNodeInfo? = null
 
-    private val boundsPaint = Paint().apply {
+    private val normalPaint = Paint().apply {
         style = Style.STROKE
-        strokeWidth = 1.dpFloat
-        color = Color.RED
     }
 
-    private val emphaticPaint = Paint(boundsPaint).apply {
-        color = Color.YELLOW
-        strokeWidth = 2.dpFloat
-    }
+    private val highlightPaint = Paint(normalPaint)
 
     private val textPaint = TextPaint().apply {
         isAntiAlias = true
         color = Color.WHITE
         style = Style.FILL
-        textSize = 12.dpFloat
     }
 
     private val textBgPaint = Paint().apply {
@@ -81,14 +80,32 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     var onNodeSelectedListener: ((StableNodeInfo) -> Unit)? = null
 
-    private fun requireRootNode() = requireNotNull(rootNode) { "The root node is not set!" }
+    init {
+        context.obtainStyledAttributes(attrs, R.styleable.LayoutInspectorView).use {
+            normalPaint.color =
+                it.getColorOrThrow(R.styleable.LayoutInspectorView_inspectorStrokeColorNormal)
+            highlightPaint.color =
+                it.getColorOrThrow(R.styleable.LayoutInspectorView_inspectorStrokeColorHighlight)
+            normalPaint.strokeWidth =
+                it.getDimensionOrThrow(R.styleable.LayoutInspectorView_inspectorStrokeWidthNormal)
+            highlightPaint.strokeWidth =
+                it.getDimensionOrThrow(R.styleable.LayoutInspectorView_inspectorStrokeWidthHighlight)
+            textPaint.textSize =
+                it.getDimensionOrThrow(R.styleable.LayoutInspectorView_inspectorCoordinateTextSize)
+        }
+    }
 
-    private fun requireEmphaticNode() =
-        requireNotNull(emphaticNode) { "There is no emphatic node!" }
+    private fun requireRootNode() = requireNotNull(rootNode) {
+        "The root node is not set!"
+    }
+
+    private fun requireEmphaticNode() = requireNotNull(highlightNode) {
+        "There is no emphatic node!"
+    }
 
     fun clearNode() {
         rootNode = null
-        emphaticNode = null
+        highlightNode = null
         invalidate()
     }
 
@@ -104,7 +121,7 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     fun setRootNode(node: StableNodeInfo) {
         rootNode = node
-        emphaticNode = null
+        highlightNode = null
     }
 
     fun hasNodeInfo(): Boolean {
@@ -114,7 +131,7 @@ class LayoutInspectorView @JvmOverloads constructor(
     private fun offsetPointer(xOffset: Int, yOffset: Int) {
         pointerX = MathUtils.clamp(pointerX + xOffset, 0F, width.toFloat())
         pointerY = MathUtils.clamp(pointerY + yOffset, 0F, height.toFloat())
-        emphaticNode = findNodeUnder(pointerX.toInt(), pointerY.toInt())
+        highlightNode = findNodeUnder(pointerX.toInt(), pointerY.toInt())
         invalidate()
     }
 
@@ -176,18 +193,13 @@ class LayoutInspectorView @JvmOverloads constructor(
         return super.onKeyLongPress(keyCode, event)
     }
 
-    private fun drawEmphaticBounds(canvas: Canvas, node: StableNodeInfo) {
-        if (!shouldDrawNodes) {
-            emphaticPaint.color = Color.RED
-        } else {
-            emphaticPaint.color = Color.YELLOW
-        }
+    private fun drawHighlightBounds(canvas: Canvas, node: StableNodeInfo) {
         reusableRect.set(node.getVisibleBoundsIn(visibleBounds))
         reusableRect.inset(
-            (boundsPaint.strokeWidth / 2).toInt(),
-            (boundsPaint.strokeWidth / 2).toInt()
+            (normalPaint.strokeWidth / 2).toInt(),
+            (normalPaint.strokeWidth / 2).toInt()
         )
-        canvas.drawRect(reusableRect, emphaticPaint)
+        canvas.drawRect(reusableRect, highlightPaint)
     }
 
     private fun drawNormalNode(canvas: Canvas, node: StableNodeInfo) {
@@ -195,10 +207,10 @@ class LayoutInspectorView @JvmOverloads constructor(
             reusableRect.set(it.getVisibleBoundsIn(visibleBounds))
             if (reusableRect.width() != 0 && reusableRect.height() != 0) {
                 reusableRect.inset(
-                    (boundsPaint.strokeWidth / 2).toInt(),
-                    (boundsPaint.strokeWidth / 2).toInt()
+                    (normalPaint.strokeWidth / 2).toInt(),
+                    (normalPaint.strokeWidth / 2).toInt()
                 )
-                canvas.drawRect(reusableRect, boundsPaint)
+                canvas.drawRect(reusableRect, normalPaint)
                 drawNormalNode(canvas, it)
             }
         }
@@ -208,10 +220,10 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     private val reusableRect = Rect()
 
-    private fun drawTextAndBackground(canvas: Canvas, text: String, gravity: Int) {
+    private fun drawTextAndBackground(canvas: Canvas, text: String) {
         val fontMetrics = textPaint.fontMetrics
         textPaint.getTextBounds(text, 0, text.length, reusableRect)
-        val left = if (gravity == Gravity.END) width - reusableRect.width() else 0
+        val left = width - reusableRect.width()
         reusableRect.offset(left, -fontMetrics.ascent.toInt())
         canvas.drawRect(reusableRect, textBgPaint)
         canvas.drawText(text, left.toFloat(), -fontMetrics.ascent, textPaint)
@@ -220,16 +232,15 @@ class LayoutInspectorView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (rootNode != null && shouldDrawNodes) {
-            canvas.drawRect(requireRootNode().getVisibleBoundsIn(visibleBounds), boundsPaint)
+            canvas.drawRect(requireRootNode().getVisibleBoundsIn(visibleBounds), normalPaint)
             drawNormalNode(canvas, requireRootNode())
         }
-        if (emphaticNode != null) {
-            drawEmphaticBounds(canvas, requireEmphaticNode())
+        if (highlightNode != null) {
+            drawHighlightBounds(canvas, requireEmphaticNode())
         }
         // Draw coordinates
         drawTextAndBackground(
-            canvas, "x:${pointerX.toInt() + offsetX}, y:${pointerY.toInt() + offsetY}",
-            Gravity.END
+            canvas, "x:${pointerX.toInt() + offsetX}, y:${pointerY.toInt() + offsetY}"
         )
         if (pointerX >= 0) {
             reusableRect.set(
@@ -246,7 +257,7 @@ class LayoutInspectorView @JvmOverloads constructor(
     }
 
     override fun performClick(): Boolean {
-        emphaticNode?.let {
+        highlightNode?.let {
             onNodeClickedListener?.invoke(it)
         }
         return super.performClick()
@@ -259,10 +270,10 @@ class LayoutInspectorView @JvmOverloads constructor(
         pointerY = y
         if (rootNode != null) {
             val node = findNodeUnder(x.toInt(), y.toInt())
-            if (node != emphaticNode && node != null) {
+            if (node != highlightNode && node != null) {
                 onNodeSelectedListener?.invoke(node)
             }
-            emphaticNode = node
+            highlightNode = node
         }
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {

@@ -43,7 +43,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 vm.bubbleY = layoutParams.y
             }
             ibConfirm.setAntiMoneyClickListener {
-                if (vm.emphaticNode.isNull()) {
+                if (vm.highlightNode.isNull()) {
                     vm.makeToast(R.string.no_node_selected)
                     return@setAntiMoneyClickListener
                 }
@@ -116,10 +116,10 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                         /* no-op */
                     }
                     InspectorMode.COORDS -> {
-                        ibPinScreenshot.isVisible = false
                         ibGamePad.isVisible = true
-                        ibLayers.isVisible = false
-                        ibShowGrid.isVisible = false
+                    }
+                    InspectorMode.GESTURE_RECORDER -> {
+                        ibRecord.isVisible = true
                     }
                 }
             }

@@ -57,7 +57,7 @@
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/bg_selectable_primary_surface"
+                android:background="@drawable/bg_selectable_surface"
                 android:clipToPadding="false"
                 android:fadingEdgeLength="16dp"
                 android:overScrollMode="never"

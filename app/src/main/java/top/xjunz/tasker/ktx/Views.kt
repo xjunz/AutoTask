@@ -121,6 +121,18 @@ fun TextView.setDrawableStart(drawable: Drawable?) {
     setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null)
 }
 
+fun TextView.setDrawableEnd(@DrawableRes res: Int) {
+    if (res == View.NO_ID) {
+        setDrawableEnd(null)
+    } else {
+        setDrawableEnd(res.getDrawable())
+    }
+}
+
+fun TextView.setDrawableEnd(drawable: Drawable?) {
+    setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
+}
+
 fun View.beginAutoTransition(transition: Transition = AutoTransition()) {
     this as ViewGroup
     TransitionManager.beginDelayedTransition(

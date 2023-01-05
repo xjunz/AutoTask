@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -108,7 +107,12 @@
     <string name="press_home">回到桌面</string>
     <string name="format_perform_input_text">向%s中输入%s</string>
     <string name="perform_input_ref_text">匹配并输入文字(仅限文本框)</string>
-    <string name="force_stop_current_pkg">强行停止当前应用</string>
+    <string name="force_stop_current_app">强行停止当前应用</string>
+
+    <string name="format_force_stop">强行停止%s</string>
+    <string name="format_launch">启动%s</string>
+    <string name="specified_app">指定应用</string>
+    <string name="launch_activity">启动指定页面</string>
 
     <string name="notification_contains">通知内容包含</string>
     <string name="not_notification_contains">通知内容不包含</string>
@@ -117,4 +121,6 @@
     <string name="notification_matches">通知内容满足正则表达式</string>
     <string name="not_notification_matches">通知内容不满足正则表达式</string>
     <string name="on_notification_received">收到通知时</string>
+    <string name="open_notification_shade">下拉通知栏</string>
+    <string name="lock_screen">熄灭屏幕</string>
 </resources>

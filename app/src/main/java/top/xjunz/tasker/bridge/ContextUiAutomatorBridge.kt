@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.bridge
 
+import android.app.UiAutomation
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,12 +13,12 @@ import android.os.PowerManager
 import android.view.Display
 import android.view.ViewConfiguration
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.tasker.service.uiAutomation
 
 /**
  * @author xjunz 2023/01/03
  */
-abstract class ContextUiAutomatorBridge : UiAutomatorBridge(uiAutomation) {
+abstract class ContextUiAutomatorBridge(uiAutomation: UiAutomation) :
+    UiAutomatorBridge(uiAutomation) {
 
     private val ctx: Context get() = ContextBridge.getContext()
 

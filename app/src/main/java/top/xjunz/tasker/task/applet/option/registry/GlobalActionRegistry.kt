@@ -5,12 +5,9 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import android.accessibilityservice.AccessibilityService
+import android.os.Build
 import top.xjunz.tasker.R
-import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
-import top.xjunz.tasker.engine.applet.dto.AppletValues
-import top.xjunz.tasker.ktx.firstGroupValue
-import top.xjunz.tasker.privileged.ActivityManagerUtil
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -19,8 +16,6 @@ import top.xjunz.tasker.task.applet.option.AppletOption
  * @author xjunz 2022/11/15
  */
 class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
-
-    override val categoryNames: IntArray? = null
 
     private fun globalActionOption(title: Int, action: Int): AppletOption {
         return appletOption(title) {
@@ -44,38 +39,22 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     )
 
     @AppletCategory(0x0003)
-    val forceStop = appletOption(R.string.force_stop_current_pkg) {
-        pureAction {
-            ActivityManagerUtil.forceStopPackage(it.hitEvent.componentInfo.pkgName)
-        }
-    }.shizukuOnly()
+    val openNotificationShade = globalActionOption(
+        R.string.open_notification_shade,
+        AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
+    )
 
     @AppletCategory(0x0004)
-    val extractText = appletOption(R.string.format_extract_text) {
-        unaryArgProcessor<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
-            if (v == null) null else arg?.firstGroupValue(v)
-        }
-    }.withRefArgument<String>(R.string.text)
-        .withValueArgument<String>(R.string.regex)
-        .withResult<String>(R.string.extracted_text)
-        .withHelperText(R.string.help_extract_text)
-        .hasCompositeTitle()
+    val lockScreen = globalActionOption(
+        R.string.lock_screen,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN
+        else -1
+    ).restrictApiLevel(Build.VERSION_CODES.P)
 
     @AppletCategory(0x0005)
-    val copyText = appletOption(R.string.format_copy_text) {
-        singleArgAction<String, String>(AppletValues.VAL_TYPE_TEXT) { arg, v ->
-            if (arg == null && v == null) {
-                false
-            } else if (arg != null) {
-                ClipboardManagerBridge.copyToClipboard(arg)
-                true
-            } else if (v != null) {
-                ClipboardManagerBridge.copyToClipboard(v)
-                true
-            } else {
-                false
-            }
-        }
-    }.withArgument<String>(R.string.text)
-        .hasCompositeTitle()
+    val takeScreenshot = globalActionOption(
+        R.string.take_screenshot,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
+        else -1
+    ).restrictApiLevel(Build.VERSION_CODES.P)
 }

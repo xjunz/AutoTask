@@ -43,7 +43,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_badge"
-            android:text="@string/launch_activity"
+            android:text="@string/launcher_activity"
             android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
             android:textColor="?colorPrimary"
             app:layout_constraintBottom_toBottomOf="@+id/tv_activity_name"

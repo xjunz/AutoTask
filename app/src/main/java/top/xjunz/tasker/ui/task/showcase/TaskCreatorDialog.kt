@@ -15,9 +15,11 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.TaskMetadataEditor
+import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -57,7 +59,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
 
         }
         binding.tvRecordGesture.setAntiMoneyClickListener {
-
+            FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER).show(childFragmentManager)
         }
         binding.containerPreloadTasks.setAntiMoneyClickListener {
             PreloadTaskDialog().show(requireParentFragment().childFragmentManager)

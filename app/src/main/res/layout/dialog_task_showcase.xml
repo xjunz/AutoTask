@@ -52,8 +52,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
                     android:layout_marginEnd="4dp"
-                    android:insetTop="6dp"
-                    android:insetBottom="6dp"
                     android:text="@string/start_service"
                     android:textColor="@color/color_status_text"
                     app:backgroundTint="@color/color_status_tint"

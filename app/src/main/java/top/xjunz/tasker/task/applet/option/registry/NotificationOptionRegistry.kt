@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
 import top.xjunz.tasker.ktx.format
@@ -12,14 +13,13 @@ import top.xjunz.tasker.task.applet.anno.AppletCategory
 import top.xjunz.tasker.task.applet.flow.NotificationFlow
 import top.xjunz.tasker.task.applet.flow.PackageInfoContext
 import top.xjunz.tasker.ui.task.selector.option.PackageInfoWrapper.Companion.wrapped
-import top.xjunz.tasker.util.PackageInfoLoader
 
 /**
  * @author xjunz 2022/11/16
  */
 class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    override val categoryNames: IntArray? = null
+
 
     @AppletCategory(0x00_00)
     val pkgCollection = invertibleAppletOption(R.string.in_notification_pkg_names) {
@@ -29,11 +29,11 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueDescriber<Collection<String>> {
         if (it.size == 1) {
             val first = it.first()
-            PackageInfoLoader.loadPackageInfo(first)?.wrapped()?.label ?: first
+            PackageManagerBridge.loadPackageInfo(first)?.wrapped()?.label ?: first
         } else {
             R.string.format_pkg_collection_desc.format(
                 it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                    PackageInfoLoader.loadPackageInfo(name)?.wrapped()?.label ?: name
+                    PackageManagerBridge.loadPackageInfo(name)?.wrapped()?.label ?: name
                 }.joinToString("、"), it.size
             )
         }

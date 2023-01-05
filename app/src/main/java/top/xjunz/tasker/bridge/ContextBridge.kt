@@ -31,12 +31,12 @@ object ContextBridge {
 
     @Privileged
     private val privilegedContext by lazy {
-        generatePrivilegedContext()
+        createPrivilegedContext()
     }
 
     @Privileged
     private val appContext by lazy {
-        generateAppContext()
+        createAppContext()
     }
 
     @Anywhere
@@ -44,7 +44,7 @@ object ContextBridge {
         return if (isAppProcess) app else privilegedContext
     }
 
-    private fun generateAppContext(): Context {
+    private fun createAppContext(): Context {
         val activityThread: ActivityThread = ActivityThread.currentActivityThread()
         val sysCtx: Context = activityThread.systemContext
         val opPkgName = if (OsUtil.isInShellProcess) SHELL_APPLICATION_ID else "android"
@@ -67,7 +67,7 @@ object ContextBridge {
         }
     }
 
-    private fun generatePrivilegedContext(): Context {
+    private fun createPrivilegedContext(): Context {
         val activityThread: ActivityThread = ActivityThread.currentActivityThread()
         val sysCtx: Context = activityThread.systemContext
         return if (OsUtil.isInRootProcess) {

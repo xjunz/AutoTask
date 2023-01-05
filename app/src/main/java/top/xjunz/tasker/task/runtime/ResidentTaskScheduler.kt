@@ -86,7 +86,7 @@ class ResidentTaskScheduler(
     private val listener = object : XTask.OnStateChangedListener {
         override fun onStarted(runtime: TaskRuntime) {
             super.onStarted(runtime)
-            logcat("\n-------- $runtime Started --------")
+            logcat("\n******** $runtime Started ********")
         }
 
         override fun onError(runtime: TaskRuntime, t: Throwable) {

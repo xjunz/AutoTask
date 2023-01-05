@@ -4,11 +4,9 @@
 
 package top.xjunz.tasker.task.applet.option
 
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.task.applet.option.registry.*
-import kotlin.system.measureTimeMillis
 
 
 /**
@@ -43,6 +41,11 @@ object AppletOptionFactory : AppletFactory {
     private val uiObjectActionRegistry =
         UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
+    private val textActionRegistry = TextActionRegistry(FlowOptionRegistry.ID_TEXT_ACTION_REGISTRY)
+
+    private val appActionRegistry =
+        ApplicationActionRegistry(FlowOptionRegistry.ID_APP_ACTION_REGISTRY)
+
     val controlActionRegistry =
         ControlActionRegistry(FlowOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
@@ -59,6 +62,8 @@ object AppletOptionFactory : AppletFactory {
         // action
         globalActionRegistry,
         uiObjectActionRegistry,
+        textActionRegistry,
+        appActionRegistry,
         controlActionRegistry
     )
 
@@ -80,12 +85,9 @@ object AppletOptionFactory : AppletFactory {
 
     fun preloadIfNeeded() {
         if (!preloaded) {
-            logcat("preload time:" +
-                    measureTimeMillis {
-                        allRegistries.forEach {
-                            it.parseDeclaredOptions()
-                        }
-                    })
+            allRegistries.forEach {
+                it.parseDeclaredOptions()
+            }
             preloaded = true
         }
     }

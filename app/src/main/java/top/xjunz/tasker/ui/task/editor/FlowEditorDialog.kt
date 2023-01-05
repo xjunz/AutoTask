@@ -151,7 +151,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             binding.rvBreadCrumbs.isVisible = true
             binding.rvBreadCrumbs.adapter = FlowCascadeAdapter(vm)
         }
-        binding.tvSubtitle.setAntiMoneyClickListener {
+        binding.cvMetadata.setAntiMoneyClickListener {
+            binding.ibEdit.performClick()
+        }
+        binding.ibEdit.setAntiMoneyClickListener {
             TaskMetadataEditor().init(vm.metadata) {
                 vm.selectionLiveData.notifySelfChanged()
             }.show(childFragmentManager)
@@ -217,7 +220,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             adapter.notifyItemChanged(adapter.currentList.indexOf(it))
         }
         observe(vm.selectionLiveData) {
-            binding.tvSubtitle.isVisible = vm.isBase
+            binding.cvMetadata.isVisible = vm.isBase
             if (vm.isSelectingRef) {
                 if (!vm.hasCandidateReference(vm.flow)) {
                     toast(R.string.no_candidate_reference)
@@ -228,11 +231,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 }
             } else if (it.isEmpty()) {
                 if (vm.isBase) {
-                    binding.tvTitle.text = vm.metadata.title
+                    binding.tvTitle.text = R.string.edit_task.text
+                    binding.tvTaskName.text = vm.metadata.title
                     if (vm.metadata.description.isNullOrEmpty()) {
-                        binding.tvSubtitle.text = R.string.no_desc_provided.text.italic()
+                        binding.tvTaskDesc.text = R.string.no_desc_provided.text.italic()
                     } else {
-                        binding.tvSubtitle.text = vm.metadata.description
+                        binding.tvTaskDesc.text = vm.metadata.description
                     }
                 } else {
                     binding.tvTitle.text = R.string.edit_rules.text

@@ -89,7 +89,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         check(isPrivilegedProcess) {
             "You cannot access Shizuku UiAutomatorBridge from the host process!"
         }
-        ShizukuUiAutomatorBridge()
+        ShizukuUiAutomatorBridge(uiAutomation)
     }
 
     @Anywhere

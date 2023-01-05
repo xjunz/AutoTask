@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.applet.option.AppletOption.Companion.TITLE_NONE
  */
 abstract class AppletOptionRegistry(val id: Int) {
 
-    abstract val categoryNames: IntArray?
+    protected open val categoryNames: IntArray? = null
 
     fun parseDeclaredOptions() {
         val registeredId = mutableSetOf<Int>()
