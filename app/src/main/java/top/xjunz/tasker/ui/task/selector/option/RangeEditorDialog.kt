@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogRangeEditorBinding
-import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
@@ -28,7 +28,7 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
     private class InnerViewModel : ViewModel() {
 
-        var type: Int = AppletValues.VAL_TYPE_INT
+        var type: Int = Applet.VAL_TYPE_INT
 
         lateinit var title: CharSequence
 
@@ -43,9 +43,9 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
     protected open fun String.toNumberOrNull(): Number? {
         return when (viewModel.type) {
-            AppletValues.VAL_TYPE_INT -> toIntOrNull()
-            AppletValues.VAL_TYPE_FLOAT -> toFloatOrNull()
-            AppletValues.VAL_TYPE_LONG -> toLongOrNull()
+            Applet.VAL_TYPE_INT -> toIntOrNull()
+            Applet.VAL_TYPE_FLOAT -> toFloatOrNull()
+            Applet.VAL_TYPE_LONG -> toLongOrNull()
             else -> illegalArgument("number type", viewModel.type)
         }
     }
@@ -56,20 +56,20 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
     private fun compare(a: Number, b: Number): Int {
         return when (viewModel.type) {
-            AppletValues.VAL_TYPE_INT -> (a as Int).compareTo(b as Int)
-            AppletValues.VAL_TYPE_FLOAT -> (a as Float).compareTo(b as Float)
-            AppletValues.VAL_TYPE_LONG -> (a as Long).compareTo(b as Long)
+            Applet.VAL_TYPE_INT -> (a as Int).compareTo(b as Int)
+            Applet.VAL_TYPE_FLOAT -> (a as Float).compareTo(b as Float)
+            Applet.VAL_TYPE_LONG -> (a as Long).compareTo(b as Long)
             else -> illegalArgument("number type", viewModel.type)
         }
     }
 
     protected open fun configEditText(et: EditText) {
         when (viewModel.type) {
-            AppletValues.VAL_TYPE_INT, AppletValues.VAL_TYPE_LONG -> {
+            Applet.VAL_TYPE_INT, Applet.VAL_TYPE_LONG -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER
                 et.filters += DigitsKeyListener.getInstance("0123456789")
             }
-            AppletValues.VAL_TYPE_FLOAT -> {
+            Applet.VAL_TYPE_FLOAT -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             }
             else -> illegalArgument("number type", viewModel.type)

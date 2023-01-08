@@ -6,7 +6,6 @@ package top.xjunz.tasker.engine.applet.criterion
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -47,5 +46,5 @@ class LambdaCriterion<T : Any, V : Any>(
 
 inline fun <T : Any, reified V : Any> newCriterion(noinline matcher: ((T, V) -> Boolean))
         : Criterion<T, V> {
-    return LambdaCriterion(AppletValues.judgeValueType<V>(), matcher)
+    return LambdaCriterion(Applet.judgeValueType<V>(), matcher)
 }

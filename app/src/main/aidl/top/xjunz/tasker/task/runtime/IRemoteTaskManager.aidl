@@ -1,6 +1,6 @@
 // IRemoteTaskManager.aidl
 package top.xjunz.tasker.task.runtime;
-import top.xjunz.tasker.engine.task.dto.XTaskDTO;
+import top.xjunz.tasker.engine.dto.XTaskDTO;
 
 interface IRemoteTaskManager {
 

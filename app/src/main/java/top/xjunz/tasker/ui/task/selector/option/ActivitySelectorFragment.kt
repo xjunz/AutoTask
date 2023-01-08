@@ -17,6 +17,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ui.model.ActivityInfoWrapper
+import top.xjunz.tasker.ui.model.PackageInfoWrapper
 
 /**
  * @author xjunz 2022/10/08

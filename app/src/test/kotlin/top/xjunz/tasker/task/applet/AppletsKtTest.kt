@@ -8,7 +8,6 @@ import org.junit.Test
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -18,7 +17,7 @@ internal class AppletsKtTest {
 
     private class EmptyApplet : Applet() {
 
-        override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
+        override val valueType: Int = VAL_TYPE_IRRELEVANT
 
         override suspend fun apply(runtime: TaskRuntime) {
             /* no-op */

@@ -412,7 +412,7 @@ public class UiObject2 implements Searchable {
     /**
      * Clicks on this object, and waits for the given condition to become true.
      */
-    public <R> R clickAndWait(EventCondition<R> condition, long timeout) {
+    public <C> C clickAndWait(EventCondition<C> condition, long timeout) {
         return mGestureController.performGestureAndWait(condition, timeout,
                 mGestures.click(getVisibleCenter()));
     }

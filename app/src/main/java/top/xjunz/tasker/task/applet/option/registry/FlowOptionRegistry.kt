@@ -8,7 +8,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 
@@ -75,69 +75,69 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         )
     }
 
-    @AppletCategory(0x0000)
+    @AppletOrdinal(0x0000)
     val rootFlow = flowOption<RootFlow>(AppletOption.TITLE_NONE)
 
-    @AppletCategory(0x0001)
+    @AppletOrdinal(0x0001)
     val whenFlow = flowOption<When>(R.string._when)
 
-    @AppletCategory(0x0002)
+    @AppletOrdinal(0x0002)
     val ifFlow = flowOption<If>(R.string._if)
 
-    @AppletCategory(0x0003)
+    @AppletOrdinal(0x0003)
     val doFlow = flowOption<Do>(R.string._do)
 
-    @AppletCategory(0x0004)
+    @AppletOrdinal(0x0004)
     val elseIfFlow = flowOption<ElseIf>(R.string.else_if)
 
-    @AppletCategory(0x0005)
+    @AppletOrdinal(0x0005)
     val elseFlow = flowOption<Else>(R.string._else)
 
-    @AppletCategory(0x0005)
+    @AppletOrdinal(0x0005)
     val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
 
-    @AppletCategory(0x000F)
+    @AppletOrdinal(0x000F)
     val eventFlow = presetFlowOption<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
-    @AppletCategory(0x0010)
+    @AppletOrdinal(0x0010)
     val componentFlow = presetFlowOption<PackageFlow>(ID_PKG_OPTION_REGISTRY, R.string.current_app)
         .withResult<String>(R.string.package_name)
 
-    @AppletCategory(0x0011)
+    @AppletOrdinal(0x0011)
     val uiObjectFlow =
         presetFlowOption<UiObjectFlow>(ID_UI_OBJECT_OPTION_REGISTRY, R.string.ui_object_exists)
             .withResult<AccessibilityNodeInfo>(R.string.ui_object)
             .withResult<String>(R.string.matched_ui_object_text)
 
-    @AppletCategory(0x0012)
+    @AppletOrdinal(0x0012)
     val timeFlow = presetFlowOption<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
 
-    @AppletCategory(0x0013)
+    @AppletOrdinal(0x0013)
     val globalInfoFlow =
         presetFlowOption<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
 
-    @AppletCategory(0x0014)
+    @AppletOrdinal(0x0014)
     val notificationFlow = presetFlowOption<NotificationFlow>(
         ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification
     )
 
-    @AppletCategory(0x0020)
+    @AppletOrdinal(0x0020)
     val globalActionFlow =
         presetFlowOption<PhantomFlow>(ID_GLOBAL_ACTION_REGISTRY, R.string.global_actions)
 
-    @AppletCategory(0x0021)
+    @AppletOrdinal(0x0021)
     val uiObjectActionFlow =
         presetFlowOption<PhantomFlow>(ID_UI_OBJECT_ACTION_REGISTRY, R.string.ui_object_operations)
 
-    @AppletCategory(0x0022)
+    @AppletOrdinal(0x0022)
     val textActionFlow =
         presetFlowOption<PhantomFlow>(ID_TEXT_ACTION_REGISTRY, R.string.text_operations)
 
-    @AppletCategory(0x0023)
+    @AppletOrdinal(0x0023)
     val appActionFlow =
         presetFlowOption<PhantomFlow>(ID_APP_ACTION_REGISTRY, R.string.app_operations)
 
-    @AppletCategory(0x0024)
+    @AppletOrdinal(0x0024)
     val controlActionFlow =
         presetFlowOption<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
 

@@ -5,7 +5,7 @@
 package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -46,7 +46,7 @@ class LambdaReferenceAction<V>(
 inline fun <reified Arg, reified V> singleArgAction(
     crossinline action: (Arg?, V?) -> Boolean
 ): ReferenceAction<V> {
-    return LambdaReferenceAction(AppletValues.judgeValueType<V>()) { args, v, _ ->
+    return LambdaReferenceAction(Applet.judgeValueType<V>()) { args, v, _ ->
         action(args.single()?.casted(), v)
     }
 }
@@ -54,7 +54,7 @@ inline fun <reified Arg, reified V> singleArgAction(
 inline fun <reified ArgOrValue> unaryArgAction(
     crossinline action: (ArgOrValue) -> Boolean
 ): ReferenceAction<ArgOrValue> {
-    return LambdaReferenceAction(AppletValues.judgeValueType<ArgOrValue>()) { args, v, _ ->
+    return LambdaReferenceAction(Applet.judgeValueType<ArgOrValue>()) { args, v, _ ->
         action(requireNotNull(args.singleOrNull()?.casted() ?: v) {
             "Neither ref nor value is specified!"
         })

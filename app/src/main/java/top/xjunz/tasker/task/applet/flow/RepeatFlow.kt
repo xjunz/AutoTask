@@ -6,7 +6,6 @@ package top.xjunz.tasker.task.applet.flow
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -14,7 +13,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class RepeatFlow : Flow() {
 
-    override val valueType: Int = AppletValues.VAL_TYPE_INT
+    override val valueType: Int = VAL_TYPE_INT
 
     private var count: Int = 0
 

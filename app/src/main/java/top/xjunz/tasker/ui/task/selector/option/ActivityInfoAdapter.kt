@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import top.xjunz.tasker.databinding.ItemActivityInfoBinding
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ui.model.ActivityInfoWrapper
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**

@@ -13,10 +13,10 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
 import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
-import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.applet.value.Distance
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter

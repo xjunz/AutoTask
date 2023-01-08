@@ -209,7 +209,7 @@
     </string>
     <string name="format_scoped_distance_name">到%s%s边缘的距离</string>
     <string name="format_error_min_greater_than_max">%1$s不能大于%2$s</string>
-    <string name="format_error_min_max_not_in_scope">当前选中单位为\"%s\"，最大值和最小值范围为0到1</string>
+    <string name="format_error_min_max_not_in_scope">当前选中单位为\"%s\"，取值范围为%d到%d</string>
     <string name="format_less_than">小于等于%s</string>
     <string name="format_larger_than">大于等于%s</string>
     <string name="format_percent_less_than">小于等于%d%%</string>
@@ -358,4 +358,9 @@
     <string name="take_screenshot">屏幕截图</string>
     <string name="text_operations">文本操作</string>
     <string name="app_operations">应用操作</string>
+    <string name="rename">重命名</string>
+    <string name="format_long_click">长按%s</string>
+    <string name="format_coordinate">坐标(%d, %d)</string>
+    <string name="format_drag">长按并拖动%s到%s</string>
+    <string name="format_swipe_ui_object">滑动%s</string>
 </resources>

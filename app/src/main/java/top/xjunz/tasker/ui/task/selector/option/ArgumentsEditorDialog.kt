@@ -6,9 +6,8 @@ package top.xjunz.tasker.ui.task.selector.option
 
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
@@ -100,26 +99,12 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val adapter by lazy {
         inlineAdapter(option.arguments, ItemArgumentEditorBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
-                val which = adapterPosition
-                val arg = option.arguments[which]
-                if (arg.isTolerant) {
-                    val popup = PopupMenu(requireContext(), it, Gravity.END)
-                    popup.menu.add(R.string.refer_to.format(arg.name))
-                    popup.menu.add(R.string.specify_value.format(arg.name))
-                    popup.show()
-                    popup.setOnMenuItemClickListener set@{ item ->
-                        when (popup.menu.indexOf(item)) {
-                            0 -> showReferenceSelectorDialog(which, arg, null)
-                            1 -> showValueInputDialog(which, arg)
-                        }
-                        return@set true
-                    }
-                } else if (arg.isReferenceOnly) {
-                    showReferenceSelectorDialog(which, arg, applet.references[which])
-                } else if (arg.isValueOnly) {
-                    showValueInputDialog(which, arg)
-                }
+            binding.btnRefer.setAntiMoneyClickListener {
+                val pos = adapterPosition
+                showReferenceSelectorDialog(pos, option.arguments[pos], applet.references[pos])
+            }
+            binding.btnSpecify.setAntiMoneyClickListener {
+                showValueInputDialog(adapterPosition, option.arguments[adapterPosition])
             }
             binding.tvValue.setAntiMoneyClickListener {
                 val position = adapterPosition
@@ -161,11 +146,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 binding.tvValue.setDrawableStart(View.NO_ID)
                 binding.tvValue.isEnabled = false
             }
-            if (arg.isValueOnly) {
-                binding.ivEnter.setImageResource(R.drawable.ic_edit_24dp)
-            } else {
-                binding.ivEnter.setImageResource(R.drawable.ic_baseline_chevron_right_24)
-            }
+            binding.btnRefer.isVisible = !arg.isValueOnly
+            binding.btnSpecify.isVisible = !arg.isReferenceOnly
         }
     }
 

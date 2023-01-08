@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.engine.util
+package top.xjunz.tasker.engine.dto
 
-import top.xjunz.tasker.engine.applet.dto.AppletDTO
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import java.util.zip.CRC32
 
 /**

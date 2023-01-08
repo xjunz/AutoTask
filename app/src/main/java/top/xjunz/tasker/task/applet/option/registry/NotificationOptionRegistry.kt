@@ -9,19 +9,17 @@ import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
 import top.xjunz.tasker.ktx.format
-import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.NotificationFlow
 import top.xjunz.tasker.task.applet.flow.PackageInfoContext
-import top.xjunz.tasker.ui.task.selector.option.PackageInfoWrapper.Companion.wrapped
+import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
  * @author xjunz 2022/11/16
  */
 class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-
-
-    @AppletCategory(0x00_00)
+    @AppletOrdinal(0x00_00)
     val pkgCollection = invertibleAppletOption(R.string.in_notification_pkg_names) {
         collectionCriterion<NotificationFlow.NotificationInfo, String> {
             it.packageName
@@ -39,14 +37,14 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    @AppletCategory(0x00_01)
+    @AppletOrdinal(0x00_01)
     val contentContains = invertibleAppletOption(R.string.notification_contains) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle?.contains(v) == true
         }
     }
 
-    @AppletCategory(0x00_03)
+    @AppletOrdinal(0x00_02)
     val contentMatches = invertibleAppletOption(R.string.notification_matches) {
         newCriterion<PackageInfoContext, String> { t, v ->
             t.panelTitle?.matches(Regex(v)) == true

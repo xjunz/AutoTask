@@ -9,12 +9,10 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.criterion.BoundsCriterion
-import top.xjunz.tasker.engine.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
-import top.xjunz.tasker.engine.applet.dto.AppletValues
-import top.xjunz.tasker.engine.applet.dto.AppletValues.rawType
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
+import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.task.applet.isAttached
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -69,7 +67,7 @@ open class AppletOptionClickHandler(
                 DateTimeRangeEditorDialog().setRange(
                     value?.firstOrNull() ?: System.currentTimeMillis(),
                     value?.lastOrNull() ?: System.currentTimeMillis()
-                ).setType(AppletValues.VAL_TYPE_LONG).setTitle(title)
+                ).setType(Applet.VAL_TYPE_LONG).setTitle(title)
                     .doOnCompletion { start, end ->
                         applet.value = listOf(start, end)
                         onCompleted()
@@ -133,7 +131,7 @@ open class AppletOptionClickHandler(
                     .show(fragmentManager)
             }
 
-            applet.valueType == AppletValues.VAL_TYPE_TEXT -> {
+            applet.valueType == Applet.VAL_TYPE_TEXT -> {
                 val dialog = TextEditorDialog().configEditText {
                     it.setMaxLength(64)
                 }.init(title, applet.value?.casted()) {
@@ -147,7 +145,7 @@ open class AppletOptionClickHandler(
                 dialog.show(fragmentManager)
             }
 
-            applet.valueType == AppletValues.VAL_TYPE_INT -> {
+            applet.valueType == Applet.VAL_TYPE_INT -> {
                 TextEditorDialog().configEditText {
                     it.setMaxLength(16)
                     it.configInputType(Int::class.java)

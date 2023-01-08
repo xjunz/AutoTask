@@ -25,6 +25,8 @@
     <string name="not_pkg_name_ends_with">包名不以指定文本结束</string>
     <string name="pkg_name_matches_pattern">包名满足正则表达式</string>
     <string name="not_pkg_name_matches_pattern">包名不满足正则表达式</string>
+    <string name="pkg_name_contains_text">包名包含指定文本</string>
+    <string name="not_pkg_name_contains_text">包名不包含指定文本</string>
     <string name="contains_text">包含指定文本</string>
     <string name="not_contains_text">不包含指定文本</string>
     <string name="in_pkg_collection">是指定应用程序</string>
@@ -113,6 +115,9 @@
     <string name="format_launch">启动%s</string>
     <string name="specified_app">指定应用</string>
     <string name="launch_activity">启动指定页面</string>
+
+    <string name="format_click">点击%s</string>
+    <string name="specified_coordinate">指定坐标</string>
 
     <string name="notification_contains">通知内容包含</string>
     <string name="not_notification_contains">通知内容不包含</string>

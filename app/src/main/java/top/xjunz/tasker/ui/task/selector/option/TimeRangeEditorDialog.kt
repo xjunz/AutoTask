@@ -12,6 +12,7 @@ import android.widget.EditText
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.task.applet.util.IntValueUtil
 
 /**
  * @author xjunz 2022/10/27
@@ -33,8 +34,7 @@ class TimeRangeEditorDialog : RangeEditorDialog() {
     }
 
     override fun Number.toStringOrNull(): String {
-        this as Int
-        return "%02d:%02d:%02d".format(this shr 16 and 0xFF, this shr 8 and 0xFF, this and 0xFF)
+        return "%02d:%02d:%02d".format(*IntValueUtil.parseTime(this as Int))
     }
 
     override fun configEditText(et: EditText) {

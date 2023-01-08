@@ -11,9 +11,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.StaticError
-import top.xjunz.tasker.engine.applet.dto.AppletDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.ChecksumUtil
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.engine.util.ChecksumUtil
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast

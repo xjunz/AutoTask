@@ -55,7 +55,7 @@ abstract class ContextUiAutomatorBridge(uiAutomation: UiAutomation) :
                 @Suppress("DEPRECATION")
                 pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
             }
-        return resolveInfo?.activityInfo?.packageName
+        return resolveInfo?.resolvePackageName
     }
 
     final override fun getScaledMinimumFlingVelocity(): Int {

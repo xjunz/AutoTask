@@ -4,8 +4,6 @@
 
 package android.app;
 
-import android.content.Context;
-
 /**
  * @author xjunz 2023/01/03
  */
@@ -15,7 +13,7 @@ public class ActivityThread {
         throw new RuntimeException("Stub!");
     }
 
-    public Context getSystemContext() {
+    public ContextImpl getSystemContext() {
         throw new RuntimeException("Stub!");
     }
 }

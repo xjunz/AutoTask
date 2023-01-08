@@ -19,7 +19,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -125,7 +124,7 @@ class AppletCandidatesAdapter(
                 }
             } else {
                 it.ibAction.isVisible = applet.isInvertible
-                if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
+                if (applet.valueType == Applet.VAL_TYPE_TEXT) {
                     it.tvDesc.setTypeface(null, Typeface.ITALIC)
                 } else {
                     it.tvDesc.setTypeface(null, Typeface.NORMAL)

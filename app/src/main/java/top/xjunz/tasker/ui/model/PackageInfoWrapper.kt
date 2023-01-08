@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.ui.task.selector.option
+package top.xjunz.tasker.ui.model
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
+import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**

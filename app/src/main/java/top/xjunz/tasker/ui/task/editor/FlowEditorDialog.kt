@@ -246,10 +246,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 binding.tvTitle.text = R.string.format_selection_count.format(it.size)
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.quit_multi_selection.text)
             }
-            binding.appBar.beginAutoTransition()
             binding.ibMenu.isVisible = it.isNotEmpty()
             if (it.isNotEmpty()) {
-                val popup = menuHelper.createBatchMenu(binding.ibMenu, it)
+                val popup = if (it.size > 1) menuHelper.createBatchMenu(binding.ibMenu, it)
+                else menuHelper.createStandaloneMenu(binding.ibMenu, it.single())
                 binding.ibMenu.setOnTouchListener(popup.dragToOpenListener)
                 binding.ibMenu.setAntiMoneyClickListener {
                     popup.show()
@@ -321,6 +321,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     gvm.refEditor.getReferenceChangedApplets().forEach {
                         vm.onAppletChanged.value = it
                     }
+                    gvm.refEditor.reset()
                 }.show(childFragmentManager)
         }
         mvm.doOnAction(this, AppletOption.ACTION_EDIT_VALUE) { data ->

@@ -21,6 +21,7 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.configHeaderTitle
 import top.xjunz.tasker.ktx.indexOf
+import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -80,7 +81,8 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                             removed.add(it)
                         }
                     }
-                    viewModel.selections.removeAll(removed)
+                    if (viewModel.selections.removeAll(removed))
+                        viewModel.selectionLiveData.notifySelfChanged()
                 }
                 super.doRemove(parent, from)
             }
@@ -151,7 +153,11 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                     viewModel.toggleMultiSelection(applet)
                 } else {
                     viewModel.singleSelect(adapterPosition)
-                    menuHelper.showStandaloneMenu(view, applet)
+                    val popup = menuHelper.createStandaloneMenu(view, applet)
+                    popup.setOnDismissListener {
+                        viewModel.singleSelect(-1)
+                    }
+                    popup.show()
                 }
             }
             binding.ibAction.setAntiMoneyClickListener {

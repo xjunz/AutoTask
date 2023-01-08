@@ -172,23 +172,17 @@ class XTask {
 
         @SerialName("ty") var taskType: Int = TYPE_RESIDENT,
 
-        @SerialName("d")
-        var description: String? = null,
+        @SerialName("d") var description: String? = null,
 
-        @SerialName("c")
-        var creationTimestamp: Long = -1,
+        @SerialName("c") var creationTimestamp: Long = -1,
 
-        @SerialName("m")
-        var modificationTimestamp: Long = -1,
+        @SerialName("m") var modificationTimestamp: Long = -1,
 
-        @SerialName("s")
-        var checksum: Long = -1,
+        @SerialName("s") var checksum: Long = -1,
 
-        @SerialName("a")
-        var author: String? = null,
+        @SerialName("a") var author: String? = null,
 
-        @SerialName("p")
-        var isPreload: Boolean = false
+        @SerialName("p") var isPreload: Boolean = false
     ) : Parcelable {
 
         inline val identifier get() = checksum.toString().md5.substring(0, 7)

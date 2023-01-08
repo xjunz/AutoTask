@@ -16,8 +16,8 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
-import top.xjunz.tasker.engine.value.Distance
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.value.Distance
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
@@ -101,10 +101,25 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                 )
                 return@setAntiMoneyClickListener
             }
-            if (viewModel.unit >= 2
+            if (viewModel.unit in Distance.UNIT_SCREEN_WIDTH..Distance.UNIT_PARENT_HEIGHT
                 && (min != null && min !in 0F..1F || (max != null && max !in 0F..1F))
             ) {
-                toastAndShake(R.string.format_error_min_max_not_in_scope.format(binding.menuUnit.text))
+                toastAndShake(
+                    R.string.format_error_min_max_not_in_scope.format(
+                        binding.menuUnit.text, 0, 1
+                    )
+                )
+                return@setAntiMoneyClickListener
+            }
+            if (viewModel.unit in Distance.UNIT_PX..Distance.UNIT_DP
+                && (min != null && min !in 0F..Distance.MAX_RANGE_VALUE ||
+                        (max != null && max !in 0F..Distance.MAX_RANGE_VALUE))
+            ) {
+                toastAndShake(
+                    R.string.format_error_min_max_not_in_scope.format(
+                        binding.menuUnit.text, 0, Distance.MAX_RANGE_VALUE.toInt()
+                    )
+                )
                 return@setAntiMoneyClickListener
             }
             viewModel.distance.let {

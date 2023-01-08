@@ -5,7 +5,6 @@
 package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -22,7 +21,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     inline val requiredSize get() = if (minSize == maxSize) minSize else -1
 
-    override val valueType: Int = AppletValues.VAL_TYPE_IRRELEVANT
+    override val valueType: Int = VAL_TYPE_IRRELEVANT
 
     protected open fun shouldSkipAll(runtime: TaskRuntime): Boolean = false
 

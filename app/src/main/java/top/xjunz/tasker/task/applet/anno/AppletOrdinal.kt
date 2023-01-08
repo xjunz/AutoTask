@@ -11,7 +11,7 @@ import androidx.annotation.Keep
  * |  :----: |:----: | :----:  |
  * |id|│|index|
  *
- * The first 8 bits of [categoryId] is the category id and the last 8 bits of [categoryId] is
+ * The first 8 bits of [ordinal] is the category id and the last 8 bits of [ordinal] is
  * the index in the category.
  *
  * @author xjunz 2022/09/22
@@ -19,4 +19,4 @@ import androidx.annotation.Keep
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD)
 @Keep
-annotation class AppletCategory(val categoryId: Int)
+annotation class AppletOrdinal(val ordinal: Int)

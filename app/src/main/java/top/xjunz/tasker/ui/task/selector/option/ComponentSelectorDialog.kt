@@ -23,6 +23,8 @@ import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.ui.model.ActivityInfoWrapper
+import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 

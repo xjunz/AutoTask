@@ -12,7 +12,6 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -52,7 +51,7 @@ class AppletOperationMenuHelper(
         return popup
     }
 
-    fun showStandaloneMenu(anchor: View, applet: Applet) {
+    fun createStandaloneMenu(anchor: View, applet: Applet): PopupMenu {
         val popup = PopupListMenu(
             anchor.context, anchor, Gravity.END, 0, R.style.FlowEditorPopupMenuStyle
         )
@@ -86,7 +85,7 @@ class AppletOperationMenuHelper(
             }
             val option = factory.requireOption(applet)
             // Not editable
-            if (applet.valueType == AppletValues.VAL_TYPE_IRRELEVANT && option.arguments.isEmpty()) {
+            if (applet.valueType == Applet.VAL_TYPE_IRRELEVANT && option.arguments.isEmpty()) {
                 menu.removeItem(R.id.item_edit)
             }
             // Not removable
@@ -139,10 +138,7 @@ class AppletOperationMenuHelper(
                 onMenuItemClick(anchor, applet, it.itemId, it.title)
             }
         }
-        popup.setOnDismissListener {
-            viewModel.singleSelect(-1)
-        }
-        popup.show()
+        return popup
     }
 
     private fun onBatchMenuItemClick(

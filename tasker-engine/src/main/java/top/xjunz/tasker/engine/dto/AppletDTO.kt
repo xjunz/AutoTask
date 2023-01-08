@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.engine.applet.dto
+package top.xjunz.tasker.engine.dto
 
 import android.os.Parcel
 import android.os.Parcelable
-import io.ktor.util.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.readBool
@@ -14,8 +13,6 @@ import top.xjunz.shared.ktx.readMap
 import top.xjunz.shared.ktx.writeBool
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.dto.AppletValues.deserializeValue
-import top.xjunz.tasker.engine.applet.dto.AppletValues.serializeValue
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import java.util.zip.CRC32
 
@@ -35,7 +32,7 @@ class AppletDTO(
     @SerialName("i")
     private val isInverted: Boolean = false,
     @SerialName("v")
-    private val literal: String? = null,
+    private val serialized: String? = null,
     @SerialName("c")
     private val comment: String? = null,
     @SerialName("q")
@@ -78,7 +75,7 @@ class AppletDTO(
             update(isAnd.toInt())
             update(isEnabled.toInt())
             update(isInverted.toInt())
-            literal?.let {
+            serialized?.let {
                 update(it.toByteArray())
             }
             refids?.forEach { (t, u) ->
@@ -110,14 +107,8 @@ class AppletDTO(
          */
         fun Applet.toDTO(): AppletDTO {
             val dto = AppletDTO(
-                id,
-                isAnd,
-                isEnabled,
-                isInverted,
-                serializeValue(value),
-                comment,
-                refids.emptyToNull(),
-                references.emptyToNull(),
+                id, isAnd, isEnabled, isInverted, serializeValue(), comment,
+                refids.emptyToNull(), references.emptyToNull(),
             )
             if (this is Flow) {
                 dto.elements = if (size == 0) null else Array(size) {
@@ -141,8 +132,7 @@ class AppletDTO(
                 prototype.add(it.toApplet(registry))
             }
         }
-        if (literal != null)
-            prototype.value = prototype.deserializeValue(literal)
+        if (serialized != null) prototype.deserializeValue(serialized)
         return prototype
     }
 
@@ -151,7 +141,7 @@ class AppletDTO(
         parcel.writeBool(isAnd)
         parcel.writeBool(isEnabled)
         parcel.writeBool(isInverted)
-        parcel.writeString(literal)
+        parcel.writeString(serialized)
         parcel.writeString(comment)
         parcel.writeMap(refids)
         parcel.writeMap(references)

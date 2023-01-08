@@ -6,7 +6,6 @@ package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -30,8 +29,17 @@ open class LambdaAction<V>(
     }
 }
 
+inline fun <reified V> valueAction(crossinline block: (V) -> Boolean): Action<*> {
+    return LambdaAction<V>(Applet.judgeValueType<V>()) { v, _ ->
+        check(v != null) {
+            "Value is not defined!"
+        }
+        block(v)
+    }
+}
+
 inline fun simpleAction(crossinline block: (TaskRuntime) -> Boolean): Action<*> {
-    return LambdaAction<Any>(AppletValues.VAL_TYPE_IRRELEVANT) { _, runtime ->
+    return LambdaAction<Any>(Applet.VAL_TYPE_IRRELEVANT) { _, runtime ->
         block(runtime)
     }
 }

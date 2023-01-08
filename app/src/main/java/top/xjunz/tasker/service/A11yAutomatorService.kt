@@ -163,13 +163,16 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        instance?.clear()
-        runningState.value = false
         if (::taskScheduler.isInitialized) {
             taskScheduler.destroy()
         }
         if (isInspectorShown()) inspector.dismiss()
+        if (!launchedInInspectorMode) {
+            uiAutomationHidden.disconnect()
+        }
+        instance?.clear()
+        runningState.value = false
+        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
     /**
@@ -191,9 +194,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun destroy() {
-        if (isRunning && !launchedInInspectorMode) {
-            uiAutomationHidden.disconnect()
-        }
         disableSelf()
     }
 

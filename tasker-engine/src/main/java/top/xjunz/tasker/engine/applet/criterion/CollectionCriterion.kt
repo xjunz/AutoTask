@@ -4,7 +4,7 @@
 
 package top.xjunz.tasker.engine.applet.criterion
 
-import top.xjunz.tasker.engine.applet.dto.AppletValues
+import top.xjunz.tasker.engine.applet.base.Applet
 
 /**
  * @author xjunz 2022/08/14
@@ -12,16 +12,16 @@ import top.xjunz.tasker.engine.applet.dto.AppletValues
 class CollectionCriterion<T : Any, V : Any>(
     rawType: Int,
     private inline val getValue: T.() -> V?
-) : Criterion<T, Collection<V>>() {
+) : Criterion<T, List<V>>() {
 
     override val valueType: Int = collectionTypeOf(rawType)
 
-    override fun matchTarget(target: T, value: Collection<V>): Boolean {
+    override fun matchTarget(target: T, value: List<V>): Boolean {
         return value.contains(target.getValue())
     }
 }
 
 inline fun <T : Any, reified V : Any> collectionCriterion(noinline block: (T) -> V?)
         : CollectionCriterion<T, V> {
-    return CollectionCriterion(AppletValues.judgeValueType<V>(), block)
+    return CollectionCriterion(Applet.judgeValueType<V>(), block)
 }

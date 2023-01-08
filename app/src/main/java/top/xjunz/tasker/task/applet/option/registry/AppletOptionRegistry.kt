@@ -6,7 +6,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.task.applet.anno.AppletCategory
+import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOption.Companion.TITLE_NONE
 
@@ -22,7 +22,7 @@ abstract class AppletOptionRegistry(val id: Int) {
     fun parseDeclaredOptions() {
         val registeredId = mutableSetOf<Int>()
         allOptions = javaClass.declaredFields.mapNotNull m@{
-            val anno = it.getDeclaredAnnotation(AppletCategory::class.java) ?: return@m null
+            val anno = it.getDeclaredAnnotation(AppletOrdinal::class.java) ?: return@m null
             val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
@@ -31,7 +31,7 @@ abstract class AppletOptionRegistry(val id: Int) {
             else it.name.hashCode() and 0xFFFF
             check(registeredId.add(appletId))
             option.appletId = appletId
-            option.categoryId = anno.categoryId
+            option.categoryId = anno.ordinal
             it.isAccessible = accessible
             return@m option
         }.sorted()

@@ -565,6 +565,10 @@ public class UiDevice implements Searchable {
         return getInteractionController().clickNoSync(x, y);
     }
 
+    public boolean longClick(int x, int y) {
+       return getInteractionController().longTapNoSync(x, y);
+    }
+
     /**
      * Performs a swipe from one coordinate to another using the number of steps
      * to determine smoothness and speed. Each step execution is throttled to 5ms

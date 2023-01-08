@@ -6,8 +6,8 @@ package top.xjunz.tasker.task.runtime
 
 import android.util.ArraySet
 import top.xjunz.tasker.annotation.Privileged
+import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.engine.task.dto.XTaskDTO
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 
 /**

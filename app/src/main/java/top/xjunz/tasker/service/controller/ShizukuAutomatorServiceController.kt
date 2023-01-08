@@ -10,7 +10,7 @@ import android.os.IInterface
 import androidx.lifecycle.MutableLiveData
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.engine.task.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.service.IRemoteAutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.task.runtime.LocalTaskManager

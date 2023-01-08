@@ -9,7 +9,6 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.configInputType
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.show
@@ -30,7 +29,7 @@ class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
     fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         applet as Action<*>
         when {
-            option.arguments.isEmpty() && applet.valueType == AppletValues.VAL_TYPE_IRRELEVANT -> onCompleted()
+            option.arguments.isEmpty() && applet.valueType == Applet.VAL_TYPE_IRRELEVANT -> onCompleted()
 
             option == factory.controlActionRegistry.delayAction -> {
                 TimeIntervalEditorDialog().init(option.currentTitle, applet.value?.casted() ?: 0) {
@@ -40,7 +39,7 @@ class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
             }
 
             option.arguments.isEmpty() -> {
-                if (applet.valueType == AppletValues.VAL_TYPE_INT) {
+                if (applet.valueType == Applet.VAL_TYPE_INT) {
                     TextEditorDialog().configEditText {
                         it.setMaxLength(16)
                         it.configInputType(Int::class.java)

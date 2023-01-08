@@ -4,8 +4,8 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -45,7 +45,41 @@ abstract class Applet {
 
         const val MAX_REFERENCE_ID_LENGTH = 12
 
-        fun collectionTypeOf(type: Int) = type or AppletValues.MASK_VAL_TYPE_COLLECTION
+        const val VAL_TYPE_IRRELEVANT = 0
+        const val VAL_TYPE_TEXT = 1
+
+        @Deprecated("Unsupported! Use [Applet.isInverted] to control boolean value.")
+        const val VAL_TYPE_BOOL = VAL_TYPE_IRRELEVANT
+        const val VAL_TYPE_INT = 3
+        const val VAL_TYPE_FLOAT = 4
+        const val VAL_TYPE_LONG = 5
+
+        /**
+         * Composed long value in bitwise.
+         */
+        const val VAL_TYPE_BITS = VAL_TYPE_LONG
+
+        private val SEPARATOR = Char(0).toString()
+
+        private const val SERIALIZED_NULL_VALUE_IN_COLLECTION = ""
+
+        /**
+         * Bit mask for collection value type.
+         */
+        internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
+
+        fun collectionTypeOf(type: Int) = type or MASK_VAL_TYPE_COLLECTION
+
+        inline fun <reified T> judgeValueType(): Int {
+            return when (val clz = T::class.java) {
+                Int::class.java, Int::class.javaObjectType -> VAL_TYPE_INT
+                String::class.java -> VAL_TYPE_TEXT
+                Float::class.java, Float::class.javaObjectType -> VAL_TYPE_FLOAT
+                Long::class.java, Long::class.javaObjectType -> VAL_TYPE_LONG
+                Unit::class.java -> VAL_TYPE_IRRELEVANT
+                else -> illegalArgument("type", clz)
+            }
+        }
 
     }
 
@@ -147,6 +181,63 @@ abstract class Applet {
 
     fun toggleAbility() {
         isEnabled = !isEnabled
+    }
+
+    /**
+     * Whether its value is a [Collection].
+     */
+    private val isCollectionValue: Boolean
+        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
+
+    /**
+     * Unmasked raw type.
+     *
+     * @see MASK_VAL_TYPE_COLLECTION
+     * @see Applet.valueType
+     */
+    val rawType: Int
+        get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
+
+    protected open fun serializeToString(value: Any): String {
+        return value.toString()
+    }
+
+    internal fun serializeValue(): String? {
+        val value = this.value
+        return when {
+            value == null -> null
+            rawType == VAL_TYPE_IRRELEVANT -> null
+            isCollectionValue -> (value as Collection<*>).joinToString(SEPARATOR) {
+                if (it == null) {
+                    SERIALIZED_NULL_VALUE_IN_COLLECTION
+                } else {
+                    serializeToString(it)
+                }
+            }
+            else -> serializeToString(value)
+        }
+    }
+
+    protected open fun deserializeFromString(src: String): Any? {
+        return when (rawType) {
+            VAL_TYPE_IRRELEVANT -> null
+            VAL_TYPE_TEXT -> src
+            VAL_TYPE_FLOAT -> src.toFloat()
+            VAL_TYPE_INT -> src.toInt()
+            VAL_TYPE_LONG -> src.toLong()
+            else -> illegalArgument("value type", rawType)
+        }
+    }
+
+    internal fun deserializeValue(src: String?) {
+        value = if (src == null) null else if (isCollectionValue) {
+            val split = src.split(SEPARATOR)
+            split.mapTo(ArrayList(split.size)) {
+                if (it == SERIALIZED_NULL_VALUE_IN_COLLECTION) null else deserializeFromString(it)
+            }
+        } else {
+            deserializeFromString(src)
+        }
     }
 
     /**

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.engine.util
+package top.xjunz.tasker.task.applet.util
 
 import top.xjunz.shared.utils.unsupportedOperation
 
@@ -18,7 +18,7 @@ internal object NumberRangeUtil {
                 && (stop == null || compare(e, stop) <= 0)
     }
 
-    fun compare(a: Number, b: Number): Int {
+    private fun compare(a: Number, b: Number): Int {
 
         if (a is Int && b is Int)
             return a.compareTo(b)

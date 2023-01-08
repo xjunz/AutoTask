@@ -4,7 +4,6 @@
 
 package top.xjunz.tasker.service
 
-import android.accessibilityservice.AccessibilityService
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -64,13 +63,13 @@ class AvailabilityChecker(
                 )
             }
             R.string.case_global_action -> {
-                bridge.interactionController.toggleRecentApps()
+                uiDevice.pressRecentApps()
                 SystemClock.sleep(1000)
-                bridge.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                uiDevice.pressBack()
                 SystemClock.sleep(1000)
-                bridge.interactionController.openNotification()
+                uiDevice.openNotification()
                 SystemClock.sleep(1000)
-                bridge.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                uiDevice.pressBack()
                 listener.onCompleted(null)
             }
             R.string.case_drag_and_drop -> {

@@ -1,17 +1,14 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.engine.value
-
-import kotlinx.serialization.Serializable
+package top.xjunz.tasker.task.applet.value
 
 /**
  * The scoped distance used to match bounds.
  *
  * @author xjunz 2022/10/20
  */
-@Serializable
 data class Distance(
     var scope: Int = SCOPE_SCREEN,
     var unit: Int = UNIT_PX,
@@ -19,11 +16,34 @@ data class Distance(
     var rangeEnd: Float? = null
 ) {
 
+    fun compose(): Long {
+        return COMPOSER.compose(scope, unit, rangeStart, rangeEnd)
+    }
+
     companion object {
 
-        const val SCOPE_NONE = -1
-        const val SCOPE_SCREEN = 0
-        const val SCOPE_PARENT = 1
+        const val MAX_RANGE_VALUE = 9999F
+
+        private val COMPOSER = BitwiseValueComposer.create(
+            BitwiseValueComposer.bits(2),
+            BitwiseValueComposer.bits(4),
+            BitwiseValueComposer.nullableFloat(MAX_RANGE_VALUE),
+            BitwiseValueComposer.nullableFloat(MAX_RANGE_VALUE)
+        )
+
+        fun parse(composed: Long): Distance {
+            val parsed = COMPOSER.parse(composed)
+            return Distance(
+                parsed[0] as Int,
+                parsed[1] as Int,
+                parsed[2] as? Float,
+                parsed[3] as? Float
+            )
+        }
+
+        const val SCOPE_NONE = 0
+        const val SCOPE_SCREEN = 1
+        const val SCOPE_PARENT = 2
 
         const val UNIT_PX = 0
         const val UNIT_DP = 1

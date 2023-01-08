@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ui.base.SavedStateViewModel
+import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.util.ApplicationIconLoader
 
 /**

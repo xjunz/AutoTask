@@ -9,6 +9,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#01000000</item>
         <item name="android:letterSpacing">.1</item>
+        <item name="android:textColorHighlight">?colorPrimaryContainer</item>
         <item name="android:windowLightStatusBar">?isLightTheme</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">?isLightTheme</item>
         <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>

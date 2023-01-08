@@ -8,7 +8,6 @@ import android.graphics.Point
 import android.view.MotionEvent
 import androidx.test.uiautomator.InteractionController
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.service.A11yAutomatorService
 
 /**
@@ -19,7 +18,7 @@ class A11yInteractionController(
 ) : InteractionController(bridge) {
 
     override fun clickNoSync(x: Int, y: Int): Boolean {
-        unsupportedOperation("Non-sync click is not implemented. Used sync method instead!")
+        return clickAndSync(x, y, 100)
     }
 
     override fun clickAndSync(x: Int, y: Int, timeout: Long): Boolean {
@@ -29,7 +28,7 @@ class A11yInteractionController(
     }
 
     override fun longTapNoSync(x: Int, y: Int): Boolean {
-        unsupportedOperation("Non-sync long tap is not implemented. Use sync method instead!")
+        return longTapAndSync(x, y, 2000)
     }
 
     override fun longTapAndSync(x: Int, y: Int, timeout: Long): Boolean {

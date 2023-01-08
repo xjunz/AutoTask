@@ -17,6 +17,14 @@ inline fun <reified T : Parcelable> Parcel.readParcelable(): T? {
     return ParcelCompat.readParcelable(this, cls.classLoader, cls)
 }
 
+inline fun <R> Parcel.use(block: (Parcel) -> R): R {
+    try {
+        return block(this)
+    } finally {
+        recycle()
+    }
+}
+
 inline fun <reified T : Parcelable> Parcel.requireParcelable(): T {
     val cls = T::class.java
     return ParcelCompat.readParcelable(this, cls.classLoader, cls)!!

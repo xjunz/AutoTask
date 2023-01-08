@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.engine.task.dto
+package top.xjunz.tasker.engine.dto
 
 import android.os.Parcel
 import android.os.Parcelable
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.requireParcelable
 import top.xjunz.tasker.engine.applet.base.RootFlow
-import top.xjunz.tasker.engine.applet.dto.AppletDTO
-import top.xjunz.tasker.engine.applet.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.ChecksumUtil.calculateChecksum
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.engine.util.ChecksumUtil.calculateChecksum
 
 /**
  * Data Transfer Object for [XTask].

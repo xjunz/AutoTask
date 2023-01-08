@@ -10,7 +10,6 @@ import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.engine.applet.dto.AppletValues
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -135,7 +134,7 @@ class FlowItemViewBinder(
                     ibAction.setContentDescriptionAndTooltip(R.string.invert.text)
                 }
             }
-            if (applet.valueType == AppletValues.VAL_TYPE_TEXT) {
+            if (applet.valueType == Applet.VAL_TYPE_TEXT) {
                 desc = desc?.quoted()
                 tvDesc.setBackgroundColor(ColorScheme.colorPrimaryContainer.alphaModified(.3F))
             } else {
