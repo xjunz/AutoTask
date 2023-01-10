@@ -17,8 +17,6 @@ abstract class Applet {
 
     companion object {
 
-        const val MAX_ID = 0x00FF_FFFF
-
         const val NO_ID = -1
 
         /**
@@ -103,12 +101,6 @@ abstract class Applet {
      * @see registryId
      */
     var id: Int = NO_ID
-        set(value) {
-            check(id <= MAX_ID) {
-                "Illegal applet ID: $id"
-            }
-            field = value
-        }
 
     /**
      * A human-readable comment to this applet.
@@ -156,8 +148,14 @@ abstract class Applet {
 
     var value: Any? = null
 
+    /**
+     * Referring ids from other [Applet]s as input.
+     */
     var references: Map<Int, String> = emptyMap()
 
+    /**
+     * Reference ids exposed to other [Applet]s as output.
+     */
     var refids: Map<Int, String> = emptyMap()
 
     fun requireParent() = requireNotNull(parent) {
@@ -240,19 +238,18 @@ abstract class Applet {
         }
     }
 
+    override fun toString(): String {
+        return javaClass.simpleName
+    }
+
     /**
-     * Get referred value from this applet as per a specific reference.
+     * Derive referred value from this applet according to reference index.
+     *
+     * @see refids
      */
-    open fun getReferredValue(which: Int, ret: Any): Any? {
+    open fun deriveResultByRefid(which: Int, ret: Any): Any? {
         if (which == 0)
             return ret
         return null
-    }
-
-    override fun toString(): String {
-        if (comment == null) {
-            return javaClass.simpleName
-        }
-        return "${javaClass.simpleName}(label=$comment, id=$id)"
     }
 }

@@ -40,12 +40,18 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         remote as IRemoteAutomatorService
         service = ShizukuAutomatorService(remote)
         if (!remote.isConnected) {
-            remote.connect()
-            val remoteTaskManager = remote.taskManager
-            LocalTaskManager.setRemotePeer(remoteTaskManager)
-            if (!remoteTaskManager.isInitialized) {
-                check(LocalTaskManager.isInitialized())
-                remoteTaskManager.initialize(LocalTaskManager.enabledTasks.map { it.toDTO() })
+            runCatching {
+                remote.connect()
+            }.onSuccess {
+                val remoteTaskManager = remote.taskManager
+                LocalTaskManager.setRemotePeer(remoteTaskManager)
+                if (!remoteTaskManager.isInitialized) {
+                    check(LocalTaskManager.isInitialized())
+                    remoteTaskManager.initialize(LocalTaskManager.enabledTasks.map { it.toDTO() })
+                }
+            }.onFailure {
+                remote.destroy()
+                throw it
             }
         }
     }

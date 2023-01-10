@@ -14,6 +14,7 @@ import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.Snapshot
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -36,6 +37,10 @@ class ResidentTaskScheduler(
     private val eventDispatcher = A11yEventDispatcher(this)
 
     private val handlerDispatcher = Handler(looper).asCoroutineDispatcher()
+
+    override fun getCurrentComponentInfo(): ComponentInfoWrapper {
+        return componentInfo
+    }
 
     /**
      * Schedule all active tasks, all of which are running in the thread that owns the [looper].
@@ -71,22 +76,23 @@ class ResidentTaskScheduler(
     private val observer = object : TaskRuntime.Observer {
         override fun onStarted(victim: Applet, runtime: TaskRuntime) {
             if (victim is Flow)
-                logcat(indent(runtime.tracker.depth) + victim.isAndToString() + victim.javaClass.simpleName)
+                logcat(indent(runtime.tracker.depth) + victim.isAndToString() + victim)
         }
 
         override fun onTerminated(victim: Applet, runtime: TaskRuntime) {
-            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "${victim.javaClass.simpleName} -> ${runtime.isSuccessful}")
+            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
         }
 
         override fun onSkipped(victim: Applet, runtime: TaskRuntime) {
-            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "${victim.javaClass.simpleName} -> skipped")
+            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> skipped")
         }
     }
 
     private val listener = object : XTask.OnStateChangedListener {
         override fun onStarted(runtime: TaskRuntime) {
             super.onStarted(runtime)
-            logcat("\n******** $runtime Started ********")
+            logcat("\n\n")
+            logcat("******** $runtime Started ********")
         }
 
         override fun onError(runtime: TaskRuntime, t: Throwable) {
@@ -111,7 +117,15 @@ class ResidentTaskScheduler(
         }
     }
 
+    private val componentInfo = ComponentInfoWrapper()
+
     override fun onEvents(events: Array<out Event>) {
+        val event = events.find {
+            it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
+        }
+        if (event != null && componentInfo != event.componentInfo) {
+            componentInfo.copyFrom(event.componentInfo)
+        }
         launch {
             val snapshot = Snapshot()
             try {

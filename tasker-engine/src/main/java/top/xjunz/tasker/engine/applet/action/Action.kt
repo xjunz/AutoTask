@@ -20,7 +20,7 @@ abstract class Action<V>(override val valueType: Int) : Applet() {
     }
 }
 
-open class LambdaAction<V>(
+class LambdaAction<V>(
     valueType: Int,
     private inline val action: suspend (V?, TaskRuntime) -> Boolean
 ) : Action<V>(valueType) {

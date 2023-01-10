@@ -26,6 +26,5 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("androidx.test.uiautomator.test", appContext.getPackageName());
-        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     }
 }

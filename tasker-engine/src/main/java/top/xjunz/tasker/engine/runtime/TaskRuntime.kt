@@ -42,7 +42,7 @@ class TaskRuntime private constructor() {
         ): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
             instance.task = this
-            instance.coroutineScope = coroutineScope
+            instance.runtimeScope = coroutineScope
             instance.target = events
             instance._events = events
             instance._snapshot = snapshot
@@ -57,15 +57,9 @@ class TaskRuntime private constructor() {
         }
     }
 
-    val isActive get() = coroutineScope?.isActive == true
+    val isActive get() = runtimeScope?.isActive == true
 
-    fun ensureActive() {
-        coroutineScope?.ensureActive()
-    }
-
-    fun halt() {
-        coroutineScope?.cancel()
-    }
+    var isSuspended = false
 
     lateinit var task: XTask
 
@@ -77,7 +71,9 @@ class TaskRuntime private constructor() {
 
     val events: Array<out Event> get() = _events!!
 
-    private var coroutineScope: CoroutineScope? = null
+    private var runtimeScope: CoroutineScope? = null
+
+    var suspensionScope: CoroutineScope? = null
 
     /**
      * Target is for applet to use in runtime via [TaskRuntime.getTarget].
@@ -90,10 +86,18 @@ class TaskRuntime private constructor() {
 
     lateinit var hitEvent: Event
 
+    fun ensureActive() {
+        runtimeScope?.ensureActive()
+    }
+
+    fun halt() {
+        runtimeScope?.cancel()
+    }
+
     /**
      * Get or put a global variable if absent. The variable can be shared across tasks.
      */
-    fun <V : Any> getEnvironmentVariable(key: Int, initializer: (() -> V)? = null): V {
+    fun <V : Any> getEnvironmentVariable(key: Long, initializer: (() -> V)? = null): V {
         if (initializer == null) {
             return snapshot.registry.getValue(key).casted()
         }
@@ -138,9 +142,11 @@ class TaskRuntime private constructor() {
     fun recycle() {
         _snapshot = null
         _events = null
-        coroutineScope = null
+        runtimeScope = null
+        suspensionScope = null
         results.clear()
         tracker.reset()
+        isSuspended = false
         observer = null
         Pool.release(this)
     }

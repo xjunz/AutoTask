@@ -19,6 +19,10 @@ fun Throwable.rethrowAsRuntimeException(): Nothing {
     throw RuntimeException(this)
 }
 
+fun Throwable.rethrowInRemoteProcess(): Nothing {
+    throw IllegalArgumentException(this)
+}
+
 fun illegalArgument(name: String, value: Any): Nothing {
     throw IllegalArgumentException("Unrecognized $name: $value!")
 }

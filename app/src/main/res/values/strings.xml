@@ -362,5 +362,5 @@
     <string name="format_long_click">长按%s</string>
     <string name="format_coordinate">坐标(%d, %d)</string>
     <string name="format_drag">长按并拖动%s到%s</string>
-    <string name="format_swipe_ui_object">滑动%s</string>
+    <string name="format_swipe_ui_object">在%s内滑动</string>
 </resources>

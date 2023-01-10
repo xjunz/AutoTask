@@ -5,7 +5,7 @@
 package top.xjunz.tasker.task.inspector
 
 import androidx.lifecycle.MutableLiveData
-import top.xjunz.tasker.engine.runtime.ComponentInfo
+import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
 import top.xjunz.tasker.ktx.text
 
 /**
@@ -17,7 +17,7 @@ class InspectorViewModel {
 
     val toastText = MutableLiveData<CharSequence?>()
 
-    val currentComp = MutableLiveData<ComponentInfo>()
+    val currentComp = MutableLiveData<ComponentInfoWrapper>()
 
     val currentMode = MutableLiveData<InspectorMode>()
 

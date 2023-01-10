@@ -124,8 +124,9 @@ class XTask {
         events: Array<out Event>,
         observer: TaskRuntime.Observer? = null
     ): Boolean {
-        // if (!isEnabled) return false
-        // Cancel if executing
+        if (isExecuting && currentRuntime?.isSuspended != true) {
+            return false
+        }
         val runtime = obtainRuntime(snapshot, scope, events)
         runtime.observer = observer
         try {

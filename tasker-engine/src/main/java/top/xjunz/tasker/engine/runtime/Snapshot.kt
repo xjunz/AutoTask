@@ -9,7 +9,7 @@ package top.xjunz.tasker.engine.runtime
  */
 class Snapshot {
 
-    val registry = mutableMapOf<Int, Any>()
+    val registry = mutableMapOf<Long, Any>()
 
     fun clear() {
         registry.clear()

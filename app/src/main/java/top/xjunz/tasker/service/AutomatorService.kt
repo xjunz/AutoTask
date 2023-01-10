@@ -5,6 +5,7 @@
 package top.xjunz.tasker.service
 
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
+import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 
 /**
  * A service defines the common abstractions of [A11yAutomatorService] and [ShizukuAutomatorService].
@@ -16,6 +17,8 @@ interface AutomatorService {
     val isRunning: Boolean
 
     val uiAutomatorBridge: UiAutomatorBridge
+
+    val residentTaskScheduler: ResidentTaskScheduler
 
     fun destroy()
 

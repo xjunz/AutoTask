@@ -14,7 +14,6 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.OsUtil
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.annotation.Anywhere
-import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.app
 import top.xjunz.tasker.isAppProcess
 import java.lang.reflect.Field
@@ -29,19 +28,14 @@ object ContextBridge {
 
     private const val SHELL_APPLICATION_ID = "com.android.shell"
 
-    @Privileged
-    private val privilegedContext by lazy {
-        createPrivilegedContext()
-    }
-
-    @Privileged
-    private val appContext by lazy {
-        createAppContext()
+    @Anywhere
+    fun getContext(): Context {
+        return if (isAppProcess) app else createPrivilegedContext()
     }
 
     @Anywhere
-    fun getContext(): Context {
-        return if (isAppProcess) app else privilegedContext
+    fun getAppContext(): Context {
+        return if (isAppProcess) app else createAppContext()
     }
 
     private fun createAppContext(): Context {

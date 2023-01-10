@@ -16,6 +16,7 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.*
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
-import top.xjunz.tasker.engine.runtime.ComponentInfo
+import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.event.A11yEventDispatcher
@@ -72,7 +73,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     lateinit var inspector: FloatingInspector
 
-    lateinit var taskScheduler: ResidentTaskScheduler
+    override lateinit var residentTaskScheduler: ResidentTaskScheduler
 
     override val isRunning get() = runningState.isTrue
 
@@ -90,8 +91,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (!launchedInInspectorMode) {
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
-                taskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
-                taskScheduler.scheduleTasks()
+                residentTaskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
+                residentTaskScheduler.scheduleTasks()
             }
             runningState.value = true
             startTimestamp = System.currentTimeMillis()
@@ -108,6 +109,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         if (launchedInInspectorMode) {
             disableSelf()
         }
+    }
+
+    override fun onKeyEvent(event: KeyEvent?): Boolean {
+        return super.onKeyEvent(event)
     }
 
     fun isInspectorShown(): Boolean {
@@ -134,7 +139,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    private val componentInfo = ComponentInfo()
+    private val componentInfo = ComponentInfoWrapper()
 
     private val a11yEventDispatcher: A11yEventDispatcher by lazy {
         A11yEventDispatcher { events ->
@@ -163,8 +168,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
-        if (::taskScheduler.isInitialized) {
-            taskScheduler.destroy()
+        if (::residentTaskScheduler.isInitialized) {
+            residentTaskScheduler.destroy()
         }
         if (isInspectorShown()) inspector.dismiss()
         if (!launchedInInspectorMode) {

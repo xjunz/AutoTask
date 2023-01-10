@@ -7,7 +7,7 @@ package top.xjunz.tasker.engine.runtime
 /**
  * @author xjunz 2022/10/18
  */
-class ComponentInfo {
+class ComponentInfoWrapper {
 
     lateinit var pkgName: String
 
@@ -15,7 +15,7 @@ class ComponentInfo {
 
     var paneTitle: String? = null
 
-    fun copyFrom(another: ComponentInfo) {
+    fun copyFrom(another: ComponentInfoWrapper) {
         paneTitle = another.paneTitle
         pkgName = another.pkgName
         actName = another.actName
@@ -29,7 +29,7 @@ class ComponentInfo {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as ComponentInfo
+        other as ComponentInfoWrapper
 
         if (paneTitle != other.paneTitle) return false
         if (pkgName != other.pkgName) return false

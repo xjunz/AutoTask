@@ -135,10 +135,7 @@ class FlowItemViewBinder(
                 }
             }
             if (applet.valueType == Applet.VAL_TYPE_TEXT) {
-                desc = desc?.quoted()
-                tvDesc.setBackgroundColor(ColorScheme.colorPrimaryContainer.alphaModified(.3F))
-            } else {
-                tvDesc.background = null
+                desc = desc?.italic()
             }
             if (viewModel.isSelectingRef) {
                 title = title?.toString()

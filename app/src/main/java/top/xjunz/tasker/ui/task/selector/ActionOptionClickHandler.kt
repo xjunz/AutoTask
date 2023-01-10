@@ -31,7 +31,7 @@ class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
         when {
             option.arguments.isEmpty() && applet.valueType == Applet.VAL_TYPE_IRRELEVANT -> onCompleted()
 
-            option == factory.controlActionRegistry.delayAction -> {
+            option == factory.controlActionRegistry.suspension -> {
                 TimeIntervalEditorDialog().init(option.currentTitle, applet.value?.casted() ?: 0) {
                     applet.value = it
                     onCompleted()

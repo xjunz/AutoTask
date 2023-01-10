@@ -58,7 +58,7 @@ internal class FlowTest {
             }
         }
         mockTask.enable(object : XTask.OnStateChangedListener {
-            override fun onStarted() {
+            override fun onStarted(runtime: TaskRuntime) {
                 println("---- onTaskStarted ----")
             }
 
@@ -71,7 +71,7 @@ internal class FlowTest {
                 println("---- onAppletFailure: ${runtime.currentApplet} ----")
             }
 
-            override fun onCancelled() {
+            override fun onCancelled(runtime: TaskRuntime) {
                 println("onTaskStopped")
             }
         })

@@ -18,6 +18,7 @@ import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.utils.rethrowInRemoteProcess
 import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
@@ -66,9 +67,14 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private var startTimestamp: Long = -1
 
+    override val residentTaskScheduler by lazy {
+        ResidentTaskScheduler(looper, RemoteTaskManager)
+    }
+
     @Keep
     @Privileged
     constructor() {
+        ensurePrivilegedProcess()
         logcat("Hello from the remote service! My uid is ${Os.getuid()} and my pid is ${Os.getpid()}")
         handlerThread.isDaemon = false
         handlerThread.start()
@@ -80,15 +86,19 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         delegate = connection
     }
 
+    private fun ensurePrivilegedProcess() {
+        check(isPrivilegedProcess) {
+            "You cannot access Shizuku UiAutomatorBridge from the host process!"
+        }
+    }
+
     @Local
     override val isRunning: Boolean
         get() = delegate.asBinder().pingBinder() && delegate.asBinder().isBinderAlive
 
     @Privileged
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
-        check(isPrivilegedProcess) {
-            "You cannot access Shizuku UiAutomatorBridge from the host process!"
-        }
+        ensurePrivilegedProcess()
         ShizukuUiAutomatorBridge(uiAutomation)
     }
 
@@ -125,8 +135,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     override fun connect() {
+        Binder.clearCallingIdentity()
         try {
-            Binder.clearCallingIdentity()
             uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
@@ -141,10 +151,10 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
-            ResidentTaskScheduler(looper, RemoteTaskManager).scheduleTasks()
+            residentTaskScheduler.scheduleTasks()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
-            error(t)
+            t.rethrowInRemoteProcess()
         }
     }
 
@@ -153,6 +163,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         if (isAppProcess) {
             delegate.destroy()
         } else try {
+            residentTaskScheduler.destroy()
             handler.removeCallbacksAndMessages(null)
             if (::uiAutomationHidden.isInitialized)
                 uiAutomationHidden.disconnect()

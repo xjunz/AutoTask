@@ -85,6 +85,10 @@ open class BitwiseValueComposer(private var descriptors: IntArray) : ValueCompos
         }
     }
 
+    init {
+        checkComponentDescriptors()
+    }
+
     fun setComponents(vararg descriptors: Int) {
         this.descriptors = descriptors
         checkComponentDescriptors()
@@ -150,6 +154,9 @@ open class BitwiseValueComposer(private var descriptors: IntArray) : ValueCompos
     }
 
     private fun checkComponentDescriptors() {
-        check(descriptors.sumOf { getBitCount(it) } <= maxBitCount)
+        val bitCountCum = descriptors.sumOf { getBitCount(it) }
+        check(bitCountCum <= maxBitCount) {
+            "Bit count overflow! Available: $maxBitCount, Required: $bitCountCum"
+        }
     }
 }

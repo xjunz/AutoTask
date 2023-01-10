@@ -30,21 +30,13 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
             super.doApply(runtime)
             runtime.isSuccessful
         }
-        if (node != null) {
-            refids.forEach { (which, id) ->
-                runtime.registerResult(id, getReferredValue(which, node))
-            }
-            runtime.isSuccessful = true
-        } else {
-            runtime.isSuccessful = false
-        }
+        runtime.isSuccessful = node != null
     }
 
     private suspend fun AccessibilityNodeInfo.findFirst(condition: suspend (AccessibilityNodeInfo) -> Boolean)
             : AccessibilityNodeInfo? {
         for (i in 0 until childCount) {
             val child = getChild(i) ?: continue
-            // Need this?
             if (!child.isVisibleToUser) continue
             try {
                 if (condition(child)) {
@@ -61,10 +53,10 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
         return null
     }
 
-    override fun getReferredValue(which: Int, ret: Any): Any? {
+    override fun deriveTargetByRefid(which: Int, target: UiObjectContext): Any? {
         if (which == 1) {
-            return (ret as AccessibilityNodeInfo).text?.toString()
+            return target.source.text?.toString()
         }
-        return super.getReferredValue(which, ret)
+        return super.deriveTargetByRefid(which, target)
     }
 }

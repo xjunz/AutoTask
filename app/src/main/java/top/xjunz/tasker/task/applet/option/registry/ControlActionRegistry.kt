@@ -6,7 +6,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
-import top.xjunz.tasker.engine.applet.action.DelayAction
+import top.xjunz.tasker.engine.applet.action.Suspension
 import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.ktx.foreColored
@@ -26,8 +26,8 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val ifAction = appletOption(R.string._if) { If() }
 
     @AppletOrdinal(0x0001)
-    val delayAction = appletOption(R.string.delay) {
-        DelayAction()
+    val suspension = appletOption(R.string.delay) {
+        Suspension()
     }.withDescriber<Int> { applet, t ->
         R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
             app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())

@@ -102,6 +102,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0010)
     val componentFlow = presetFlowOption<PackageFlow>(ID_PKG_OPTION_REGISTRY, R.string.current_app)
         .withResult<String>(R.string.package_name)
+        .withResult<String>(R.string.activity)
 
     @AppletOrdinal(0x0011)
     val uiObjectFlow =

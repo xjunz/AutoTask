@@ -70,6 +70,10 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
         override fun onServiceDisconnected(name: ComponentName?) {}
     }
 
+    protected open fun onServiceConnectionError() {
+
+    }
+
     override fun bindService() {
         ShizukuUtil.ensureShizukuEnv {
             listener?.onStartBinding()

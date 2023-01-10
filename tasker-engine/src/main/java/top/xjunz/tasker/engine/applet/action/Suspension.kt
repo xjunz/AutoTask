@@ -14,15 +14,18 @@ import java.lang.ref.WeakReference
 /**
  * @author xjunz 2022/11/15
  */
-class DelayAction : Action<Int>(VAL_TYPE_INT) {
+class Suspension : Action<Int>(VAL_TYPE_INT) {
 
     private var suspendingScope: WeakReference<CoroutineScope>? = null
 
     override suspend fun doAction(value: Int?, runtime: TaskRuntime): Boolean {
+        check(value != null)
         suspendingScope?.get()?.cancel()
         coroutineScope {
             suspendingScope = WeakReference(this)
-            delay(value!!.toLong())
+            runtime.isSuspended = true
+            delay(value.toLong())
+            runtime.isSuspended = false
         }
         return true
     }

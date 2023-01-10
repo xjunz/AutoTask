@@ -10,8 +10,8 @@ import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.newCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.flow.ComponentInfoContext
 import top.xjunz.tasker.task.applet.flow.NotificationFlow
-import top.xjunz.tasker.task.applet.flow.PackageInfoContext
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
@@ -39,14 +39,14 @@ class NotificationOptionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x00_01)
     val contentContains = invertibleAppletOption(R.string.notification_contains) {
-        newCriterion<PackageInfoContext, String> { t, v ->
+        newCriterion<ComponentInfoContext, String> { t, v ->
             t.panelTitle?.contains(v) == true
         }
     }
 
     @AppletOrdinal(0x00_02)
     val contentMatches = invertibleAppletOption(R.string.notification_matches) {
-        newCriterion<PackageInfoContext, String> { t, v ->
+        newCriterion<ComponentInfoContext, String> { t, v ->
             t.panelTitle?.matches(Regex(v)) == true
         }
     }

@@ -14,7 +14,7 @@ class Event private constructor() {
 
     var type: Int = EVENT_UNDEFINED
 
-    val componentInfo = ComponentInfo()
+    val componentInfo = ComponentInfoWrapper()
 
     private object Pool : SynchronizedPool<Event>(10)
 
