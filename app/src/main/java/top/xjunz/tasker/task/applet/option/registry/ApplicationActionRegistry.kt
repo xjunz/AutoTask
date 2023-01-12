@@ -48,7 +48,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
 
     @AppletOrdinal(0x0003)
-    val launchActivity = appletOption(R.string.launch_activity) {
+    val launchActivity = appletOption(R.string.format_launch) {
         unaryArgAction<String> {
             ContextBridge.getContext().startActivity(
                 Intent().setComponent(ComponentName.unflattenFromString(it))
@@ -56,6 +56,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             )
             true
         }
-    }.withArgument<String>(R.string.activity)
+    }.withArgument<String>(R.string.specified_activity)
+        .hasCompositeTitle()
 
 }

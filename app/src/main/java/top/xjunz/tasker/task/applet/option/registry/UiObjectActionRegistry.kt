@@ -10,6 +10,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.singleArgAction
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.flow.UiObjectContext
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.applet.value.Swipe
@@ -30,7 +31,8 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     private inline fun <reified V> uiObjectActionOption(
         title: Int, crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
     ) = appletOption(title) {
-        singleArgAction<AccessibilityNodeInfo, V> { node, value ->
+        singleArgAction<UiObjectContext, V> { ctx, value ->
+            val node = ctx?.source
             requireNotNull(node) {
                 "Node is not captured!"
             }

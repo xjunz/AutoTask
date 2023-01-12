@@ -11,13 +11,13 @@
     <string name="on_success">然后</string>
     <string name="on_failure">否则</string>
 
-    <string name="current_app">当前程序</string>
+    <string name="current_app">当前应用</string>
     <string name="current_notification">当前通知</string>
     <string name="ui_object_exists">存在控件</string>
     <string name="current_time">当前时间</string>
 
     <string name="package_name">包名</string>
-    <string name="component_info">程序和页面</string>
+    <string name="component_info">应用和页面</string>
 
     <string name="pkg_name_starts_with">包名以指定文本开始</string>
     <string name="not_pkg_name_starts_with">包名不以指定文本开始</string>

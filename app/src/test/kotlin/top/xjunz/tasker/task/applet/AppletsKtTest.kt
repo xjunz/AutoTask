@@ -19,8 +19,8 @@ internal class AppletsKtTest {
 
         override val valueType: Int = VAL_TYPE_IRRELEVANT
 
-        override suspend fun apply(runtime: TaskRuntime) {
-            /* no-op */
+        override suspend fun apply(runtime: TaskRuntime): Boolean {
+            return true
         }
 
     }

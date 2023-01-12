@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -52,6 +51,9 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
+    <style name="OutlinedButtonStyle" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">?colorPrimary</item>
+    </style>
 
     <style name="BubbleButton">
         <item name="android:layout_width">32dp</item>

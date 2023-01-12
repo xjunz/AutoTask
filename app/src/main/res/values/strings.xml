@@ -228,7 +228,7 @@
     <string name="format_before">%s之前</string>
     <string name="format_after">%s之后</string>
     <string name="with_pane_title">页面标题为</string>
-    <string name="no_comp_detected">暂未检测到任何程序和页面</string>
+    <string name="no_comp_detected">暂未检测到任何应用和页面</string>
     <string name="format_switch_mode">悬浮助手已切换到%s模式</string>
     <string name="coords">坐标点</string>
     <string name="format_current">当前%s</string>
@@ -265,7 +265,7 @@
     <string name="input_content">输入的内容</string>
     <string name="unspecified">未指定</string>
     <string name="refer_to">引用</string>
-    <string name="specify_value">直接指定</string>
+    <string name="specify_value">指定</string>
     <string name="notification_content">通知内容</string>
     <string name="regex">正则表达式</string>
     <string name="format_select">请选择%s</string>
@@ -330,7 +330,7 @@
     <string name="prompt_disable_task">你确定要禁用该任务吗？</string>
     <string name="prompt_enable_task">你确定要启用该任务吗？</string>
     <string name="nothing_here">空空如也</string>
-    <string name="desc_preload_tasks">添加程序内预置的任务</string>
+    <string name="desc_preload_tasks">添加应用内预置的任务</string>
     <string name="prompt_repeated_task">操作失败，因为已经存在完全相同的任务，请修改当前任务的<b>名称、描述或规则</b>。</string>
     <string name="add">添加</string>
     <string name="added">已添加</string>
@@ -363,4 +363,5 @@
     <string name="format_coordinate">坐标(%d, %d)</string>
     <string name="format_drag">长按并拖动%s到%s</string>
     <string name="format_swipe_ui_object">在%s内滑动</string>
+    <string name="specified_activity">指定页面</string>
 </resources>

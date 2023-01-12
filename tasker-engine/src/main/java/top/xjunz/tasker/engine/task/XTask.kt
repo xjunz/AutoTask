@@ -10,7 +10,6 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
-import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.Snapshot
@@ -41,20 +40,12 @@ class XTask {
 
     var flow: RootFlow? = null
 
-    /**
-     * Whether the task is active or not. Even if set to `false`, the task may continue executing until
-     * its latest [Applet] is completed. You can observe [OnStateChangedListener.onCancelled] to
-     * get notified. Inactive tasks will no longer response to any further [Event] from [launch].
-     */
-    var isEnabled = false
-        private set
-
     var onStateChangedListener: OnStateChangedListener? = null
 
     /**
      * Whether the task is traversing its [flow].
      */
-    private val isExecuting get() = currentRuntime?.isActive == true
+    internal val isExecuting get() = currentRuntime?.isActive == true
 
     private var currentRuntime: TaskRuntime? = null
 
@@ -95,22 +86,11 @@ class XTask {
         "RootFlow is not initialized!"
     }
 
-    fun enable(stateListener: OnStateChangedListener? = null) {
-        check(!isEnabled) {
-            "Task has already been activated!"
-        }
-        onStateChangedListener = stateListener
-        isEnabled = true
-    }
-
-    fun disable() {
-        check(isEnabled) {
-            "The task is not enabled!"
-        }
-        isEnabled = false
-        if (!isExecuting) {
-            currentRuntime?.halt()
-        }
+    /**
+     * Halt the runtime if is running.
+     */
+    fun halt() {
+        currentRuntime?.halt()
     }
 
     /**
@@ -132,7 +112,7 @@ class XTask {
         try {
             currentRuntime = runtime
             onStateChangedListener?.onStarted(runtime)
-            requireFlow().apply(runtime)
+            runtime.isSuccessful = requireFlow().apply(runtime)
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
             } else {

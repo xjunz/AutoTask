@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.tasker.engine.applet.action.LambdaAction
 import top.xjunz.tasker.engine.applet.criterion.DslCriterion
 import top.xjunz.tasker.engine.applet.criterion.EventCriterion
 import top.xjunz.tasker.engine.runtime.Event
@@ -22,6 +23,18 @@ internal fun DslFlow(initialTarget: Any? = null, init: RootFlow.() -> Unit): Roo
 @FlowDsl
 internal fun Flow.If(block: If.() -> Unit) {
     add(If().apply(block))
+}
+
+@FlowDsl
+internal fun Flow.Then(block: Do.() -> Unit) {
+    add(Do().apply(block))
+}
+
+@FlowDsl
+internal fun Do.Action(block: () -> Boolean) {
+    add(LambdaAction<Any>(Applet.VAL_TYPE_IRRELEVANT) { _, _ ->
+        block()
+    })
 }
 
 @FlowDsl

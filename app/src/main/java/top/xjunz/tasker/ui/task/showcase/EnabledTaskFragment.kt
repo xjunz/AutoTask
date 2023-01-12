@@ -8,7 +8,8 @@ import android.os.Bundle
 import android.view.View
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
-import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 
 /**
  * @author xjunz 2022/12/20
@@ -16,7 +17,7 @@ import top.xjunz.tasker.task.storage.TaskStorage
 class EnabledTaskFragment : BaseTaskShowcaseFragment() {
 
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.allTasks.filter { it.isEnabled }
+        return LocalTaskManager.getEnabledTasks()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -81,7 +81,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_negative"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="?materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -89,8 +89,7 @@
             app:layout_constraintEnd_toStartOf="@+id/btn_positive"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/btn_positive"
-            app:strokeColor="?colorPrimary" />
+            app:layout_constraintTop_toTopOf="@id/btn_positive"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_positive"

@@ -25,9 +25,6 @@ internal class A11yEventDispatcherTest : CoroutineScope {
         }
         UiAutomationRegistry.getUiAutomation().setOnAccessibilityEventListener {
             println(it)
-            /* launch {
-                 dispatcher.processAccessibilityEvent(it)
-             }*/
         }
     }
 

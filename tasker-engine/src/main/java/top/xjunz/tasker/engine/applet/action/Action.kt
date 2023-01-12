@@ -15,8 +15,8 @@ abstract class Action<V>(override val valueType: Int) : Applet() {
 
     abstract suspend fun doAction(value: V?, runtime: TaskRuntime): Boolean
 
-    final override suspend fun apply(runtime: TaskRuntime) {
-        runtime.isSuccessful = doAction(value?.casted(), runtime)
+    final override suspend fun apply(runtime: TaskRuntime): Boolean {
+        return doAction(value?.casted(), runtime)
     }
 }
 

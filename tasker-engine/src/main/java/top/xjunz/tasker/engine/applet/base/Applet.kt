@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import androidx.annotation.CheckResult
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -167,7 +168,8 @@ abstract class Applet {
      *
      * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
-    abstract suspend fun apply(runtime: TaskRuntime)
+    @CheckResult
+    abstract suspend fun apply(runtime: TaskRuntime): Boolean
 
     fun toggleRelation() {
         isAnd = !isAnd

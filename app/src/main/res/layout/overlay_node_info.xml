@@ -79,7 +79,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_cancel"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="?materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -91,8 +91,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/btn_complete"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/btn_complete"
-                app:strokeColor="?colorPrimary" />
+                app:layout_constraintTop_toTopOf="@+id/btn_complete" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>

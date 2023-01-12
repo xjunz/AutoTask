@@ -25,4 +25,10 @@
         <attr name="inspectorStrokeColorHighlight" format="color" />
         <attr name="inspectorCoordinateTextSize" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="WaveDivider">
+        <attr name="waveWidth" format="dimension" />
+        <attr name="waveStrokeWidth" format="dimension" />
+        <attr name="waveStrokeColor" format="color" />
+        <attr name="waveRunningColor" format="color" />
+    </declare-styleable>
 </resources>

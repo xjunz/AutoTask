@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -13,6 +12,7 @@
         <item name="android:windowLightStatusBar">?isLightTheme</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">?isLightTheme</item>
         <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
+        <item name="materialButtonOutlinedStyle">@style/OutlinedButtonStyle</item>
     </style>
 
     <style name="FlowEditorPopupMenuStyle" parent="@style/Widget.Material3.PopupMenu.Overflow">

@@ -27,11 +27,11 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     private var _root: RootFlow? = null
 
-    private val selected = mutableSetOf<Pair<Applet, Int>>()
+    private val _selectedRefs = mutableSetOf<Pair<Applet, Int>>()
 
     private val factory = AppletOptionFactory
 
-    val selectedRefs: Set<Pair<Applet, Int>> get() = selected
+    val selectedRefs: Set<Pair<Applet, Int>> get() = _selectedRefs
 
     val root: RootFlow get() = _root!!
 
@@ -56,8 +56,18 @@ class GlobalFlowEditorViewModel : ViewModel() {
         }
     }
 
+    fun isRefSelected(applet: Applet, which: Int): Boolean {
+        return _selectedRefs.any {
+            it.first === applet && it.second == which
+        }
+    }
+
+    fun isRefSelected(applet: Applet) = _selectedRefs.any {
+        it.first === applet
+    }
+
     fun setRefidForSelections(refid: String) {
-        selected.forEach { (applet, which) ->
+        _selectedRefs.forEach { (applet, which) ->
             refEditor.setRefid(applet, which, refid)
         }
     }
@@ -78,10 +88,6 @@ class GlobalFlowEditorViewModel : ViewModel() {
         _root = flow
     }
 
-    fun isRefSelected(applet: Applet) = selected.any {
-        it.first === applet
-    }
-
     private fun Flow.addSelectionsWithRefid(id: String, block: (Applet, Int) -> Unit) {
         forEach {
             for ((index, refid) in it.refids) {
@@ -98,35 +104,43 @@ class GlobalFlowEditorViewModel : ViewModel() {
     }
 
     fun addRefSelection(applet: Applet, which: Int) {
-        selected.add(applet to which)
-        onAppletChanged.value = applet
+        _selectedRefs.add(applet to which)
     }
 
     fun addRefSelectionWithRefid(self: Applet, refid: String) {
         root.addSelectionsWithRefid(refid) { applet, index ->
             if (applet != self && self.parent == null || applet.isAheadOf(self)) {
-                selected.add(applet to index)
+                // Remove existed reference to this applet, because multiple refs to one applet
+                // is not allowed!
+                _selectedRefs.removeIf {
+                    it.first === applet
+                }
+                _selectedRefs.add(applet to index)
             }
         }
     }
 
-    fun removeRefSelection(applet: Applet) {
-        val found = selected.find {
-            it.first === applet
+    /**
+     * Remove a specific reference to an applet as per argument [which]. If [which] is default (-1),
+     * remove all references to this applet.
+     */
+    fun removeRefSelection(applet: Applet, which: Int = -1) {
+        val found = _selectedRefs.find {
+            it.first === applet && (which == -1 || it.second == which)
         }
         checkNotNull(found) {
             "This applet is not referred?"
         }
         val refid = found.first.refids[found.second]
         if (refid == null) {
-            selected.removeIf {
+            _selectedRefs.removeIf {
                 it.first === applet
             }
             onAppletChanged.value = applet
-        } else selected.filter {
+        } else _selectedRefs.filter {
             it.first.refids[it.second] == refid
         }.forEach {
-            selected.remove(it)
+            _selectedRefs.remove(it)
             onAppletChanged.value = it.first
         }
     }
@@ -148,7 +162,7 @@ class GlobalFlowEditorViewModel : ViewModel() {
     }
 
     fun clearRefSelections() {
-        selected.clear()
+        _selectedRefs.clear()
     }
 
     fun clearRootFlow() {

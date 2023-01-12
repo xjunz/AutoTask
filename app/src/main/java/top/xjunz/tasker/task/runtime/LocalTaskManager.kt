@@ -5,7 +5,6 @@
 package top.xjunz.tasker.task.runtime
 
 import android.os.IBinder.DeathRecipient
-import android.util.ArraySet
 import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.whenAlive
@@ -13,66 +12,54 @@ import top.xjunz.tasker.ktx.whenAlive
 /**
  * @author xjunz 2022/12/17
  */
-object LocalTaskManager : TaskManager<XTask, XTask> {
+object LocalTaskManager : TaskManager<XTask, XTask>() {
 
-    private var initialized = false
+    var isInitialized = false
 
-    private var remotePeer: IRemoteTaskManager? = null
+    private var peer: IRemoteTaskManager? = null
 
     private val peerDeathRecipient: DeathRecipient by lazy {
         DeathRecipient {
-            remotePeer?.asBinder()?.unlinkToDeath(peerDeathRecipient, 0)
-            remotePeer = null
+            peer?.asBinder()?.unlinkToDeath(peerDeathRecipient, 0)
+            peer = null
         }
     }
 
+    val XTask.isEnabled: Boolean get() = enabled.contains(this)
+
     fun setRemotePeer(peer: IRemoteTaskManager) {
-        remotePeer?.asBinder()?.unlinkToDeath(peerDeathRecipient, 0)
-        remotePeer = peer
+        this.peer?.asBinder()?.linkToDeath(peerDeathRecipient, 0)
+        this.peer = peer
         peer.asBinder().linkToDeath(peerDeathRecipient, 0)
     }
 
-    override val enabledTasks = ArraySet<XTask>()
-
-    override fun ArraySet<XTask>.findTask(identifier: XTask): XTask? {
-        return if (contains(identifier)) identifier else null
-    }
-
-    override fun XTask.asTask(): XTask {
-        return this
-    }
-
-    fun removeRemoteCache(checksum: Long) {
-        remotePeer?.whenAlive {
-            it.removeCachedTask(checksum)
+    override fun disableResidentTask(identifier: XTask) {
+        super.disableResidentTask(identifier)
+        peer?.whenAlive {
+            it.disableResidentTask(identifier.checksum)
         }
     }
 
-    override fun removeResidentTask(identifier: XTask) {
-        super.removeResidentTask(identifier)
-        remotePeer?.whenAlive {
-            it.removeResidentTask(identifier.checksum)
+    override fun enableResidentTask(carrier: XTask) {
+        super.enableResidentTask(carrier)
+        peer?.whenAlive {
+            it.enableResidentTask(carrier.toDTO())
         }
     }
 
-    override fun initialize(carriers: Collection<XTask>) {
-        super.initialize(carriers)
-        initialized = true
-    }
-
-    fun addResidentTask(task: XTask) {
-        check(enabledTasks.add(task))
-        remotePeer?.whenAlive {
-            if (it.isTaskCached(task.checksum)) {
-                it.enableCachedResidentTask(task.checksum)
-            } else {
-                it.enableNewResidentTask(task.toDTO())
-            }
+    override fun updateResidentTask(previousChecksum: Long, updated: XTask) {
+        super.updateResidentTask(previousChecksum, updated)
+        peer?.whenAlive {
+            it.updateResidentTask(previousChecksum, updated.toDTO())
         }
     }
 
-    override fun isInitialized(): Boolean {
-        return initialized
+    override fun asTask(carrier: XTask): XTask {
+        return carrier
+    }
+
+    override fun List<XTask>.indexOfTask(identifier: XTask): Int {
+        return indexOf(identifier)
     }
 
 }

@@ -197,7 +197,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         if (isBase) {
             val checksum = ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
             if (checksum != metadata.checksum) {
-                if (TaskStorage.allTasks.any { it.checksum == checksum }) {
+                if (TaskStorage.getAllTasks().any { it.checksum == checksum }) {
                     showTaskRepeatedPrompt.value = true
                     return false
                 }

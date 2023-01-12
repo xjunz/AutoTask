@@ -23,9 +23,8 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
      */
     open lateinit var defaultValue: V
 
-    final override suspend fun apply(runtime: TaskRuntime) {
-        runtime.isSuccessful =
-            isInverted != matchTarget(runtime.getTarget(), value?.casted() ?: defaultValue)
+    final override suspend fun apply(runtime: TaskRuntime): Boolean {
+        return isInverted != matchTarget(runtime.getTarget(), value?.casted() ?: defaultValue)
     }
 
     /**

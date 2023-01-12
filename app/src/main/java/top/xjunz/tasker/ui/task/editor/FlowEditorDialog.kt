@@ -17,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.transition.platform.MaterialFadeThrough
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -224,11 +225,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             if (vm.isSelectingRef) {
                 if (!vm.hasCandidateReference(vm.flow)) {
                     toast(R.string.no_candidate_reference)
-                    binding.tvTitle.text = R.string.no_candidate_reference.text
-                } else {
-                    val refName = vm.refValueDescriptor.name
-                    binding.tvTitle.text = R.string.format_select.format(refName)
                 }
+                val refName = vm.refValueDescriptor.name
+                binding.tvTitle.text = R.string.format_select.format(refName)
             } else if (it.isEmpty()) {
                 if (vm.isBase) {
                     binding.tvTitle.text = R.string.edit_task.text
@@ -280,7 +279,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 as HideBottomViewOnScrollBehavior
         observe(vm.isFabVisible) {
             if (it != binding.fabAction.isVisible) {
-                binding.root.beginAutoTransition(binding.fabAction, MaterialFadeThrough())
+                binding.root.beginAutoTransition(
+                    binding.fabAction,
+                    MaterialSharedAxis(MaterialSharedAxis.Y, it)
+                )
             }
             if (it) {
                 behavior.slideUp(binding.fabAction, true)

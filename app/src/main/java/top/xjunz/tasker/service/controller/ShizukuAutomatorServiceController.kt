@@ -39,20 +39,19 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
     override fun onServiceConnected(remote: IInterface) {
         remote as IRemoteAutomatorService
         service = ShizukuAutomatorService(remote)
-        if (!remote.isConnected) {
-            runCatching {
+        runCatching {
+            if (!remote.isConnected) {
                 remote.connect()
-            }.onSuccess {
-                val remoteTaskManager = remote.taskManager
-                LocalTaskManager.setRemotePeer(remoteTaskManager)
-                if (!remoteTaskManager.isInitialized) {
-                    check(LocalTaskManager.isInitialized())
-                    remoteTaskManager.initialize(LocalTaskManager.enabledTasks.map { it.toDTO() })
-                }
-            }.onFailure {
-                remote.destroy()
-                throw it
             }
+        }.onSuccess {
+            val rtm = remote.taskManager
+            LocalTaskManager.setRemotePeer(rtm)
+            if (!rtm.isInitialized) {
+                rtm.initialize(LocalTaskManager.getEnabledTasks().map { it.toDTO() })
+            }
+        }.onFailure {
+            remote.destroy()
+            throw it
         }
     }
 

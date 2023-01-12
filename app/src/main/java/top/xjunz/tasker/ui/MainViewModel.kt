@@ -19,7 +19,6 @@ import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.util.Router
 
@@ -39,26 +38,22 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val onNewIntent = MutableLiveData<Uri>()
 
-    val showStopConfirmation = MutableLiveData<Boolean>()
+    val stopServiceConfirmation = MutableLiveData<Boolean>()
 
-    val isRunning = MutableLiveData(false)
+    val isServiceRunning = MutableLiveData(false)
 
-    val isBinding = MutableLiveData<Boolean>()
+    val isServiceBinding = MutableLiveData<Boolean>()
 
-    val bindingError = MutableLiveData<Throwable>()
+    val serviceBindingError = MutableLiveData<Throwable>()
 
     val operatingMode = MutableLiveData(OperatingMode.CURRENT)
 
     fun init() {
         AppletOptionFactory.preloadIfNeeded()
-        if (TaskStorage.customTaskLoaded) {
+        if (TaskStorage.storageTaskLoaded) {
             allTaskLoaded.value = true
         } else viewModelScope.launch {
             TaskStorage.loadAllTasks()
-            TaskStorage.customTaskLoaded = true
-            LocalTaskManager.initialize(TaskStorage.allTasks.filter {
-                it.isEnabled
-            })
             allTaskLoaded.value = true
         }
     }
@@ -71,7 +66,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     }
 
     fun toggleService() {
-        if (isRunning.isTrue) {
+        if (isServiceRunning.isTrue) {
             serviceController.stopService()
         } else {
             serviceController.bindService()
@@ -79,22 +74,22 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     }
 
     override fun onStartBinding() {
-        isBinding.postValue(true)
+        isServiceBinding.postValue(true)
     }
 
     override fun onError(t: Throwable) {
-        isBinding.postValue(false)
-        isRunning.postValue(false)
-        bindingError.postValue(t)
+        isServiceBinding.postValue(false)
+        isServiceRunning.postValue(false)
+        serviceBindingError.postValue(t)
     }
 
     override fun onServiceBound() {
-        isBinding.postValue(false)
-        isRunning.postValue(true)
+        isServiceBinding.postValue(false)
+        isServiceRunning.postValue(true)
     }
 
     override fun onServiceDisconnected() {
-        isRunning.postValue(false)
+        isServiceRunning.postValue(false)
     }
 
     inline fun doOnHostRouted(
@@ -119,11 +114,5 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
                 block(it.getQueryParameter(actionName)!!)
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        //  TaskStorage.allTasks.clear()
-        //  TaskStorage.customTaskLoaded = false
     }
 }

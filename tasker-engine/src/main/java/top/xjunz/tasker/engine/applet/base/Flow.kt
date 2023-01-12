@@ -5,6 +5,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
+import androidx.annotation.CheckResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -23,10 +24,9 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     override val valueType: Int = VAL_TYPE_IRRELEVANT
 
-    protected open fun shouldSkipAll(runtime: TaskRuntime): Boolean = false
-
     @CallSuper
-    protected open suspend fun doApply(runtime: TaskRuntime) {
+    @CheckResult
+    protected open suspend fun doApply(runtime: TaskRuntime): Boolean {
         forEachIndexed `continue`@{ index, applet ->
             if (!applet.isEnabled) {
                 return@`continue`
@@ -43,9 +43,10 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
             runtime.observer?.onStarted(applet, runtime)
-            applet.apply(runtime)
+            runtime.isSuccessful = applet.apply(runtime)
             runtime.observer?.onTerminated(applet, runtime)
         }
+        return runtime.isSuccessful
     }
 
     open fun performStaticCheck(): StaticError? {
@@ -78,23 +79,20 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         return StaticError.ERR_NONE
     }
 
-    override suspend fun apply(runtime: TaskRuntime) {
+    override suspend fun apply(runtime: TaskRuntime): Boolean {
         onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
-        if (shouldSkipAll(runtime)) {
-            runtime.observer?.onSkipped(this, runtime)
-        } else {
-            onPrepare(runtime)
-            // Backup the target, because sub-flows may change the target, we don't want the changed
-            // value to fall through.
-            val backup = runtime.getRawTarget()
-            doApply(runtime)
-            onPostApply(runtime)
-            // restore the target
-            runtime.setTarget(backup)
-        }
+        onPrepare(runtime)
+        // Backup the target, because sub-flows may change the target, we don't want the changed
+        // value to fall through.
+        val backup = runtime.getRawTarget()
+        val succeeded = doApply(runtime)
+        onPostApply(runtime)
+        // restore the target
+        runtime.setTarget(backup)
         runtime.tracker.jumpOut()
+        return succeeded
     }
 
     /**

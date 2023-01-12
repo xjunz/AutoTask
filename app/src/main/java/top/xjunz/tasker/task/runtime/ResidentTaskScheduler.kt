@@ -97,7 +97,7 @@ class ResidentTaskScheduler(
 
         override fun onError(runtime: TaskRuntime, t: Throwable) {
             super.onError(runtime, t)
-            logcat(t.message)
+            logcat(t.stackTraceToString())
             logcat("-------- $runtime Error --------")
         }
 
@@ -129,7 +129,7 @@ class ResidentTaskScheduler(
         launch {
             val snapshot = Snapshot()
             try {
-                for (task in taskManager.enabledTasks) {
+                for (task in taskManager.getEnabledTasks()) {
                     task.onStateChangedListener = listener
                     task.launch(snapshot, this, events, observer)
                 }

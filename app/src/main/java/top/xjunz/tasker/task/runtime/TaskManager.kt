@@ -1,34 +1,50 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
 package top.xjunz.tasker.task.runtime
 
-import android.util.ArraySet
 import top.xjunz.tasker.engine.task.XTask
+import java.util.*
 
 /**
  * @author xjunz 2022/12/25
  */
-interface TaskManager<TaskIdentifier, TaskCarrier> {
+abstract class TaskManager<TaskIdentifier, TaskCarrier> {
 
-    val enabledTasks: ArraySet<XTask>
+    protected val enabled: MutableList<XTask> = mutableListOf()
 
-    fun ArraySet<XTask>.findTask(identifier: TaskIdentifier): XTask?
+    protected abstract fun asTask(carrier: TaskCarrier): XTask
 
-    fun TaskCarrier.asTask(): XTask
+    protected abstract fun List<XTask>.indexOfTask(identifier: TaskIdentifier): Int
 
-    fun isInitialized(): Boolean
-
-    fun removeResidentTask(identifier: TaskIdentifier) {
-        enabledTasks.remove(checkNotNull(enabledTasks.findTask(identifier)))
+    fun getEnabledTasks(): List<XTask> {
+        return enabled
     }
 
-    fun initialize(carriers: Collection<TaskCarrier>) {
-        check(!isInitialized())
-        carriers.mapTo(enabledTasks) {
-            it.asTask()
+    open fun disableResidentTask(identifier: TaskIdentifier) {
+        val index = enabled.indexOfTask(identifier)
+        if (index >= 0) {
+            enabled[index].halt()
+            enabled.removeAt(index)
         }
     }
 
+    open fun enableResidentTask(carrier: TaskCarrier) {
+        val task = asTask(carrier)
+        check(!enabled.contains(task)) {
+            "Task [${task.title}] already enabled!"
+        }
+        enabled.add(task)
+    }
+
+    open fun updateResidentTask(previousChecksum: Long, updated: TaskCarrier) {
+        val task = enabled.find {
+            it.checksum == previousChecksum
+        }
+        if (task != null) {
+            task.halt()
+            Collections.replaceAll(enabled, task, asTask(updated))
+        }
+    }
 }

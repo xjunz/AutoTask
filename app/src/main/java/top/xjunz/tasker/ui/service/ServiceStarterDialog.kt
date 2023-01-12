@@ -81,7 +81,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
             }
         }
 
-        observe(mvm.isBinding) {
+        observe(mvm.isServiceBinding) {
             binding.btnStart.isEnabled = !it
             if (it) {
                 binding.spreadContainer.clearSpreading()
@@ -91,7 +91,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
                 binding.tvState.text = R.string.service_not_started.text
             }
         }
-        observe(mvm.isRunning) {
+        observe(mvm.isServiceRunning) {
             if (it) {
                 toast(R.string.service_started)
                 dismiss()

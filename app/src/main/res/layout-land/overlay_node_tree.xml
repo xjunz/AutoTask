@@ -58,7 +58,7 @@
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/bg_selectable_primary_surface"
+                android:background="@drawable/bg_selectable_surface"
                 android:clipToPadding="false"
                 android:fadingEdgeLength="16dp"
                 android:overScrollMode="never"
@@ -72,7 +72,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/ib_close"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="?materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"

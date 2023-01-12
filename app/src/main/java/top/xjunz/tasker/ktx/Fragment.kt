@@ -23,8 +23,9 @@ fun <T : Fragment> T.doWhenCreated(block: CoroutineScope.() -> Unit): T {
     return this
 }
 
-fun DialogFragment.show(fm: FragmentManager) {
+fun DialogFragment.show(fm: FragmentManager): Fragment {
     show(fm, javaClass.simpleName)
+    return this
 }
 
 inline fun <reified T : Fragment> Fragment.peekParentFragment(): T {

@@ -17,6 +17,8 @@ import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import java.io.File
 import java.io.FileFilter
 import java.util.zip.ZipInputStream
@@ -28,13 +30,21 @@ object TaskStorage {
 
     private const val X_TASK_FILE_SUFFIX = ".xtsk"
 
-    var customTaskLoaded = false
+    var storageTaskLoaded = false
 
     var preloadTaskLoaded = false
 
-    val allTasks = mutableListOf<XTask>()
+    private val all = mutableListOf<XTask>()
 
-    val preloadTasks = mutableListOf<XTask>()
+    fun getAllTasks(): List<XTask> {
+        return all
+    }
+
+    private val preloads = mutableListOf<XTask>()
+
+    fun getPreloadTasks(): List<XTask> {
+        return preloads
+    }
 
     private val storageDir: File = app.getExternalFilesDir("xtsk")!!
 
@@ -49,13 +59,10 @@ object TaskStorage {
         }
 
     fun removeTask(task: XTask) {
-        check(allTasks.contains(task))
-        check(!task.isEnabled) {
-            "Not enabled!"
-        }
+        check(all.contains(task))
         val file = task.fileOnStorage
         if (!file.exists() || file.delete()) {
-            allTasks.remove(task)
+            all.remove(task)
         } else {
             runtimeException("Failed to delete file!")
         }
@@ -78,7 +85,7 @@ object TaskStorage {
                 while (entry != null) {
                     val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory)
                     task.metadata.isPreload = true
-                    preloadTasks.add(task)
+                    preloads.add(task)
                     entry = it.nextEntry
                 }
             }
@@ -93,7 +100,7 @@ object TaskStorage {
                     file.outputStream().bufferedWriter().use {
                         it.write(Json.encodeToString(task.toDTO()))
                     }
-                    allTasks.add(task)
+                    all.add(task)
                 } else {
                     runtimeException("Failed to create new file!")
                 }
@@ -124,37 +131,33 @@ object TaskStorage {
                                 "Checksum failure to xtsk file $file?!"
                             }
                         }.toXTask(AppletOptionFactory)
-                        allTasks.add(task)
+                        all.add(task)
                         if (isEnabled) {
-                            task.enable()
+                            LocalTaskManager.enableResidentTask(task)
                         }
                     }.onFailure {
                         it.printStackTrace()
                     }
                 }
             }
+            storageTaskLoaded = true
+            LocalTaskManager.isInitialized = true
         }
     }
 
     private fun findTask(checksum: Long): XTask? {
-        return allTasks.find { it.checksum == checksum }
+        return all.find { it.checksum == checksum }
     }
 
     fun getResidentTasks(): List<XTask> {
-        return allTasks.filter {
+        return all.filter {
             it.metadata.taskType == XTask.TYPE_RESIDENT
         }
     }
 
     fun getOneshotTasks(): List<XTask> {
-        return allTasks.filter {
+        return all.filter {
             it.metadata.taskType == XTask.TYPE_ONESHOT
-        }
-    }
-
-    fun getActiveResidentTasks(): List<XTask> {
-        return allTasks.filter {
-            it.isEnabled
         }
     }
 }

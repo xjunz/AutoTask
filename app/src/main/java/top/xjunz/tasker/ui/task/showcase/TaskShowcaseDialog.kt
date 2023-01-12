@@ -6,21 +6,21 @@ package top.xjunz.tasker.ui.task.showcase
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.doOnPreDraw
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.shape.MaterialShapeDrawable
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
@@ -35,17 +35,21 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
 
     private val viewModel by viewModels<TaskShowcaseViewModel>()
 
+    private val fragments = arrayOfNulls<BaseTaskShowcaseFragment>(3)
+
     private val viewPagerAdapter by lazy {
         object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int = 3
 
             override fun createFragment(position: Int): Fragment {
-                return when (position) {
+                val f = when (position) {
                     0 -> EnabledTaskFragment()
                     1 -> ResidentTaskFragment()
                     2 -> EnabledTaskFragment()
                     else -> illegalArgument()
                 }
+                fragments[position] = f
+                return f
             }
         }
     }
@@ -61,16 +65,18 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         binding.bottomBar.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
             v.doOnPreDraw {
-                binding.fabAction.updateLayoutParams<MarginLayoutParams> {
-                    bottomMargin = v.height + 16.dp
-                }
                 viewModel.bottomBarHeight.value = it.height
             }
+        }
+        binding.bottomBar.background.let {
+            it as MaterialShapeDrawable
+            it.elevation = 4.dpFloat
+            it.alpha = (.88 * 0xFF).toInt()
         }
         val mvm = peekMainViewModel()
         binding.btnServiceControl.setAntiMoneyClickListener {
             if (it.isActivated) {
-                mvm.showStopConfirmation.value = true
+                mvm.stopServiceConfirmation.value = true
             } else {
                 ServiceStarterDialog().show(childFragmentManager)
             }
@@ -83,9 +89,6 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             binding.viewPager.currentItem = binding.bottomBar.menu.indexOf(it)
             return@setOnItemSelectedListener true
         }
-        binding.appBar.addLiftOnScrollListener { _, _ ->
-            viewModel.liftedStates[binding.viewPager.currentItem] = binding.appBar.isLifted
-        }
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -94,14 +97,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                         as HideBottomViewOnScrollBehavior<View>).slideUp(binding.bottomBar, true)
                 ((binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
                         as HideBottomViewOnScrollBehavior<View>).slideUp(binding.fabAction, true)
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-                if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                    if (viewModel.liftedStates[binding.viewPager.currentItem])
-                        binding.appBar.isLifted = true
-                }
+                binding.appBar.setLiftOnScrollTargetView(fragments[position]?.getScrollTarget())
             }
         })
         observeDialog(viewModel.requestToggleTask) {
@@ -123,7 +119,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeTransient(viewModel.requestAddNewTask) {
             viewModel.addRequestedTask()
         }
-        observe(peekMainViewModel().isRunning) {
+        observe(mvm.isServiceRunning) {
             binding.btnServiceControl.isActivated = it
             if (it) {
                 binding.btnServiceControl.setText(R.string.stop_service)
@@ -134,5 +130,4 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             }
         }
     }
-
 }

@@ -7,12 +7,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/container"
         style="@style/Widget.Material3.CardView.Elevated"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginVertical="4dp"
-        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large">
+        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
+        app:strokeColor="?colorPrimary">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -28,20 +30,16 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/tv_task_name" />
 
-
             <TextView
                 android:id="@+id/tv_task_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:drawablePadding="8dp"
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textColor="?colorPrimary"
-                app:drawableStartCompat="@drawable/ic_hourglass_bottom_24px"
-                app:drawableTint="?colorPrimary"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintEnd_toStartOf="@+id/tv_badge"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -55,7 +53,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:ellipsize="end"
                 android:maxLines="5"
@@ -80,63 +78,63 @@
                 app:layout_constraintTop_toTopOf="@+id/tv_task_name"
                 app:layout_goneMarginEnd="16dp" />
 
-            <com.google.android.material.divider.MaterialDivider
-                android:id="@+id/divider"
+            <top.xjunz.tasker.ui.widget.WaveDivider
+                android:id="@+id/wave"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="6dp"
                 android:layout_marginTop="16dp"
-                app:dividerColor="@color/material_on_surface_stroke"
-                app:layout_constraintTop_toBottomOf="@+id/tv_task_desc" />
+                app:layout_constraintTop_toBottomOf="@+id/tv_task_desc"
+                app:waveRunningColor="?colorPrimary"
+                app:waveStrokeColor="@color/material_on_surface_stroke"
+                app:waveStrokeWidth="1dp"
+                app:waveWidth="20dp" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/ms_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider" />
+                app:layout_constraintTop_toBottomOf="@+id/wave" />
 
-            <ImageButton
-                android:id="@+id/ib_edit"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@string/edit"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/ms_enabled"
-                app:srcCompat="@drawable/ic_edit_24dp"
-                app:tint="@color/color_text_control_normal" />
-
-            <ImageButton
-                android:id="@+id/ib_track"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@string/track_task_flow"
-                app:layout_constraintStart_toEndOf="@+id/ib_delete"
-                app:layout_constraintTop_toTopOf="@+id/ms_enabled"
-                app:layout_goneMarginStart="16dp"
-                app:srcCompat="@drawable/ic_timeline_24px"
-                app:tint="@color/color_text_control_normal" />
+                app:layout_constraintStart_toStartOf="@+id/wave"
+                app:layout_constraintTop_toTopOf="@+id/ms_enabled">
 
-            <ImageButton
-                android:id="@+id/ib_delete"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_selectable_circle"
-                android:contentDescription="@string/delete"
-                app:layout_constraintBottom_toBottomOf="@+id/ib_edit"
-                app:layout_constraintStart_toEndOf="@+id/ib_edit"
-                app:layout_constraintTop_toTopOf="@+id/ms_enabled"
-                app:srcCompat="@drawable/delete_forever_24px"
-                app:tint="@color/color_text_control_normal" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_edit"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@{@string/edit}"
+                    android:insetTop="6dp"
+                    android:insetBottom="6dp"
+                    app:icon="@drawable/ic_edit_24dp"
+                    app:iconTint="@color/color_text_control_normal" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_delete"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@{@string/delete}"
+                    app:icon="@drawable/delete_forever_24px"
+                    app:iconTint="@color/color_text_control_normal" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_track"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@{@string/track_task_flow}"
+                    app:icon="@drawable/ic_timeline_24px"
+                    app:iconTint="@color/color_text_control_normal" />
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>

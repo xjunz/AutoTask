@@ -16,7 +16,7 @@ import top.xjunz.tasker.task.storage.TaskStorage
 class ResidentTaskFragment : BaseTaskShowcaseFragment() {
 
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.allTasks
+        return TaskStorage.getAllTasks()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

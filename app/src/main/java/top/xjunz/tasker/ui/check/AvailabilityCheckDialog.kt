@@ -172,7 +172,7 @@ class AvailabilityCheckDialog : BaseDialogFragment<DialogAvailabilityCheckBindin
             binding.cvList.isVisible = it
             binding.mask.isVisible = it
         }
-        observe(mainViewModel.isRunning) {
+        observe(mainViewModel.isServiceRunning) {
             if (!it) {
                 dismiss()
                 toast(R.string.service_not_started)

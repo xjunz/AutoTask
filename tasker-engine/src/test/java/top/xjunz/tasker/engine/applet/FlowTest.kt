@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.applet
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.Test
@@ -22,6 +23,7 @@ internal class FlowTest {
 
     private val mockTask = XTask()
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun testFlowApply() {
         val rootFlow = DslFlow("abc") {
@@ -30,17 +32,17 @@ internal class FlowTest {
             If {
                 UnaryCriterion {
                     comment = "notEqual"
-                    Matcher { s, s2 -> s == s2 }
                     value = "a"
                     isInverted = true
                     Value("a", true)
+                    Matcher { s, s2 -> s == s2 }
                 }
 
                 UnaryCriterion {
-                    isAnd = false
+                    isAnd = true
                     comment = "equal"
-                    Matcher { s, s2 -> s == s2 }
                     Value("b")
+                    Matcher { s, s2 -> s == s2 }
                 }
 
                 UnaryCriterion {
@@ -54,6 +56,12 @@ internal class FlowTest {
                     comment = "contains2"
                     Value("task")
                     Matcher { s: String, s2: String -> s.contains(s2) }
+                }
+            }
+            Then {
+                Action {
+                    println("Action!")
+                    true
                 }
             }
         }

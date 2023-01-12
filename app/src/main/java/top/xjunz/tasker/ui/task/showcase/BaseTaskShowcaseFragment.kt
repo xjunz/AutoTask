@@ -5,11 +5,15 @@
 package top.xjunz.tasker.ui.task.showcase
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -19,6 +23,8 @@ import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
 import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.serviceController
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
@@ -58,7 +64,28 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 val prevChecksum = task.checksum
                 FlowEditorDialog().init(task).doOnTaskEdited {
                     viewModel.updateTask(prevChecksum, task)
-                }.show(childFragmentManager)
+                }.show(childFragmentManager).tag
+                childFragmentManager.registerFragmentLifecycleCallbacks(
+                    object : FragmentLifecycleCallbacks() {
+                        override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
+                            super.onFragmentDestroyed(fm, f)
+                            if (f.tag === tag) {
+                                viewModel.isPaused.value = false
+                                childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
+                            }
+                        }
+
+                        override fun onFragmentAttached(
+                            fm: FragmentManager,
+                            f: Fragment,
+                            context: Context
+                        ) {
+                            if (f.tag === tag) {
+                                viewModel.isPaused.value = true
+                            }
+                        }
+                    }, false
+                )
             }
         }
     }
@@ -88,14 +115,26 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.tvTaskDesc.isEnabled = true
             }
             b.tvBadge.isVisible = task.isPreload
+            b.ibTrack.isVisible = false
+            b.container.strokeWidth = 0
             if (task.isEnabled) {
                 b.msEnabled.setText(R.string.is_enabled)
+                if (serviceController.isServiceRunning) {
+                    b.wave.fadeIn()
+                    b.ibTrack.isVisible = true
+                    b.container.strokeWidth = 1.dp
+                } else {
+                    b.wave.fadeOut()
+                }
             } else {
                 b.msEnabled.setText(R.string.not_is_enabled)
+                b.wave.fadeOut()
             }
-            b.ibDelete.isVisible = !task.isEnabled
-            b.ibEdit.isVisible = !task.isEnabled
-            b.ibTrack.isVisible = task.isEnabled
+            if (viewModel.isPaused.value == true) {
+                b.wave.pause()
+            } else {
+                b.wave.resume()
+            }
         }
 
         override fun getItemCount() = taskList.size
@@ -107,6 +146,10 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         binding.groupPlaceholder.isVisible = visible
     }
 
+    fun getScrollTarget(): RecyclerView {
+        return binding.rvTaskList
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observe(viewModel.appbarHeight) {
@@ -115,13 +158,17 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         observe(viewModel.bottomBarHeight) {
             binding.rvTaskList.updatePadding(bottom = it)
         }
-        observe(peekMainViewModel().allTaskLoaded) {
+        val mvm = peekMainViewModel()
+        observe(mvm.allTaskLoaded) {
             taskList.clear()
             taskList.addAll(initTaskList())
             binding.rvTaskList.adapter = adapter
             if (taskList.isEmpty()) {
                 togglePlaceholder(true)
             }
+        }
+        observe(mvm.isServiceRunning) {
+            adapter.notifyItemRangeChanged(0, taskList.size, 0)
         }
         observeTransient(viewModel.onTaskDeleted) {
             val index = taskList.indexOf(it)
@@ -137,5 +184,18 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         observeTransient(viewModel.onTaskUpdated) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)
         }
+        observe(viewModel.isPaused) {
+            adapter.notifyItemRangeChanged(0, taskList.size, true)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.isPaused.value = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.isPaused.value = false
     }
 }

@@ -24,10 +24,13 @@ class RepeatFlow : Flow() {
         return super.staticCheckMyself()
     }
 
-    override suspend fun doApply(runtime: TaskRuntime) {
+    override suspend fun doApply(runtime: TaskRuntime): Boolean {
         for (i in 0 until count) {
-            super.doApply(runtime)
+            if (!super.doApply(runtime)) {
+                return false
+            }
         }
+        return true
     }
 
 }

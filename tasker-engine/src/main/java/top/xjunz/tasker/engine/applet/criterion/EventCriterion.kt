@@ -16,15 +16,15 @@ class EventCriterion(eventType: Int) : Applet() {
         value = eventType
     }
 
-    override val valueType: Int = Applet.VAL_TYPE_INT
+    override val valueType: Int = VAL_TYPE_INT
 
-    override suspend fun apply(runtime: TaskRuntime) {
+    override suspend fun apply(runtime: TaskRuntime): Boolean {
         val hit = runtime.events.find { it.type == value }
-        if (hit == null) {
-            runtime.isSuccessful = false
+        return if (hit == null) {
+            false
         } else {
-            runtime.isSuccessful = true
             runtime.hitEvent = hit
+            true
         }
     }
 

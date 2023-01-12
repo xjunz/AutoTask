@@ -97,11 +97,11 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     }
 
     private fun observeData() {
-        observe(viewModel.isBinding) {
+        observe(viewModel.isServiceBinding) {
             binding.btnRun.isEnabled = !it
             if (it) binding.tvServiceStatus.setText(R.string.service_connecting)
         }
-        observe(viewModel.isRunning) {
+        observe(viewModel.isServiceRunning) {
             binding.btnRun.isActivated = it
             if (it) {
                 handler.post(updateDurationTask)
@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             binding.btnRun.isEnabled = it
             if (it) {
                 // [isRunning] has a higher priority
-                if (viewModel.isRunning.isNotTrue) {
+                if (viewModel.isServiceRunning.isNotTrue) {
                     binding.tvPrompt.setText(R.string.prompt_start_service)
                 }
                 binding.btnGrant.setText(R.string.granted)
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 binding.btnGrant.setText(R.string.grant)
             }
         }
-        observeDialog(viewModel.bindingError) {
+        observeDialog(viewModel.serviceBindingError) {
             if (it is TimeoutException) {
                 makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out)
                     .setTitle(R.string.error_occurred)
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             binding.tvMode.text = it.name
             binding.btnRun.isEnabled = it == OperatingMode.Accessibility
         }
-        observeConfirmation(viewModel.showStopConfirmation, R.string.prompt_stop_service) {
+        observeConfirmation(viewModel.stopServiceConfirmation, R.string.prompt_stop_service) {
             viewModel.toggleService()
         }
     }
@@ -201,7 +201,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             }
         }
         binding.containerOperatingMode.setOnClickListener {
-            if (viewModel.isBinding.isTrue || viewModel.isRunning.isTrue) {
+            if (viewModel.isServiceBinding.isTrue || viewModel.isServiceRunning.isTrue) {
                 toast(R.string.prompt_unable_to_switch_mode)
                 return@setOnClickListener
             }
@@ -213,14 +213,14 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             operatingModeMenu.show()
         }
         binding.btnRun.setOnClickListener {
-            if (viewModel.isRunning.isTrue) {
-                viewModel.showStopConfirmation.toggle()
+            if (viewModel.isServiceRunning.isTrue) {
+                viewModel.stopServiceConfirmation.toggle()
             } else {
                 viewModel.toggleService()
             }
         }
         binding.containerCheck.setOnClickListener {
-            if (viewModel.isRunning.isNotTrue) {
+            if (viewModel.isServiceRunning.isNotTrue) {
                 toast(R.string.pls_start_service)
                 return@setOnClickListener
             }

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -70,7 +69,7 @@
             android:layout_marginTop="4dp"
             android:textStyle="bold"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
+            app:layout_constraintBottom_toTopOf="@+id/container_refids"
             app:layout_constraintStart_toEndOf="@+id/bullet"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_goneMarginBottom="4dp"
@@ -89,9 +88,8 @@
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
             app:layout_constraintBottom_toTopOf="@+id/tv_comment"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/container_refids"
             app:layout_goneMarginBottom="4dp"
             tools:text="@tools:sample/lorem" />
 
@@ -107,10 +105,9 @@
             android:textColor="@color/color_text_control_highlight"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
             app:layout_constraintTop_toBottomOf="@+id/tv_desc"
-            tools:text="说明: XXX——XXX——SS" />
+            tools:text="说明: 请勿删除此规则" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ib_action"
@@ -127,26 +124,56 @@
             app:tint="?colorPrimary"
             tools:src="@drawable/ic_baseline_switch_24" />
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/cg_refids"
+        <HorizontalScrollView
+            android:id="@+id/container_refids"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
-            app:layout_constraintStart_toEndOf="@+id/tv_title"
-            app:layout_constraintTop_toTopOf="@+id/tv_title"
-            app:selectionRequired="false"
-            app:singleLine="true">
+            app:layout_constraintStart_toEndOf="@+id/bullet"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:visibility="visible">
 
-            <TextView
-                android:id="@+id/tv_badge"
-                style="@style/BadgeText"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cg_refs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="?colorTertiaryContainer"
-                android:textColor="?colorOnTertiaryContainer" />
-        </com.google.android.material.chip.ChipGroup>
+                app:singleLine="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_refid_1"
+                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    app:checkedIconTint="?colorPrimary"
+                    app:chipIcon="@drawable/ic_baseline_link_24"
+                    tools:text="包名" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_refid_2"
+                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    app:checkedIconTint="?colorPrimary"
+                    app:chipIcon="@drawable/ic_baseline_link_24"
+                    tools:text="包名" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_refid_3"
+                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    app:checkedIconTint="?colorPrimary"
+                    app:chipIcon="@drawable/ic_baseline_link_24"
+                    tools:text="包名" />
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

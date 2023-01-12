@@ -47,8 +47,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    val binder: Binder = Binder()
-
     private lateinit var delegate: IRemoteAutomatorService
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
@@ -127,7 +125,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     override fun getTaskManager(): IRemoteTaskManager {
-        return RemoteTaskManager
+        return RemoteTaskManager.Delegate
     }
 
     override fun isConnected(): Boolean {
@@ -141,11 +139,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
                 eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
-                        AccessibilityEvent.TYPE_WINDOWS_CHANGED or
                         AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
                         AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED or
                         AccessibilityEvent.TYPE_ANNOUNCEMENT
-                notificationTimeout = 100
                 flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                         AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS and
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()

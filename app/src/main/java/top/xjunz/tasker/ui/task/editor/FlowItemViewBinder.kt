@@ -8,12 +8,16 @@ import android.annotation.SuppressLint
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
+import com.google.android.material.chip.Chip
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
+import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/11/07
@@ -43,7 +47,6 @@ class FlowItemViewBinder(
         holder.binding.apply {
             root.translationX = 0F
             root.isSelected = viewModel.isSelected(applet)
-                    || (viewModel.isSelectingRef && globalViewModel.isRefSelected(applet))
             root.isActivated = viewModel.staticError?.victim === applet
             root.isEnabled = true
 
@@ -53,7 +56,6 @@ class FlowItemViewBinder(
             dividerTop.isVisible = false
             dividerBott.isVisible = false
 
-            cgRefids.isVisible = false
             tvTitle.isEnabled = true
             bullet.isVisible = false
             // Don't show innate value
@@ -90,7 +92,6 @@ class FlowItemViewBinder(
                     dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                     tvNumber.text = (applet.index + 1).toString()
                     tvTitle.setTextAppearance(TextAppearance_Material3_LabelLarge)
-                    // tvTitle.setTextColor(ColorScheme.textColorPrimary)
                     if (applet is Flow) {
                         val size = applet.size.toString().foreColored()
                         desc = R.string.format_applet_count.formatSpans(size)
@@ -142,35 +143,37 @@ class FlowItemViewBinder(
                 if (!tvDesc.isEnabled) {
                     desc = desc?.toString()
                 }
-                val isAhead = viewModel.refSelectingApplet.parent == null
+                val ahead = viewModel.refSelectingApplet.parent == null
                         || applet.isAheadOf(viewModel.refSelectingApplet)
                 // When selecting ref, only enable valid targets
-                val ref = if (!isAhead) null else option.results.find {
+                val refs = if (!ahead) emptyList() else option.results.filter {
                     it.type == viewModel.refValueDescriptor.type
                 }
                 if (applet.isContainer && depth == 3) {
-                    root.isEnabled = isAhead && viewModel.hasCandidateReference(applet as Flow)
+                    root.isEnabled = ahead && viewModel.hasCandidateReference(applet as Flow)
                 } else {
-                    root.isEnabled = ref != null
-                    cgRefids.isVisible = root.isEnabled
+                    root.isEnabled = refs.isNotEmpty()
+                    containerRefids.isVisible = refs.isNotEmpty()
                 }
                 tvTitle.isEnabled = root.isEnabled
-                if (ref != null) {
-                    val refid = applet.refids[option.results.indexOf(ref)]
-                    if (refid != null) {
-                        tvBadge.text = ref.name + " [$refid]".foreColored(ColorScheme.colorTertiary)
-                    } else {
-                        tvBadge.text = ref.name
+                if (refs.isNotEmpty()) {
+                    chipRefid1.isVisible = false
+                    chipRefid2.isVisible = false
+                    chipRefid3.isVisible = false
+                    refs.forEachIndexed { index, ref ->
+                        val which = option.results.indexOf(ref)
+                        val refid = applet.refids[which]
+                        showReference(applet, index, which, ref.name, refid)
                     }
                 }
             } else {
-                cgRefids.isVisible = false
+                containerRefids.isVisible = false
             }
 
             if (!applet.isEnabledInHierarchy) title = title?.strikeThrough()
 
-            ibAction.isGone = ibAction.tag == null
-                    || (viewModel.isSelectingRef && ibAction.tag != ACTION_COLLAPSE
+            ibAction.isGone = ibAction.tag == null || (viewModel.isSelectingRef
+                    && ibAction.tag != ACTION_COLLAPSE
                     && ibAction.tag != ACTION_ENTER)
             tvTitle.text = title
             tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
@@ -188,6 +191,57 @@ class FlowItemViewBinder(
                 tvComment.text = (R.string.comment.text.bold() + applet.comment!!)
                     .quoted(ColorScheme.colorTertiaryContainer)
             }
+        }
+    }
+
+    private fun ItemFlowItemBinding.getReferenceChip(index: Int): Chip {
+        return when (index) {
+            0 -> chipRefid1
+            1 -> chipRefid2
+            2 -> chipRefid3
+            else -> illegalArgument("chip index", index)
+        }
+    }
+
+    private fun toggleSelectReference(applet: Applet, index: Int) {
+        if (globalViewModel.isRefSelected(applet, index)) {
+            globalViewModel.removeRefSelection(applet, index)
+            if (globalViewModel.selectedRefs.isEmpty())
+                viewModel.isFabVisible.value = false
+        } else {
+            // Remove existed reference to this applet, because multiple refs to one applet
+            // is not allowed!
+            if (globalViewModel.isRefSelected(applet)) {
+                globalViewModel.removeRefSelection(applet)
+            }
+            val refid = applet.refids[index]
+            if (refid == null) {
+                globalViewModel.addRefSelection(applet, index)
+            } else {
+                globalViewModel.addRefSelectionWithRefid(viewModel.refSelectingApplet, refid)
+            }
+            if (globalViewModel.selectedRefs.isNotEmpty())
+                viewModel.isFabVisible.value = true
+        }
+    }
+
+    private fun ItemFlowItemBinding.showReference(
+        applet: Applet,
+        index: Int,
+        which: Int,
+        refName: CharSequence,
+        refid: String?
+    ) {
+        val chip = getReferenceChip(index)
+        chip.isVisible = true
+        chip.isChecked = globalViewModel.isRefSelected(applet, which)
+        chip.setAntiMoneyClickListener {
+            toggleSelectReference(applet, which)
+        }
+        chip.text = if (refid == null) {
+            refName
+        } else {
+            refName + " [$refid]".foreColored()
         }
     }
 }

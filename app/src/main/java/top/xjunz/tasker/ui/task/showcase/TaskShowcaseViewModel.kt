@@ -13,12 +13,17 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.task.storage.TaskStorage
 
 /**
  * @author xjunz 2022/12/20
  */
 class TaskShowcaseViewModel : ViewModel() {
+
+    val currentItemIndex = MutableLiveData<Int>()
+
+    val isPaused = MutableLiveData<Boolean>()
 
     val requestDeleteTask = MutableLiveData<XTask>()
 
@@ -35,22 +40,20 @@ class TaskShowcaseViewModel : ViewModel() {
     val onTaskUpdated = MutableLiveData<XTask>()
 
     /**
-     * Request adding a new task to [TaskStorage.allTasks].
+     * Request adding a new task.
      */
     val requestAddNewTask = MutableLiveData<XTask>()
 
     /**
-     * When a new task is added to [TaskStorage.allTasks].
+     * When a new task is added.
      */
     val onNewTaskAdded = MutableLiveData<XTask>()
-
-    val liftedStates = booleanArrayOf(false, false, false)
 
     fun deleteRequestedTask() {
         val task = requestDeleteTask.require()
         runCatching {
             TaskStorage.removeTask(task)
-            LocalTaskManager.removeRemoteCache(task.checksum)
+            LocalTaskManager.disableResidentTask(task)
             onTaskDeleted.value = task
             toast(R.string.format_task_removed.format(task.metadata.title))
         }.onFailure {
@@ -60,7 +63,7 @@ class TaskShowcaseViewModel : ViewModel() {
 
     fun addRequestedTask() {
         val task = requestAddNewTask.require()
-        if (TaskStorage.allTasks.contains(task)) {
+        if (TaskStorage.getAllTasks().contains(task)) {
             toast(R.string.prompt_repeated_task)
             return
         }
@@ -83,7 +86,7 @@ class TaskShowcaseViewModel : ViewModel() {
             try {
                 TaskStorage.removeTask(task)
                 removed = true
-                LocalTaskManager.removeRemoteCache(prevChecksum)
+                LocalTaskManager.updateResidentTask(prevChecksum, task)
             } catch (t: Throwable) {
                 t.printStackTrace()
                 toastUnexpectedError(t)
@@ -104,11 +107,9 @@ class TaskShowcaseViewModel : ViewModel() {
     fun toggleRequestedTask() {
         val it = requestToggleTask.require()
         if (it.isEnabled) {
-            it.disable()
-            LocalTaskManager.removeResidentTask(it)
+            LocalTaskManager.disableResidentTask(it)
         } else {
-            it.enable()
-            LocalTaskManager.addResidentTask(it)
+            LocalTaskManager.enableResidentTask(it)
         }
         TaskStorage.toggleTaskFilename(it)
         onTaskToggled.value = it

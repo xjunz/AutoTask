@@ -75,6 +75,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
     }
 
     override fun bindService() {
+        if (bindingJob?.isActive == true) return
         ShizukuUtil.ensureShizukuEnv {
             listener?.onStartBinding()
             bindingJob = async {

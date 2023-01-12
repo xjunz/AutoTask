@@ -25,7 +25,6 @@ import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.ValueDescriptor
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
@@ -109,8 +108,8 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                 onSelected(popup.menu.indexOf(it) - 1)
                 return@setOnMenuItemClickListener true
             }
-            popup.configHeaderTitle()
             popup.show()
+            popup.configHeaderTitle()
         }
     }
 
@@ -121,35 +120,11 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
             binding.tvComment.setBackgroundColor(
                 ColorScheme.colorTertiaryContainer.alphaModified(.3F)
             )
-            binding.root.setOnLongClickListener {
-                true
-            }
+            binding.root.setOnLongClickListener { true }
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
-                if (viewModel.isSelectingRef && !applet.isContainer) {
-                    if (globalViewModel.isRefSelected(applet)) {
-                        globalViewModel.removeRefSelection(applet)
-                        if (globalViewModel.selectedRefs.isEmpty())
-                            viewModel.isFabVisible.value = false
-                    } else {
-                        val option = AppletOptionFactory.requireOption(applet)
-                        val candidates = option.results.filter {
-                            viewModel.refValueDescriptor.type == it.type
-                        }
-                        showMultiReferencesSelectorMenu(view, option, candidates) {
-                            val refid = applet.refids[it]
-                            if (refid == null) {
-                                globalViewModel.addRefSelection(applet, it)
-                            } else {
-                                globalViewModel.addRefSelectionWithRefid(
-                                    viewModel.refSelectingApplet, refid
-                                )
-                            }
-                            if (globalViewModel.selectedRefs.isNotEmpty())
-                                viewModel.isFabVisible.value = true
-                        }
-                    }
-                } else if (viewModel.isInMultiSelectionMode) {
+                if (viewModel.isSelectingRef && !applet.isContainer) return@setAntiMoneyClickListener
+                if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else {
                     viewModel.singleSelect(adapterPosition)

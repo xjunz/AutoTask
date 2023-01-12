@@ -14,8 +14,6 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
-import top.xjunz.tasker.service.floatingInspector
-import top.xjunz.tasker.service.isFloatingInspectorShown
 import java.lang.ref.WeakReference
 
 /**
@@ -38,10 +36,10 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
         val packageName = event.packageName?.toString() ?: return
         // Do not send events from the host application!
         if (packageName == BuildConfig.APPLICATION_ID) return
+        if (packageName == "com.android.systemui") return
         if (event.eventTime < curEventTime && !event.isFullScreen) return
         val className = event.className?.toString()
         if (className == "android.inputmethodservice.SoftInputWindow") return
-        if (isFloatingInspectorShown && className == floatingInspector.exemptionEventClassName) return
         curEventTime = event.eventTime
         val firstText = event.text.firstOrNull()?.toString()
         val prevPanelTitle = curPanelTitle
@@ -66,10 +64,10 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
 
                 val prevActivityName = curActivityName
-                val isActivity = className != null && className != curActivityName
-                        && isActivityExisting(packageName, className)
+                val isNewActivity = className != null && className != prevActivityName
+                        && isActivityExistent(packageName, className)
 
-                if (isActivity)
+                if (isNewActivity)
                     curActivityName = className
 
                 if (
@@ -77,9 +75,13 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                     // Only full screen windows, because there may be overlay windows
                     && event.isFullScreen
                 ) {
+                    val prevPkgName = curPackageName
                     curPanelTitle = firstText
-                    if (curPackageName != packageName) {
-                        if (!isActivity)
+                    // New package detected
+                    if (prevPkgName != packageName) {
+                        curPackageName = packageName
+
+                        if (!isNewActivity)
                             curActivityName = null
 
                         val pkgEnterEvent = Event.obtain(
@@ -88,10 +90,10 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                             curActivityName,
                             curPanelTitle
                         )
-                        if (curPackageName != null) {
+                        if (prevPkgName != null) {
                             val pkgExitEvent = Event.obtain(
                                 Event.EVENT_ON_PACKAGE_EXITED,
-                                curPackageName!!,
+                                prevPkgName,
                                 prevActivityName,
                                 prevPanelTitle
                             )
@@ -99,7 +101,6 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                         } else {
                             dispatchEvents(pkgEnterEvent)
                         }
-                        curPackageName = packageName
                         return
                     }
                 }
@@ -127,7 +128,7 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
         )
     }
 
-    private fun isActivityExisting(pkgName: String, actName: String): Boolean {
+    private fun isActivityExistent(pkgName: String, actName: String): Boolean {
         val hashCode = 31 * pkgName.hashCode() + actName.hashCode()
         if (activityHashCache.contains(hashCode)) return true
         if (activityHashCache.contains(-hashCode)) return false

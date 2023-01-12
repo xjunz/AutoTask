@@ -20,7 +20,7 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
         return UiObjectContext()
     }
 
-    override suspend fun doApply(runtime: TaskRuntime) {
+    override suspend fun doApply(runtime: TaskRuntime): Boolean {
         val ctx = runtime.target
         val node = runtime.getEnvironmentVariable(rootNodeKey) {
             uiAutomation.rootInActiveWindow
@@ -28,9 +28,8 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
             runtime.ensureActive()
             ctx.source = it
             super.doApply(runtime)
-            runtime.isSuccessful
         }
-        runtime.isSuccessful = node != null
+        return node != null
     }
 
     private suspend fun AccessibilityNodeInfo.findFirst(condition: suspend (AccessibilityNodeInfo) -> Boolean)

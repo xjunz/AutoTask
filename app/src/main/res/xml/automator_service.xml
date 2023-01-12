@@ -4,14 +4,13 @@
 
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowsChanged|typeWindowStateChanged|typeAnnouncement|typeNotificationStateChanged"
-    android:accessibilityFeedbackType="feedbackAllMask"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowStateChanged|typeAnnouncement|typeNotificationStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
     android:canPerformGestures="true"
     android:canRequestTouchExplorationMode="true"
     android:canRetrieveWindowContent="true"
     android:canTakeScreenshot="true"
     android:description="@string/accessibility_service_summary"
-    android:notificationTimeout="100"
     android:settingsActivity="top.xjunz.tasker.main.MainActivity"
     tools:ignore="UnusedAttribute" />

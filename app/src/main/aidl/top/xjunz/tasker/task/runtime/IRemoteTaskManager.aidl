@@ -8,14 +8,10 @@ interface IRemoteTaskManager {
 
     boolean isInitialized();
 
-    void enableCachedResidentTask(long identifier);
+    void updateResidentTask(long previous, in XTaskDTO updated);
 
-    void removeResidentTask(long identifier);
+    void disableResidentTask(long identifier);
 
-    void enableNewResidentTask(in XTaskDTO carrier);
-
-    void removeCachedTask(long checksum);
-
-    boolean isTaskCached(long identifier);
+    void enableResidentTask(in XTaskDTO carrier);
 
 }

@@ -54,12 +54,13 @@ class PreloadTaskDialog : BaseBottomSheetDialog<DialogPreloadTasksBinding>() {
     private val viewModel by viewModels<InnerViewModel>()
 
     private val adapter: Adapter<*> by lazy {
-        inlineAdapter(TaskStorage.preloadTasks, ItemPreloadTaskBinding::class.java, {
+        inlineAdapter(TaskStorage.getPreloadTasks(), ItemPreloadTaskBinding::class.java, {
             binding.btnAdd.setAntiMoneyClickListener {
-                parentViewModel.requestAddNewTask.value = TaskStorage.preloadTasks[adapterPosition]
+                parentViewModel.requestAddNewTask.value =
+                    TaskStorage.getPreloadTasks()[adapterPosition]
             }
         }) { binding, _, task ->
-            binding.btnAdd.isEnabled = !TaskStorage.allTasks.contains(task)
+            binding.btnAdd.isEnabled = !TaskStorage.getAllTasks().contains(task)
             if (binding.btnAdd.isEnabled) {
                 binding.btnAdd.text = R.string.add.text
             } else {
@@ -81,7 +82,7 @@ class PreloadTaskDialog : BaseBottomSheetDialog<DialogPreloadTasksBinding>() {
             binding.rvTaskList.adapter = adapter
         }
         observeTransient(parentViewModel.onNewTaskAdded) {
-            adapter.notifyItemChanged(TaskStorage.preloadTasks.indexOf(it), true)
+            adapter.notifyItemChanged(TaskStorage.getPreloadTasks().indexOf(it), true)
         }
     }
 }
