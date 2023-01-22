@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.applet.criterion
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -18,13 +19,23 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
+    protected open fun T.getActualValue(): Any? {
+        return this
+    }
+
     /**
      * The default value when [value] is null.
      */
     open lateinit var defaultValue: V
 
-    final override suspend fun apply(runtime: TaskRuntime): Boolean {
-        return isInverted != matchTarget(runtime.getTarget(), value?.casted() ?: defaultValue)
+    final override suspend fun apply(runtime: TaskRuntime): AppletResult {
+        val expected = value?.casted() ?: defaultValue
+        val target = runtime.getTarget<T>()
+        return if (isInverted != matchTarget(target, expected)) {
+            AppletResult.SUCCESS
+        } else {
+            AppletResult.failure(expected, target.getActualValue())
+        }
     }
 
     /**

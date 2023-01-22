@@ -53,11 +53,6 @@ abstract class Applet {
         const val VAL_TYPE_FLOAT = 4
         const val VAL_TYPE_LONG = 5
 
-        /**
-         * Composed long value in bitwise.
-         */
-        const val VAL_TYPE_BITS = VAL_TYPE_LONG
-
         private val SEPARATOR = Char(0).toString()
 
         private const val SERIALIZED_NULL_VALUE_IN_COLLECTION = ""
@@ -166,10 +161,16 @@ abstract class Applet {
     /**
      * Execute the applet.
      *
+     * @return returns `null` indicating the applet failed, [Unit] indicating the applet succeeded
+     * but there is no result and otherwise returns the result.
      * @param runtime The shared runtime throughout the root flow's lifecycle.
      */
     @CheckResult
-    abstract suspend fun apply(runtime: TaskRuntime): Boolean
+    abstract suspend fun apply(runtime: TaskRuntime): AppletResult
+
+    fun isSuccess(any: Any?): Boolean {
+        return any != null
+    }
 
     fun toggleRelation() {
         isAnd = !isAnd
@@ -249,7 +250,7 @@ abstract class Applet {
      *
      * @see refids
      */
-    open fun deriveResultByRefid(which: Int, ret: Any): Any? {
+    open fun getReferent(which: Int, ret: Any): Any? {
         if (which == 0)
             return ret
         return null

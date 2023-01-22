@@ -15,7 +15,7 @@ import top.xjunz.tasker.task.applet.criterion.simpleNumberRangeCriterion
 /**
  * @author xjunz 2022/11/10
  */
-class GlobalInfoOptionRegistry(id: Int) : AppletOptionRegistry(id) {
+class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
 
     @AppletOrdinal(0x0000)

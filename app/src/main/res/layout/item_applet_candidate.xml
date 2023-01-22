@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -10,8 +9,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector_bg_selectable_item"
-        android:paddingHorizontal="8dp">
+        android:layout_marginTop="2dp"
+        android:background="@drawable/selector_bg_selectable_surface_item"
+        android:minHeight="48dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp">
 
         <TextView
             android:id="@+id/tv_number"
@@ -19,44 +21,21 @@
             android:layout_height="wrap_content"
             android:ems="2"
             android:gravity="center"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Overline"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="?colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="123" />
 
-        <com.google.android.material.divider.MaterialDivider
-            android:id="@+id/divider_top"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_marginBottom="2dp"
-            app:dividerColor="?colorPrimaryContainer"
-            app:layout_constraintBottom_toTopOf="@id/tv_number"
-            app:layout_constraintEnd_toEndOf="@id/tv_number"
-            app:layout_constraintStart_toStartOf="@id/tv_number"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.divider.MaterialDivider
-            android:id="@+id/divider_bott"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="2dp"
-            app:dividerColor="?colorPrimaryContainer"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/tv_number"
-            app:layout_constraintStart_toStartOf="@id/tv_number"
-            app:layout_constraintTop_toBottomOf="@id/tv_number" />
-
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:background="?selectableItemBackground"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toTopOf="@+id/tv_desc"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
@@ -64,17 +43,14 @@
             app:layout_constraintStart_toEndOf="@+id/tv_number"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            app:layout_goneMarginBottom="4dp"
-            app:layout_goneMarginTop="0dp"
             tools:text="Hello" />
 
         <TextView
             android:id="@+id/tv_desc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
@@ -84,8 +60,8 @@
 
         <ImageButton
             android:id="@+id/ib_action"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/bg_selectable_circle"
             android:contentDescription="@{@string/invert}"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -81,7 +81,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     private val rightAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(viewModel.options, ItemAppletOptionBinding::class.java, {
             itemView.setAntiMoneyClickListener {
-               // if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
+                // if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
                 val position = adapterPosition
                 val option = viewModel.options[position]
                 if (option.isValid) {
@@ -99,11 +99,9 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }) { binding, position, option ->
             var title = option.currentTitle
             val m = option.titleModifier
-            if (m != null) {
-                title = title?.plus(
-                    " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
-                )
-            }
+            if (m != null) title = title?.plus(
+                " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
+            )
             binding.tvLabel.text = title
             binding.ibInvert.isInvisible = !option.isInvertible
             if (!option.isValid) {
@@ -211,7 +209,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             binding.rootView.beginAutoTransition(transition)
             val flowRegistry = AppletOptionFactory.flowRegistry
             when (viewModel.registryOptions[it]) {
-                flowRegistry.componentFlow -> {
+                flowRegistry.applicationFlow -> {
                     binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =

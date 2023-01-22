@@ -6,10 +6,10 @@ package top.xjunz.tasker.ui.task.selector.option
 
 import android.os.Bundle
 import android.text.InputType
-import android.text.method.DigitsKeyListener
 import android.view.View
 import android.widget.EditText
 import top.xjunz.tasker.R
+import top.xjunz.tasker.ktx.setDigits
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.util.IntValueUtil
@@ -39,7 +39,7 @@ class TimeRangeEditorDialog : RangeEditorDialog() {
 
     override fun configEditText(et: EditText) {
         et.setMaxLength(8)
-        et.filters += DigitsKeyListener.getInstance("0123456789:")
+        et.setDigits("0123456789:")
         et.inputType = InputType.TYPE_CLASS_DATETIME or InputType.TYPE_DATETIME_VARIATION_TIME
     }
 

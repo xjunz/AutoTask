@@ -16,11 +16,11 @@ object IntValueUtil {
     }
 
     fun parseTime(time: Int): Array<Int> {
-        return integerArrayOf(time shr 16 and 0xFF, time shr 8 and 0xFF, time and 0xFF)
+        return integerArrayOf(time ushr 16 and 0xFF, time ushr 8 and 0xFF, time and 0xFF)
     }
 
     fun composeTime(hour: Int, min: Int, sec: Int): Int {
-        return hour shl 16 or min shl 8 or sec
+        return hour shl 16 or (min shl 8) or sec
     }
 
     fun parseCoordinate(coordinate: Int): Point {

@@ -130,6 +130,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:visibility="gone"
+            android:clipChildren="false"
             app:layout_constraintBottom_toTopOf="@+id/tv_desc"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintStart_toEndOf="@+id/bullet"
@@ -141,6 +142,8 @@
                 android:id="@+id/cg_refs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
                 app:singleLine="true">
 
                 <com.google.android.material.chip.Chip
@@ -151,7 +154,7 @@
                     android:checkable="true"
                     app:checkedIconTint="?colorPrimary"
                     app:chipIcon="@drawable/ic_baseline_link_24"
-                    tools:text="包名" />
+                    tools:text="@tools:sample/lorem" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_refid_2"

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -83,5 +82,16 @@
         <item>请在该规则前添加规则</item>
         <item>请在该规则前添加规则</item>
         <item>请在该规则后添加规则</item>
+    </string-array>
+    <string-array name="swipe_arg_hints">
+        <item>滑动方向</item>
+        <item>滑动百分比(%)</item>
+        <item>滑动速度(像素/秒)</item>
+    </string-array>
+    <string-array name="swipe_directions">
+        <item>向左</item>
+        <item>向上</item>
+        <item>向右</item>
+        <item>向下</item>
     </string-array>
 </resources>

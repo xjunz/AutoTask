@@ -167,7 +167,7 @@
                             android:insetBottom="4dp"
                             android:stateListAnimator="@null"
                             android:textColor="@color/color_text_control_normal"
-                            app:icon="@drawable/touch_app_24px"
+                            app:icon="@drawable/ic_touch_app_24px"
                             app:iconGravity="textStart"
                             app:iconTint="@color/color_status_icon"
                             app:strokeColor="@color/color_status_text"
@@ -240,7 +240,7 @@
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/custom_task"
                         android:scaleType="centerInside"
-                        android:src="@drawable/gesture_24px" />
+                        android:src="@drawable/ic_gesture_24px" />
 
                     <TextView
                         android:id="@+id/tv_custom"

@@ -10,6 +10,7 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.applet.value.VariantType
 
 /**
  * @author xjunz 2023/01/07
@@ -25,7 +26,7 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueDescriber<Int> {
         val point = IntValueUtil.parseCoordinate(it)
         R.string.format_coordinate.format(point.x, point.y)
-    }.withValueArgument<Int>(R.string.specified_coordinate)
+    }.withArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
         .hasCompositeTitle()
 
     @AppletOrdinal(0x00_02)
@@ -34,6 +35,6 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
             val point = IntValueUtil.parseCoordinate(it)
             uiDevice.longClick(point.x, point.y)
         }
-    }.withValueArgument<Int>(R.string.specified_coordinate)
+    }.withArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
         .hasCompositeTitle()
 }

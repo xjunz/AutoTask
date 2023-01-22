@@ -14,6 +14,8 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class ScopedFlow<Target : Any> : Flow() {
 
+    override val registerResultsForChildren: Boolean = false
+
     /**
      * The key used to registry target to runtime, equivalent to [id] by default, which means
      * all flows with the same id will share an identical target at runtime.
@@ -50,25 +52,9 @@ abstract class ScopedFlow<Target : Any> : Flow() {
             targetKey = generateTargetKey()
         }
         runtime.setTarget(
-            runtime.getEnvironmentVariable(targetKey) {
+            runtime.getGlobal(targetKey) {
                 initializeTarget(runtime)
             }
         )
-    }
-
-    /**
-     * Typed version of [deriveResultByRefid].
-     */
-    protected open fun deriveTargetByRefid(which: Int, target: Target): Any? {
-        return deriveResultByRefid(which, target)
-    }
-
-    override fun onPostApply(runtime: TaskRuntime) {
-        super.onPostApply(runtime)
-        runtime.target.let {
-            refids.forEach { (which, id) ->
-                runtime.registerResult(id, deriveTargetByRefid(which, it))
-            }
-        }
     }
 }

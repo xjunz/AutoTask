@@ -4,17 +4,14 @@
 
 package top.xjunz.tasker.engine.task
 
-import kotlinx.coroutines.CoroutineScope
-import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
-
 /**
  * @author xjunz 2022/12/04
  */
-interface TaskScheduler : CoroutineScope {
+interface TaskScheduler : EventDispatcher.Callback {
 
-    fun getCurrentComponentInfo(): ComponentInfoWrapper
+    fun scheduleTasks(dispatcher: EventDispatcher) {
+        dispatcher.addCallback(this)
+    }
 
-    fun scheduleTasks()
-
-    fun destroy()
+    fun release()
 }

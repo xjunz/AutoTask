@@ -65,7 +65,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/specify_value"
+            android:text="@string/edit"
             android:textColor="?android:textColorPrimary"
             app:backgroundTint="@color/color_primary_background"
             app:icon="@drawable/ic_edit_24dp"

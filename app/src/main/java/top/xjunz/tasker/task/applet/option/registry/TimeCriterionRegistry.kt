@@ -19,7 +19,7 @@ import java.util.*
 /**
  * @author xjunz 2022/10/01
  */
-class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
+class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun timeCollectionCriterion(block: (Calendar) -> Int)
             : CollectionCriterion<Calendar, Int> {
@@ -27,7 +27,7 @@ class TimeOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletOrdinal(0x00_00)
-    val timeRange = appletOption(R.string.time_range) {
+    val timeRange = appletOption(R.string.in_time_range) {
         numberRangeCriterion<Calendar, Long> {
             it.timeInMillis
         }

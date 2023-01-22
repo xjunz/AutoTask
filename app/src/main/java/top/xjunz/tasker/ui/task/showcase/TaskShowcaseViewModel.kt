@@ -21,8 +21,6 @@ import top.xjunz.tasker.task.storage.TaskStorage
  */
 class TaskShowcaseViewModel : ViewModel() {
 
-    val currentItemIndex = MutableLiveData<Int>()
-
     val isPaused = MutableLiveData<Boolean>()
 
     val requestDeleteTask = MutableLiveData<XTask>()
@@ -86,7 +84,6 @@ class TaskShowcaseViewModel : ViewModel() {
             try {
                 TaskStorage.removeTask(task)
                 removed = true
-                LocalTaskManager.updateResidentTask(prevChecksum, task)
             } catch (t: Throwable) {
                 t.printStackTrace()
                 toastUnexpectedError(t)
@@ -96,6 +93,8 @@ class TaskShowcaseViewModel : ViewModel() {
             if (!removed) return@launch
             try {
                 TaskStorage.persistTask(task)
+                LocalTaskManager.updateResidentTask(prevChecksum, task)
+                toast(R.string.task_updated)
                 onTaskUpdated.value = task
             } catch (t: Throwable) {
                 onTaskDeleted.value = task

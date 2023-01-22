@@ -28,7 +28,7 @@
             android:layout_height="24dp"
             android:background="?colorSurface"
             android:elevation="2dp"
-            android:src="@drawable/widgets_24px"
+            android:src="@drawable/ic_widgets_24px"
             android:translationX="4dp"
             app:contentPadding="4dp"
             app:layout_constraintBottom_toBottomOf="@id/iv_icon"

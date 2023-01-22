@@ -13,8 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.google.android.material.R.style.TextAppearance_Material3_BodyMedium
-import com.google.android.material.R.style.TextAppearance_Material3_TitleLarge
+import com.google.android.material.R.style.*
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemAppletCandidateBinding
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -50,7 +49,7 @@ class AppletCandidatesAdapter(
                     notifyItemChanged(adapterPosition, true)
                 } else {
                     onClickListener.onClick(applet) {
-                        notifyItemChanged(adapterPosition)
+                        notifyItemChanged(adapterPosition, true)
                     }
                 }
             }
@@ -66,7 +65,7 @@ class AppletCandidatesAdapter(
                     viewModel.notifyFlowChanged()
                 } else {
                     applet.toggleInversion()
-                    notifyItemChanged(adapterPosition)
+                    notifyItemChanged(adapterPosition, true)
                 }
             }
         }
@@ -87,13 +86,12 @@ class AppletCandidatesAdapter(
         holder.binding.let {
             val showRelation = position != 0 && applet.index != 0
             val option = AppletOptionFactory.requireOption(applet)
-            val title = if (option.descAsTitle) option.describe(applet) else option.getTitle(applet)
+            var title = if (option.descAsTitle) option.describe(applet)
+            else option.loadTitle(applet)
             if (title != null && showRelation) {
-                it.tvTitle.text = AppletOption.makeRelationSpan(
+                title = AppletOption.makeRelationSpan(
                     title, applet, viewModel.isInCriterionScope
                 )
-            } else {
-                it.tvTitle.text = title
             }
             if (!option.descAsTitle) {
                 it.tvDesc.text = option.describe(applet)
@@ -101,17 +99,13 @@ class AppletCandidatesAdapter(
             it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
             if (applet.parent === viewModel.flow) {
                 it.tvNumber.isVisible = false
-                it.dividerTop.isVisible = false
-                it.dividerBott.isVisible = false
-                it.tvDesc.isVisible = false
-                it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
+                //it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
+                title = title?.relativeSize(1.2F)
             } else {
                 it.tvNumber.isVisible = true
-                it.dividerTop.isVisible = true
-                it.dividerBott.isVisible = applet.index != applet.parent?.lastIndex
                 it.tvNumber.text = (applet.index + 1).toString()
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
-                it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
+                //  it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
             }
             if (applet is Flow) {
                 it.ibAction.isVisible = true
@@ -130,6 +124,7 @@ class AppletCandidatesAdapter(
                     it.tvDesc.setTypeface(null, Typeface.NORMAL)
                 }
             }
+            it.tvTitle.text = title
         }
     }
 }

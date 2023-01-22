@@ -34,10 +34,10 @@ class ComponentOverlay(inspector: FloatingInspector) :
             if (it.paneTitle != null) {
                 binding.tvTitle.append("\n")
             }
-            binding.tvTitle.append(it.pkgName)
-            if (it.actName != null) {
+            binding.tvTitle.append(it.packageName)
+            if (it.activityName != null) {
                 binding.tvTitle.append("\n")
-                binding.tvTitle.append(it.actName)
+                binding.tvTitle.append(it.activityName)
             }
         }
         inspector.observe(vm.currentMode) {

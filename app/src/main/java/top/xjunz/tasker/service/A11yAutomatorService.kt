@@ -18,14 +18,13 @@ import android.os.ParcelFileDescriptor
 import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.unsupportedOperation
-import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
-import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
-import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -33,6 +32,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
+import top.xjunz.tasker.uiautomator.A11yUiAutomatorBridge
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import java.lang.ref.WeakReference
 
@@ -81,6 +81,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         A11yUiAutomatorBridge(uiAutomation)
     }
 
+    override val a11yEventDispatcher: A11yEventDispatcher by lazy {
+        A11yEventDispatcher(mainLooper)
+    }
+
     private var launchedInInspectorMode = false
 
     override fun onServiceConnected() {
@@ -91,9 +95,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (!launchedInInspectorMode) {
                 uiAutomationHidden = UiAutomationHidden(mainLooper, this)
                 uiAutomationHidden.connect()
-                residentTaskScheduler = ResidentTaskScheduler(mainLooper, LocalTaskManager)
-                residentTaskScheduler.scheduleTasks()
+                residentTaskScheduler = ResidentTaskScheduler(LocalTaskManager)
+                residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
             }
+            a11yEventDispatcher.startProcessing()
             runningState.value = true
             startTimestamp = System.currentTimeMillis()
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -101,6 +106,8 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             t.printStackTrace()
             launchError.value = t
             destroy()
+        } finally {
+            FLAG_REQUEST_INSPECTOR_MODE = false
         }
     }
 
@@ -139,26 +146,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    private val componentInfo = ComponentInfoWrapper()
-
-    private val a11yEventDispatcher: A11yEventDispatcher by lazy {
-        A11yEventDispatcher { events ->
-            val event = events.find {
-                it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
-            }
-            if (event != null && componentInfo != event.componentInfo) {
-                componentInfo.copyFrom(event.componentInfo)
-                inspectorViewModel.currentComp.value = componentInfo
-            }
-        }
-    }
-
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (isInspectorShown()) {
-            lifecycleScope.launch {
-                a11yEventDispatcher.processAccessibilityEvent(event)
-            }
-        }
         callbacks?.onAccessibilityEvent(event)
     }
 
@@ -168,8 +156,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
+        a11yEventDispatcher.destroy()
         if (::residentTaskScheduler.isInitialized) {
-            residentTaskScheduler.destroy()
+            residentTaskScheduler.release()
         }
         if (isInspectorShown()) inspector.dismiss()
         if (!launchedInInspectorMode) {

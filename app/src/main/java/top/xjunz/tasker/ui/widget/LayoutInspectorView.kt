@@ -139,6 +139,18 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     private var offsetY: Int = 0
 
+    fun isPointerMoved(): Boolean {
+        return pointerX >= 0 && pointerY >= 0
+    }
+
+    fun getCoordinateX(): Int {
+        return (pointerX + offsetX).toInt()
+    }
+
+    fun getCoordinateY(): Int {
+        return (pointerY + offsetY).toInt()
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         getWindowVisibleDisplayFrame(visibleBounds)
@@ -240,7 +252,7 @@ class LayoutInspectorView @JvmOverloads constructor(
         }
         // Draw coordinates
         drawTextAndBackground(
-            canvas, "x:${pointerX.toInt() + offsetX}, y:${pointerY.toInt() + offsetY}"
+            canvas, "x:${getCoordinateX()}, y:${getCoordinateY()}"
         )
         if (pointerX >= 0) {
             reusableRect.set(

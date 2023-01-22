@@ -47,7 +47,7 @@ class FlowCascadeAdapter(private val viewModel: FlowEditorViewModel) :
                         }
                     )
                 } else {
-                    ret.add(AppletOptionFactory.requireOption(flow).getTitle(flow)!!)
+                    ret.add(AppletOptionFactory.requireOption(flow).loadTitle(flow)!!)
                 }
             }
             flow = flow.parent

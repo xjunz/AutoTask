@@ -44,7 +44,7 @@ class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
                         it.setMaxLength(16)
                         it.configInputType(Int::class.java)
                     }.setCaption(option.helpText)
-                        .init(option.getTitle(applet)!!, applet.value?.toString()) {
+                        .init(option.loadTitle(applet), applet.value?.toString()) {
                             val v = it.toIntOrNull() ?: return@init R.string.error_mal_format.str
                             applet.value = v
                             onCompleted()

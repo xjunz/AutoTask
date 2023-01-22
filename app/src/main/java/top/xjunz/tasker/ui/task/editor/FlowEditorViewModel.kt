@@ -21,7 +21,7 @@ import top.xjunz.tasker.task.applet.clone
 import top.xjunz.tasker.task.applet.depth
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
 import top.xjunz.tasker.task.storage.TaskStorage
 
 /**
@@ -65,9 +65,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showTaskRepeatedPrompt = MutableLiveData<Boolean>()
 
-    lateinit var onFlowEdited: (Flow) -> Unit
+    lateinit var onFlowCompleted: (Flow) -> Unit
 
-    lateinit var onTaskEdited: () -> Unit
+    lateinit var onTaskCompleted: () -> Unit
 
     lateinit var doOnRefSelected: (String) -> Unit
 
@@ -195,8 +195,8 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     fun complete(): Boolean {
         if (isBase) {
-            val checksum = ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
-            if (checksum != metadata.checksum) {
+            val checksum = calculateChecksum()
+            if (checksum != task.checksum) {
                 if (TaskStorage.getAllTasks().any { it.checksum == checksum }) {
                     showTaskRepeatedPrompt.value = true
                     return false
@@ -208,17 +208,17 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 metadata.checksum = checksum
                 task.metadata = metadata
                 task.flow = flow.casted()
-                onTaskEdited.invoke()
+                onTaskCompleted.invoke()
             }
         } else {
-            onFlowEdited.invoke(flow)
+            onFlowCompleted.invoke(flow)
         }
         return true
     }
 
     private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
-        if (option != null && option.results.any { it.type == refValueDescriptor.type }) {
+        if (option != null && option.findResults(refValueDescriptor).isNotEmpty()) {
             return true
         }
         if (this is Flow) {
@@ -290,7 +290,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         notifyFlowChanged()
     }
 
-    fun isTaskChanged(): Boolean {
-        return ChecksumUtil.calculateChecksum(flow.toDTO(), metadata) != task.checksum
+    fun calculateChecksum(): Long {
+        return ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
     }
 }

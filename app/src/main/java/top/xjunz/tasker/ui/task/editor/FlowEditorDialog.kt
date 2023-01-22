@@ -7,7 +7,9 @@ package top.xjunz.tasker.ui.task.editor
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
@@ -29,7 +31,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -56,6 +58,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     private val menuHelper by lazy {
         AppletOperationMenuHelper(vm, childFragmentManager)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        if (vm.isSelectingRef && !vm.hasCandidateReference(vm.flow)) {
+            toast(R.string.no_candidate_reference)
+            dismiss()
+            return null
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -165,8 +180,22 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     private fun confirmReferenceSelections() {
         val refids = gvm.selectedRefs.mapNotNull { (applet, which) ->
             applet.refids[which]
+        }.toSet()
+        if (refids.size == 1) {
+            val refid = refids.single()
+            gvm.setRefidForSelections(refid)
+            vm.doOnRefSelected(refid)
+            gvm.onReferenceSelected.value = true
+            return
         }
-        val distinctRefids = refids.toSet()
+        val names = gvm.selectedRefs.map { (applet, which) ->
+            val option = AppletOptionFactory.requireOption(applet)
+            option.results[which].name.toString()
+        }.toSet()
+        var def: String? = refids.singleOrNull()
+        if (def == null && names.size == 1) {
+            def = names.single()
+        }
         val caption = if (gvm.selectedRefs.size > 1) {
             R.string.prompt_set_refid.text +
                     "\n\n" + R.string.help_multi_references.text.relativeSize(.8F)
@@ -176,22 +205,22 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         val dialog = TextEditorDialog().setCaption(caption).configEditText {
             it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
-        }.init(R.string.set_refid.text, distinctRefids.singleOrNull()) {
+        }.init(R.string.set_refid.text, def) {
             if (!gvm.isRefidLegalForSelections(it)) {
                 return@init R.string.error_tag_exists.text
             }
             gvm.setRefidForSelections(it)
-            gvm.renameRefidInRoot(distinctRefids, it)
+            gvm.renameRefidInRoot(refids, it)
             vm.doOnRefSelected(it)
             gvm.onReferenceSelected.value = true
             return@init null
         }
-        if (refids.size == gvm.selectedRefs.size && distinctRefids.size == 1) {
+        if (refids.size == gvm.selectedRefs.size && refids.size == 1) {
             // All applets have the same refid
-            dialog.setDropDownData(arrayOf(distinctRefids.single()))
-        } else if (distinctRefids.size > 1) {
+            dialog.setDropDownData(arrayOf(refids.single()))
+        } else if (refids.size > 1) {
             // Multiple refids
-            dialog.setDropDownData(distinctRefids.toTypedArray())
+            dialog.setDropDownData(refids.toTypedArray())
         }
         dialog.show(childFragmentManager)
     }
@@ -222,13 +251,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         observe(vm.selectionLiveData) {
             binding.cvMetadata.isVisible = vm.isBase
-            if (vm.isSelectingRef) {
-                if (!vm.hasCandidateReference(vm.flow)) {
-                    toast(R.string.no_candidate_reference)
-                }
-                val refName = vm.refValueDescriptor.name
-                binding.tvTitle.text = R.string.format_select.format(refName)
-            } else if (it.isEmpty()) {
+            if (it.isEmpty()) {
                 if (vm.isBase) {
                     binding.tvTitle.text = R.string.edit_task.text
                     binding.tvTaskName.text = vm.metadata.title
@@ -338,7 +361,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     override fun onBackPressed(): Boolean {
         if (vm.isInMultiSelectionMode) {
             vm.clearSelections()
-        } else if (vm.isBase && vm.isTaskChanged()) {
+        } else if (vm.isBase && vm.calculateChecksum() != vm.task.checksum) {
             vm.showQuitConfirmation.value = true
         } else {
             dismiss()
@@ -361,12 +384,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         vm.doOnRefSelected = block
     }
 
-    fun doOnFlowEdited(block: (Flow) -> Unit) = doWhenCreated {
-        vm.onFlowEdited = block
+    fun doAfterFlowEdited(block: (Flow) -> Unit) = doWhenCreated {
+        vm.onFlowCompleted = block
     }
 
     fun doOnTaskEdited(block: () -> Unit) = doWhenCreated {
-        vm.onTaskEdited = block
+        vm.onTaskCompleted = block
     }
 
     fun doSplit(block: () -> Unit) = doWhenCreated {

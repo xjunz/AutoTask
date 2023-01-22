@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.Snapshot
+import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
 
@@ -99,20 +99,20 @@ class XTask {
      * @return `true` if the task starts executed and `false` otherwise
      */
     suspend fun launch(
-        snapshot: Snapshot,
-        scope: CoroutineScope,
+        eventScope: EventScope,
+        coroutineScope: CoroutineScope,
         events: Array<out Event>,
         observer: TaskRuntime.Observer? = null
     ): Boolean {
         if (isExecuting && currentRuntime?.isSuspended != true) {
             return false
         }
-        val runtime = obtainRuntime(snapshot, scope, events)
+        val runtime = obtainRuntime(eventScope, coroutineScope, events)
         runtime.observer = observer
         try {
             currentRuntime = runtime
             onStateChangedListener?.onStarted(runtime)
-            runtime.isSuccessful = requireFlow().apply(runtime)
+            runtime.isSuccessful = requireFlow().apply(runtime).isSuccessful
             if (runtime.isSuccessful) {
                 onStateChangedListener?.onSuccess(runtime)
             } else {

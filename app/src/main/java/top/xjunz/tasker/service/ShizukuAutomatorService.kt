@@ -9,26 +9,25 @@ import android.app.UiAutomation
 import android.app.UiAutomationConnection
 import android.app.UiAutomationHidden
 import android.os.Binder
-import android.os.Handler
 import android.os.HandlerThread
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.Keep
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import com.jaredrummler.android.shell.Shell
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.utils.rethrowInRemoteProcess
 import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
-import top.xjunz.tasker.bridge.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager
 import top.xjunz.tasker.task.runtime.RemoteTaskManager
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
+import top.xjunz.tasker.uiautomator.ShizukuUiAutomatorBridge
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
@@ -53,10 +52,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private val handlerThread = HandlerThread("ShizukuAutomatorThread")
 
-    private val handler by lazy {
-        Handler(looper)
-    }
-
     private val looper get() = handlerThread.looper
 
     private val uiAutomation: UiAutomation by lazy {
@@ -66,8 +61,10 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     private var startTimestamp: Long = -1
 
     override val residentTaskScheduler by lazy {
-        ResidentTaskScheduler(looper, RemoteTaskManager)
+        ResidentTaskScheduler(RemoteTaskManager)
     }
+
+    override val a11yEventDispatcher = A11yEventDispatcher(looper)
 
     @Keep
     @Privileged
@@ -114,14 +111,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    private val shConsole by lazy {
-        Shell.SH.getConsole()
-    }
-
     override fun executeShellCmd(cmd: String) {
-        val ret = shConsole.run(cmd)
-        if (!ret.isSuccessful)
-            error(ret.getStderr())
+
     }
 
     override fun getTaskManager(): IRemoteTaskManager {
@@ -147,7 +138,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
-            residentTaskScheduler.scheduleTasks()
+            residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
+            a11yEventDispatcher.startProcessing()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()
@@ -159,8 +151,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         if (isAppProcess) {
             delegate.destroy()
         } else try {
-            residentTaskScheduler.destroy()
-            handler.removeCallbacksAndMessages(null)
+            a11yEventDispatcher.destroy()
+            residentTaskScheduler.release()
             if (::uiAutomationHidden.isInitialized)
                 uiAutomationHidden.disconnect()
 

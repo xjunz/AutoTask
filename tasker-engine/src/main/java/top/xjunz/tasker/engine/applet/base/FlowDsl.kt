@@ -6,8 +6,6 @@ package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.tasker.engine.applet.action.LambdaAction
 import top.xjunz.tasker.engine.applet.criterion.DslCriterion
-import top.xjunz.tasker.engine.applet.criterion.EventCriterion
-import top.xjunz.tasker.engine.runtime.Event
 
 /**
  * @author xjunz 2022/08/13
@@ -34,17 +32,6 @@ internal fun Flow.Then(block: Do.() -> Unit) {
 internal fun Do.Action(block: () -> Boolean) {
     add(LambdaAction<Any>(Applet.VAL_TYPE_IRRELEVANT) { _, _ ->
         block()
-    })
-}
-
-@FlowDsl
-internal fun Flow.When(@Event.EventType eventType: Int) {
-    add(When().apply {
-        if (isEmpty()) {
-            add(EventCriterion(eventType))
-        } else {
-            this[0] = EventCriterion(eventType)
-        }
     })
 }
 

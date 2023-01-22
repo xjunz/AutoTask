@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.ScopedFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.uiAutomation
@@ -12,24 +13,24 @@ import top.xjunz.tasker.service.uiAutomation
 /**
  * @author xjunz 2022/08/25
  */
-class UiObjectFlow : ScopedFlow<UiObjectContext>() {
+class UiObjectFlow : ScopedFlow<UiObjectTarget>() {
 
     private val rootNodeKey = generateUniqueKey(1)
 
-    override fun initializeTarget(runtime: TaskRuntime): UiObjectContext {
-        return UiObjectContext()
+    override fun initializeTarget(runtime: TaskRuntime): UiObjectTarget {
+        return UiObjectTarget()
     }
 
-    override suspend fun doApply(runtime: TaskRuntime): Boolean {
+    override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         val ctx = runtime.target
-        val node = runtime.getEnvironmentVariable(rootNodeKey) {
+        val node = runtime.getGlobal(rootNodeKey) {
             uiAutomation.rootInActiveWindow
         }.findFirst {
             runtime.ensureActive()
             ctx.source = it
-            super.doApply(runtime)
+            super.applyFlow(runtime).isSuccessful
         }
-        return node != null
+        return if (node != null) AppletResult.successWithReturn(node) else AppletResult.FAILURE
     }
 
     private suspend fun AccessibilityNodeInfo.findFirst(condition: suspend (AccessibilityNodeInfo) -> Boolean)
@@ -50,12 +51,5 @@ class UiObjectFlow : ScopedFlow<UiObjectContext>() {
             }
         }
         return null
-    }
-
-    override fun deriveTargetByRefid(which: Int, target: UiObjectContext): Any? {
-        if (which == 1) {
-            return target.source.text?.toString()
-        }
-        return super.deriveTargetByRefid(which, target)
     }
 }

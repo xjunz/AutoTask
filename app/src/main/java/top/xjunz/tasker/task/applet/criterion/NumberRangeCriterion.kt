@@ -16,6 +16,10 @@ class NumberRangeCriterion<R : Any, T : Number>(rawType: Int, private inline val
 
     override val valueType: Int = collectionTypeOf(rawType)
 
+    override fun R.getActualValue(): Any {
+        return mapper(this)
+    }
+
     override fun matchTarget(target: R, value: List<T>): Boolean {
         return NumberRangeUtil.contains(value[0], value[1]) {
             mapper(target)

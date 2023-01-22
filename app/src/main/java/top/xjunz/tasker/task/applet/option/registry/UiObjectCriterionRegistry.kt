@@ -17,30 +17,30 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.criterion.numberRangeCriterion
-import top.xjunz.tasker.task.applet.flow.UiObjectContext
+import top.xjunz.tasker.task.applet.flow.UiObjectTarget
 import top.xjunz.tasker.task.applet.value.Distance
 
 /**
  * @author xjunz 2022/09/27
  */
-class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
+class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private inline fun <reified V : Any> nodeCriterion(
         crossinline matcher: (AccessibilityNodeInfo, V) -> Boolean
-    ): Criterion<UiObjectContext, V> {
+    ): Criterion<UiObjectTarget, V> {
         return LambdaCriterion(Applet.judgeValueType<V>()) { ctx, v ->
             matcher(ctx.source, v)
         }
     }
 
     private inline fun nodePropertyCriterion(crossinline matcher: (AccessibilityNodeInfo) -> Boolean)
-            : PropertyCriterion<UiObjectContext> {
+            : PropertyCriterion<UiObjectTarget> {
         return PropertyCriterion {
             matcher(it.source)
         }
     }
 
-    private fun uiObjectBoundsCriterion(@GravityInt direction: Int): BoundsCriterion<UiObjectContext> {
+    private fun uiObjectBoundsCriterion(@GravityInt direction: Int): BoundsCriterion<UiObjectTarget> {
         return BoundsCriterion(direction) { ctx, scope, unit ->
             val childRect = Rect()
             var parentRect: Rect? = null
@@ -151,19 +151,19 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x01_00)
     val textEquals = invertibleAppletOption(R.string.with_text) {
         nodeCriterion<String> { t, v ->
-            t.className == v
+            t.text == v
         }
     }
 
     @AppletOrdinal(0x01_01)
-    val textStartsWith = invertibleAppletOption(R.string.pkg_name_starts_with) {
+    val textStartsWith = invertibleAppletOption(R.string.text_starts_with) {
         nodeCriterion<String> { t, v ->
             t.text?.startsWith(v) == true
         }
     }
 
     @AppletOrdinal(0x01_02)
-    val textEndsWith = invertibleAppletOption(R.string.pkg_name_ends_with) {
+    val textEndsWith = invertibleAppletOption(R.string.text_ends_with) {
         nodeCriterion<String> { t, v ->
             t.text?.endsWith(v) == true
         }
@@ -184,7 +184,7 @@ class UiObjectOptionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletOrdinal(0x01_05)
-    val textPattern = invertibleAppletOption(R.string.pkg_name_matches_pattern) {
+    val textPattern = invertibleAppletOption(R.string.text_matches_pattern) {
         nodeCriterion<String> { t, v ->
             t.text?.matches(Regex(v)) == true
         }

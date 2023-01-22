@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogArgumentsEditorBinding
 import top.xjunz.tasker.databinding.ItemArgumentEditorBinding
@@ -19,7 +20,11 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.StaticError
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
+import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.applet.value.Swipe
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
@@ -77,18 +82,54 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     }
 
     private fun showValueInputDialog(which: Int, arg: ValueDescriptor) {
-        TextEditorDialog().configEditText { et ->
-            et.configInputType(arg.type, true)
-            et.maxLines = 10
-        }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
-            val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
-            gvm.refEditor.setValue(applet, which, parsed)
-            vm.onItemChanged.value = arg
-            return@set null
-        }.show(parentFragmentManager)
+        when (arg.variantType) {
+            VariantType.INT_COORDINATE -> {
+                val point = applet.value?.let {
+                    IntValueUtil.parseCoordinate(it.casted())
+                }
+                CoordinateEditorDialog().init(arg.name, point) { x, y ->
+                    applet.value = IntValueUtil.composeCoordinate(x, y)
+                    vm.onItemChanged.value = arg
+                }.show(childFragmentManager)
+            }
+            VariantType.BITS_SWIPE ->
+                BitsValueEditorDialog().init(arg.name, applet.value as? Long, Swipe.COMPOSER) {
+                    applet.value = it
+                    vm.onItemChanged.value = arg
+                }.setEnums(0, R.array.swipe_directions)
+                    .setHints(R.array.swipe_arg_hints)
+                    .show(childFragmentManager)
+
+            VariantType.TEXT_APP_LIST ->
+                ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
+                    .doOnCompleted {
+                        applet.value = it
+                        vm.onItemChanged.value = arg
+                    }
+                    .setTitle(option.currentTitle)
+                    .show(childFragmentManager)
+            VariantType.TEXT_ACTIVITY_LIST ->
+                ComponentSelectorDialog().setTitle(option.currentTitle)
+                    .setSelectedActivities(applet.value?.casted() ?: emptyList())
+                    .doOnCompleted {
+                        applet.value = it
+                        vm.onItemChanged.value = arg
+                    }
+                    .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
+                    .show(childFragmentManager)
+            else -> TextEditorDialog().configEditText { et ->
+                et.configInputType(arg.type, true)
+                et.maxLines = 10
+            }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
+                val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
+                gvm.refEditor.setValue(applet, which, parsed)
+                vm.onItemChanged.value = arg
+                return@set null
+            }.show(childFragmentManager)
+        }
     }
 
-    private fun showReferenceSelectorDialog(whichArg: Int, arg: ValueDescriptor, id: String?) {
+    private fun showReferenceSelectorDialog(whichArg: Int, arg: ArgumentDescriptor, id: String?) {
         FlowEditorDialog().init(gvm.root, true)
             .setReferenceToSelect(applet, arg, id)
             .doOnReferenceSelected { refid ->
@@ -117,7 +158,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     if (!gvm.isRefidLegalForSelections(it)) {
                         return@init R.string.error_tag_exists.text
                     }
-                    // This applet may be not attached to the root
+                    // This applet may not be attached to the root
                     gvm.refEditor.renameReference(applet, position, it)
                     gvm.renameRefidInRoot(Collections.singleton(refid), it)
                     vm.onItemChanged.value = arg

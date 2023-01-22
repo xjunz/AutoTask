@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.junit.Test
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.Snapshot
+import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.task.XTask
 import java.util.*
@@ -103,7 +103,7 @@ internal class FlowTest {
             }
         }
         GlobalScope.launch {
-            assert(mockTask.launch(Snapshot(), this, events, observer))
+            assert(mockTask.launch(EventScope(), this, events, observer))
         }
     }
 

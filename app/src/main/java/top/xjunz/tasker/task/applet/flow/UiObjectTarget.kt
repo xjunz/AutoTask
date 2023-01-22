@@ -10,7 +10,7 @@ import top.xjunz.tasker.bridge.DisplayManagerBridge
 /**
  * @author xjunz 2022/10/01
  */
-class UiObjectContext {
+class UiObjectTarget {
 
     lateinit var source: AccessibilityNodeInfo
 

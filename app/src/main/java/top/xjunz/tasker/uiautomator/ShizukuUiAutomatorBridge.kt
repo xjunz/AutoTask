@@ -2,7 +2,7 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.bridge
+package top.xjunz.tasker.uiautomator
 
 import android.app.UiAutomation
 import androidx.test.uiautomator.GestureController

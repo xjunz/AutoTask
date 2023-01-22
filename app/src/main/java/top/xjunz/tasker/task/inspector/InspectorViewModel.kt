@@ -5,8 +5,8 @@
 package top.xjunz.tasker.task.inspector
 
 import androidx.lifecycle.MutableLiveData
-import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
 import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 
 /**
  * @author xjunz 2022/10/13
@@ -24,6 +24,8 @@ class InspectorViewModel {
     val onKeyUpOrCancelled = MutableLiveData<Int>()
 
     val onKeyLongPressed = MutableLiveData<Int>()
+
+    val onCoordinateSelected = MutableLiveData<Boolean>()
 
     val isCollapsed = MutableLiveData(true)
 

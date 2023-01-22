@@ -5,21 +5,27 @@
 package top.xjunz.tasker.task.event
 
 import android.app.Notification
-import android.content.ComponentName
-import android.content.pm.PackageManager
-import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import kotlinx.coroutines.*
+import kotlinx.coroutines.android.asCoroutineDispatcher
 import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.app
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
+import top.xjunz.tasker.service.uiAutomatorBridge
+import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 import java.lang.ref.WeakReference
+import kotlin.coroutines.CoroutineContext
 
 /**
  * @author xjunz 2022/10/29
  */
-class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
+class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
+
+    override val coroutineContext: CoroutineContext =
+        Handler(looper).asCoroutineDispatcher() + SupervisorJob()
 
     private val activityHashCache = mutableSetOf<Int>()
 
@@ -32,7 +38,21 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
 
     private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
-    suspend fun processAccessibilityEvent(event: AccessibilityEvent) {
+    fun startProcessing() {
+        uiAutomatorBridge.addOnAccessibilityEventListener {
+            launch {
+                processAccessibilityEvent(it)
+            }
+        }
+        uiAutomatorBridge.startReceivingEvents()
+    }
+
+    override fun destroy() {
+        cancel()
+        uiAutomatorBridge.stopReceivingEvents()
+    }
+
+    private suspend fun processAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
         // Do not send events from the host application!
         if (packageName == BuildConfig.APPLICATION_ID) return
@@ -56,7 +76,7 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                     dispatchEvents(
                         Event.obtain(
                             Event.EVENT_ON_NOTIFICATION_RECEIVED,
-                            packageName, paneTitle = firstText
+                            packageName, curActivityName, firstText
                         )
                     )
                 }
@@ -67,8 +87,9 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                 val isNewActivity = className != null && className != prevActivityName
                         && isActivityExistent(packageName, className)
 
-                if (isNewActivity)
+                if (isNewActivity) {
                     curActivityName = className
+                }
 
                 if (
                     event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED
@@ -80,9 +101,6 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
                     // New package detected
                     if (prevPkgName != packageName) {
                         curPackageName = packageName
-
-                        if (!isNewActivity)
-                            curActivityName = null
 
                         val pkgEnterEvent = Event.obtain(
                             Event.EVENT_ON_PACKAGE_ENTERED,
@@ -118,7 +136,7 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
         }
     }
 
-    private fun dispatchContentChanged(packageName: String) {
+    private suspend fun dispatchContentChanged(packageName: String) {
         if (packageName != curPackageName) return
         dispatchEvents(
             Event.obtain(
@@ -128,23 +146,20 @@ class A11yEventDispatcher(callback: Callback) : EventDispatcher(callback) {
         )
     }
 
+    fun getCurrentComponentInfo(): ComponentInfoWrapper {
+        return ComponentInfoWrapper(curPackageName!!, curActivityName, curPanelTitle)
+    }
+
     private fun isActivityExistent(pkgName: String, actName: String): Boolean {
         val hashCode = 31 * pkgName.hashCode() + actName.hashCode()
         if (activityHashCache.contains(hashCode)) return true
         if (activityHashCache.contains(-hashCode)) return false
-        return runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                app.packageManager.getActivityInfo(
-                    ComponentName(pkgName, actName), PackageManager.ComponentInfoFlags.of(0)
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                app.packageManager.getActivityInfo(ComponentName(pkgName, actName), 0)
-            }
-        }.onSuccess {
+        return if (PackageManagerBridge.isActivityExistent(pkgName, actName)) {
             activityHashCache.add(hashCode)
-        }.onFailure {
+            true
+        } else {
             activityHashCache.add(-hashCode)
-        }.isSuccess
+            false
+        }
     }
 }

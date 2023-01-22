@@ -57,7 +57,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
     private val viewModel by viewModels<InnerViewModel>()
 
     fun init(
-        title: CharSequence?, defText: String? = null, onConfirmed: (String) -> CharSequence?
+        title: CharSequence?, defText: CharSequence? = null, onConfirmed: (String) -> CharSequence?
     ) = doWhenCreated {
         viewModel.title = title
         viewModel.defText = defText

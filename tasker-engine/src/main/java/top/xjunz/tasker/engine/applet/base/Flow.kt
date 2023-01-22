@@ -24,9 +24,11 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     override val valueType: Int = VAL_TYPE_IRRELEVANT
 
+    protected open val registerResultsForChildren: Boolean = true
+
     @CallSuper
     @CheckResult
-    protected open suspend fun doApply(runtime: TaskRuntime): Boolean {
+    protected open suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         forEachIndexed `continue`@{ index, applet ->
             if (!applet.isEnabled) {
                 return@`continue`
@@ -43,10 +45,14 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
             runtime.observer?.onStarted(applet, runtime)
-            runtime.isSuccessful = applet.apply(runtime)
+            val result = applet.apply(runtime)
+            if (registerResultsForChildren) {
+                runtime.registerResult(applet, result)
+            }
+            runtime.isSuccessful = result.isSuccessful
             runtime.observer?.onTerminated(applet, runtime)
         }
-        return runtime.isSuccessful
+        return if (runtime.isSuccessful) AppletResult.SUCCESS else AppletResult.FAILURE
     }
 
     open fun performStaticCheck(): StaticError? {
@@ -79,7 +85,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         return StaticError.ERR_NONE
     }
 
-    override suspend fun apply(runtime: TaskRuntime): Boolean {
+    override suspend fun apply(runtime: TaskRuntime): AppletResult {
         onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
@@ -87,7 +93,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         // Backup the target, because sub-flows may change the target, we don't want the changed
         // value to fall through.
         val backup = runtime.getRawTarget()
-        val succeeded = doApply(runtime)
+        val succeeded = applyFlow(runtime)
         onPostApply(runtime)
         // restore the target
         runtime.setTarget(backup)

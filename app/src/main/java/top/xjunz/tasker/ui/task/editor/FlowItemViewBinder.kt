@@ -60,7 +60,7 @@ class FlowItemViewBinder(
             bullet.isVisible = false
             // Don't show innate value
             var desc = if (option.isValueInnate) null else option.describe(applet)
-            var title = option.getTitle(applet) ?: applet.comment
+            var title = option.loadTitle(applet) ?: applet.comment
             tvTitle.isVisible = true
             if (option.descAsTitle) {
                 title = desc
@@ -146,9 +146,8 @@ class FlowItemViewBinder(
                 val ahead = viewModel.refSelectingApplet.parent == null
                         || applet.isAheadOf(viewModel.refSelectingApplet)
                 // When selecting ref, only enable valid targets
-                val refs = if (!ahead) emptyList() else option.results.filter {
-                    it.type == viewModel.refValueDescriptor.type
-                }
+                val refs =
+                    if (!ahead) emptyList() else option.findResults(viewModel.refValueDescriptor)
                 if (applet.isContainer && depth == 3) {
                     root.isEnabled = ahead && viewModel.hasCandidateReference(applet as Flow)
                 } else {
@@ -182,7 +181,7 @@ class FlowItemViewBinder(
             if (root.isActivated) {
                 var prompt = errorPrompts[viewModel.staticError!!.code]
                 viewModel.staticError?.arg?.let {
-                    prompt = prompt.toString().format(it)
+                    prompt = prompt.toString().formatSpans(it.italic().underlined())
                 }
                 tvComment.text = (R.string.error.text.bold() + prompt).foreColored(
                     ColorScheme.colorError

@@ -14,7 +14,7 @@ class Event private constructor() {
 
     var type: Int = EVENT_UNDEFINED
 
-    val componentInfo = ComponentInfoWrapper()
+    val componentInfo = ComponentInfo()
 
     private object Pool : SynchronizedPool<Event>(10)
 
@@ -52,8 +52,8 @@ class Event private constructor() {
         ): Event {
             return (Pool.acquire() ?: Event()).apply {
                 type = t
-                componentInfo.pkgName = pkgName
-                componentInfo.actName = actName
+                componentInfo.packageName = pkgName
+                componentInfo.activityName = actName
                 componentInfo.paneTitle = paneTitle
             }
         }

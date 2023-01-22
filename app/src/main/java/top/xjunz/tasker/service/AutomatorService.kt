@@ -5,6 +5,7 @@
 package top.xjunz.tasker.service
 
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
+import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 
 /**
@@ -19,6 +20,8 @@ interface AutomatorService {
     val uiAutomatorBridge: UiAutomatorBridge
 
     val residentTaskScheduler: ResidentTaskScheduler
+
+    val a11yEventDispatcher: A11yEventDispatcher
 
     fun destroy()
 

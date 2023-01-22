@@ -12,6 +12,7 @@ import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.unaryArgAction
 import top.xjunz.tasker.privileged.ActivityManagerUtil
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
@@ -25,7 +26,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             ActivityManagerUtil.forceStopPackage(it)
             true
         }
-    }.withArgument<String>(R.string.specified_app)
+    }.withArgument<String>(R.string.specified_app, VariantType.TEXT_PACKAGE_NAME)
         .hasCompositeTitle()
         .withValueDescriber<String> {
             PackageManagerBridge.loadPackageInfo(it)?.wrapped()?.label ?: it
@@ -42,7 +43,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             true
         }
     }.hasCompositeTitle()
-        .withArgument<String>(R.string.specified_app)
+        .withArgument<String>(R.string.specified_app, VariantType.TEXT_PACKAGE_NAME)
         .withValueDescriber<String> {
             PackageManagerBridge.loadPackageInfo(it)?.wrapped()?.label ?: it
         }
@@ -56,7 +57,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             )
             true
         }
-    }.withArgument<String>(R.string.specified_activity)
+    }.withArgument<String>(R.string.specified_activity, VariantType.TEXT_PACKAGE_NAME)
         .hasCompositeTitle()
 
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.bridge
+package top.xjunz.tasker.uiautomator
 
 import android.app.UiAutomation
 import android.content.Context
@@ -13,6 +13,8 @@ import android.os.PowerManager
 import android.view.Display
 import android.view.ViewConfiguration
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
+import top.xjunz.tasker.bridge.ContextBridge
+import top.xjunz.tasker.bridge.DisplayManagerBridge
 
 /**
  * @author xjunz 2023/01/03

@@ -64,7 +64,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         viewModel.selectedCount.value = selected.size
     }
 
-    fun setTitle(title: CharSequence) = doWhenCreated {
+    fun setTitle(title: CharSequence?) = doWhenCreated {
         viewModel.title = title
     }
 

@@ -25,7 +25,7 @@ import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 

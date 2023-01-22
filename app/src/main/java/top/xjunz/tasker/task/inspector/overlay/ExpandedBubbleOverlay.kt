@@ -43,11 +43,15 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 vm.bubbleY = layoutParams.y
             }
             ibConfirm.setAntiMoneyClickListener {
-                if (vm.highlightNode.isNull()) {
-                    vm.makeToast(R.string.no_node_selected)
-                    return@setAntiMoneyClickListener
+                if (vm.currentMode eq InspectorMode.UI_OBJECT) {
+                    if (vm.highlightNode.isNull()) {
+                        vm.makeToast(R.string.no_node_selected)
+                    } else {
+                        vm.showNodeInfo.value = true
+                    }
+                } else if (vm.currentMode eq InspectorMode.COORDS) {
+                    vm.onCoordinateSelected.value = true
                 }
-                vm.showNodeInfo.value = true
             }
             ibLayers.setAntiMoneyClickListener {
                 vm.showNodeTree.value = true

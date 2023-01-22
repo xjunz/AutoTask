@@ -23,9 +23,8 @@ private inline fun CharSequence.ensureSpannable(block: (Spannable) -> Unit): Cha
     return (if (this is Spannable) this else SpannableStringBuilder(this)).also(block)
 }
 
-fun @receiver:StringRes Int.formatSpans(vararg args: Any): CharSequence {
-    val raw = this.str
-    val split = raw.split("%s").flatMap {
+fun String.formatSpans(vararg args: Any): CharSequence {
+    val split = split("%s").flatMap {
         it.split("%d")
     }
     var title: CharSequence = split[0]
@@ -38,6 +37,10 @@ fun @receiver:StringRes Int.formatSpans(vararg args: Any): CharSequence {
         title += rep + s
     }
     return title
+}
+
+fun @receiver:StringRes Int.formatSpans(vararg args: Any): CharSequence {
+    return str.formatSpans(*args)
 }
 
 private fun CharSequence.setSpan(span: Any) = ensureSpannable {

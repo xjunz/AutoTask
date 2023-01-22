@@ -16,7 +16,7 @@ class BoundsCriterion<T : Any>(
     private inline val bounds: (target: T, scope: Int, unit: Int) -> Float
 ) : Criterion<T, Distance>() {
 
-    override val valueType: Int = VAL_TYPE_BITS
+    override val valueType: Int = VAL_TYPE_LONG
 
     override fun matchTarget(target: T, value: Distance): Boolean {
         return NumberRangeUtil.contains(value.rangeStart, value.rangeEnd) {

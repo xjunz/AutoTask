@@ -2,7 +2,7 @@
  * Copyright (c) 2022 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.task.applet.option
+package top.xjunz.tasker.task.applet.option.descriptor
 
 import androidx.annotation.StringRes
 import top.xjunz.tasker.ktx.text
@@ -10,19 +10,13 @@ import top.xjunz.tasker.ktx.text
 /**
  * @author xjunz 2022/11/20
  */
-class ValueDescriptor(
+open class ValueDescriptor(
     @StringRes private val nameRes: Int,
     val type: Class<*>,
-    private val isReference: Boolean?
+    val variantType: Int
 ) {
 
     val name: CharSequence get() = nameRes.text
-
-    val isReferenceOnly get() = isReference == true
-
-    val isValueOnly get() = isReference == false
-
-    val isTolerant get() = isReference == null
 
     fun parseValueFromInput(str: String): Any? {
         if (type == String::class.java)
@@ -39,10 +33,5 @@ class ValueDescriptor(
 
         return null
     }
-
-    override fun toString(): String {
-        return "ValueDescriptor(type=$type, isReference=$isReference, name=$name)"
-    }
-
 
 }

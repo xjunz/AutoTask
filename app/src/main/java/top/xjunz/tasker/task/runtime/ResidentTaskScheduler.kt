@@ -4,62 +4,29 @@
 
 package top.xjunz.tasker.task.runtime
 
-import android.os.Handler
-import android.os.Looper
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.android.asCoroutineDispatcher
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.runtime.ComponentInfoWrapper
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.Snapshot
+import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.service.uiAutomatorBridge
-import top.xjunz.tasker.task.event.A11yEventDispatcher
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 /**
  * @author xjunz 2022/08/05
  */
-class ResidentTaskScheduler(
-    private val looper: Looper,
-    private val taskManager: TaskManager<*, *>
-) : EventDispatcher.Callback, TaskScheduler {
-
-    private val eventDispatcher = A11yEventDispatcher(this)
-
-    private val handlerDispatcher = Handler(looper).asCoroutineDispatcher()
-
-    override fun getCurrentComponentInfo(): ComponentInfoWrapper {
-        return componentInfo
-    }
-
-    /**
-     * Schedule all active tasks, all of which are running in the thread that owns the [looper].
-     */
-    override fun scheduleTasks() {
-        uiAutomatorBridge.addOnAccessibilityEventListener {
-            launch {
-                eventDispatcher.processAccessibilityEvent(it)
-            }
-        }
-        uiAutomatorBridge.startReceivingEvents()
-    }
+class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventDispatcher.Callback,
+    TaskScheduler {
 
     /**
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
-    override fun destroy() {
-        uiAutomatorBridge.stopReceivingEvents()
-        cancel()
+    override fun release() {
         TaskRuntime.drainPool()
     }
 
@@ -80,7 +47,14 @@ class ResidentTaskScheduler(
         }
 
         override fun onTerminated(victim: Applet, runtime: TaskRuntime) {
-            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
+            val indents = indent(runtime.tracker.depth)
+            logcat(indents + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
+            if (!runtime.isSuccessful) {
+                val failure = runtime.getFailure(victim)
+                if (failure != null) {
+                    logcat(indents + "expected: ${failure.first}, actual: ${failure.second}")
+                }
+            }
         }
 
         override fun onSkipped(victim: Applet, runtime: TaskRuntime) {
@@ -117,29 +91,20 @@ class ResidentTaskScheduler(
         }
     }
 
-    private val componentInfo = ComponentInfoWrapper()
-
-    override fun onEvents(events: Array<out Event>) {
-        val event = events.find {
-            it.type == Event.EVENT_ON_CONTENT_CHANGED || it.type == Event.EVENT_ON_PACKAGE_ENTERED
-        }
-        if (event != null && componentInfo != event.componentInfo) {
-            componentInfo.copyFrom(event.componentInfo)
-        }
-        launch {
-            val snapshot = Snapshot()
-            try {
-                for (task in taskManager.getEnabledTasks()) {
-                    task.onStateChangedListener = listener
-                    task.launch(snapshot, this, events, observer)
+    override suspend fun onEvents(events: Array<out Event>) {
+        val eventScope = EventScope()
+        try {
+            for (task in taskManager.getEnabledTasks()) {
+                task.onStateChangedListener = listener
+                coroutineScope {
+                    task.launch(eventScope, this, events, observer)
                 }
-            } finally {
-                events.forEach {
-                    it.recycle()
-                }
+            }
+        } finally {
+            events.forEach {
+                it.recycle()
             }
         }
     }
 
-    override val coroutineContext: CoroutineContext = handlerDispatcher + SupervisorJob()
 }

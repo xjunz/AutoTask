@@ -8,23 +8,22 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenCreated
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.withCreated
 import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 
 /**
  * @author xjunz 2022/05/18
  */
-fun <T : Fragment> T.doWhenCreated(block: CoroutineScope.() -> Unit): T {
+fun <T : Fragment> T.doWhenCreated(block: () -> Unit): T {
     lifecycleScope.launch {
-        lifecycle.whenCreated(block)
+        lifecycle.withCreated(block)
     }
     return this
 }
 
 fun DialogFragment.show(fm: FragmentManager): Fragment {
-    show(fm, javaClass.simpleName)
+    show(fm, javaClass.simpleName + "#" + Integer.toHexString(System.identityHashCode(this)))
     return this
 }
 

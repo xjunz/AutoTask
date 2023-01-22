@@ -6,7 +6,6 @@ package top.xjunz.tasker.ui.task.selector.option
 
 import android.os.Bundle
 import android.text.InputType
-import android.text.method.DigitsKeyListener
 import android.view.View
 import android.widget.EditText
 import androidx.fragment.app.viewModels
@@ -67,7 +66,7 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         when (viewModel.type) {
             Applet.VAL_TYPE_INT, Applet.VAL_TYPE_LONG -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER
-                et.filters += DigitsKeyListener.getInstance("0123456789")
+                et.setDigits("0123456789")
             }
             Applet.VAL_TYPE_FLOAT -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
@@ -150,9 +149,14 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         viewModel.type = t
     }
 
-    fun setRange(start: Number?, end: Number?) = doWhenCreated {
-        viewModel.rangeStart = start
-        viewModel.rangeEnd = end
-    }
+    fun setRange(start: Number?, end: Number?, defStart: Number? = null, defEnd: Number? = null) =
+        doWhenCreated {
+            viewModel.rangeStart = start
+            viewModel.rangeEnd = end
+            if (start == null && end == null) {
+                viewModel.rangeStart = defStart
+                viewModel.rangeEnd = defEnd
+            }
+        }
 
 }

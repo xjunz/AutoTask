@@ -11,7 +11,8 @@
     <string name="on_success">然后</string>
     <string name="on_failure">否则</string>
 
-    <string name="current_app">当前应用</string>
+    <string name="current_app">所处的应用</string>
+    <string name="current_top_app">应用信息</string>
     <string name="current_notification">当前通知</string>
     <string name="ui_object_exists">存在控件</string>
     <string name="current_time">当前时间</string>
@@ -19,18 +20,18 @@
     <string name="package_name">包名</string>
     <string name="component_info">应用和页面</string>
 
-    <string name="pkg_name_starts_with">包名以指定文本开始</string>
-    <string name="not_pkg_name_starts_with">包名不以指定文本开始</string>
-    <string name="pkg_name_ends_with">包名以指定文本结束</string>
-    <string name="not_pkg_name_ends_with">包名不以指定文本结束</string>
-    <string name="pkg_name_matches_pattern">包名满足正则表达式</string>
-    <string name="not_pkg_name_matches_pattern">包名不满足正则表达式</string>
-    <string name="pkg_name_contains_text">包名包含指定文本</string>
-    <string name="not_pkg_name_contains_text">包名不包含指定文本</string>
+    <string name="pkg_name_starts_with">%s包名起始文本是</string>
+    <string name="not_pkg_name_starts_with">%s包名起始文本不是</string>
+    <string name="pkg_name_ends_with">%s包名结束文本是</string>
+    <string name="not_pkg_name_ends_with">%s包名结束文本不是</string>
+    <string name="pkg_name_matches_pattern">%s包名满足正则表达式</string>
+    <string name="not_pkg_name_matches_pattern">%s包名不满足正则表达式</string>
+    <string name="pkg_name_contains_text">%s包名包含文本</string>
+    <string name="not_pkg_name_contains_text">%s包名不包含文本</string>
     <string name="contains_text">包含指定文本</string>
     <string name="not_contains_text">不包含指定文本</string>
-    <string name="in_pkg_collection">是指定应用程序</string>
-    <string name="not_in_pkg_collection">不是指定应用程序</string>
+    <string name="in_app_collection">%s在应用名单中</string>
+    <string name="not_in_app_collection">%s不在应用名单中</string>
     <string name="format_range">%s至%s</string>
     <string name="to_lower_case">将英文字母全部转为小写</string>
     <string name="trim">去除空格</string>
@@ -38,12 +39,10 @@
     <string name="on_package_left">离开应用程序时</string>
     <string name="on_content_changed">处于应用程序内</string>
     <string name="invert">取反</string>
-    <string name="is_system">是系统应用</string>
-    <string name="not_is_system">不是系统应用</string>
-    <string name="is_launcher">是桌面应用</string>
-    <string name="not_is_launcher">不是桌面应用</string>
-    <string name="in_version_range">指定版本号</string>
-    <string name="not_in_version_range">排除指定版本号</string>
+    <string name="is_system_app">%s是系统应用</string>
+    <string name="not_is_system_app">%s不是系统应用</string>
+    <string name="is_launcher">%s是桌面</string>
+    <string name="not_is_launcher">%s不是桌面</string>
 
     <string name="with_type">控件类型为</string>
     <string name="with_text">指定文本内容</string>
@@ -78,18 +77,19 @@
     <string name="node_index_in_parent">在父布局中的位置</string>
     <string name="with_id">控件ID为</string>
 
-    <string name="time_range">指定时间范围</string>
-    <string name="in_months">指定月份</string>
-    <string name="not_in_months">排除月份</string>
-    <string name="in_day_of_month">指定日期</string>
-    <string name="not_in_day_of_month">排除日期</string>
+    <string name="in_time_range">在指定时间范围</string>
+    <string name="not_in_time_range">不在指定时间范围</string>
+    <string name="in_months">在指定月份内</string>
+    <string name="not_in_months">不在指定月份内</string>
+    <string name="in_day_of_month">在指定日期内</string>
+    <string name="not_in_day_of_month">不在指定日期内</string>
     <string name="in_day_of_week">指定星期几</string>
     <string name="not_in_day_of_week">排除星期几</string>
-    <string name="in_hour_min_sec_range">指定时分秒</string>
-    <string name="not_in_hour_min_sec_range">指定时分秒以外</string>
+    <string name="in_hour_min_sec_range">在指定时间范围（一天内）</string>
+    <string name="not_in_hour_min_sec_range">不在指定时间范围（一天内）</string>
     <string name="property">属性</string>
-    <string name="in_activity_collection">是指定页面</string>
-    <string name="not_in_activity_collection">不是指定页面</string>
+    <string name="in_activity_collection">%s处于指定页面</string>
+    <string name="not_in_activity_collection">%s不处于指定页面</string>
 
     <string name="screen_orientation_portrait">屏幕处于竖屏状态</string>
     <string name="not_screen_orientation_portrait">屏幕处于横屏状态</string>

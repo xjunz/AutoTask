@@ -11,7 +11,7 @@ import kotlin.math.log2
 /**
  * @author xjunz 2023/01/08
  */
-open class BitwiseValueComposer(private var descriptors: IntArray) : ValueComposer<Number, Long>() {
+open class BitwiseValueComposer(var descriptors: IntArray) : ValueComposer<Number, Long>() {
 
     protected open val maxBitCount = Long.SIZE_BITS
 
@@ -31,7 +31,7 @@ open class BitwiseValueComposer(private var descriptors: IntArray) : ValueCompos
             return bitCount shl 4 or type
         }
 
-        private fun isNullable(descriptor: Int): Boolean {
+        fun isNullable(descriptor: Int): Boolean {
             return descriptor ushr 12 == 1
         }
 
@@ -41,11 +41,11 @@ open class BitwiseValueComposer(private var descriptors: IntArray) : ValueCompos
             return 1 shl 12 or newOne
         }
 
-        private fun getBitCount(descriptor: Int): Int {
+        fun getBitCount(descriptor: Int): Int {
             return descriptor ushr 4 and 0xFF
         }
 
-        private fun getType(descriptor: Int): Int {
+        fun getType(descriptor: Int): Int {
             return descriptor and 0xF
         }
 

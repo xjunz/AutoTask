@@ -16,6 +16,7 @@ import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.task.applet.isAttached
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.option.*
 
@@ -35,15 +36,18 @@ open class AppletOptionClickHandler(
     }
 
     open fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
-        val title = option.getTitle(applet)!!
+        val title = option.loadTitle(applet)!!
         when {
+            option.arguments.isNotEmpty() -> ArgumentsEditorDialog().setAppletOption(applet, option)
+                .doOnCompletion(onCompleted).show(fragmentManager)
+
             option.isValueInnate -> onCompleted()
 
             applet is Action<*> ->
                 actionOptionClickHandler.onClick(applet, option, onCompleted)
 
-            option == factory.packageRegistry.pkgCollection
-                    || option == factory.notificationOptionRegistry.pkgCollection ->
+            option == factory.applicationRegistry.appCollection
+                    || option == factory.notificationRegistry.appCollection ->
                 ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
                         applet.value = it
@@ -52,7 +56,7 @@ open class AppletOptionClickHandler(
                     .setTitle(title)
                     .show(fragmentManager)
 
-            option == factory.packageRegistry.activityCollection ->
+            option == factory.applicationRegistry.activityCollection ->
                 ComponentSelectorDialog().setTitle(option.rawTitle!!)
                     .setSelectedActivities(applet.value?.casted() ?: emptyList())
                     .doOnCompleted {
@@ -65,8 +69,8 @@ open class AppletOptionClickHandler(
             option == factory.timeRegistry.timeRange -> {
                 val value = applet.value?.casted<Collection<Long>>()
                 DateTimeRangeEditorDialog().setRange(
-                    value?.firstOrNull() ?: System.currentTimeMillis(),
-                    value?.lastOrNull() ?: System.currentTimeMillis()
+                    value?.firstOrNull(), value?.lastOrNull(),
+                    System.currentTimeMillis(), System.currentTimeMillis()
                 ).setType(Applet.VAL_TYPE_LONG).setTitle(title)
                     .doOnCompletion { start, end ->
                         applet.value = listOf(start, end)
@@ -77,7 +81,8 @@ open class AppletOptionClickHandler(
             option == factory.timeRegistry.hourMinSec -> {
                 val value = applet.value?.casted<Collection<Int>>()
                 TimeRangeEditorDialog().setRange(
-                    value?.firstOrNull() ?: 0, value?.lastOrNull() ?: 0
+                    value?.firstOrNull(), value?.lastOrNull(),
+                    0, IntValueUtil.composeTime(23, 59, 59)
                 ).setTitle(title).doOnCompletion { start, end ->
                     applet.value = listOf(start, end)
                     onCompleted()

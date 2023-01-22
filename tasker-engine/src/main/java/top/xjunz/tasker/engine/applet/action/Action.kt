@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -13,9 +14,9 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Action<V>(override val valueType: Int) : Applet() {
 
-    abstract suspend fun doAction(value: V?, runtime: TaskRuntime): Boolean
+    abstract suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult
 
-    final override suspend fun apply(runtime: TaskRuntime): Boolean {
+    final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         return doAction(value?.casted(), runtime)
     }
 }
@@ -24,8 +25,8 @@ class LambdaAction<V>(
     valueType: Int,
     private inline val action: suspend (V?, TaskRuntime) -> Boolean
 ) : Action<V>(valueType) {
-    override suspend fun doAction(value: V?, runtime: TaskRuntime): Boolean {
-        return action(value, runtime)
+    override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
+        return if (action(value, runtime)) AppletResult.SUCCESS else AppletResult.FAILURE
     }
 }
 

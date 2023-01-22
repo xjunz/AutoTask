@@ -1,16 +1,14 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.bridge
+package top.xjunz.tasker.uiautomator
 
 import android.app.UiAutomation
 import androidx.test.uiautomator.GestureController
 import androidx.test.uiautomator.InteractionController
 import androidx.test.uiautomator.UiDevice
 import top.xjunz.tasker.service.a11yAutomatorService
-import top.xjunz.tasker.uiautomator.A11yGestureController
-import top.xjunz.tasker.uiautomator.A11yInteractionController
 
 
 /**

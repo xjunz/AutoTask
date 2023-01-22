@@ -5,6 +5,7 @@
 package top.xjunz.tasker.bridge
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -48,5 +49,18 @@ object PackageManagerBridge {
             @Suppress("DEPRECATION")
             packageManager.getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES)
         }
+    }
+
+    fun isActivityExistent(pkgName: String, actName: String): Boolean {
+        return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getActivityInfo(
+                    ComponentName(pkgName, actName), PackageManager.ComponentInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getActivityInfo(ComponentName(pkgName, actName), 0)
+            }
+        }.isSuccess
     }
 }

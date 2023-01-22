@@ -5,7 +5,7 @@
 package top.xjunz.tasker.task.editor
 
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.task.applet.option.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 
 /**
  * @author xjunz 2022/11/28
@@ -92,7 +92,7 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
-    fun setReference(applet: Applet, arg: ValueDescriptor, whichArg: Int, refid: String?) {
+    fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, refid: String?) {
         val prevRefid = applet.references[whichArg]
         val prevValue = applet.value
         applet.rawSetReference(whichArg, refid)

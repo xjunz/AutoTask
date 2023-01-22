@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -18,8 +17,8 @@
             app:backgroundTint="?colorSurface"
             app:behavior_draggable="true"
             app:behavior_fitToContents="true"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             app:behavior_peekHeight="?actionBarSize"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge.BottomSheet">
 
             <View
@@ -67,7 +66,6 @@
                     android:paddingHorizontal="16dp"
                     android:textColor="?colorError"
                     app:icon="@drawable/ic_remove_shopping_cart"
-                    app:iconGravity="start"
                     app:iconTint="?colorError"
                     app:rippleColor="?colorControlHighlight"
                     app:strokeColor="?colorError"

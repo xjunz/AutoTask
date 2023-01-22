@@ -146,8 +146,8 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         binding.groupPlaceholder.isVisible = visible
     }
 
-    fun getScrollTarget(): RecyclerView {
-        return binding.rvTaskList
+    fun getScrollTarget(): RecyclerView? {
+        return if (isAdded) binding.rvTaskList else null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

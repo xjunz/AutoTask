@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.text.InputFilter
 import android.text.InputType
+import android.text.method.DigitsKeyListener
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
@@ -86,6 +87,20 @@ fun EditText.setMaxLength(len: Int) {
     filters += InputFilter.LengthFilter(len)
 }
 
+inline fun EditText.setOnEnterListener(crossinline block: () -> Unit) {
+    setOnKeyListener { _, keyCode, event ->
+        if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+            block()
+            return@setOnKeyListener true
+        }
+        return@setOnKeyListener false
+    }
+}
+
+fun EditText.setDigits(digits: String) {
+    filters += DigitsKeyListener.getInstance(digits)
+}
+
 fun EditText.configInputType(type: Class<*>, allowMultiLine: Boolean = false) {
     when (type) {
         String::class.java -> {
@@ -154,8 +169,8 @@ fun AutoCompleteTextView.setEntries(
             onItemClicked(position)
         }
     }
+    threshold = Int.MAX_VALUE
     if (setFirstAsText) {
-        threshold = Int.MAX_VALUE
         setText(array[0].toString())
     }
 }

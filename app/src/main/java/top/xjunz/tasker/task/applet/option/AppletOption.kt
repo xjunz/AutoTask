@@ -12,6 +12,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.Router.launchAction
 import java.util.*
 
@@ -75,9 +78,16 @@ class AppletOption(
             } else {
                 if (applet.isAnd) R.string.on_success.str else R.string.on_failure.str
             }
-            return relation.foreColored().underlined().bold().clickable {
+            return relation.clickable {
                 app.launchAction(ACTION_TOGGLE_RELATION, applet.hashCode())
-            } + origin
+            }.bold().underlined() + origin
+        }
+
+        private fun makeReferenceText(applet: Applet, refid: CharSequence?): CharSequence? {
+            if (refid == null) return null
+            return refid.clickable {
+                app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid" + Char(0) + applet.hashCode())
+            }.bold().foreColored(ColorScheme.colorTertiary).underlined()
         }
 
     }
@@ -124,9 +134,6 @@ class AppletOption(
      */
     var value: Any? = null
 
-    var variantValueType: Int = 0
-        private set
-
     var minApiLevel: Int = -1
 
     /**
@@ -154,7 +161,7 @@ class AppletOption(
     var isA11yOnly = false
         private set
 
-    var arguments: List<ValueDescriptor> = emptyList()
+    var arguments: List<ArgumentDescriptor> = emptyList()
 
     var results: List<ValueDescriptor> = emptyList()
 
@@ -190,20 +197,26 @@ class AppletOption(
         }
     }
 
-    val invertedTitle: CharSequence?
+    private val invertedTitle: CharSequence?
         get() = if (invertedTitleResource == TITLE_NONE) null else invertedTitleResource.text
 
-    val currentTitle get() = getTitle(null, isInverted)
+    val currentTitle get() = loadTitle(null, isInverted)
 
-    private fun getTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
+    fun findResults(descriptor: ValueDescriptor): List<ValueDescriptor> {
+        return results.filter {
+            it.type == descriptor.type && it.variantType == descriptor.variantType
+        }
+    }
+
+    private fun loadTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
         if (isTitleComplex) {
             return getComplexTitle(applet)
         }
         return if (isInverted) invertedTitle else rawTitle
     }
 
-    fun getTitle(applet: Applet): CharSequence? {
-        return getTitle(applet, applet.isInverted)
+    fun loadTitle(applet: Applet): CharSequence? {
+        return loadTitle(applet, applet.isInverted)
     }
 
     fun shizukuOnly(): AppletOption {
@@ -233,11 +246,6 @@ class AppletOption(
 
     fun toggleInversion() {
         isInverted = !isInverted
-    }
-
-    fun withVariantType(variantType: Int): AppletOption {
-        variantValueType = variantType
-        return this
     }
 
     fun withDefaultRangeDescriber(): AppletOption {
@@ -279,17 +287,10 @@ class AppletOption(
         return this
     }
 
-    private fun makeReferenceText(applet: Applet, refid: CharSequence?): CharSequence? {
-        if (refid == null) return null
-        return refid.foreColored().bold().clickable {
-            app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid" + Char(0) + applet.hashCode())
-        }
-    }
-
     private fun getComplexTitle(applet: Applet?): CharSequence {
         if (applet == null) {
             return titleRes.format(*Array(arguments.size) {
-                arguments[it].name
+                arguments[it].substitution
             })
         }
         val split = titleRes.str.split("%s")
@@ -298,18 +299,18 @@ class AppletOption(
             val s = split[i]
             val index = i - 1
             val arg = arguments[index]
-            val refid = applet.references[index]
-            val rep = when {
-                arg.isReferenceOnly -> makeReferenceText(applet, refid) ?: arg.name
-                arg.isValueOnly -> arg.name
+            val ref = applet.references[index]
+            val sub = when {
+                arg.isReferenceOnly -> makeReferenceText(applet, ref) ?: arg.substitution
+                arg.isValueOnly -> arg.substitution
                 else -> when {
-                    value == null && refid == null -> arg.name
-                    value == null && refid != null -> makeReferenceText(applet, refid)!!
-                    refid == null -> arg.name
+                    value == null && ref == null -> arg.substitution
+                    value == null && ref != null -> makeReferenceText(applet, ref)!!
+                    ref == null -> arg.substitution
                     else -> error("Value and reference both specified!")
                 }
             }
-            title += rep + s
+            title += sub + s
         }
         return title
     }
@@ -333,30 +334,46 @@ class AppletOption(
         return this
     }
 
-    inline fun <reified T> withResult(@StringRes name: Int): AppletOption {
+    inline fun <reified T> withResult(
+        @StringRes name: Int,
+        variantType: Int = -1
+    ): AppletOption {
         if (results == Collections.EMPTY_LIST) results = mutableListOf()
-        (results as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, true))
+        (results as MutableList<ValueDescriptor>).add(
+            ValueDescriptor(name, T::class.java, variantType)
+        )
         return this
     }
 
     inline fun <reified T> withArgument(
         @StringRes name: Int,
-        isRef: Boolean? = null
+        variantType: Int = -1,
+        isRef: Boolean? = null,
+        @StringRes substitution: Int = -1,
     ): AppletOption {
         if (arguments == Collections.EMPTY_LIST) arguments = mutableListOf()
-        (arguments as MutableList<ValueDescriptor>).add(ValueDescriptor(name, T::class.java, isRef))
+        (arguments as MutableList<ArgumentDescriptor>).add(
+            ArgumentDescriptor(name, substitution, T::class.java, variantType, isRef)
+        )
         return this
     }
 
     /**
      * Describe [Applet.value] as an argument.
      */
-    inline fun <reified T> withValueArgument(@StringRes name: Int): AppletOption {
-        return withArgument<T>(name, false)
+    inline fun <reified T> withValueArgument(
+        @StringRes name: Int,
+        variantType: Int = -1
+    ): AppletOption {
+        return withArgument<T>(name, variantType, false)
     }
 
-    inline fun <reified T> withRefArgument(@StringRes name: Int): AppletOption {
-        return withArgument<T>(name, true)
+    inline fun <reified T> withRefArgument(
+        @StringRes name: Int,
+        variantType: Int = -1,
+        @StringRes substitution: Int = -1,
+    ): AppletOption {
+        return withArgument<T>(name, variantType, true, substitution)
     }
 
     inline fun <T : Any> withValueChecker(crossinline checker: (T?) -> String?): AppletOption {

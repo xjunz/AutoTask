@@ -11,6 +11,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
 
@@ -36,7 +37,7 @@ class TaskRuntime private constructor() {
     companion object {
 
         fun XTask.obtainRuntime(
-            snapshot: Snapshot,
+            eventScope: EventScope,
             coroutineScope: CoroutineScope,
             events: Array<out Event>
         ): TaskRuntime {
@@ -45,7 +46,7 @@ class TaskRuntime private constructor() {
             instance.runtimeScope = coroutineScope
             instance.target = events
             instance._events = events
-            instance._snapshot = snapshot
+            instance._eventScope = eventScope
             return instance
         }
 
@@ -63,17 +64,15 @@ class TaskRuntime private constructor() {
 
     lateinit var task: XTask
 
-    private var _snapshot: Snapshot? = null
+    private var _eventScope: EventScope? = null
 
-    private val snapshot: Snapshot get() = _snapshot!!
+    private val eventScope: EventScope get() = _eventScope!!
 
     private var _events: Array<out Event>? = null
 
     val events: Array<out Event> get() = _events!!
 
     private var runtimeScope: CoroutineScope? = null
-
-    var suspensionScope: CoroutineScope? = null
 
     /**
      * Target is for applet to use in runtime via [TaskRuntime.getTarget].
@@ -86,6 +85,10 @@ class TaskRuntime private constructor() {
 
     lateinit var hitEvent: Event
 
+    private var _result: AppletResult? = null
+
+    val result: AppletResult get() = _result!!
+
     fun ensureActive() {
         runtimeScope?.ensureActive()
     }
@@ -95,19 +98,20 @@ class TaskRuntime private constructor() {
     }
 
     /**
-     * Get or put a global variable if absent. The variable can be shared across tasks.
+     * Get or put a global variable if absent. The variable can be shared across tasks. More specific,
+     * within an [EventScope].
      */
-    fun <V : Any> getEnvironmentVariable(key: Long, initializer: (() -> V)? = null): V {
+    fun <V : Any> getGlobal(key: Long, initializer: (() -> V)? = null): V {
         if (initializer == null) {
-            return snapshot.registry.getValue(key).casted()
+            return eventScope.registry.getValue(key).casted()
         }
-        return snapshot.registry.getOrPut(key, initializer).casted()
+        return eventScope.registry.getOrPut(key, initializer).casted()
     }
 
     /**
      * Values are keyed by applets' remarks.
      */
-    private val results = mutableMapOf<String, Any?>()
+    private val referents = mutableMapOf<String, Any?>()
 
     lateinit var currentApplet: Applet
 
@@ -118,13 +122,44 @@ class TaskRuntime private constructor() {
      */
     var isSuccessful = true
 
-    fun registerResult(refid: String, result: Any?) {
-        results[refid] = result
+    /**
+     * Get all arguments from registered results, which were registered by [registerResult].
+     */
+    fun getArguments(applet: Applet): Array<Any?> {
+        return if (applet.references.isEmpty()) {
+            emptyArray()
+        } else {
+            Array(applet.references.size) {
+                getResultByRefid(applet.references[it])
+            }
+        }
+    }
+
+    /**
+     * Register all results of an applet.
+     */
+    fun registerResult(applet: Applet, result: AppletResult) {
+        _result = result
+        if (result.isSuccessful && result.values != null) {
+            registerReferents(applet, *result.values!!)
+        } else {
+            eventScope.registerFailure(applet, result.expected, result.actual)
+        }
+    }
+
+    fun registerReferents(applet: Applet, vararg values: Any?) {
+        applet.refids.forEach { (index, refid) ->
+            referents[refid] = values[index]
+        }
+    }
+
+    fun getFailure(applet: Applet): Pair<Any?, Any?>? {
+        return eventScope.failures[applet]
     }
 
     fun getResultByRefid(refid: String?): Any? {
         if (refid == null) return null
-        return results[refid]
+        return referents[refid]
     }
 
     fun setTarget(any: Any) {
@@ -140,14 +175,14 @@ class TaskRuntime private constructor() {
     }
 
     fun recycle() {
-        _snapshot = null
+        _eventScope = null
         _events = null
         runtimeScope = null
-        suspensionScope = null
-        results.clear()
+        referents.clear()
         tracker.reset()
         isSuspended = false
         observer = null
+        _result = null
         Pool.release(this)
     }
 

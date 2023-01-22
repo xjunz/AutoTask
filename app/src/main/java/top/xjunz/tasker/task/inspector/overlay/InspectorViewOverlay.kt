@@ -21,10 +21,12 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayInspectorBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.a11yAutomatorService
+import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.task.inspector.StableNodeInfo.Companion.freeze
+import top.xjunz.tasker.util.Router.launchAction
 
 /**
  * @author xjunz 2022/10/16
@@ -96,6 +98,19 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
             inspector.observe(vm.currentMode) {
                 inspectorView.isVisible = it != InspectorMode.COMPONENT
                 gestureOverlayView.isVisible = it == InspectorMode.GESTURE_RECORDER
+            }
+            inspector.observeTransient(vm.onCoordinateSelected) {
+                if (binding.inspectorView.isPointerMoved()) {
+                    context.launchAction(
+                        FloatingInspector.ACTION_SELECT_COORDINATE,
+                        IntValueUtil.composeCoordinate(
+                            binding.inspectorView.getCoordinateX(),
+                            binding.inspectorView.getCoordinateY()
+                        )
+                    )
+                } else {
+                    toast(R.string.error_no_coordinate_selected)
+                }
             }
         }
     }

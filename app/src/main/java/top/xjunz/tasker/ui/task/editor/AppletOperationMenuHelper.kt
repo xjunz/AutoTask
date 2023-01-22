@@ -203,7 +203,7 @@ class AppletOperationMenuHelper(
             R.id.item_open_in_new -> {
                 val dialog = FlowEditorDialog().init(
                     applet as Flow, viewModel.isSelectingRef
-                ).doOnFlowEdited { edited ->
+                ).doAfterFlowEdited { edited ->
                     if (edited.isEmpty() && applet.isContainer) {
                         // If all children in a container is removed, remove the container as well
                         applet.requireParent().remove(applet)

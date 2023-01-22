@@ -35,7 +35,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val uiObjectRegistry = AppletOptionFactory.uiObjectRegistry
 
-    private val pkgRegistry = AppletOptionFactory.packageRegistry
+    private val pkgRegistry = AppletOptionFactory.applicationRegistry
 
     private val options = mutableListOf<AppletOption>()
 
@@ -68,10 +68,10 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     private fun collectProperties() {
         if (vm.currentMode eq InspectorMode.COMPONENT || vm.showExtraOptions) {
             vm.currentComp.value?.let {
-                options.add(pkgRegistry.pkgCollection.withValue(Collections.singleton(it.pkgName)))
+                options.add(pkgRegistry.appCollection.withValue(Collections.singleton(it.packageName)))
 
-                if (it.actName != null) {
-                    val compName = ComponentName(it.pkgName, it.actName!!).flattenToShortString()
+                if (it.activityName != null) {
+                    val compName = ComponentName(it.packageName, it.activityName!!).flattenToShortString()
                     options.add(
                         pkgRegistry.activityCollection.withValue(Collections.singleton(compName))
                     )

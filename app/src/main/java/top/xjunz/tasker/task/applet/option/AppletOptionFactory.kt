@@ -20,26 +20,29 @@ object AppletOptionFactory : AppletFactory {
 
     val flowRegistry = FlowOptionRegistry()
 
-    val eventRegistry = EventFilterOptionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_REGISTRY)
+    val eventRegistry = EventCriterionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_REGISTRY)
 
-    val packageRegistry = PackageOptionRegistry(FlowOptionRegistry.ID_PKG_OPTION_REGISTRY)
+    val applicationRegistry = ApplicationCriterionRegistry(FlowOptionRegistry.ID_APP_OPTION_REGISTRY)
 
     val uiObjectRegistry =
-        UiObjectOptionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
+        UiObjectCriterionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
 
-    val timeRegistry = TimeOptionRegistry(FlowOptionRegistry.ID_TIME_OPTION_REGISTRY)
+    val timeRegistry = TimeCriterionRegistry(FlowOptionRegistry.ID_TIME_OPTION_REGISTRY)
 
     private val globalInfoRegistry =
-        GlobalInfoOptionRegistry(FlowOptionRegistry.ID_GLOBAL_OPTION_REGISTRY)
+        GlobalCriterionRegistry(FlowOptionRegistry.ID_GLOBAL_OPTION_REGISTRY)
 
-    val notificationOptionRegistry =
-        NotificationOptionRegistry(FlowOptionRegistry.ID_NOTIFICATION_OPTION_REGISTRY)
+    val notificationRegistry =
+        NotificationCriterionRegistry(FlowOptionRegistry.ID_NOTIFICATION_OPTION_REGISTRY)
 
     private val globalActionRegistry =
         GlobalActionRegistry(FlowOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
 
     private val uiObjectActionRegistry =
         UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
+
+    private val gestureActionRegistry =
+        GestureActionRegistry(FlowOptionRegistry.ID_GESTURE_ACTION_REGISTRY)
 
     private val textActionRegistry = TextActionRegistry(FlowOptionRegistry.ID_TEXT_ACTION_REGISTRY)
 
@@ -54,14 +57,15 @@ object AppletOptionFactory : AppletFactory {
         flowRegistry,
         // criterion
         eventRegistry,
-        packageRegistry,
+        applicationRegistry,
         uiObjectRegistry,
         timeRegistry,
         globalInfoRegistry,
-        notificationOptionRegistry,
+        notificationRegistry,
         // action
         globalActionRegistry,
         uiObjectActionRegistry,
+        gestureActionRegistry,
         textActionRegistry,
         appActionRegistry,
         controlActionRegistry

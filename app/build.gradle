@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dev.rikka.tools.refine'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$serialization_version"
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -82,7 +83,7 @@ dependencies {
     // ktor
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     // lifecycle
-    def lifecycle_version = "2.6.0-alpha03"
+    def lifecycle_version = "2.6.0-alpha04"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
@@ -90,9 +91,8 @@ dependencies {
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     // app icon loader
     implementation 'me.zhanghai.android.appiconloader:appiconloader:1.5.0'
-    implementation 'com.jaredrummler:android-shell:1.0.0'
     // test
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

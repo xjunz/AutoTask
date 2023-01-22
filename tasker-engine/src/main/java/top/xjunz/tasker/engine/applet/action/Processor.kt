@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.applet.action
 
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -16,23 +17,18 @@ class Processor<V, R>(
     private inline val processor: (args: Array<Any?>, value: V?, runtime: TaskRuntime) -> R?
 ) : ReferenceAction<V>(valueType) {
 
-    override suspend fun doActionWithReferences(
+    override suspend fun doWithArgs(
         args: Array<Any?>,
         value: V?,
         runtime: TaskRuntime
-    ): Boolean {
+    ): AppletResult {
         val ret = processor(args, value, runtime)
-        if (ret != null) {
-            refids.forEach { (which, refid) ->
-                runtime.registerResult(refid, deriveResultByRefid(which, ret))
-            }
-        }
-        return ret != null
+        return if (ret != null) AppletResult.successWithReturn(ret) else AppletResult.FAILURE
     }
 
 }
 
-inline fun <reified Arg, reified V:Any> unaryArgProcessor(
+inline fun <reified Arg, reified V : Any> unaryArgProcessor(
     crossinline action: (Arg?, V?) -> V?
 ): Processor<V, V> {
     return Processor(Applet.judgeValueType<V>()) { args, v, _ ->
