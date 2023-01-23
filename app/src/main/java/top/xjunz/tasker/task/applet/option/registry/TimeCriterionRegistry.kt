@@ -6,7 +6,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
-import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
+import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.collectionCriterion
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str

@@ -19,6 +19,7 @@ import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.clone
 import top.xjunz.tasker.task.applet.depth
+import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
@@ -45,11 +46,11 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     inline val isInEditionMode get() = flow.parent != null && !isReadyOnly
 
-    lateinit var refSelectingApplet: Applet
+    lateinit var referentAnchor: Applet
 
-    lateinit var refValueDescriptor: ValueDescriptor
+    lateinit var referentDescriptor: ValueDescriptor
 
-    val isSelectingRef get() = ::refSelectingApplet.isInitialized
+    val isSelectingReferent get() = ::referentAnchor.isInitialized
 
     val showSplitConfirmation = MutableLiveData<Boolean>()
 
@@ -123,13 +124,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     private fun flatmapFlow(flow: Flow, depth: Int = 0): List<Applet> {
         val ret = mutableListOf<Applet>()
-        flow.forEachIndexed { index, applet ->
+        flow.forEachIndexed `continue`@{ index, applet ->
+
+            if (applet is PreloadFlow && !isSelectingReferent)
+                return@`continue`
+
             applet.index = index
             applet.parent = flow
             ret.add(applet)
-            if (applet is Flow && collapsedFlows.contains(applet)) {
-                return@forEachIndexed
-            }
+
+            if (applet is Flow && collapsedFlows.contains(applet))
+                return@`continue`
+
             if (applet is Flow && depth < 2) {
                 ret.addAll(flatmapFlow(applet, depth + 1))
             }
@@ -190,7 +196,6 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         factory = appletOptionFactory
         isReadyOnly = readonly
         flow = if (readonly) initialFlow else initialFlow.clone(factory)
-        notifyFlowChanged()
     }
 
     fun complete(): Boolean {
@@ -218,7 +223,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
-        if (option != null && option.findResults(refValueDescriptor).isNotEmpty()) {
+        if (option != null && option.findResults(referentDescriptor).isNotEmpty()) {
             return true
         }
         if (this is Flow) {

@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.editor
 
+import android.util.ArrayMap
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 
@@ -33,9 +34,9 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
-    private val referenceRevocations = mutableMapOf<AppletArg, () -> Unit>()
+    private val referenceRevocations = ArrayMap<AppletArg, () -> Unit>()
 
-    private val refidRevocations = mutableMapOf<AppletArg, () -> Unit>()
+    private val referentRevocations = ArrayMap<AppletArg, () -> Unit>()
 
     private fun MutableMap<AppletArg, () -> Unit>.putIfNeeded(
         applet: Applet,
@@ -47,14 +48,14 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
-    private fun Applet.rawSetRefid(whichRet: Int, id: String?) {
+    private fun Applet.rawSetReferent(whichRet: Int, id: String?) {
         if (id == null) {
-            rawRemoveRefid(whichRet)
+            rawRemoveReferent(whichRet)
         } else {
-            if (refids === emptyMap<Int, String>()) {
-                refids = mutableMapOf()
+            if (referents === emptyMap<Int, String>()) {
+                referents = ArrayMap()
             }
-            (refids as MutableMap)[whichRet] = id
+            (referents as MutableMap)[whichRet] = id
         }
     }
 
@@ -63,7 +64,7 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
             rawRemoveReference(whichArg)
         } else {
             if (references === emptyMap<Int, String>()) {
-                references = mutableMapOf()
+                references = ArrayMap()
             }
             (references as MutableMap)[whichArg] = ref
         }
@@ -75,50 +76,50 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         if (references.isEmpty()) references = emptyMap()
     }
 
-    private fun Applet.rawRemoveRefid(which: Int) {
-        if (refids === emptyMap<Int, String>()) return
-        (refids as MutableMap).remove(which)
-        if (refids.isEmpty()) refids = emptyMap()
+    private fun Applet.rawRemoveReferent(which: Int) {
+        if (referents === emptyMap<Int, String>()) return
+        (referents as MutableMap).remove(which)
+        if (referents.isEmpty()) referents = emptyMap()
     }
 
     fun setValue(applet: Applet, whichArg: Int, value: Any?) {
         val prevValue = applet.value
-        val prevRefid = applet.references[whichArg]
+        val prevReferent = applet.references[whichArg]
         applet.value = value
         applet.rawRemoveReference(whichArg)
         referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevRefid)
+            applet.rawSetReference(whichArg, prevReferent)
             applet.value = prevValue
         }
     }
 
-    fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, refid: String?) {
-        val prevRefid = applet.references[whichArg]
+    fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, referent: String?) {
+        val prevReferent = applet.references[whichArg]
         val prevValue = applet.value
-        applet.rawSetReference(whichArg, refid)
+        applet.rawSetReference(whichArg, referent)
         // Clear its value once the arg is set to a reference
         if (!arg.isReferenceOnly) {
             applet.value = null
         }
         referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevRefid)
+            applet.rawSetReference(whichArg, prevReferent)
             applet.value = prevValue
         }
     }
 
-    fun renameReference(applet: Applet, whichArg: Int, newRefid: String) {
-        val prevRefid = applet.references[whichArg]
-        applet.rawSetReference(whichArg, newRefid)
+    fun renameReference(applet: Applet, whichArg: Int, newReferent: String?) {
+        val prevReferent = applet.references[whichArg]
+        applet.rawSetReference(whichArg, newReferent)
         referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevRefid)
+            applet.rawSetReference(whichArg, prevReferent)
         }
     }
 
-    fun setRefid(applet: Applet, whichResult: Int, refid: String?) {
-        val prevRefid = applet.refids[whichResult]
-        applet.rawSetRefid(whichResult, refid)
-        refidRevocations.putIfNeeded(applet, whichResult) {
-            applet.rawSetRefid(whichResult, prevRefid)
+    fun setReferent(applet: Applet, whichResult: Int, referent: String?) {
+        val prevReferent = applet.referents[whichResult]
+        applet.rawSetReferent(whichResult, referent)
+        referentRevocations.putIfNeeded(applet, whichResult) {
+            applet.rawSetReferent(whichResult, prevReferent)
         }
     }
 
@@ -128,14 +129,14 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
 
     fun reset() {
         referenceRevocations.clear()
-        refidRevocations.clear()
+        referentRevocations.clear()
     }
 
     fun revokeAll() {
         referenceRevocations.forEach { (_, u) ->
             u.invoke()
         }
-        refidRevocations.forEach { (_, u) ->
+        referentRevocations.forEach { (_, u) ->
             u.invoke()
         }
         reset()

@@ -145,14 +145,14 @@ abstract class Applet {
     var value: Any? = null
 
     /**
-     * Referring ids from other [Applet]s as input.
+     * References to other [Applet]s as input.
      */
     var references: Map<Int, String> = emptyMap()
 
     /**
-     * Reference ids exposed to other [Applet]s as output.
+     * Referents exposed to other [Applet]s as output.
      */
-    var refids: Map<Int, String> = emptyMap()
+    var referents: Map<Int, String> = emptyMap()
 
     fun requireParent() = requireNotNull(parent) {
         "Parent not found!"
@@ -243,16 +243,5 @@ abstract class Applet {
 
     override fun toString(): String {
         return javaClass.simpleName
-    }
-
-    /**
-     * Derive referred value from this applet according to reference index.
-     *
-     * @see refids
-     */
-    open fun getReferent(which: Int, ret: Any): Any? {
-        if (which == 0)
-            return ret
-        return null
     }
 }

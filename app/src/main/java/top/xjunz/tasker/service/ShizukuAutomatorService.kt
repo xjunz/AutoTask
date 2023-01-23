@@ -64,7 +64,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         ResidentTaskScheduler(RemoteTaskManager)
     }
 
-    override val a11yEventDispatcher = A11yEventDispatcher(looper)
+    override val a11yEventDispatcher by lazy {
+        A11yEventDispatcher(looper)
+    }
 
     @Keep
     @Privileged

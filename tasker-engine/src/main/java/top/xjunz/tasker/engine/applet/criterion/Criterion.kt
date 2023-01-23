@@ -7,6 +7,7 @@ package top.xjunz.tasker.engine.applet.criterion
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -19,8 +20,17 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
+    private inline val isScoped get() = parent is ScopeFlow<*>
+
     protected open fun T.getActualValue(): Any? {
         return this
+    }
+
+    private fun getTarget(runtime: TaskRuntime): T {
+        if (isScoped) {
+            return runtime.getTarget()
+        }
+        return runtime.getArguments(this)[0]!!.casted()
     }
 
     /**
@@ -30,11 +40,11 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val expected = value?.casted() ?: defaultValue
-        val target = runtime.getTarget<T>()
+        val target = getTarget(runtime)
         return if (isInverted != matchTarget(target, expected)) {
             AppletResult.SUCCESS
         } else {
-            AppletResult.failure(expected, target.getActualValue())
+            AppletResult.failed(expected, target.getActualValue())
         }
     }
 
@@ -42,19 +52,4 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
      * Check whether the [target] and [value] are matched.
      */
     protected abstract fun matchTarget(target: T, value: V): Boolean
-}
-
-class LambdaCriterion<T : Any, V : Any>(
-    override val valueType: Int,
-    private inline val matcher: ((T, V) -> Boolean)
-) : Criterion<T, V>() {
-
-    override fun matchTarget(target: T, value: V): Boolean {
-        return matcher(target, value)
-    }
-}
-
-inline fun <T : Any, reified V : Any> newCriterion(noinline matcher: ((T, V) -> Boolean))
-        : Criterion<T, V> {
-    return LambdaCriterion(Applet.judgeValueType<V>(), matcher)
 }

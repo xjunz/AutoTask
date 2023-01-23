@@ -58,13 +58,9 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         }
         isInCriterionScope = control is If
         title = factory.requireOption(control).rawTitle
-        if (scope is ScopedFlow<*>) {
+        if (scope is ScopeFlow<*>) {
             isScoped = true
-            registryOptions = arrayOf(
-                factory.requireRegistryOption(scope.appletId),
-                /* Non-scope flow is allowed anywhere */
-                factory.flowRegistry.globalInfoFlow
-            )
+            registryOptions = arrayOf(factory.requireRegistryOption(scope.appletId))
             // If scoped, do not show extra options from other registry, like showing component
             // options while showing ui object options.
             if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
@@ -75,7 +71,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
                 is Do -> factory.flowRegistry.actionFlowOptions
 
-                is When -> arrayOf(factory.flowRegistry.eventFlow)
+                is When -> arrayOf(factory.flowRegistry.eventCriteria)
 
                 else -> illegalArgument("control flow", control)
             }

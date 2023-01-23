@@ -57,6 +57,10 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         viewModel.onCompleted = block
     }
 
+    fun setSingleSelection(single: Boolean) = doWhenCreated {
+        viewModel.isSingleSelection = single
+    }
+
     fun setSelectedActivities(selected: Collection<String>) = doWhenCreated {
         viewModel.selectedActivities.addAll(selected.map {
             ComponentName.unflattenFromString(it)!!
@@ -213,6 +217,13 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 viewModel.removedItem.value = pkgName
                 viewModel.selectedPackages.remove(pkgName)
             } else {
+                if (viewModel.isSingleSelection) {
+                    val removed = viewModel.selectedPackages.singleOrNull()
+                    if (removed != null) {
+                        viewModel.selectedPackages.remove(removed)
+                        viewModel.removedItem.value = removed
+                    }
+                }
                 viewModel.selectedPackages.add(pkgName)
                 shoppingCartIntegration.animateIntoShopCart(binding.ivIcon, false)
                 viewModel.addedItem.value = pkgName
@@ -229,6 +240,13 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             viewModel.removedItem.value = compName
             viewModel.selectedActivities.remove(compName)
         } else {
+            if (viewModel.isSingleSelection) {
+                val removed = viewModel.selectedActivities.singleOrNull()
+                if (removed != null) {
+                    viewModel.selectedActivities.remove(removed)
+                    viewModel.removedItem.value = removed
+                }
+            }
             viewModel.selectedActivities.add(compName)
             shoppingCartIntegration.animateIntoShopCart(binding.ivIcon, false)
             viewModel.addedItem.value = compName

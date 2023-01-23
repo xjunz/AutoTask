@@ -25,17 +25,17 @@ open class RootFlow : Flow() {
         return error
     }
 
-    private fun checkInvalidReference(applet: Applet, refids: MutableSet<String>): StaticError? {
+    private fun checkInvalidReference(applet: Applet, referents: MutableSet<String>): StaticError? {
         val invalid = applet.references.values.find {
-            !refids.contains(it)
+            !referents.contains(it)
         }
         if (invalid != null) {
             return StaticError(applet, StaticError.ERR_INVALID_REFERENCE, invalid)
         }
-        refids.addAll(applet.refids.values)
+        referents.addAll(applet.referents.values)
         if (applet is Flow) {
             applet.forEach {
-                val error = checkInvalidReference(it, refids)
+                val error = checkInvalidReference(it, referents)
                 if (error != null) {
                     return error
                 }

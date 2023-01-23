@@ -97,7 +97,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, position, option ->
-            var title = option.currentTitle
+            var title = option.dummyTitle
             val m = option.titleModifier
             if (m != null) title = title?.plus(
                 " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
@@ -209,13 +209,13 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             binding.rootView.beginAutoTransition(transition)
             val flowRegistry = AppletOptionFactory.flowRegistry
             when (viewModel.registryOptions[it]) {
-                flowRegistry.applicationFlow -> {
+                flowRegistry.appCriteria -> {
                     binding.cvHeader.tag = InspectorMode.COMPONENT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =
                         R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.COMPONENT.label)
                 }
-                flowRegistry.uiObjectFlow -> {
+                flowRegistry.uiObjectCriteria -> {
                     binding.cvHeader.tag = InspectorMode.UI_OBJECT
                     binding.cvHeader.isVisible = true
                     binding.tvHeader.text =

@@ -6,14 +6,14 @@ package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.tasker.engine.applet.base.AppletResult
-import top.xjunz.tasker.engine.applet.base.ScopedFlow
+import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.uiAutomation
 
 /**
  * @author xjunz 2022/08/25
  */
-class UiObjectFlow : ScopedFlow<UiObjectTarget>() {
+class UiObjectFlow : ScopeFlow<UiObjectTarget>() {
 
     private val rootNodeKey = generateUniqueKey(1)
 
@@ -30,7 +30,7 @@ class UiObjectFlow : ScopedFlow<UiObjectTarget>() {
             ctx.source = it
             super.applyFlow(runtime).isSuccessful
         }
-        return if (node != null) AppletResult.successWithReturn(node) else AppletResult.FAILURE
+        return if (node != null) AppletResult.succeeded(node) else AppletResult.FAILURE
     }
 
     private suspend fun AccessibilityNodeInfo.findFirst(condition: suspend (AccessibilityNodeInfo) -> Boolean)

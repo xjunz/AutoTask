@@ -24,9 +24,9 @@ class Suspension : Action<Int>(VAL_TYPE_INT) {
         suspendingScope?.get()?.cancel()
         coroutineScope {
             suspendingScope = WeakReference(this)
-            runtime.isSuspended = true
+            runtime.isSuspending = true
             delay(value.toLong())
-            runtime.isSuspended = false
+            runtime.isSuspending = false
         }
         return AppletResult.SUCCESS
     }

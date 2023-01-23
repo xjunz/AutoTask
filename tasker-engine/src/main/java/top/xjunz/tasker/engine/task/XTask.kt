@@ -19,7 +19,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
 /**
  * The abstraction of an automator task.
  *
- * **XTask** is the abbr of "XJUNZ-TASK", rather cool isn't it? :)
+ * **XTask** is the abbr. of "XJUNZ-TASK", rather cool isn't it? :)
  *
  * @author xjunz 2022/07/12
  */
@@ -104,7 +104,7 @@ class XTask {
         events: Array<out Event>,
         observer: TaskRuntime.Observer? = null
     ): Boolean {
-        if (isExecuting && currentRuntime?.isSuspended != true) {
+        if (isExecuting && currentRuntime?.isSuspending != true) {
             return false
         }
         val runtime = obtainRuntime(eventScope, coroutineScope, events)

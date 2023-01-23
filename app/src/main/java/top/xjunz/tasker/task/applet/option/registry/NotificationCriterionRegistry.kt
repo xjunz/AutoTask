@@ -6,8 +6,8 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PackageManagerBridge
-import top.xjunz.tasker.engine.applet.criterion.collectionCriterion
-import top.xjunz.tasker.engine.applet.criterion.newCriterion
+import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.collectionCriterion
+import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.newCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper

@@ -19,7 +19,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.transition.platform.MaterialFadeThrough
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -65,7 +64,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        if (vm.isSelectingRef && !vm.hasCandidateReference(vm.flow)) {
+        if (vm.isSelectingReferent && !vm.hasCandidateReference(vm.flow)) {
             toast(R.string.no_candidate_reference)
             dismiss()
             return null
@@ -75,6 +74,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        vm.notifyFlowChanged()
         initGlobalViewModel()
         initViews()
         observeLiveData()
@@ -103,17 +103,18 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         binding.rvTaskEditor.adapter = adapter
         vm.isFabVisible.value = vm.isInEditionMode ||
-                (vm.isSelectingRef && gvm.selectedRefs.isNotEmpty())
+                (vm.isSelectingReferent && gvm.selectedReferents.isNotEmpty())
         if (vm.isInEditionMode) {
-            binding.fabAction.text = R.string.add_rules.text
-            binding.fabAction.setIconResource(R.drawable.ic_baseline_add_24)
-        } else if (vm.isSelectingRef) {
-            binding.fabAction.text = R.string.confirm_ref.text
-            binding.fabAction.setIconResource(R.drawable.ic_baseline_add_link_24)
+            binding.btnAction1.text = R.string.add_rules.text
+            binding.btnAction1.setIconResource(R.drawable.ic_baseline_add_24)
+            binding.btnAction2.isVisible = false
+        } else if (vm.isSelectingReferent) {
+            binding.btnAction1.text = R.string.confirm_ref.text
+            binding.btnAction1.setIconResource(R.drawable.ic_baseline_add_link_24)
         }
-        binding.fabAction.setAntiMoneyClickListener {
-            if (vm.isSelectingRef) {
-                if (gvm.selectedRefs.isNotEmpty())
+        binding.btnAction1.setAntiMoneyClickListener {
+            if (vm.isSelectingReferent) {
+                if (gvm.selectedReferents.isNotEmpty())
                     confirmReferenceSelections()
             } else {
                 val flow = vm.flow
@@ -124,6 +125,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 AppletSelectorDialog().init(flow) {
                     vm.addInside(flow, it)
                 }.show(childFragmentManager)
+            }
+        }
+        binding.btnAction2.setAntiMoneyClickListener {
+            gvm.renameReferentInRoot(gvm.getSelectedReferentNames().toSet(), null)
+            gvm.referenceEditor.getReferenceChangedApplets().forEach {
+                gvm.onAppletChanged.value = it
             }
         }
         binding.ibDismiss.setOnClickListener {
@@ -178,50 +185,45 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     }
 
     private fun confirmReferenceSelections() {
-        val refids = gvm.selectedRefs.mapNotNull { (applet, which) ->
-            applet.refids[which]
-        }.toSet()
-        if (refids.size == 1) {
-            val refid = refids.single()
-            gvm.setRefidForSelections(refid)
-            vm.doOnRefSelected(refid)
-            gvm.onReferenceSelected.value = true
+        val referentNamesList = gvm.getSelectedReferentNames()
+        val referentNames = referentNamesList.toSet()
+        // All referents have the same name, just do it!
+        if (referentNames.size == 1 && gvm.selectedReferents.size == referentNamesList.size) {
+            val referent = referentNames.single()
+            gvm.setReferentForSelections(referent)
+            vm.doOnRefSelected(referent)
+            gvm.onReferentSelected.value = true
             return
         }
-        val names = gvm.selectedRefs.map { (applet, which) ->
+        val resultNames = gvm.selectedReferents.map { (applet, which) ->
             val option = AppletOptionFactory.requireOption(applet)
             option.results[which].name.toString()
         }.toSet()
-        var def: String? = refids.singleOrNull()
-        if (def == null && names.size == 1) {
-            def = names.single()
+        var def: String? = referentNames.singleOrNull()
+        if (def == null && resultNames.size == 1) {
+            def = resultNames.single()
         }
-        val caption = if (gvm.selectedRefs.size > 1) {
-            R.string.prompt_set_refid.text +
+        val caption = if (gvm.selectedReferents.size > 1) {
+            R.string.prompt_set_referent.text +
                     "\n\n" + R.string.help_multi_references.text.relativeSize(.8F)
                 .quoted(ColorScheme.colorPrimary).bold()
         } else {
-            R.string.prompt_set_refid.text
+            R.string.prompt_set_referent.text
         }
         val dialog = TextEditorDialog().setCaption(caption).configEditText {
             it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
-        }.init(R.string.set_refid.text, def) {
-            if (!gvm.isRefidLegalForSelections(it)) {
+        }.init(R.string.set_referent.text, def) {
+            if (!gvm.isReferentLegalForSelections(it)) {
                 return@init R.string.error_tag_exists.text
             }
-            gvm.setRefidForSelections(it)
-            gvm.renameRefidInRoot(refids, it)
+            gvm.setReferentForSelections(it)
+            gvm.renameReferentInRoot(referentNames, it)
             vm.doOnRefSelected(it)
-            gvm.onReferenceSelected.value = true
+            gvm.onReferentSelected.value = true
             return@init null
         }
-        if (refids.size == gvm.selectedRefs.size && refids.size == 1) {
-            // All applets have the same refid
-            dialog.setDropDownData(arrayOf(refids.single()))
-        } else if (refids.size > 1) {
-            // Multiple refids
-            dialog.setDropDownData(refids.toTypedArray())
-        }
+        // Multiple referents
+        dialog.setDropDownData((referentNames + resultNames).toSet().toTypedArray())
         dialog.show(childFragmentManager)
     }
 
@@ -251,7 +253,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         observe(vm.selectionLiveData) {
             binding.cvMetadata.isVisible = vm.isBase
-            if (it.isEmpty()) {
+            if (vm.isSelectingReferent) {
+                val name = vm.referentDescriptor.name
+                binding.tvTitle.text = R.string.format_select.formatSpans(name.foreColored())
+            } else if (it.isEmpty()) {
                 if (vm.isBase) {
                     binding.tvTitle.text = R.string.edit_task.text
                     binding.tvTaskName.text = vm.metadata.title
@@ -295,21 +300,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 it.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ColorScheme.colorError)
             }
         }
-        observeTransient(gvm.onReferenceSelected) {
-            if (vm.isSelectingRef) dismiss()
+        observeTransient(gvm.onReferentSelected) {
+            if (vm.isSelectingReferent) dismiss()
         }
         val behavior = (binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
                 as HideBottomViewOnScrollBehavior
         observe(vm.isFabVisible) {
             if (it != binding.fabAction.isVisible) {
-                binding.root.beginAutoTransition(
-                    binding.fabAction,
-                    MaterialSharedAxis(MaterialSharedAxis.Y, it)
-                )
+                binding.root.beginAutoTransition(binding.fabAction, MaterialFadeThrough())
             }
             if (it) {
                 behavior.slideUp(binding.fabAction, true)
             }
+            binding.btnAction2.isEnabled = gvm.getSelectedReferentNames().isNotEmpty()
             binding.fabAction.isVisible = it
         }
         observeTransient(vm.onAppletLongClicked) {
@@ -327,26 +330,26 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 vm.onAppletChanged.value = this
             }
         }
-        if (vm.isSelectingRef) return
+        if (vm.isSelectingReferent) return
         mvm.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
             val split = data.split(Char(0))
             val hashcode = split[1].toInt()
             val applet = adapter.currentList.firstOrNull {
                 it.hashCode() == hashcode
             } ?: return@doOnAction
-            val refid = split[0]
+            val referent = split[0]
             val option = factory.requireOption(applet)
-            val whichArg = applet.whichReference(refid)
+            val whichArg = applet.whichReference(referent)
             val arg = option.arguments[whichArg]
             FlowEditorDialog().init(gvm.root, true)
-                .setReferenceToSelect(applet, arg, refid)
-                .doOnReferenceSelected { newRefid ->
-                    gvm.refEditor.setReference(applet, arg, whichArg, newRefid)
+                .setReferentToSelect(applet, arg, referent)
+                .doOnReferentSelected { newReferent ->
+                    gvm.referenceEditor.setReference(applet, arg, whichArg, newReferent)
                     vm.clearStaticErrorIfNeeded(applet, StaticError.PROMPT_RESET_REFERENCE)
-                    gvm.refEditor.getReferenceChangedApplets().forEach {
+                    gvm.referenceEditor.getReferenceChangedApplets().forEach {
                         vm.onAppletChanged.value = it
                     }
-                    gvm.refEditor.reset()
+                    gvm.referenceEditor.reset()
                 }.show(childFragmentManager)
         }
         mvm.doOnAction(this, AppletOption.ACTION_EDIT_VALUE) { data ->
@@ -369,18 +372,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         return true
     }
 
-    fun setReferenceToSelect(victim: Applet, ref: ValueDescriptor, refid: String?) = doWhenCreated {
-        vm.refSelectingApplet = victim
-        vm.refValueDescriptor = ref
-        vm.isReadyOnly = true
-        if (refid != null)
-            gvm.addRefSelectionWithRefid(victim, refid)
-        vm.addCloseable {
-            gvm.clearRefSelections()
+    fun setReferentToSelect(victim: Applet, ref: ValueDescriptor, referent: String?) =
+        doWhenCreated {
+            vm.referentAnchor = victim
+            vm.referentDescriptor = ref
+            vm.isReadyOnly = true
+            if (referent != null)
+                gvm.selectReferentsWithName(victim, referent)
+            vm.addCloseable {
+                gvm.clearReferentSelections()
+            }
         }
-    }
 
-    fun doOnReferenceSelected(block: (String) -> Unit) = doWhenCreated {
+    fun doOnReferentSelected(block: (String) -> Unit) = doWhenCreated {
         vm.doOnRefSelected = block
     }
 

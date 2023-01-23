@@ -12,7 +12,6 @@ import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.UiObjectTarget
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.applet.value.Swipe
@@ -34,10 +33,9 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     private inline fun <reified V> uiObjectActionOption(
         title: Int, crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
     ) = appletOption(title) {
-        singleArgAction<UiObjectTarget, V> { ctx, value ->
-            val node = ctx?.source
+        singleArgAction<AccessibilityNodeInfo, V> { node, value ->
             requireNotNull(node) {
-                "Node is not captured!"
+                "Node is not captured?!"
             }
             if (node.refresh()) block(node, value) else false
         }

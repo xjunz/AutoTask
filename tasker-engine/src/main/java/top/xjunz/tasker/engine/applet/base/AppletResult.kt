@@ -9,13 +9,11 @@ import androidx.core.util.Pools.SimplePool
 /**
  * @author xjunz 2023/01/15
  */
-class AppletResult private constructor(
-    private var _isSuccessful: Boolean
-) {
+class AppletResult private constructor(private var successful: Boolean) {
 
-    val isSuccessful get() = _isSuccessful
+    val isSuccessful get() = successful
 
-    var values: Array<out Any?>? = null
+    var returns: Array<out Any?>? = null
         private set
 
     var expected: Any? = null
@@ -37,25 +35,25 @@ class AppletResult private constructor(
 
         private fun obtain(
             isSuccessful: Boolean,
-            values: Array<out Any?>? = null,
+            returns: Array<out Any?>? = null,
             expected: Any? = null,
             actual: Any? = null,
             throwable: Throwable? = null
         ): AppletResult {
             return (Pool.acquire() ?: AppletResult(false)).also {
-                it._isSuccessful = isSuccessful
-                it.values = values
+                it.successful = isSuccessful
+                it.returns = returns
                 it.actual = actual
                 it.expected = expected
                 it.throwable = throwable
             }
         }
 
-        fun successWithReturn(vararg results: Any?): AppletResult {
-            return if (results.isNotEmpty()) obtain(true, results) else SUCCESS
+        fun succeeded(vararg returns: Any?): AppletResult {
+            return if (returns.isNotEmpty()) obtain(true, returns) else SUCCESS
         }
 
-        fun failure(expected: Any?, actual: Any?): AppletResult {
+        fun failed(expected: Any?, actual: Any?): AppletResult {
             return obtain(false, expected = expected, actual = actual)
         }
 
@@ -65,7 +63,7 @@ class AppletResult private constructor(
     }
 
     fun recycle() {
-        values = null
+        returns = null
         expected = null
         actual = null
         throwable = null

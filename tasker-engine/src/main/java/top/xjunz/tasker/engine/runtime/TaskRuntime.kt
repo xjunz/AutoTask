@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.runtime
 
+import android.util.ArrayMap
 import androidx.core.util.Pools.SimplePool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -15,6 +16,8 @@ import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
 
+
+private typealias Referred = () -> Any?
 
 /**
  * The structure storing runtime information of a running [XTask].
@@ -60,7 +63,7 @@ class TaskRuntime private constructor() {
 
     val isActive get() = runtimeScope?.isActive == true
 
-    var isSuspended = false
+    var isSuspending = false
 
     lateinit var task: XTask
 
@@ -75,9 +78,9 @@ class TaskRuntime private constructor() {
     private var runtimeScope: CoroutineScope? = null
 
     /**
-     * Target is for applet to use in runtime via [TaskRuntime.getTarget].
+     * Target is for applets in a specific flow to use in runtime.
      */
-    private lateinit var target: Any
+    private var target: Any? = null
 
     val tracker = AppletIndexer()
 
@@ -108,10 +111,7 @@ class TaskRuntime private constructor() {
         return eventScope.registry.getOrPut(key, initializer).casted()
     }
 
-    /**
-     * Values are keyed by applets' remarks.
-     */
-    private val referents = mutableMapOf<String, Any?>()
+    private val referents = ArrayMap<String, Any?>()
 
     lateinit var currentApplet: Applet
 
@@ -130,7 +130,7 @@ class TaskRuntime private constructor() {
             emptyArray()
         } else {
             Array(applet.references.size) {
-                getResultByRefid(applet.references[it])
+                getReferentByName(applet.references[it])
             }
         }
     }
@@ -140,38 +140,45 @@ class TaskRuntime private constructor() {
      */
     fun registerResult(applet: Applet, result: AppletResult) {
         _result = result
-        if (result.isSuccessful && result.values != null) {
-            registerReferents(applet, *result.values!!)
+        if (result.isSuccessful && result.returns != null) {
+            registerAllReferents(applet, *result.returns!!)
         } else {
             eventScope.registerFailure(applet, result.expected, result.actual)
         }
     }
 
-    fun registerReferents(applet: Applet, vararg values: Any?) {
-        applet.refids.forEach { (index, refid) ->
-            referents[refid] = values[index]
+    fun registerAllReferents(applet: Applet, vararg values: Any?) {
+        applet.referents.forEach { (which, name) ->
+            referents[name] = values[which]
         }
+    }
+
+    fun registerReferent(applet: Applet, which: Int, referred: Referred) {
+        referents[applet.referents[which]] = referred
     }
 
     fun getFailure(applet: Applet): Pair<Any?, Any?>? {
         return eventScope.failures[applet]
     }
 
-    fun getResultByRefid(refid: String?): Any? {
-        if (refid == null) return null
-        return referents[refid]
+    private fun getReferentByName(name: String?): Any? {
+        if (name == null) return null
+        val referent = referents[name]
+        return if (referent is Referred) referent.invoke() else referent
     }
 
-    fun setTarget(any: Any) {
+    fun setTarget(any: Any?) {
         target = any
     }
 
-    fun getRawTarget(): Any {
+    fun getRawTarget(): Any? {
         return target
     }
 
     fun <T> getTarget(): T {
-        return target.casted()
+        return requireNotNull(target) {
+            "Target is not set!"
+        }.casted()
     }
 
     fun recycle() {
@@ -180,9 +187,10 @@ class TaskRuntime private constructor() {
         runtimeScope = null
         referents.clear()
         tracker.reset()
-        isSuspended = false
+        isSuspending = false
         observer = null
         _result = null
+        target = null
         Pool.release(this)
     }
 

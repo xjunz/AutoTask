@@ -79,7 +79,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             check(isEnabled)
         }
         // User layer checks: find improper operations
-        if (isEmpty()) {
+        if (requiredSize != 0 && isEmpty()) {
             return StaticError.ERR_FLOW_NO_ELEMENT
         }
         return StaticError.ERR_NONE
@@ -91,18 +91,18 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         runtime.tracker.jumpIn()
         onPrepare(runtime)
         // Backup the target, because sub-flows may change the target, we don't want the changed
-        // value to fall through.
+        // target to fall through.
         val backup = runtime.getRawTarget()
         val succeeded = applyFlow(runtime)
         onPostApply(runtime)
-        // restore the target
+        // Restore the target
         runtime.setTarget(backup)
         runtime.tracker.jumpOut()
         return succeeded
     }
 
     /**
-     * Just before the flow execute its elements.
+     * Just before the flow executing its elements.
      */
     protected open fun onPrepare(runtime: TaskRuntime) {
         /* no-op */

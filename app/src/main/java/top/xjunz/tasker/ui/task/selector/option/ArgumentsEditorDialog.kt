@@ -100,29 +100,41 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     .setHints(R.array.swipe_arg_hints)
                     .show(childFragmentManager)
 
-            VariantType.TEXT_APP_LIST ->
-                ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
+            VariantType.TEXT_APP_LIST, VariantType.TEXT_PACKAGE_NAME -> {
+                val singleSelection = arg.variantType == VariantType.TEXT_PACKAGE_NAME
+                val value: Collection<String>? = if (singleSelection) applet.value?.let {
+                    Collections.singleton(it as String)
+                } else applet.value?.casted()
+                ComponentSelectorDialog().setSelectedPackages(value ?: emptyList())
                     .doOnCompleted {
-                        applet.value = it
+                        applet.value = if (singleSelection) it.single() else it
                         vm.onItemChanged.value = arg
                     }
-                    .setTitle(option.currentTitle)
+                    .setSingleSelection(singleSelection)
+                    .setTitle(option.dummyTitle)
                     .show(childFragmentManager)
-            VariantType.TEXT_ACTIVITY_LIST ->
-                ComponentSelectorDialog().setTitle(option.currentTitle)
-                    .setSelectedActivities(applet.value?.casted() ?: emptyList())
+            }
+            VariantType.TEXT_ACTIVITY, VariantType.TEXT_ACTIVITY_LIST -> {
+                val singleSelection = arg.variantType == VariantType.TEXT_ACTIVITY
+                val value: Collection<String>? = if (singleSelection) applet.value?.let {
+                    Collections.singleton(it as String)
+                } else applet.value?.casted()
+                ComponentSelectorDialog().setTitle(option.dummyTitle)
+                    .setSelectedActivities(value ?: emptyList())
                     .doOnCompleted {
-                        applet.value = it
+                        applet.value = if (singleSelection) it.single() else it
                         vm.onItemChanged.value = arg
                     }
+                    .setSingleSelection(true)
                     .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
                     .show(childFragmentManager)
+            }
             else -> TextEditorDialog().configEditText { et ->
                 et.configInputType(arg.type, true)
                 et.maxLines = 10
             }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
                 val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
-                gvm.refEditor.setValue(applet, which, parsed)
+                gvm.referenceEditor.setValue(applet, which, parsed)
                 vm.onItemChanged.value = arg
                 return@set null
             }.show(childFragmentManager)
@@ -131,9 +143,9 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private fun showReferenceSelectorDialog(whichArg: Int, arg: ArgumentDescriptor, id: String?) {
         FlowEditorDialog().init(gvm.root, true)
-            .setReferenceToSelect(applet, arg, id)
-            .doOnReferenceSelected { refid ->
-                gvm.refEditor.setReference(applet, arg, whichArg, refid)
+            .setReferentToSelect(applet, arg, id)
+            .doOnReferentSelected { referent ->
+                gvm.referenceEditor.setReference(applet, arg, whichArg, referent)
                 vm.onItemChanged.value = arg
             }.show(childFragmentManager)
     }
@@ -150,17 +162,17 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             binding.tvValue.setAntiMoneyClickListener {
                 val position = adapterPosition
                 val arg = option.arguments[position]
-                val refid = applet.references.getValue(position)
-                TextEditorDialog().setCaption(R.string.prompt_set_refid.text).configEditText {
+                val referent = applet.references.getValue(position)
+                TextEditorDialog().setCaption(R.string.prompt_set_referent.text).configEditText {
                     it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
-                }.init(R.string.edit_refid.text, refid) {
-                    if (it == refid) return@init null
-                    if (!gvm.isRefidLegalForSelections(it)) {
+                }.init(R.string.edit_referent.text, referent) {
+                    if (it == referent) return@init null
+                    if (!gvm.isReferentLegalForSelections(it)) {
                         return@init R.string.error_tag_exists.text
                     }
                     // This applet may not be attached to the root
-                    gvm.refEditor.renameReference(applet, position, it)
-                    gvm.renameRefidInRoot(Collections.singleton(refid), it)
+                    gvm.referenceEditor.renameReference(applet, position, it)
+                    gvm.renameReferentInRoot(Collections.singleton(referent), it)
                     vm.onItemChanged.value = arg
                     return@init null
                 }.show(childFragmentManager)
@@ -171,9 +183,9 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             binding.tvValue.isClickable = false
             binding.tvValue.background = null
             if (!arg.isValueOnly && applet.references.containsKey(pos)) {
-                val refid = applet.references.getValue(pos)
+                val referent = applet.references.getValue(pos)
                 // Not value only and the reference is available
-                binding.tvValue.text = refid.underlined().foreColored()
+                binding.tvValue.text = referent.underlined().foreColored()
                 binding.tvValue.setDrawableStart(R.drawable.ic_baseline_link_24)
                 binding.tvValue.isClickable = true
                 binding.tvValue.background =
@@ -194,15 +206,15 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        gvm.refEditor.revokeAll()
+        gvm.referenceEditor.revokeAll()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvArgument.adapter = adapter
-        binding.tvTitle.text = option.currentTitle
+        binding.tvTitle.text = option.dummyTitle
         binding.btnCancel.setOnClickListener {
-            gvm.refEditor.revokeAll()
+            gvm.referenceEditor.revokeAll()
             dismiss()
         }
         binding.btnComplete.setAntiMoneyClickListener {
@@ -210,10 +222,10 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             if (illegal == -1) {
                 vm.doOnCompletion()
                 pvm.clearStaticErrorIfNeeded(vm.applet, StaticError.PROMPT_RESET_REFERENCE)
-                gvm.refEditor.getReferenceChangedApplets().forEach {
+                gvm.referenceEditor.getReferenceChangedApplets().forEach {
                     gvm.onAppletChanged.value = it
                 }
-                gvm.refEditor.reset()
+                gvm.referenceEditor.reset()
                 dismiss()
             } else {
                 binding.rvArgument.findViewHolderForAdapterPosition(illegal)?.itemView?.shake()

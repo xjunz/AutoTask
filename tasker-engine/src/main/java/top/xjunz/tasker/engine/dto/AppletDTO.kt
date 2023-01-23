@@ -36,7 +36,7 @@ class AppletDTO(
     @SerialName("c")
     private val comment: String? = null,
     @SerialName("q")
-    private val refids: Map<Int, String>? = null,
+    private val referents: Map<Int, String>? = null,
     @SerialName("r")
     private val references: Map<Int, String>? = null,
 ) : Parcelable {
@@ -78,7 +78,7 @@ class AppletDTO(
             serialized?.let {
                 update(it.toByteArray())
             }
-            refids?.forEach { (t, u) ->
+            referents?.forEach { (t, u) ->
                 update(t)
                 update(u.toByteArray())
             }
@@ -108,7 +108,7 @@ class AppletDTO(
         fun Applet.toDTO(): AppletDTO {
             val dto = AppletDTO(
                 id, isAnd, isEnabled, isInverted, serializeValue(), comment,
-                refids.emptyToNull(), references.emptyToNull(),
+                referents.emptyToNull(), references.emptyToNull(),
             )
             if (this is Flow) {
                 dto.elements = if (size == 0) null else Array(size) {
@@ -124,7 +124,7 @@ class AppletDTO(
         prototype.isAnd = isAnd
         prototype.isEnabled = isEnabled
         prototype.isInverted = isInverted
-        prototype.refids = refids ?: emptyMap()
+        prototype.referents = referents ?: emptyMap()
         prototype.references = references ?: emptyMap()
         prototype.comment = comment
         if (prototype is Flow) {
@@ -143,7 +143,7 @@ class AppletDTO(
         parcel.writeBool(isInverted)
         parcel.writeString(serialized)
         parcel.writeString(comment)
-        parcel.writeMap(refids)
+        parcel.writeMap(referents)
         parcel.writeMap(references)
         parcel.writeTypedArray(elements, flags)
     }

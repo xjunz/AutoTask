@@ -10,6 +10,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.criterion.*
+import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.collectionCriterion
+import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.newCriterion
+import top.xjunz.tasker.ktx.bold
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
@@ -28,22 +31,14 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     private fun invertibleApplicationOption(
         @StringRes name: Int, creator: () -> Applet
     ): AppletOption {
-        return invertibleAppletOption(
-            name,
-            creator
-        ).withRefArgument<ComponentInfoWrapper>(
-            R.string.specified_app,
-            substitution = R.string.empty
+        return invertibleAppletOption(name, creator).withRefArgument<ComponentInfoWrapper>(
+            R.string.app, substitution = R.string.empty
         ).hasCompositeTitle()
     }
 
     private fun applicationOption(@StringRes name: Int, creator: () -> Applet): AppletOption {
-        return appletOption(
-            name,
-            creator
-        ).withRefArgument<ComponentInfoWrapper>(
-            R.string.specified_app,
-            substitution = R.string.empty
+        return appletOption(name, creator).withRefArgument<ComponentInfoWrapper>(
+            R.string.app, substitution = R.string.empty
         ).hasCompositeTitle()
     }
 
@@ -61,7 +56,7 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
                 R.string.format_pkg_collection_desc.formatSpans(
                     value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
                         (PackageManagerBridge.loadPackageInfo(name)?.wrapped()?.label ?: name)
-                    }.joinToString("、"), value.size.toString().foreColored()
+                    }.joinToString("、"), value.size.toString().bold()
                 )
             }
         }
@@ -76,7 +71,10 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<String>(R.string.activity_collection, VariantType.TEXT_ACTIVITY_LIST)
         .withValueDescriber<Collection<String>> {
             if (it.size == 1) {
-                it.first()
+                val comp = ComponentName.unflattenFromString(it.single())!!
+                (PackageManagerBridge.loadPackageInfo(comp.packageName)
+                    ?.wrapped()?.label?.toString()
+                    ?: comp.packageName) + "/" + it.single().substringAfterLast('/')
             } else {
                 R.string.format_act_collection_desc.formatSpans(it.size.toString().foreColored())
             }

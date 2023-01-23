@@ -21,6 +21,8 @@ import top.xjunz.tasker.util.ApplicationIconLoader
  */
 class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel(states) {
 
+    var isSingleSelection: Boolean = false
+
     var mode = ComponentSelectorDialog.MODE_PACKAGE
 
     val currentItem = MutableLiveData<Int>()

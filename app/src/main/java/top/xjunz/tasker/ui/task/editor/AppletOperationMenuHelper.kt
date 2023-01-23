@@ -202,7 +202,7 @@ class AppletOperationMenuHelper(
         when (id) {
             R.id.item_open_in_new -> {
                 val dialog = FlowEditorDialog().init(
-                    applet as Flow, viewModel.isSelectingRef
+                    applet as Flow, viewModel.isSelectingReferent
                 ).doAfterFlowEdited { edited ->
                     if (edited.isEmpty() && applet.isContainer) {
                         // If all children in a container is removed, remove the container as well
@@ -221,10 +221,10 @@ class AppletOperationMenuHelper(
                 }.setStaticError(viewModel.staticError).doSplit {
                     viewModel.splitContainerFlow(applet)
                 }
-                if (viewModel.isSelectingRef) {
-                    dialog.doOnReferenceSelected(viewModel.doOnRefSelected)
-                    dialog.setReferenceToSelect(
-                        viewModel.refSelectingApplet, viewModel.refValueDescriptor, null
+                if (viewModel.isSelectingReferent) {
+                    dialog.doOnReferentSelected(viewModel.doOnRefSelected)
+                    dialog.setReferentToSelect(
+                        viewModel.referentAnchor, viewModel.referentDescriptor, null
                     )
                 }
                 dialog.show(fm)
@@ -275,7 +275,7 @@ class AppletOperationMenuHelper(
                     options.forEach {
                         popup.menu.add(it.rawTitle)
                     }
-                    popup.setOnMenuItemClickListener {
+                    val listener = PopupMenu.OnMenuItemClickListener {
                         val index = popup.menu.indexOf(it) - 1
                         if (index >= 0) {
                             val yielded = options[index].yield()
@@ -285,10 +285,15 @@ class AppletOperationMenuHelper(
                                 viewModel.addAfter(applet, Collections.singletonList(yielded))
                             }
                         }
-                        return@setOnMenuItemClickListener true
+                        true
                     }
-                    popup.show()
-                    popup.configHeaderTitle()
+                    if (options.size == 1) {
+                        listener.onMenuItemClick(popup.menu.getItem(1))
+                    } else {
+                        popup.setOnMenuItemClickListener(listener)
+                        popup.show()
+                        popup.configHeaderTitle()
+                    }
                 } else {
                     val flow = applet.requireParent()
                     if (flow.size == flow.maxSize) {

@@ -123,7 +123,7 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
             binding.root.setOnLongClickListener { true }
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
-                if (viewModel.isSelectingRef && !applet.isContainer) return@setAntiMoneyClickListener
+                if (viewModel.isSelectingReferent && !applet.isContainer) return@setAntiMoneyClickListener
                 if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else {

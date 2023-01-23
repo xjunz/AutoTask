@@ -33,7 +33,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
         const val ID_GESTURE_ACTION_REGISTRY = 0x55
     }
 
-    private inline fun <reified F : Flow> presetFlowOption(
+    private inline fun <reified F : Flow> flowOptionWithId(
         appletId: Int,
         title: Int
     ): AppletOption {
@@ -45,7 +45,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     private inline fun <reified F : Flow> flowOption(title: Int): AppletOption {
-        return presetFlowOption<F>(-1, title)
+        return flowOptionWithId<F>(-1, title)
     }
 
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
@@ -63,17 +63,17 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
      * Applet flow is a container flow whose child has the same target.
      */
     val criterionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(applicationFlow, uiObjectFlow, timeFlow, notificationFlow, globalInfoFlow)
+        arrayOf(appCriteria, uiObjectCriteria, timeCriteria, notificationCriteria, globalCriteria)
     }
 
     val actionFlowOptions: Array<AppletOption> by lazy {
         arrayOf(
-            globalActionFlow,
-            uiObjectActionFlow,
-            gestureActionFlow,
-            textActionFlow,
-            appActionFlow,
-            controlActionFlow
+            globalActions,
+            uiObjectActions,
+            gestureActions,
+            textActions,
+            appActions,
+            controlActions
         )
     }
 
@@ -98,56 +98,57 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0005)
     val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
 
+    @AppletOrdinal(0x0006)
+    val preloadFlow = flowOption<PreloadFlow>(R.string.global)
+        .withResult<ComponentInfoWrapper>(R.string.current_top_app)
+
     @AppletOrdinal(0x000F)
-    val eventFlow = presetFlowOption<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
+    val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
     @AppletOrdinal(0x0010)
-    val applicationFlow =
-        presetFlowOption<PhantomFlow>(ID_APP_OPTION_REGISTRY, R.string.current_top_app)
-            .withResult<String>(R.string.current_top_app, VariantType.TEXT_PACKAGE_NAME)
-            .withResult<String>(R.string.activity, VariantType.TEXT_ACTIVITY)
+    val appCriteria = flowOptionWithId<PhantomFlow>(ID_APP_OPTION_REGISTRY, R.string.app_info)
 
     @AppletOrdinal(0x0011)
-    val uiObjectFlow =
-        presetFlowOption<UiObjectFlow>(ID_UI_OBJECT_OPTION_REGISTRY, R.string.ui_object_exists)
+    val uiObjectCriteria =
+        flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_OPTION_REGISTRY, R.string.ui_object_exists)
             .withResult<AccessibilityNodeInfo>(R.string.ui_object)
             .withResult<String>(R.string.matched_ui_object_text)
             .withResult<Int>(R.string.center_coordinate, VariantType.INT_COORDINATE)
 
     @AppletOrdinal(0x0012)
-    val timeFlow = presetFlowOption<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
+    val timeCriteria = flowOptionWithId<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
 
     @AppletOrdinal(0x0013)
-    val globalInfoFlow =
-        presetFlowOption<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
+    val globalCriteria =
+        flowOptionWithId<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
 
     @AppletOrdinal(0x0014)
-    val notificationFlow = presetFlowOption<NotificationFlow>(
+    val notificationCriteria = flowOptionWithId<NotificationFlow>(
         ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification
     )
 
     @AppletOrdinal(0x0020)
-    val globalActionFlow =
-        presetFlowOption<PhantomFlow>(ID_GLOBAL_ACTION_REGISTRY, R.string.global_actions)
+    val globalActions =
+        flowOptionWithId<PhantomFlow>(ID_GLOBAL_ACTION_REGISTRY, R.string.global_actions)
 
     @AppletOrdinal(0x0021)
-    val uiObjectActionFlow =
-        presetFlowOption<PhantomFlow>(ID_UI_OBJECT_ACTION_REGISTRY, R.string.ui_object_operations)
+    val uiObjectActions =
+        flowOptionWithId<PhantomFlow>(ID_UI_OBJECT_ACTION_REGISTRY, R.string.ui_object_operations)
 
     @AppletOrdinal(0x0022)
-    val gestureActionFlow =
-        presetFlowOption<PhantomFlow>(ID_GESTURE_ACTION_REGISTRY, R.string.gesture_operations)
+    val gestureActions =
+        flowOptionWithId<PhantomFlow>(ID_GESTURE_ACTION_REGISTRY, R.string.gesture_operations)
 
     @AppletOrdinal(0x0023)
-    val textActionFlow =
-        presetFlowOption<PhantomFlow>(ID_TEXT_ACTION_REGISTRY, R.string.text_operations)
+    val textActions =
+        flowOptionWithId<PhantomFlow>(ID_TEXT_ACTION_REGISTRY, R.string.text_operations)
 
     @AppletOrdinal(0x0024)
-    val appActionFlow =
-        presetFlowOption<PhantomFlow>(ID_APP_ACTION_REGISTRY, R.string.app_operations)
+    val appActions =
+        flowOptionWithId<PhantomFlow>(ID_APP_ACTION_REGISTRY, R.string.app_operations)
 
     @AppletOrdinal(0x0025)
-    val controlActionFlow =
-        presetFlowOption<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
+    val controlActions =
+        flowOptionWithId<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
 
 }

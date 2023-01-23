@@ -47,16 +47,15 @@ abstract class ContextUiAutomatorBridge(uiAutomation: UiAutomation) :
     final override fun getLauncherPackageName(): String? {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
         val pm: PackageManager = ctx.packageManager
-        val resolveInfo =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.resolveActivity(
-                    intent,
-                    PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-            }
+        val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.resolveActivity(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        }
         return resolveInfo?.activityInfo?.packageName
     }
 

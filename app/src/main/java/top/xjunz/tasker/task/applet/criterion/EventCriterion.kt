@@ -26,13 +26,13 @@ class EventCriterion(eventType: Int) : Applet() {
             it.type == value
         }
         return if (hit == null) {
-            AppletResult.failure(value, runtime.events)
+            AppletResult.failed(value, runtime.events)
         } else {
             val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)
             if (hit.type == Event.EVENT_ON_NOTIFICATION_RECEIVED) {
-                AppletResult.successWithReturn(hit.componentInfo.paneTitle, wrapper)
+                AppletResult.succeeded(hit.componentInfo.paneTitle, wrapper)
             } else {
-                AppletResult.successWithReturn(wrapper)
+                AppletResult.succeeded(wrapper, wrapper.packageName)
             }
         }
     }

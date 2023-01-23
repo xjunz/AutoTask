@@ -23,7 +23,7 @@ class Processor<V, R>(
         runtime: TaskRuntime
     ): AppletResult {
         val ret = processor(args, value, runtime)
-        return if (ret != null) AppletResult.successWithReturn(ret) else AppletResult.FAILURE
+        return if (ret != null) AppletResult.succeeded(ret) else AppletResult.FAILURE
     }
 
 }

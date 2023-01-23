@@ -18,20 +18,25 @@ import top.xjunz.tasker.task.applet.value.VariantType
 class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun eventFilterOption(@Event.EventType event: Int, label: Int) =
-        appletOption(label) { EventCriterion(event) }.hasInnateValue()
+        appletOption(label) {
+            EventCriterion(event)
+        }.hasInnateValue()
 
     @AppletOrdinal(0)
     val pkgEntered = eventFilterOption(Event.EVENT_ON_PACKAGE_ENTERED, R.string.on_package_entered)
-        .withResult<ComponentInfoWrapper>(R.string.app_entered, VariantType.TEXT_PACKAGE_NAME)
+        .withResult<ComponentInfoWrapper>(R.string.app_entered)
+        .withResult<String>(R.string.app_entered, VariantType.TEXT_PACKAGE_NAME)
 
     @AppletOrdinal(1)
     val pkgExited = eventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_left)
         .withResult<ComponentInfoWrapper>(R.string.app_left)
+        .withResult<String>(R.string.app_entered, VariantType.TEXT_PACKAGE_NAME)
 
     @AppletOrdinal(2)
     val contentChanged =
         eventFilterOption(Event.EVENT_ON_CONTENT_CHANGED, R.string.on_content_changed)
             .withResult<ComponentInfoWrapper>(R.string.current_app)
+            .withResult<String>(R.string.current_app, VariantType.TEXT_PACKAGE_NAME)
 
     @AppletOrdinal(3)
     val notificationReceived =

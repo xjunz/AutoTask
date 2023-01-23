@@ -15,7 +15,7 @@ class When : ControlFlow() {
 
     override val minSize: Int = 1
 
-    override val requiredIndex: Int = 0
+    override val requiredIndex: Int = 1
 
     override fun onPostApply(runtime: TaskRuntime) {
         super.onPostApply(runtime)

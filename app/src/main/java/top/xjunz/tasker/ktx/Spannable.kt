@@ -79,7 +79,8 @@ fun CharSequence.quoted(strokeColor: Int = ColorScheme.colorPrimaryContainer) =
 
 fun CharSequence.strikeThrough() = setSpan(StrikethroughSpan())
 
-fun CharSequence.backColored() = setSpan(BackgroundColorSpan(ColorScheme.colorPrimaryContainer))
+fun CharSequence.backColored(color: Int = ColorScheme.colorPrimaryContainer) =
+    setSpan(BackgroundColorSpan(color))
 
 fun CharSequence.bulleted() = setSpan(BulletSpan(8, ColorScheme.colorPrimary))
 

@@ -62,10 +62,12 @@ class ActivitySelectorFragment : BaseComponentFragment() {
             with(Dispatchers.IO) {
                 PackageManagerBridge.loadPackageInfo(
                     info.packageName, PackageManager.GET_ACTIVITIES
-                )!!.activities.mapTo(activities) {
+                )?.activities?.filter {
+                    it.exported
+                }?.mapTo(activities) { activityInfo ->
                     ensureActive()
-                    ActivityInfoWrapper(it, info.entranceName)
-                }.sort()
+                    ActivityInfoWrapper(activityInfo, info.entranceName)
+                }?.sort()
             }
             if (binding.rvList.adapter == null) {
                 adapter = ActivityInfoAdapter(viewModel, activities, parentFragment)

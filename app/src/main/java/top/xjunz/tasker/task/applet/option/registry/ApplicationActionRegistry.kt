@@ -12,6 +12,7 @@ import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.unaryArgAction
 import top.xjunz.tasker.privileged.ActivityManagerUtil
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
@@ -26,11 +27,8 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             ActivityManagerUtil.forceStopPackage(it)
             true
         }
-    }.withArgument<String>(R.string.specified_app, VariantType.TEXT_PACKAGE_NAME)
-        .hasCompositeTitle()
-        .withValueDescriber<String> {
-            PackageManagerBridge.loadPackageInfo(it)?.wrapped()?.label ?: it
-        }.shizukuOnly()
+    }.withRefArgument<ComponentInfoWrapper>(R.string.specified_app)
+        .hasCompositeTitle().shizukuOnly()
 
     @AppletOrdinal(0x0002)
     val launchApp = appletOption(R.string.format_launch) {
@@ -49,7 +47,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
 
     @AppletOrdinal(0x0003)
-    val launchActivity = appletOption(R.string.format_launch) {
+    val launchActivity = appletOption(R.string.launch_activity) {
         unaryArgAction<String> {
             ContextBridge.getContext().startActivity(
                 Intent().setComponent(ComponentName.unflattenFromString(it))
@@ -57,7 +55,11 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             )
             true
         }
-    }.withArgument<String>(R.string.specified_activity, VariantType.TEXT_PACKAGE_NAME)
-        .hasCompositeTitle()
+    }.withValueArgument<String>(R.string.activity, VariantType.TEXT_ACTIVITY)
+        .withValueDescriber<String> {
+            val comp = ComponentName.unflattenFromString(it)!!
+            (PackageManagerBridge.loadPackageInfo(comp.packageName)?.wrapped()?.label?.toString()
+                ?: comp.packageName) + "/" + it.substringAfterLast('/')
+        }
 
 }

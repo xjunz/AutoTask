@@ -269,9 +269,9 @@
     <string name="notification_content">通知内容</string>
     <string name="regex">正则表达式</string>
     <string name="format_select">请选择%s</string>
-    <string name="set_refid">设置标识</string>
-    <string name="edit_refid">编辑标识</string>
-    <string name="prompt_set_refid">为所选引用设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
+    <string name="set_referent">设置标识</string>
+    <string name="edit_referent">编辑标识</string>
+    <string name="prompt_set_referent">为所选引用设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
     <string name="error_tag_exists">该标识已经存在，请重新编辑。</string>
     <string name="no_candidate_reference">没有可选的引用</string>
     <string name="which_to_refer">引用哪个？</string>
@@ -343,7 +343,7 @@
     <string name="millisecond">毫秒</string>
     <string name="second">秒</string>
     <string name="minute">分钟</string>
-    <string name="prompt_fix_static_error">操作失败，请先消除错误。</string>
+    <string name="prompt_fix_static_error">操作失败，请先修正错误。</string>
     <string name="edit_task_metadata">编辑任务信息</string>
     <string name="start_service">启动服务</string>
     <string name="stop_service">停止服务</string>
@@ -393,4 +393,7 @@
     <string name="suffix">结束文本</string>
     <string name="containment">包含的文本</string>
     <string name="pane_title">页面标题</string>
+    <string name="app">应用程序</string>
+    <string name="global">全局</string>
+    <string name="app_info">应用信息</string>
 </resources>

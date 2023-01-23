@@ -12,7 +12,7 @@
     <string name="on_failure">否则</string>
 
     <string name="current_app">所处的应用</string>
-    <string name="current_top_app">应用信息</string>
+    <string name="current_top_app">当前应用</string>
     <string name="current_notification">当前通知</string>
     <string name="ui_object_exists">存在控件</string>
     <string name="current_time">当前时间</string>
@@ -98,7 +98,7 @@
     <string name="in_battery_capacity_range">电池电量在指定范围内</string>
     <string name="not_in_battery_capacity_range">电池电量不在指定范围内</string>
 
-    <string name="format_pkg_collection_desc">%s等共%d个应用程序</string>
+    <string name="format_pkg_collection_desc">%s等共%d个应用程序之一</string>
     <string name="format_act_collection_desc">已指定%d个页面</string>
     <string name="format_clear_selected_pkg">清空共%d个应用程序</string>
     <string name="format_clear_selected_act">清空共%d个页面</string>
@@ -121,8 +121,8 @@
 
     <string name="notification_contains">通知内容包含</string>
     <string name="not_notification_contains">通知内容不包含</string>
-    <string name="in_notification_pkg_names">发送通知的应用为</string>
-    <string name="not_in_notification_pkg_names">发送通知的应用不为</string>
+    <string name="in_notification_pkg_names">发送通知的应用是</string>
+    <string name="not_in_notification_pkg_names">发送通知的应用不是</string>
     <string name="notification_matches">通知内容满足正则表达式</string>
     <string name="not_notification_matches">通知内容不满足正则表达式</string>
     <string name="on_notification_received">收到通知时</string>

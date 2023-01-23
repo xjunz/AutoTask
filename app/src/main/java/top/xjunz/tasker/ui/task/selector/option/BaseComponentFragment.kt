@@ -40,7 +40,7 @@ abstract class BaseComponentFragment : BaseFragment<FragmentComponentSelectorBin
         binding.rvList.id = View.generateViewId()
         observe(viewModel.currentItem) {
             if (it == index) {
-                parentFragment.appBar.liftOnScrollTargetViewId = binding.rvList.id
+                parentFragment.appBar.setLiftOnScrollTargetView(binding.rvList)
                 parentFragment.appBar.isLifted =
                     (binding.rvList.canScrollVertically(-1) || binding.rvList.scrollY > 0)
             }

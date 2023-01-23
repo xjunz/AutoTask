@@ -7,17 +7,17 @@ package top.xjunz.tasker.engine.applet.base
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
- * Scoped flow initializes its target at [Flow.onPrepare]. The target will be used by all of its
+ * A [ScopeFlow] initializes its target at [Flow.onPrepare]. The target will be used by all of its
  * elements.
  *
  * @author xjunz 2022/12/04
  */
-abstract class ScopedFlow<Target : Any> : Flow() {
+abstract class ScopeFlow<Target : Any> : Flow() {
 
     override val registerResultsForChildren: Boolean = false
 
     /**
-     * The key used to registry target to runtime, equivalent to [id] by default, which means
+     * The key used to register target to runtime, equivalent to [id] by default, which means
      * all flows with the same id will share an identical target at runtime.
      */
     protected open fun generateTargetKey(): Long {

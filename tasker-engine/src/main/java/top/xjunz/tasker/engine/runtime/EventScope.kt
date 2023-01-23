@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.runtime
 
+import android.util.ArrayMap
 import top.xjunz.tasker.engine.applet.base.Applet
 
 /**
@@ -11,9 +12,9 @@ import top.xjunz.tasker.engine.applet.base.Applet
  */
 class EventScope {
 
-    val registry = mutableMapOf<Long, Any>()
+    val registry = ArrayMap<Long, Any>()
 
-    val failures = mutableMapOf<Applet, Pair<Any?, Any?>>()
+    val failures = ArrayMap<Applet, Pair<Any?, Any?>>()
 
     fun clear() {
         registry.clear()

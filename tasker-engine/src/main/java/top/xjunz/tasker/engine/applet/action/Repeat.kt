@@ -29,7 +29,7 @@ class Repeat : Flow() {
 
     override fun onPreApply(runtime: TaskRuntime) {
         super.onPreApply(runtime)
-        runtime.registerReferents(this, this)
+        runtime.registerAllReferents(this, this)
     }
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {

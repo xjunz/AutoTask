@@ -14,7 +14,6 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
-import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.Router.launchAction
 import java.util.*
 
@@ -26,7 +25,7 @@ import java.util.*
  */
 class AppletOption(
     val registryId: Int,
-    private val titleRes: Int,
+    private val titleResource: Int,
     private val invertedTitleRes: Int,
     private inline val rawCreateApplet: () -> Applet
 ) : Comparable<AppletOption> {
@@ -83,11 +82,14 @@ class AppletOption(
             }.bold().underlined() + origin
         }
 
-        private fun makeReferenceText(applet: Applet, refid: CharSequence?): CharSequence? {
-            if (refid == null) return null
-            return refid.clickable {
-                app.launchAction(ACTION_NAVIGATE_REFERENCE, "$refid" + Char(0) + applet.hashCode())
-            }.bold().foreColored(ColorScheme.colorTertiary).underlined()
+        private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
+            if (name == null) return null
+            return name.clickable {
+                app.launchAction(
+                    ACTION_NAVIGATE_REFERENCE,
+                    "$name" + Char(0) + applet.hashCode()
+                )
+            }.foreColored().backColored().underlined()
         }
 
     }
@@ -152,7 +154,7 @@ class AppletOption(
     var descAsTitle: Boolean = false
         private set
 
-    var isTitleComplex: Boolean = false
+    var isTitleComposite: Boolean = false
         private set
 
     var isShizukuOnly = false
@@ -166,7 +168,7 @@ class AppletOption(
     var results: List<ValueDescriptor> = emptyList()
 
     val rawTitle: CharSequence?
-        get() = if (titleRes == TITLE_NONE) null else titleRes.text
+        get() = if (titleResource == TITLE_NONE) null else titleResource.text
 
     // TODO
     var valueChecker: ((Any?) -> String?)? = null
@@ -187,7 +189,7 @@ class AppletOption(
         @SuppressLint("DiscouragedApi")
         when (invertedTitleRes) {
             TITLE_AUTO_INVERTED -> {
-                val invertedResName = "not_" + app.resources.getResourceEntryName(titleRes)
+                val invertedResName = "not_" + app.resources.getResourceEntryName(titleResource)
                 val id = app.resources.getIdentifier(invertedResName, "string", app.packageName)
                 check(id != 0) { "Resource id 'R.string.$invertedResName' not found!" }
                 id
@@ -200,7 +202,7 @@ class AppletOption(
     private val invertedTitle: CharSequence?
         get() = if (invertedTitleResource == TITLE_NONE) null else invertedTitleResource.text
 
-    val currentTitle get() = loadTitle(null, isInverted)
+    val dummyTitle get() = loadTitle(null, isInverted)
 
     fun findResults(descriptor: ValueDescriptor): List<ValueDescriptor> {
         return results.filter {
@@ -209,8 +211,8 @@ class AppletOption(
     }
 
     private fun loadTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
-        if (isTitleComplex) {
-            return getComplexTitle(applet)
+        if (isTitleComposite) {
+            return composeTitle(applet)
         }
         return if (isInverted) invertedTitle else rawTitle
     }
@@ -287,13 +289,14 @@ class AppletOption(
         return this
     }
 
-    private fun getComplexTitle(applet: Applet?): CharSequence {
+    private fun composeTitle(applet: Applet?): CharSequence {
         if (applet == null) {
-            return titleRes.format(*Array(arguments.size) {
+            return titleResource.format(*Array(arguments.size) {
                 arguments[it].substitution
             })
         }
-        val split = titleRes.str.split("%s")
+        val res = if (applet.isInverted) invertedTitleResource else titleResource
+        val split = res.str.split("%s")
         var title: CharSequence = split[0]
         for (i in 1..split.lastIndex) {
             val s = split[i]
@@ -321,7 +324,7 @@ class AppletOption(
     }
 
     fun hasCompositeTitle(): AppletOption {
-        isTitleComplex = true
+        isTitleComposite = true
         return this
     }
 

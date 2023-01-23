@@ -5,14 +5,14 @@
 package top.xjunz.tasker.task.applet.flow
 
 import top.xjunz.tasker.engine.applet.base.AppletResult
-import top.xjunz.tasker.engine.applet.base.ScopedFlow
+import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/11/16
  */
-class NotificationFlow : ScopedFlow<NotificationFlow.NotificationTarget>() {
+class NotificationFlow : ScopeFlow<NotificationFlow.NotificationTarget>() {
 
     data class NotificationTarget(val packageName: String, val content: CharSequence?)
 

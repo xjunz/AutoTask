@@ -42,9 +42,9 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
         var defText: CharSequence? = null
 
-        var dropDownNames: Array<CharSequence>? = null
+        var dropDownNames: Array<out CharSequence>? = null
 
-        var dropDownValues: Array<CharSequence>? = null
+        var dropDownValues: Array<out CharSequence>? = null
 
         /**
          * Return the error message, null if there is no error
@@ -69,8 +69,8 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
     }
 
     fun setDropDownData(
-        names: Array<CharSequence>,
-        values: Array<CharSequence>? = null
+        names: Array<out CharSequence>,
+        values: Array<out CharSequence>? = null
     ) = doWhenCreated {
         viewModel.dropDownNames = names
         viewModel.dropDownValues = values
@@ -84,46 +84,53 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.allowEmptyInput = true
     }
 
+    private lateinit var inputBox: EditText
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        showSoftInput(binding.etInput)
         binding.apply {
             tvTitle.text = viewModel.title
             tvCaption.isVisible = !viewModel.caption.isNullOrEmpty()
             tvCaption.text = viewModel.caption
-            viewModel.editTextConfig?.invoke(etInput)
-            btnPositive.setAntiMoneyClickListener {
-                if (!viewModel.allowEmptyInput && binding.etInput.text.isEmpty()) {
-                    toastAndShake(R.string.error_empty_input)
-                    return@setAntiMoneyClickListener
-                }
-                val error = viewModel.onConfirmed(binding.etInput.textString)
-                if (error == null) {
-                    dismiss()
-                } else {
-                    toastAndShake(error)
-                }
-            }
             if (viewModel.dropDownNames != null) {
-                etInput.setAdapter(
+                inputBox = etMenu
+                etMenu.setAdapter(
                     DropdownArrayAdapter(
                         requireContext(),
                         viewModel.dropDownNames!!.toMutableList()
                     )
                 )
-                etInput.setOnItemClickListener { _, _, position, _ ->
-                    etInput.setText(
+                etMenu.setOnItemClickListener { _, _, position, _ ->
+                    inputBox.setText(
                         if (viewModel.dropDownValues != null) {
                             viewModel.dropDownValues?.get(position)
                         } else {
                             viewModel.dropDownNames!![position]
                         }
                     )
-                    etInput.setSelectionToEnd()
+                    inputBox.setSelectionToEnd()
+                }
+                etMenu.threshold = Int.MAX_VALUE
+            } else {
+                inputBox = etInput
+                tilMenu.isVisible =false
+                tilInput.isVisible = true
+            }
+            viewModel.editTextConfig?.invoke(inputBox)
+            btnPositive.setAntiMoneyClickListener {
+                if (!viewModel.allowEmptyInput && inputBox.text.isEmpty()) {
+                    toastAndShake(R.string.error_empty_input)
+                    return@setAntiMoneyClickListener
+                }
+                val error = viewModel.onConfirmed(inputBox.textString)
+                if (error == null) {
+                    dismiss()
+                } else {
+                    toastAndShake(error)
                 }
             }
             if (!viewModel.defText.isNullOrEmpty()) {
-                etInput.doAfterTextChanged {
+                inputBox.doAfterTextChanged {
                     if (it?.toString() != viewModel.defText) {
                         btnNegative.setText(R.string.reset)
                     } else {
@@ -132,18 +139,18 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                 }
             }
             if (savedInstanceState == null)
-                etInput.setText(viewModel.defText)
+                inputBox.setText(viewModel.defText)
 
-            etInput.setSelectionToEnd()
-
+            inputBox.setSelectionToEnd()
+            showSoftInput(inputBox)
             btnNegative.setOnClickListener {
                 if (viewModel.defText.isNullOrEmpty()) {
                     dismiss()
-                } else if (etInput.textString == viewModel.defText) {
+                } else if (inputBox.textString == viewModel.defText) {
                     dismiss()
                 } else {
-                    etInput.setText(viewModel.defText)
-                    etInput.setSelectionToEnd()
+                    inputBox.setText(viewModel.defText)
+                    inputBox.setSelectionToEnd()
                 }
             }
             ibDismiss.setOnClickListener {
@@ -153,7 +160,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         dialog?.setOnKeyListener l@{ _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER
                 && event.action == KeyEvent.ACTION_UP
-                && binding.etInput.maxLines == 1
+                && inputBox.maxLines == 1
             ) {
                 binding.btnPositive.performClick()
                 return@l true
@@ -161,8 +168,8 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             return@l false
         }
         peekMainViewModel().doOnAction(this, ACTION_INPUT) {
-            binding.etInput.setText(it)
-            binding.etInput.setSelection(it.length)
+            inputBox.setText(it)
+            inputBox.setSelection(it.length)
         }
     }
 

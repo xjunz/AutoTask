@@ -60,7 +60,7 @@
         <item name="android:backgroundDimAmount">0.32</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowMinWidthMinor">85%</item>
-        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowMinWidthMajor">45%</item>
         <item name="android:windowElevation">6dp</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>

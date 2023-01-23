@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.applet
 
+import android.util.ArrayMap
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
@@ -81,9 +82,9 @@ fun Flow.forEachApplet(block: (Applet) -> Boolean) {
     }
 }
 
-inline fun Flow.forEachRefid(crossinline block: (Applet, which: Int, refid: String) -> Boolean) {
+inline fun Flow.forEachReferent(crossinline block: (Applet, which: Int, referent: String) -> Boolean) {
     forEachApplet {
-        it.refids.forEach { (t, u) ->
+        it.referents.forEach { (t, u) ->
             if (block(it, t, u)) return@forEachApplet true
         }
         return@forEachApplet false
@@ -151,17 +152,17 @@ fun Applet.isAheadOf(another: Applet): Boolean {
     return h1 < h2
 }
 
-fun Applet.whichRefid(refid: String): Int {
-    return refids.keys.firstOrNull { refids[it] == refid } ?: -1
+fun Applet.whichReferent(referent: String): Int {
+    return referents.keys.firstOrNull { referents[it] == referent } ?: -1
 }
 
-fun Applet.whichReference(refid: String): Int {
+fun Applet.whichReference(referent: String): Int {
     return references.keys.firstOrNull {
-        references[it] == refid
+        references[it] == referent
     } ?: -1
 }
 
-inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, refid: String) -> Boolean) {
+inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, referent: String) -> Boolean) {
     forEachApplet {
         it.references.forEach { (t, u) ->
             if (block(it, t, u)) return@forEachApplet true
@@ -220,10 +221,10 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     cloned.isInverted = isInverted
     cloned.isInvertible = isInvertible
     cloned.comment = comment
-    cloned.refids = mutableMapOf<Int, String>().apply {
-        putAll(refids)
+    cloned.referents = ArrayMap<Int, String>().apply {
+        putAll(referents)
     }
-    cloned.references = mutableMapOf<Int, String>().apply {
+    cloned.references = ArrayMap<Int, String>().apply {
         putAll(references)
     }
     if (cloneHierarchyInfo) {

@@ -76,7 +76,6 @@
                     android:marqueeRepeatLimit="marquee_forever"
                     android:maxLines="1"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
-                    android:textColor="?colorPrimary"
                     app:layout_constraintBottom_toBottomOf="@+id/ib_dismiss"
                     app:layout_constraintEnd_toStartOf="@+id/ib_split"
                     app:layout_constraintStart_toStartOf="parent"
@@ -90,6 +89,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
                     android:layout_marginTop="8dp"
+                    android:visibility="gone"
                     app:contentPaddingBottom="12dp"
                     app:contentPaddingLeft="12dp"
                     app:contentPaddingRight="12dp"
@@ -247,17 +247,41 @@
             tools:itemCount="10"
             tools:listitem="@layout/item_flow_item" />
 
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/fab_action"
-            style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:alpha=".82"
-            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-            tools:icon="@drawable/ic_baseline_add_24"
-            tools:layout_marginBottom="16dp"
-            tools:text="@string/add_rules" />
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_action1"
+                style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:strokeColor="?colorTertiary"
+                android:textColor="?colorOnTertiaryContainer"
+                app:backgroundTint="?colorTertiaryContainer"
+                app:elevation="4dp"
+                android:stateListAnimator="@null"
+                app:icon="@drawable/ic_baseline_add_link_24"
+                app:iconTint="?colorOnTertiaryContainer" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_action2"
+                style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清除标识"
+                app:strokeColor="?colorTertiary"
+                android:textColor="?colorOnTertiaryContainer"
+                app:backgroundTint="?colorTertiaryContainer"
+                app:icon="@drawable/ic_delete_forever_24px"
+                app:iconTint="?colorOnTertiaryContainer" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

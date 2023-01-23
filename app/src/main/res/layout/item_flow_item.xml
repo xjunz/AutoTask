@@ -69,7 +69,7 @@
             android:layout_marginTop="4dp"
             android:textStyle="bold"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toTopOf="@+id/container_refids"
+            app:layout_constraintBottom_toTopOf="@+id/container_referents"
             app:layout_constraintStart_toEndOf="@+id/bullet"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_goneMarginBottom="4dp"
@@ -89,7 +89,7 @@
             app:layout_constraintBottom_toTopOf="@+id/tv_comment"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/container_refids"
+            app:layout_constraintTop_toBottomOf="@+id/container_referents"
             app:layout_goneMarginBottom="4dp"
             tools:text="@tools:sample/lorem" />
 
@@ -125,7 +125,7 @@
             tools:src="@drawable/ic_baseline_switch_24" />
 
         <HorizontalScrollView
-            android:id="@+id/container_refids"
+            android:id="@+id/container_referents"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -147,7 +147,7 @@
                 app:singleLine="true">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_refid_1"
+                    android:id="@+id/chip_referent_1"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
                     tools:text="@tools:sample/lorem" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_refid_2"
+                    android:id="@+id/chip_referent_2"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -167,7 +167,7 @@
                     tools:text="包名" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_refid_3"
+                    android:id="@+id/chip_referent_3"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

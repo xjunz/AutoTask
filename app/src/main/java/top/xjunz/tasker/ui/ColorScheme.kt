@@ -55,6 +55,10 @@ object ColorScheme {
         get() = com.google.android.material.R.attr.colorSurface.attrColor
 
     @get:ColorInt
+    val colorSurfaceVariant: Int
+        get() = com.google.android.material.R.attr.colorSurfaceVariant.attrColor
+
+    @get:ColorInt
     val colorPrimaryContainer
         get() = com.google.android.material.R.attr.colorPrimaryContainer.attrColor
 }

@@ -138,40 +138,40 @@ class FlowItemViewBinder(
             if (applet.valueType == Applet.VAL_TYPE_TEXT) {
                 desc = desc?.italic()
             }
-            if (viewModel.isSelectingRef) {
+            if (viewModel.isSelectingReferent) {
                 title = title?.toString()
                 if (!tvDesc.isEnabled) {
                     desc = desc?.toString()
                 }
-                val ahead = viewModel.refSelectingApplet.parent == null
-                        || applet.isAheadOf(viewModel.refSelectingApplet)
+                val ahead = viewModel.referentAnchor.parent == null
+                        || applet.isAheadOf(viewModel.referentAnchor)
                 // When selecting ref, only enable valid targets
                 val refs =
-                    if (!ahead) emptyList() else option.findResults(viewModel.refValueDescriptor)
+                    if (!ahead) emptyList() else option.findResults(viewModel.referentDescriptor)
                 if (applet.isContainer && depth == 3) {
                     root.isEnabled = ahead && viewModel.hasCandidateReference(applet as Flow)
                 } else {
                     root.isEnabled = refs.isNotEmpty()
-                    containerRefids.isVisible = refs.isNotEmpty()
+                    containerReferents.isVisible = refs.isNotEmpty()
                 }
                 tvTitle.isEnabled = root.isEnabled
                 if (refs.isNotEmpty()) {
-                    chipRefid1.isVisible = false
-                    chipRefid2.isVisible = false
-                    chipRefid3.isVisible = false
+                    chipReferent1.isVisible = false
+                    chipReferent2.isVisible = false
+                    chipReferent3.isVisible = false
                     refs.forEachIndexed { index, ref ->
                         val which = option.results.indexOf(ref)
-                        val refid = applet.refids[which]
-                        showReference(applet, index, which, ref.name, refid)
+                        val referent = applet.referents[which]
+                        showReference(applet, index, which, ref.name, referent)
                     }
                 }
             } else {
-                containerRefids.isVisible = false
+                containerReferents.isVisible = false
             }
 
             if (!applet.isEnabledInHierarchy) title = title?.strikeThrough()
 
-            ibAction.isGone = ibAction.tag == null || (viewModel.isSelectingRef
+            ibAction.isGone = ibAction.tag == null || (viewModel.isSelectingReferent
                     && ibAction.tag != ACTION_COLLAPSE
                     && ibAction.tag != ACTION_ENTER)
             tvTitle.text = title
@@ -195,31 +195,31 @@ class FlowItemViewBinder(
 
     private fun ItemFlowItemBinding.getReferenceChip(index: Int): Chip {
         return when (index) {
-            0 -> chipRefid1
-            1 -> chipRefid2
-            2 -> chipRefid3
+            0 -> chipReferent1
+            1 -> chipReferent2
+            2 -> chipReferent3
             else -> illegalArgument("chip index", index)
         }
     }
 
     private fun toggleSelectReference(applet: Applet, index: Int) {
-        if (globalViewModel.isRefSelected(applet, index)) {
-            globalViewModel.removeRefSelection(applet, index)
-            if (globalViewModel.selectedRefs.isEmpty())
+        if (globalViewModel.isReferentSelected(applet, index)) {
+            globalViewModel.unselectReferent(applet, index)
+            if (globalViewModel.selectedReferents.isEmpty())
                 viewModel.isFabVisible.value = false
         } else {
             // Remove existed reference to this applet, because multiple refs to one applet
             // is not allowed!
-            if (globalViewModel.isRefSelected(applet)) {
-                globalViewModel.removeRefSelection(applet)
+            if (globalViewModel.isReferentSelected(applet)) {
+                globalViewModel.unselectReferent(applet)
             }
-            val refid = applet.refids[index]
-            if (refid == null) {
-                globalViewModel.addRefSelection(applet, index)
+            val referent = applet.referents[index]
+            if (referent == null) {
+                globalViewModel.selectReferent(applet, index)
             } else {
-                globalViewModel.addRefSelectionWithRefid(viewModel.refSelectingApplet, refid)
+                globalViewModel.selectReferentsWithName(viewModel.referentAnchor, referent)
             }
-            if (globalViewModel.selectedRefs.isNotEmpty())
+            if (globalViewModel.selectedReferents.isNotEmpty())
                 viewModel.isFabVisible.value = true
         }
     }
@@ -229,18 +229,18 @@ class FlowItemViewBinder(
         index: Int,
         which: Int,
         refName: CharSequence,
-        refid: String?
+        referent: String?
     ) {
         val chip = getReferenceChip(index)
         chip.isVisible = true
-        chip.isChecked = globalViewModel.isRefSelected(applet, which)
+        chip.isChecked = globalViewModel.isReferentSelected(applet, which)
         chip.setAntiMoneyClickListener {
             toggleSelectReference(applet, which)
         }
-        chip.text = if (refid == null) {
+        chip.text = if (referent == null) {
             refName
         } else {
-            refName + " [$refid]".foreColored()
+            refName + " [$referent]".foreColored()
         }
     }
 }
