@@ -6,8 +6,8 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
-import top.xjunz.tasker.engine.applet.action.unaryArgAction
-import top.xjunz.tasker.engine.applet.action.unaryArgProcessor
+import top.xjunz.tasker.engine.applet.action.Processor.Companion.unaryArgProcessor
+import top.xjunz.tasker.engine.applet.action.unaryArgValueAction
 import top.xjunz.tasker.ktx.firstGroupValue
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 
@@ -29,10 +29,10 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0002)
     val copyText = appletOption(R.string.format_copy_text) {
-        unaryArgAction<String> { text ->
+        unaryArgValueAction<String> { text ->
             ClipboardManagerBridge.copyToClipboard(text)
             true
         }
-    }.withArgument<String>(R.string.text)
+    }.withUnaryArgument<String>(R.string.text)
         .hasCompositeTitle()
 }

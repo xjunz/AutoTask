@@ -5,7 +5,10 @@
 package top.xjunz.tasker.ui
 
 import android.content.res.ColorStateList
+import android.util.SparseArray
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.ktx.attrColor
 import top.xjunz.tasker.ktx.attrColorStateList
 
@@ -14,51 +17,65 @@ import top.xjunz.tasker.ktx.attrColorStateList
  */
 object ColorScheme {
 
+    private val colors = SparseArray<Any>()
+
+    fun release() {
+        colors.clear()
+    }
+
+    private inline fun <V> getOrPut(key: Int, block: () -> V): V {
+        var cache = colors[key]
+        if (cache == null) {
+            cache = block()
+            colors.put(key, cache)
+        }
+        return cache.casted()
+    }
+
+    private fun getAttrColor(@AttrRes attr: Int): Int {
+        return getOrPut(attr) {
+            attr.attrColor
+        }
+    }
+
+    private fun getAttrColorStateList(@AttrRes attr: Int): ColorStateList {
+        return getOrPut(attr) {
+            attr.attrColorStateList
+        }
+    }
+
     @get:ColorInt
     val colorError: Int
-        get() = com.google.android.material.R.attr.colorError.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorError)
 
     @get:ColorInt
     val textColorDisabled: Int
-        get() = android.R.attr.textColorTertiary.attrColorStateList.getColorForState(
-            intArrayOf(-android.R.attr.state_enabled), -1
-        )
-
-    @get:ColorInt
-    val textColorLink: Int
-        get() = android.R.attr.textColorLink.attrColor
-
-    val textColorTertiary: ColorStateList
-        get() = android.R.attr.textColorTertiary.attrColorStateList
+        get() = getOrPut("textColorDisabled".hashCode()) {
+            android.R.attr.textColorTertiary.attrColorStateList.getColorForState(
+                intArrayOf(-android.R.attr.state_enabled), -1
+            )
+        }
 
     val textColorPrimary: ColorStateList
-        get() = android.R.attr.textColorPrimary.attrColorStateList
-
-    @get:ColorInt
-    val colorTertiary: Int
-        get() = com.google.android.material.R.attr.colorTertiary.attrColor
+        get() = getAttrColorStateList(android.R.attr.textColorPrimary)
 
     @get:ColorInt
     val colorTertiaryContainer: Int
-        get() = com.google.android.material.R.attr.colorTertiaryContainer.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorTertiaryContainer)
 
     @get:ColorInt
     val colorPrimary: Int
-        get() = com.google.android.material.R.attr.colorPrimary.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorPrimary)
 
     @get:ColorInt
     val colorOnSurface: Int
-        get() = com.google.android.material.R.attr.colorOnSurface.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorOnSurface)
 
     @get:ColorInt
     val colorSurface: Int
-        get() = com.google.android.material.R.attr.colorSurface.attrColor
-
-    @get:ColorInt
-    val colorSurfaceVariant: Int
-        get() = com.google.android.material.R.attr.colorSurfaceVariant.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorSurface)
 
     @get:ColorInt
     val colorPrimaryContainer
-        get() = com.google.android.material.R.attr.colorPrimaryContainer.attrColor
+        get() = getAttrColor(com.google.android.material.R.attr.colorPrimaryContainer)
 }

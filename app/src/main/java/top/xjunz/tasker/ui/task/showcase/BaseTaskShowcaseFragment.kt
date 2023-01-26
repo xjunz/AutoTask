@@ -24,6 +24,7 @@ import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.serviceController
+import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseFragment
@@ -59,35 +60,49 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             binding.ibDelete.setAntiMoneyClickListener {
                 viewModel.requestDeleteTask.value = taskList[adapterPosition]
             }
+            binding.ibTrack.setAntiMoneyClickListener {
+                val task = taskList[adapterPosition]
+                if (LocalTaskManager.getSnapshotCount(task) == 0) {
+                    toast(R.string.no_task_snapshots)
+                    return@setAntiMoneyClickListener
+                }
+                spyOnFragment(
+                    FlowEditorDialog().init(task).setTrackMode().show(childFragmentManager)
+                )
+            }
             binding.ibEdit.setAntiMoneyClickListener {
                 val task = taskList[adapterPosition]
                 val prevChecksum = task.checksum
-                FlowEditorDialog().init(task).doOnTaskEdited {
+                spyOnFragment(FlowEditorDialog().init(task).doOnTaskEdited {
                     viewModel.updateTask(prevChecksum, task)
-                }.show(childFragmentManager).tag
-                childFragmentManager.registerFragmentLifecycleCallbacks(
-                    object : FragmentLifecycleCallbacks() {
-                        override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
-                            super.onFragmentDestroyed(fm, f)
-                            if (f.tag === tag) {
-                                viewModel.isPaused.value = false
-                                childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
-                            }
-                        }
-
-                        override fun onFragmentAttached(
-                            fm: FragmentManager,
-                            f: Fragment,
-                            context: Context
-                        ) {
-                            if (f.tag === tag) {
-                                viewModel.isPaused.value = true
-                            }
-                        }
-                    }, false
-                )
+                }.show(childFragmentManager))
             }
         }
+    }
+
+    private fun spyOnFragment(fragment: Fragment) {
+        val tag = fragment.tag
+        childFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentLifecycleCallbacks() {
+                override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
+                    super.onFragmentDestroyed(fm, f)
+                    if (f.tag === tag) {
+                        viewModel.isPaused.value = false
+                        childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
+                    }
+                }
+
+                override fun onFragmentAttached(
+                    fm: FragmentManager,
+                    f: Fragment,
+                    context: Context
+                ) {
+                    if (f.tag === tag) {
+                        viewModel.isPaused.value = true
+                    }
+                }
+            }, false
+        )
     }
 
     protected inner class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {

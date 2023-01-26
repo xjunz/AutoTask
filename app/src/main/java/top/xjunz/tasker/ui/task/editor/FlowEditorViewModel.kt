@@ -22,7 +22,7 @@ import top.xjunz.tasker.task.applet.depth
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.storage.TaskStorage
 
 /**
@@ -48,9 +48,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var referentAnchor: Applet
 
-    lateinit var referentDescriptor: ValueDescriptor
+    lateinit var argumentDescriptor: ArgumentDescriptor
 
-    val isSelectingReferent get() = ::referentAnchor.isInitialized
+    val isSelectingArgument get() = ::referentAnchor.isInitialized
 
     val showSplitConfirmation = MutableLiveData<Boolean>()
 
@@ -126,7 +126,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         val ret = mutableListOf<Applet>()
         flow.forEachIndexed `continue`@{ index, applet ->
 
-            if (applet is PreloadFlow && !isSelectingReferent)
+            if (applet is PreloadFlow && !isSelectingArgument)
                 return@`continue`
 
             applet.index = index
@@ -223,7 +223,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
-        if (option != null && option.findResults(referentDescriptor).isNotEmpty()) {
+        if (option != null && option.findResults(argumentDescriptor).isNotEmpty()) {
             return true
         }
         if (this is Flow) {
@@ -234,7 +234,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         return false
     }
 
-    fun hasCandidateReference(flow: Flow): Boolean {
+    fun hasCandidateReferents(flow: Flow): Boolean {
         return flow.any {
             it.hasResultWithDescriptor()
         }

@@ -20,7 +20,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
-    private inline val isScoped get() = parent is ScopeFlow<*>
+    protected inline val isScoped get() = parent is ScopeFlow<*>
 
     protected open fun T.getActualValue(): Any? {
         return this
@@ -30,16 +30,18 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         if (isScoped) {
             return runtime.getTarget()
         }
-        return runtime.getArguments(this)[0]!!.casted()
+        return runtime.getArgument(this, 0)!!.casted()
     }
 
     /**
-     * The default value when [value] is null.
+     * The default value when [value] is null. The default implementation is the second argument.
      */
-    open lateinit var defaultValue: V
+    open fun getDefaultValue(runtime: TaskRuntime): V {
+        throw NotImplementedError("Default value is not defined while value is null!")
+    }
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
-        val expected = value?.casted() ?: defaultValue
+        val expected = value?.casted() ?: getDefaultValue(runtime)
         val target = getTarget(runtime)
         return if (isInverted != matchTarget(target, expected)) {
             AppletResult.SUCCESS

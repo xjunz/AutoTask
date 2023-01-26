@@ -10,6 +10,8 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.base.When
+import top.xjunz.tasker.engine.runtime.AppletIndexer
+import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.forEachReference
 import top.xjunz.tasker.task.applet.forEachReferent
@@ -40,6 +42,31 @@ class GlobalFlowEditorViewModel : ViewModel() {
     val onAppletChanged = MutableLiveData<Applet?>()
 
     val referenceEditor = AppletReferenceEditor()
+
+    val currentSnapshotIndex = MutableLiveData<Int?>()
+
+    var isInTrackMode: Boolean = false
+
+    val allSnapshots = MutableLiveData<Array<TaskSnapshot>>()
+
+    var currentSnapshot: TaskSnapshot? = null
+        set(value) {
+            succeededApplets.clear()
+            failedApplets.clear()
+            if (value != null) {
+                value.successes.mapTo(succeededApplets) {
+                    getAppletWithHierarchy(it)
+                }
+                value.failures.forEach {
+                    failedApplets[getAppletWithHierarchy(it.hierarchy)] = it
+                }
+            }
+            field = value
+        }
+
+    val succeededApplets = mutableListOf<Applet>()
+
+    val failedApplets = mutableMapOf<Applet, TaskSnapshot.Failure>()
 
     fun renameReferentInRoot(prev: Set<String>, cur: String?) {
         root.forEachReferent { applet, which, referent ->
@@ -174,5 +201,21 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     fun clearRootFlow() {
         _root = null
+    }
+
+    fun clearSnapshots() {
+        currentSnapshot = null
+        isInTrackMode = false
+        allSnapshots.value = emptyArray()
+        currentSnapshotIndex.value = null
+    }
+
+    private fun getAppletWithHierarchy(hierarchy: Long): Applet {
+        val parsed = AppletIndexer.parse(hierarchy)
+        var applet: Applet = root
+        parsed.forEach { i ->
+            applet = (applet as Flow)[i]
+        }
+        return applet
     }
 }

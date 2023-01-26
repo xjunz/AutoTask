@@ -6,6 +6,8 @@ package top.xjunz.tasker.task.runtime
 
 import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.engine.dto.XTaskDTO
+import top.xjunz.tasker.engine.task.TaskManager
+import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 
@@ -40,6 +42,18 @@ object RemoteTaskManager : TaskManager<Long, XTaskDTO>() {
 
         override fun enableResidentTask(carrier: XTaskDTO) {
             RemoteTaskManager.enableResidentTask(carrier)
+        }
+
+        override fun getSnapshotCount(identifier: Long): Int {
+            return RemoteTaskManager.getSnapshotCount(identifier)
+        }
+
+        override fun getSnapshot(identifier: Long, index: Int): TaskSnapshot? {
+            return RemoteTaskManager.getSnapshot(identifier, index)
+        }
+
+        override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
+            return RemoteTaskManager.getAllSnapshots(identifier)
         }
 
     }

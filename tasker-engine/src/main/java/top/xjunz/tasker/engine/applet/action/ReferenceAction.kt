@@ -41,7 +41,7 @@ class LambdaReferenceAction<V>(
     }
 }
 
-inline fun <reified Arg, reified V> singleArgAction(
+inline fun <Arg, reified V> singleArgValueAction(
     crossinline action: (Arg?, V?) -> Boolean
 ): ReferenceAction<V> {
     return LambdaReferenceAction(Applet.judgeValueType<V>()) { args, v, _ ->
@@ -49,22 +49,33 @@ inline fun <reified Arg, reified V> singleArgAction(
     }
 }
 
-inline fun <reified ArgOrValue> unaryArgAction(
+inline fun <Arg> singleArgAction(crossinline action: (Arg?) -> Boolean): ReferenceAction<Unit> {
+    return LambdaReferenceAction(Applet.VAL_TYPE_IRRELEVANT) { args, _, _ ->
+        action(args.single()?.casted())
+    }
+}
+
+inline fun <reified ArgOrValue> unaryArgValueAction(
     crossinline action: (ArgOrValue) -> Boolean
 ): ReferenceAction<ArgOrValue> {
     return LambdaReferenceAction(Applet.judgeValueType<ArgOrValue>()) { args, v, _ ->
         action(requireNotNull(args.singleOrNull()?.casted() ?: v) {
-            "Neither ref nor value is specified!"
+            "Neither ref nor value is not null!"
         })
     }
 }
 
-inline fun <reified Arg1, reified Arg2, V> dualArgsAction(
-    valueType: Int,
-    crossinline action: (Arg1?, Arg2?, V?) -> Boolean
-): ReferenceAction<V> {
-    return LambdaReferenceAction(valueType) { args, v, _ ->
-        check(args.size == 2)
-        action(args[0]?.casted(), args[1]?.casted(), v)
+/**
+ * An action whose value and reference argument are of different types. Use [mapper] to convert
+ * the [Arg] into [Val].
+ */
+inline fun <reified Val, reified Arg> binaryArgValueAction(
+    crossinline mapper: Arg.() -> Val?,
+    crossinline action: (Val) -> Boolean
+): ReferenceAction<Val> {
+    return LambdaReferenceAction(Applet.judgeValueType<Val>()) { args, v, _ ->
+        action(requireNotNull(args.singleOrNull()?.casted<Arg>()?.mapper() ?: v) {
+            "Neither ref nor value is not null!"
+        })
     }
 }

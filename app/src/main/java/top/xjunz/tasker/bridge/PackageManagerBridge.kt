@@ -11,6 +11,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import top.xjunz.tasker.app
+import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
  * @author xjunz 2023/01/06
@@ -37,6 +38,10 @@ object PackageManagerBridge {
                 app.packageManager.getPackageInfo(pkgName, flags)
             }
         }.getOrNull()
+    }
+
+    fun loadLabelOfPackage(pkgName: String): CharSequence {
+        return loadPackageInfo(pkgName)?.wrapped()?.label ?: pkgName
     }
 
     @SuppressLint("QueryPermissionsNeeded")

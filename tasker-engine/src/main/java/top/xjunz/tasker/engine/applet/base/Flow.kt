@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
+import kotlinx.coroutines.CancellationException
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -37,20 +38,25 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
             if (index != 0 && applet.isAnd != runtime.isSuccessful) {
-                runtime.observer?.onSkipped(applet, runtime)
+                runtime.observer?.onAppletSkipped(applet, runtime)
                 return@`continue`
             }
             applet.parent = this
             applet.index = index
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
-            runtime.observer?.onStarted(applet, runtime)
-            val result = applet.apply(runtime)
+            runtime.observer?.onAppletStarted(applet, runtime)
+            val result = try {
+                applet.apply(runtime)
+            } catch (t: Throwable) {
+                if (t is CancellationException) throw t
+                AppletResult.error(t)
+            }
             if (registerResultsForChildren) {
                 runtime.registerResult(applet, result)
             }
             runtime.isSuccessful = result.isSuccessful
-            runtime.observer?.onTerminated(applet, runtime)
+            runtime.observer?.onAppletTerminated(applet, runtime)
         }
         return if (runtime.isSuccessful) AppletResult.SUCCESS else AppletResult.FAILURE
     }
@@ -85,7 +91,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         return StaticError.ERR_NONE
     }
 
-    override suspend fun apply(runtime: TaskRuntime): AppletResult {
+    final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()

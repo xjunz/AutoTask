@@ -26,7 +26,7 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueDescriber<Int> {
         val point = IntValueUtil.parseCoordinate(it)
         R.string.format_coordinate.format(point.x, point.y)
-    }.withArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
+    }.withUnaryArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
         .hasCompositeTitle()
 
     @AppletOrdinal(0x00_02)
@@ -35,6 +35,6 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
             val point = IntValueUtil.parseCoordinate(it)
             uiDevice.longClick(point.x, point.y)
         }
-    }.withArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
+    }.withUnaryArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
         .hasCompositeTitle()
 }

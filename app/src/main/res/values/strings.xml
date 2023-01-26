@@ -396,4 +396,21 @@
     <string name="app">应用程序</string>
     <string name="global">全局</string>
     <string name="app_info">应用信息</string>
+    <string name="format_task_snapshots">历史运行记录（%d/%d）</string>
+    <string name="no_task_snapshots">该任务没有运行记录</string>
+    <string name="format_task_snapshot_info_1">开始时间: %s\n结束时间: %s\n运行结果: %s</string>
+    <string name="format_task_snapshot_info_2">开始时间: \n%s\n结束时间: \n%s\n用时: %s</string>
+    <string name="succeeded">成功</string>
+    <string name="icons">图例</string>
+    <string name="executed_successfully">执行成功</string>
+    <string name="executed_unsuccessfully">执行失败</string>
+    <string name="not_executed_or_skipped">未执行或已跳过</string>
+    <string name="task_snapshots">运行记录</string>
+    <string name="running">运行中</string>
+    <string name="is_certain_app">%s是%s</string>
+    <string name="not_is_certain_app">%s不是%s</string>
+    <string name="is_which_app">是哪个应用？</string>
+    <string name="format_failure_value">错误值：%s</string>
+    <string name="format_failure_exception">发生错误：%s</string>
+    <string name="a_certain_app">某个应用</string>
 </resources>

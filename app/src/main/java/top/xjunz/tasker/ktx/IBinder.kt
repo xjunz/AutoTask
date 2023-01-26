@@ -83,9 +83,10 @@ inline fun IBinder.transact(code: Int, paramSetter: (Parcel) -> Unit = {}) {
     }
 }
 
+inline val IBinder.isAlive get() = isBinderAlive && pingBinder()
+
 inline fun <I : IInterface> I.whenAlive(block: (I) -> Unit) {
-    val binder = asBinder()
-    if (binder.isBinderAlive && binder.pingBinder()) {
+    if (asBinder().isAlive) {
         block(this)
     } else {
         logcat("Try to call a dead binder!", Log.WARN)

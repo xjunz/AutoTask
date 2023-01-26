@@ -13,10 +13,11 @@ import top.xjunz.tasker.ktx.text
 class ArgumentDescriptor(
     nameRes: Int,
     @StringRes private val substitutionRes: Int,
-    type: Class<*>,
-    variantType: Int,
+    valueType: Class<*>,
+    val referenceType: Class<*>?,
+    variantValueType: Int,
     private val isReference: Boolean?
-) : ValueDescriptor(nameRes, type, variantType) {
+) : ValueDescriptor(nameRes, valueType, variantValueType) {
 
     val substitution: CharSequence get() = if (substitutionRes == -1) name else substitutionRes.text
 

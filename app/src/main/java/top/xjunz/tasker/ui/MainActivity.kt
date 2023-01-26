@@ -259,6 +259,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         handler.removeCallbacksAndMessages(null)
         Shizuku.removeRequestPermissionResultListener(this)
         serviceController.unbindService()
+        ColorScheme.release()
     }
 
     override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {

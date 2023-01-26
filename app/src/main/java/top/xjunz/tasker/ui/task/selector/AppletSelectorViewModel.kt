@@ -17,9 +17,9 @@ import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.addSafely
 import top.xjunz.tasker.task.applet.controlFlow
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
+import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.scopeFlow
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
 
 /**
@@ -48,6 +48,15 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     lateinit var onCompletion: (List<Applet>) -> Unit
 
     var title: CharSequence? = null
+
+    /**
+     * The nearest non-container parent of this applet, may be itself.
+     */
+    private val Applet.scopeFlow: Flow
+        get() {
+            if (this is Flow && !isContainer) return this
+            return requireParent().scopeFlow
+        }
 
     fun setScope(origin: Flow) {
         val scope = origin.scopeFlow

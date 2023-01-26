@@ -30,11 +30,11 @@ class TaskRuntime private constructor() {
 
     interface Observer {
 
-        fun onStarted(victim: Applet, runtime: TaskRuntime) {}
+        fun onAppletStarted(victim: Applet, runtime: TaskRuntime) {}
 
-        fun onTerminated(victim: Applet, runtime: TaskRuntime) {}
+        fun onAppletTerminated(victim: Applet, runtime: TaskRuntime) {}
 
-        fun onSkipped(victim: Applet, runtime: TaskRuntime) {}
+        fun onAppletSkipped(victim: Applet, runtime: TaskRuntime) {}
     }
 
     companion object {
@@ -122,6 +122,14 @@ class TaskRuntime private constructor() {
      */
     var isSuccessful = true
 
+    fun getArgument(applet: Applet, which: Int): Any? {
+        val name = applet.references[which]
+        if (name != null) {
+            return getReferentByName(name)
+        }
+        return null
+    }
+
     /**
      * Get all arguments from registered results, which were registered by [registerResult].
      */
@@ -191,6 +199,7 @@ class TaskRuntime private constructor() {
         observer = null
         _result = null
         target = null
+        isSuccessful = true
         Pool.release(this)
     }
 

@@ -6,6 +6,8 @@ package top.xjunz.tasker.task.runtime
 
 import android.os.IBinder.DeathRecipient
 import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.task.TaskManager
+import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.whenAlive
 
@@ -52,6 +54,30 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         peer?.whenAlive {
             it.updateResidentTask(previousChecksum, updated.toDTO())
         }
+    }
+
+    override fun getSnapshotCount(id: XTask): Int {
+        val remote = peer
+        if (remote != null) {
+            return remote.getSnapshotCount(id.checksum)
+        }
+        return super.getSnapshotCount(id)
+    }
+
+    override fun getSnapshot(id: XTask, index: Int): TaskSnapshot? {
+        val remote = peer
+        if (remote != null) {
+            return remote.getSnapshot(id.checksum, index)
+        }
+        return super.getSnapshot(id, index)
+    }
+
+    override fun getAllSnapshots(id: XTask): Array<TaskSnapshot> {
+        val remote = peer
+        if (remote != null) {
+            return remote.getAllSnapshots(id.checksum)
+        }
+        return super.getAllSnapshots(id)
     }
 
     override fun asTask(carrier: XTask): XTask {

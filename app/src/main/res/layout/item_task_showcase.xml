@@ -14,7 +14,8 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginVertical="4dp"
         app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
-        app:strokeColor="?colorPrimary">
+        app:strokeColor="?colorPrimary"
+        tools:targetApi="p">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

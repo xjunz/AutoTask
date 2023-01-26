@@ -33,6 +33,9 @@ fun RecyclerView.scrollPositionToCenterVertically(position: Int, smoothly: Boole
         } else {
             scrollToPosition(position)
         }
+        post {
+            scrollPositionToCenterVertically(position, smoothly)
+        }
         return
     }
     val delta = itemView.top - (height / 2 - itemView.height / 2)

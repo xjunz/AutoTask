@@ -1,6 +1,7 @@
 // IRemoteTaskManager.aidl
 package top.xjunz.tasker.task.runtime;
 import top.xjunz.tasker.engine.dto.XTaskDTO;
+import top.xjunz.tasker.engine.task.TaskSnapshot;
 
 interface IRemoteTaskManager {
 
@@ -14,4 +15,9 @@ interface IRemoteTaskManager {
 
     void enableResidentTask(in XTaskDTO carrier);
 
+    int getSnapshotCount(long identifier);
+
+    TaskSnapshot getSnapshot(long identifier, int index);
+
+    TaskSnapshot[] getAllSnapshots(long identifier);
 }

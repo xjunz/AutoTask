@@ -21,6 +21,7 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
@@ -107,8 +108,11 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 viewModel.toggleRequestedTask()
             }.show()
         }
-        observeConfirmation(viewModel.requestDeleteTask, R.string.prompt_delete_task) {
-            viewModel.deleteRequestedTask()
+        observeDialog(viewModel.requestDeleteTask) {
+            requireActivity().makeSimplePromptDialog(msg = R.string.prompt_delete_task)
+                .setPositiveButton(R.string.delete.text.foreColored(ColorScheme.colorError)) { _, _ ->
+                    viewModel.deleteRequestedTask()
+                }.show()
         }
         observeTransient(viewModel.onNewTaskAdded) {
             when (it.metadata.taskType) {

@@ -2,9 +2,8 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.task.runtime
+package top.xjunz.tasker.engine.task
 
-import top.xjunz.tasker.engine.task.XTask
 import java.util.*
 
 /**
@@ -45,6 +44,23 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         if (task != null) {
             task.halt()
             Collections.replaceAll(enabled, task, asTask(updated))
+            task.snapshots.clear()
         }
+    }
+
+    private fun findTask(id: TaskIdentifier): XTask {
+        return enabled[enabled.indexOfTask(id)]
+    }
+
+    open fun getSnapshotCount(id: TaskIdentifier): Int {
+        return findTask(id).snapshots.size
+    }
+
+    open fun getAllSnapshots(id: TaskIdentifier): Array<TaskSnapshot> {
+        return findTask(id).snapshots.toTypedArray()
+    }
+
+    open fun getSnapshot(id: TaskIdentifier, index: Int): TaskSnapshot? {
+        return findTask(id).snapshots.getOrNull(index)
     }
 }

@@ -23,8 +23,8 @@ import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
  * @author xjunz 2022/11/07
  */
 class FlowItemViewBinder(
-    private val viewModel: FlowEditorViewModel,
-    private val globalViewModel: GlobalFlowEditorViewModel
+    private val vm: FlowEditorViewModel,
+    private val gvm: GlobalFlowEditorViewModel
 ) {
 
     companion object {
@@ -43,12 +43,12 @@ class FlowItemViewBinder(
 
     @SuppressLint("SetTextI18n")
     fun bindViewHolder(holder: TaskFlowAdapter.FlowViewHolder, applet: Applet) {
-        val option = viewModel.factory.requireOption(applet)
+        val option = vm.factory.requireOption(applet)
         holder.binding.apply {
             root.translationX = 0F
-            root.isSelected = viewModel.isSelected(applet)
-            root.isActivated = viewModel.staticError?.victim === applet
-            root.isEnabled = true
+            root.isSelected = vm.isSelected(applet)
+            root.isActivated = vm.staticError?.victim === applet
+            root.isEnabled = !vm.isReadyOnly
 
             ibAction.tag = null
 
@@ -56,7 +56,7 @@ class FlowItemViewBinder(
             dividerTop.isVisible = false
             dividerBott.isVisible = false
 
-            tvTitle.isEnabled = true
+            tvTitle.isEnabled = !vm.isReadyOnly
             bullet.isVisible = false
             // Don't show innate value
             var desc = if (option.isValueInnate) null else option.describe(applet)
@@ -77,7 +77,7 @@ class FlowItemViewBinder(
                 )
             }
 
-            val depth = applet.depthInAncestor(viewModel.flow)
+            val depth = applet.depthInAncestor(vm.flow)
             // Set text style
             when (depth) {
                 1 -> tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
@@ -116,7 +116,7 @@ class FlowItemViewBinder(
                     ibAction.setImageResource(R.drawable.ic_baseline_add_24)
                 } else {
                     ibAction.tag = ACTION_COLLAPSE
-                    if (viewModel.isCollapsed(applet)) {
+                    if (vm.isCollapsed(applet)) {
                         ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
                         ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
                     } else {
@@ -138,18 +138,13 @@ class FlowItemViewBinder(
             if (applet.valueType == Applet.VAL_TYPE_TEXT) {
                 desc = desc?.italic()
             }
-            if (viewModel.isSelectingReferent) {
+            if (vm.isSelectingArgument) {
                 title = title?.toString()
-                if (!tvDesc.isEnabled) {
-                    desc = desc?.toString()
-                }
-                val ahead = viewModel.referentAnchor.parent == null
-                        || applet.isAheadOf(viewModel.referentAnchor)
+                val ahead = vm.referentAnchor.parent == null || applet.isAheadOf(vm.referentAnchor)
                 // When selecting ref, only enable valid targets
-                val refs =
-                    if (!ahead) emptyList() else option.findResults(viewModel.referentDescriptor)
+                val refs = if (!ahead) emptyList() else option.findResults(vm.argumentDescriptor)
                 if (applet.isContainer && depth == 3) {
-                    root.isEnabled = ahead && viewModel.hasCandidateReference(applet as Flow)
+                    root.isEnabled = ahead && vm.hasCandidateReferents(applet as Flow)
                 } else {
                     root.isEnabled = refs.isNotEmpty()
                     containerReferents.isVisible = refs.isNotEmpty()
@@ -171,16 +166,28 @@ class FlowItemViewBinder(
 
             if (!applet.isEnabledInHierarchy) title = title?.strikeThrough()
 
-            ibAction.isGone = ibAction.tag == null || (viewModel.isSelectingReferent
+            ibAction.isGone = ibAction.tag == null || ((vm.isSelectingArgument || vm.isReadyOnly)
                     && ibAction.tag != ACTION_COLLAPSE
                     && ibAction.tag != ACTION_ENTER)
+
+            if (!tvTitle.isEnabled) {
+                title = title?.toString()
+            }
             tvTitle.text = title
+
             tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
-            tvDesc.text = desc
+            if (tvDesc.isVisible) {
+                if (!tvDesc.isEnabled) {
+                    desc = desc?.toString()
+                }
+                tvDesc.text = desc
+            }
+
             tvComment.isVisible = applet.comment != null || root.isActivated
+            tvComment.isEnabled = root.isEnabled
             if (root.isActivated) {
-                var prompt = errorPrompts[viewModel.staticError!!.code]
-                viewModel.staticError?.arg?.let {
+                var prompt = errorPrompts[vm.staticError!!.code]
+                vm.staticError?.arg?.let {
                     prompt = prompt.toString().formatSpans(it.italic().underlined())
                 }
                 tvComment.text = (R.string.error.text.bold() + prompt).foreColored(
@@ -189,6 +196,29 @@ class FlowItemViewBinder(
             } else if (applet.comment != null) {
                 tvComment.text = (R.string.comment.text.bold() + applet.comment!!)
                     .quoted(ColorScheme.colorTertiaryContainer)
+            }
+            if (gvm.isInTrackMode) {
+                if (gvm.succeededApplets.contains(applet)) {
+                    tvTitle.setDrawableStart(R.drawable.ic_check_circle_24px)
+                } else if (gvm.failedApplets.containsKey(applet)) {
+                    tvTitle.setDrawableStart(R.drawable.ic_cancel_24px)
+                    val failure = gvm.failedApplets[applet]
+                    if (failure?.actual != null) {
+                        tvComment.isVisible = true
+                        tvComment.isEnabled = true
+                        tvComment.text =
+                            R.string.format_failure_value.format(failure.actual!!)
+                                .quoted(ColorScheme.colorTertiaryContainer)
+                    } else if (failure?.exception != null) {
+                        tvComment.isVisible = true
+                        tvComment.isEnabled = true
+                        tvComment.text =
+                            R.string.format_failure_exception.format(failure.exception!!)
+                                .quoted(ColorScheme.colorTertiaryContainer)
+                    }
+                } else {
+                    tvTitle.setDrawableStart(R.drawable.ic_do_not_disturb_24px)
+                }
             }
         }
     }
@@ -203,24 +233,24 @@ class FlowItemViewBinder(
     }
 
     private fun toggleSelectReference(applet: Applet, index: Int) {
-        if (globalViewModel.isReferentSelected(applet, index)) {
-            globalViewModel.unselectReferent(applet, index)
-            if (globalViewModel.selectedReferents.isEmpty())
-                viewModel.isFabVisible.value = false
+        if (gvm.isReferentSelected(applet, index)) {
+            gvm.unselectReferent(applet, index)
+            if (gvm.selectedReferents.isEmpty())
+                vm.isFabVisible.value = false
         } else {
             // Remove existed reference to this applet, because multiple refs to one applet
             // is not allowed!
-            if (globalViewModel.isReferentSelected(applet)) {
-                globalViewModel.unselectReferent(applet)
+            if (gvm.isReferentSelected(applet)) {
+                gvm.unselectReferent(applet)
             }
             val referent = applet.referents[index]
             if (referent == null) {
-                globalViewModel.selectReferent(applet, index)
+                gvm.selectReferent(applet, index)
             } else {
-                globalViewModel.selectReferentsWithName(viewModel.referentAnchor, referent)
+                gvm.selectReferentsWithName(vm.referentAnchor, referent)
             }
-            if (globalViewModel.selectedReferents.isNotEmpty())
-                viewModel.isFabVisible.value = true
+            if (gvm.selectedReferents.isNotEmpty())
+                vm.isFabVisible.value = true
         }
     }
 
@@ -233,7 +263,7 @@ class FlowItemViewBinder(
     ) {
         val chip = getReferenceChip(index)
         chip.isVisible = true
-        chip.isChecked = globalViewModel.isReferentSelected(applet, which)
+        chip.isChecked = gvm.isReferentSelected(applet, which)
         chip.setAntiMoneyClickListener {
             toggleSelectReference(applet, which)
         }

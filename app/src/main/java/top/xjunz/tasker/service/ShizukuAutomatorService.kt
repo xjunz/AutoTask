@@ -141,7 +141,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             }
             AppletOptionFactory.preloadIfNeeded()
             residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
-            a11yEventDispatcher.startProcessing()
+            a11yEventDispatcher.startProcessing(uiAutomatorBridge)
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()

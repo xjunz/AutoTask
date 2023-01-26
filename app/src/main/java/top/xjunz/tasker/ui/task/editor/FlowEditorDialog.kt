@@ -12,13 +12,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
+import androidx.core.view.*
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.transition.platform.MaterialFadeThrough
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
@@ -30,13 +32,15 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
+import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
+import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.formatTime
 
 /**
  * @author xjunz 2022/08/22
@@ -64,7 +68,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        if (vm.isSelectingReferent && !vm.hasCandidateReference(vm.flow)) {
+        if (vm.isSelectingArgument && !vm.hasCandidateReferents(vm.flow)) {
             toast(R.string.no_candidate_reference)
             dismiss()
             return null
@@ -85,6 +89,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             gvm.setRoot(vm.flow as RootFlow)
             vm.addCloseable {
                 gvm.clearRootFlow()
+                gvm.clearSnapshots()
             }
         }
     }
@@ -98,24 +103,44 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
         }
+        if (gvm.isInTrackMode) {
+            binding.cvMetadata.isVisible = true
+            binding.divider.isInvisible = true
+            binding.appBarContainer.updateLayoutParams<AppBarLayout.LayoutParams> {
+                scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+            }
+            binding.appBar.addOnOffsetChangedListener { _, verticalOffset ->
+                val alpha = 1F - (-verticalOffset.toFloat() / binding.appBarContainer.height)
+                binding.appBarContainer.alpha = alpha
+            }
+            binding.appBar.isLiftOnScroll = false
+        } else if (vm.isBase) {
+            binding.tvTitle.setAntiMoneyClickListener {
+                TaskMetadataEditor().init(vm.metadata) {
+                    vm.selectionLiveData.notifySelfChanged()
+                }.show(childFragmentManager)
+            }
+        }
         binding.appBar.addLiftOnScrollListener { _, _ ->
-            binding.divider.isVisible = !binding.appBar.isLifted
+            if (!gvm.isInTrackMode)
+                binding.divider.isInvisible = binding.appBar.isLifted
         }
         binding.rvTaskEditor.adapter = adapter
-        vm.isFabVisible.value = vm.isInEditionMode ||
-                (vm.isSelectingReferent && gvm.selectedReferents.isNotEmpty())
+        vm.isFabVisible.value =
+            vm.isInEditionMode || (vm.isSelectingArgument && gvm.selectedReferents.isNotEmpty())
         if (vm.isInEditionMode) {
-            binding.btnAction1.text = R.string.add_rules.text
-            binding.btnAction1.setIconResource(R.drawable.ic_baseline_add_24)
-            binding.btnAction2.isVisible = false
-        } else if (vm.isSelectingReferent) {
-            binding.btnAction1.text = R.string.confirm_ref.text
-            binding.btnAction1.setIconResource(R.drawable.ic_baseline_add_link_24)
+            binding.fabAction.text = R.string.add_rules.text
+            binding.fabAction.setIconResource(R.drawable.ic_baseline_add_24)
+        } else if (vm.isSelectingArgument) {
+            binding.fabAction.text = R.string.confirm_ref.text
+            binding.fabAction.setIconResource(R.drawable.ic_baseline_add_link_24)
         }
-        binding.btnAction1.setAntiMoneyClickListener {
-            if (vm.isSelectingReferent) {
+        binding.fabAction.setAntiMoneyClickListener {
+            if (vm.isSelectingArgument) {
                 if (gvm.selectedReferents.isNotEmpty())
-                    confirmReferenceSelections()
+                    confirmArgumentSelections()
             } else {
                 val flow = vm.flow
                 if (flow.size == flow.requiredSize) {
@@ -125,12 +150,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 AppletSelectorDialog().init(flow) {
                     vm.addInside(flow, it)
                 }.show(childFragmentManager)
-            }
-        }
-        binding.btnAction2.setAntiMoneyClickListener {
-            gvm.renameReferentInRoot(gvm.getSelectedReferentNames().toSet(), null)
-            gvm.referenceEditor.getReferenceChangedApplets().forEach {
-                gvm.onAppletChanged.value = it
             }
         }
         binding.ibDismiss.setOnClickListener {
@@ -152,7 +171,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                         // Too deep that the hierarchy is not yet built
                         vm.flow.buildHierarchy()
                     }
-                    adapter.menuHelper.onMenuItemClick(
+                    adapter.menuHelper.triggerMenuItem(
                         null, error.victim.requireParent(), R.id.item_open_in_new
                     )
                 } else {
@@ -175,16 +194,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             binding.rvBreadCrumbs.adapter = FlowCascadeAdapter(vm)
         }
         binding.cvMetadata.setAntiMoneyClickListener {
-            binding.ibEdit.performClick()
+            binding.ibSnapshotSelector.performClick()
         }
-        binding.ibEdit.setAntiMoneyClickListener {
-            TaskMetadataEditor().init(vm.metadata) {
-                vm.selectionLiveData.notifySelfChanged()
-            }.show(childFragmentManager)
+        binding.ibSnapshotSelector.setAntiMoneyClickListener {
+            TaskSnapshotSelectorDialog().show(childFragmentManager)
         }
     }
 
-    private fun confirmReferenceSelections() {
+    private fun confirmArgumentSelections() {
         val referentNamesList = gvm.getSelectedReferentNames()
         val referentNames = referentNamesList.toSet()
         // All referents have the same name, just do it!
@@ -252,19 +269,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             adapter.notifyItemChanged(adapter.currentList.indexOf(it))
         }
         observe(vm.selectionLiveData) {
-            binding.cvMetadata.isVisible = vm.isBase
-            if (vm.isSelectingReferent) {
-                val name = vm.referentDescriptor.name
+            if (vm.isSelectingArgument) {
+                val name = vm.argumentDescriptor.name
                 binding.tvTitle.text = R.string.format_select.formatSpans(name.foreColored())
             } else if (it.isEmpty()) {
                 if (vm.isBase) {
-                    binding.tvTitle.text = R.string.edit_task.text
-                    binding.tvTaskName.text = vm.metadata.title
-                    if (vm.metadata.description.isNullOrEmpty()) {
-                        binding.tvTaskDesc.text = R.string.no_desc_provided.text.italic()
-                    } else {
-                        binding.tvTaskDesc.text = vm.metadata.description
-                    }
+                    if (!vm.isReadyOnly)
+                        binding.tvTitle.setDrawableEnd(R.drawable.ic_baseline_chevron_right_24)
+                    binding.tvTitle.text = vm.metadata.title
                 } else {
                     binding.tvTitle.text = R.string.edit_rules.text
                 }
@@ -301,7 +313,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             }
         }
         observeTransient(gvm.onReferentSelected) {
-            if (vm.isSelectingReferent) dismiss()
+            if (vm.isSelectingArgument) dismiss()
         }
         val behavior = (binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
                 as HideBottomViewOnScrollBehavior
@@ -312,13 +324,29 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             if (it) {
                 behavior.slideUp(binding.fabAction, true)
             }
-            binding.btnAction2.isEnabled = gvm.getSelectedReferentNames().isNotEmpty()
             binding.fabAction.isVisible = it
         }
         observeTransient(vm.onAppletLongClicked) {
             if (!vm.isReadyOnly && !vm.isInMultiSelectionMode) {
                 vm.toggleMultiSelection(it)
+                binding.appBar.setExpanded(true)
             }
+        }
+        observeNotNull(gvm.currentSnapshotIndex) {
+            if (!gvm.isInTrackMode) return@observeNotNull
+            val snapshot = gvm.allSnapshots.require()[it]
+            gvm.currentSnapshot = snapshot
+            binding.tvSnapshotTitle.text = R.string.format_task_snapshots.format(
+                it + 1, gvm.allSnapshots.require().size
+            )
+            binding.tvSnapshotDesc.text = R.string.format_task_snapshot_info_1.format(
+                snapshot.startTimestamp.formatTime(),
+                if (snapshot.isRunning) "-" else snapshot.endTimestamp.formatTime(),
+                if (snapshot.isRunning) R.string.running.str
+                else if (snapshot.isSuccessful) R.string.succeeded.str
+                else R.string.failed.str
+            )
+            adapter.notifyItemRangeChanged(0, adapter.currentList.size)
         }
         mvm.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
             val hashcode = it.toInt()
@@ -330,7 +358,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 vm.onAppletChanged.value = this
             }
         }
-        if (vm.isSelectingReferent) return
+        if (vm.isSelectingArgument) return
         mvm.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
             val split = data.split(Char(0))
             val hashcode = split[1].toInt()
@@ -342,8 +370,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             val whichArg = applet.whichReference(referent)
             val arg = option.arguments[whichArg]
             FlowEditorDialog().init(gvm.root, true)
-                .setReferentToSelect(applet, arg, referent)
-                .doOnReferentSelected { newReferent ->
+                .setArgumentToSelect(applet, arg, referent)
+                .doOnArgumentSelected { newReferent ->
                     gvm.referenceEditor.setReference(applet, arg, whichArg, newReferent)
                     vm.clearStaticErrorIfNeeded(applet, StaticError.PROMPT_RESET_REFERENCE)
                     gvm.referenceEditor.getReferenceChangedApplets().forEach {
@@ -357,7 +385,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             val applet = adapter.currentList.firstOrNull {
                 it.hashCode() == hashcode
             } ?: return@doOnAction
-            menuHelper.onMenuItemClick(null, applet, R.id.item_edit)
+            menuHelper.triggerMenuItem(null, applet, R.id.item_edit)
         }
     }
 
@@ -372,10 +400,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         return true
     }
 
-    fun setReferentToSelect(victim: Applet, ref: ValueDescriptor, referent: String?) =
+    fun setArgumentToSelect(victim: Applet, ref: ArgumentDescriptor, referent: String?) =
         doWhenCreated {
             vm.referentAnchor = victim
-            vm.referentDescriptor = ref
+            vm.argumentDescriptor = ref
             vm.isReadyOnly = true
             if (referent != null)
                 gvm.selectReferentsWithName(victim, referent)
@@ -384,7 +412,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             }
         }
 
-    fun doOnReferentSelected(block: (String) -> Unit) = doWhenCreated {
+    fun doOnArgumentSelected(block: (String) -> Unit) = doWhenCreated {
         vm.doOnRefSelected = block
     }
 
@@ -400,10 +428,18 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         vm.doSplit = block
     }
 
+    fun setTrackMode() = doWhenCreated {
+        gvm.isInTrackMode = true
+        vm.isReadyOnly = true
+        lifecycleScope.launch(Dispatchers.Default) {
+            gvm.allSnapshots.postValue(LocalTaskManager.getAllSnapshots(vm.task))
+            gvm.currentSnapshotIndex.postValue(0)
+        }
+    }
+
     fun setStaticError(error: StaticError?) = doWhenCreated {
         if (error != null)
-            vm.staticError =
-                StaticError(vm.flow[error.victim.index], error.code, error.arg)
+            vm.staticError = StaticError(vm.flow[error.victim.index], error.code, error.arg)
     }
 
     fun init(task: XTask) = doWhenCreated {

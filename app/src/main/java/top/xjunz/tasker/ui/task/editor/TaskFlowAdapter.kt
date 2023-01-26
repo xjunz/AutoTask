@@ -4,11 +4,8 @@
 
 package top.xjunz.tasker.ui.task.editor
 
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,20 +16,16 @@ import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.alphaModified
-import top.xjunz.tasker.ktx.configHeaderTitle
-import top.xjunz.tasker.ktx.indexOf
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
-import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/08/14
  */
-class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
+class TaskFlowAdapter(fragment: FlowEditorDialog) :
     ListAdapter<Applet, TaskFlowAdapter.FlowViewHolder>(FlowItemTouchHelperCallback.DiffCallback) {
 
     private val viewModel: FlowEditorViewModel by fragment.viewModels()
@@ -90,40 +83,17 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
         viewModel.singleSelect(-1)
     }
 
-    private inline fun showMultiReferencesSelectorMenu(
-        anchor: View,
-        option: AppletOption,
-        candidates: List<ValueDescriptor>,
-        crossinline onSelected: (Int) -> Unit
-    ) {
-        if (candidates.size == 1) {
-            onSelected(option.results.indexOf(candidates.single()))
-        } else {
-            val popup = PopupMenu(fragment.requireContext(), anchor, Gravity.END)
-            popup.menu.add(R.string.which_to_refer)
-            candidates.forEach {
-                popup.menu.add(it.name)
-            }
-            popup.setOnMenuItemClickListener {
-                onSelected(popup.menu.indexOf(it) - 1)
-                return@setOnMenuItemClickListener true
-            }
-            popup.show()
-            popup.configHeaderTitle()
-        }
-    }
-
     inner class FlowViewHolder(val binding: ItemFlowItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.tvComment.setBackgroundColor(
-                ColorScheme.colorTertiaryContainer.alphaModified(.3F)
+                ColorScheme.colorTertiaryContainer.alphaModified(.42F)
             )
             binding.root.setOnLongClickListener { true }
             binding.root.setAntiMoneyClickListener { view ->
                 val applet = currentList[adapterPosition]
-                if (viewModel.isSelectingReferent && !applet.isContainer) return@setAntiMoneyClickListener
+                if (viewModel.isSelectingArgument && !applet.isContainer) return@setAntiMoneyClickListener
                 if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else {
@@ -147,13 +117,13 @@ class TaskFlowAdapter(private val fragment: FlowEditorDialog) :
                         notifyItemChanged(adapterPosition)
                     }
                     FlowItemViewBinder.ACTION_EDIT -> {
-                        menuHelper.onMenuItemClick(it, applet, R.id.item_edit)
+                        menuHelper.triggerMenuItem(it, applet, R.id.item_edit)
                     }
                     FlowItemViewBinder.ACTION_ADD -> {
-                        menuHelper.onMenuItemClick(it, applet, R.id.item_add_inside)
+                        menuHelper.triggerMenuItem(it, applet, R.id.item_add_inside)
                     }
                     FlowItemViewBinder.ACTION_ENTER -> {
-                        menuHelper.onMenuItemClick(it, applet, R.id.item_open_in_new)
+                        menuHelper.triggerMenuItem(it, applet, R.id.item_open_in_new)
                     }
                 }
             }

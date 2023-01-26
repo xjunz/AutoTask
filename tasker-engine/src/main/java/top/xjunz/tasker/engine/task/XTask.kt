@@ -10,11 +10,13 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
-import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.shared.trace.logcat
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
+import java.util.*
 
 /**
  * The abstraction of an automator task.
@@ -40,18 +42,20 @@ class XTask {
 
     var flow: RootFlow? = null
 
-    var onStateChangedListener: OnStateChangedListener? = null
+    var taskStateListener: TaskStateListener? = null
 
     /**
      * Whether the task is traversing its [flow].
      */
-    internal val isExecuting get() = currentRuntime?.isActive == true
+    private val isExecuting get() = currentRuntime?.isActive == true
 
     private var currentRuntime: TaskRuntime? = null
 
+    internal val snapshots = LinkedList<TaskSnapshot>()
+
     class FlowFailureException(reason: String) : RuntimeException(reason)
 
-    interface OnStateChangedListener {
+    interface TaskStateListener {
 
         fun onStarted(runtime: TaskRuntime) {}
 
@@ -93,6 +97,62 @@ class XTask {
         currentRuntime?.halt()
     }
 
+    private inner class SnapshotObserver(private val snapshot: TaskSnapshot) :
+        TaskRuntime.Observer {
+
+        private var eventHit: Boolean? = null
+
+        override fun onAppletStarted(victim: Applet, runtime: TaskRuntime) {
+            if (victim is Flow)
+                logcat(indent(runtime.tracker.depth) + victim.isAndToString() + victim)
+        }
+
+        override fun onAppletTerminated(victim: Applet, runtime: TaskRuntime) {
+            val indents = indent(runtime.tracker.depth)
+            logcat(indents + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
+            if (!runtime.isSuccessful) {
+                val failure = runtime.getFailure(victim)
+                if (failure != null) {
+                    logcat(indents + "expected: ${failure.first}, actual: ${failure.second}")
+                }
+            }
+            if (victim is When) {
+                if (runtime.isSuccessful) {
+                    eventHit = true
+                    snapshots.offerFirst(snapshot)
+                } else {
+                    eventHit = false
+                }
+            }
+            if (eventHit != false) {
+                val hierarchy = runtime.tracker.getCurrentHierarchy()
+                if (runtime.isSuccessful) {
+                    snapshot.successes.add(hierarchy)
+                } else {
+                    snapshot.failures.add(
+                        TaskSnapshot.Failure.fromAppletResult(hierarchy, runtime.result)
+                    )
+                }
+            }
+        }
+
+        override fun onAppletSkipped(victim: Applet, runtime: TaskRuntime) {
+            logcat(indent(runtime.tracker.depth) + victim.isAndToString() + "$victim -> skipped")
+        }
+
+        private fun indent(count: Int): String {
+            return Collections.nCopies(count, '-').joinToString("")
+        }
+
+        private fun Applet.isAndToString(): String {
+            if (this is ControlFlow) return ""
+            if (index == 0) return ""
+            return if (isAnd) "And " else "Or "
+        }
+
+    }
+
+
     /**
      * Called when an event is received.
      *
@@ -101,32 +161,43 @@ class XTask {
     suspend fun launch(
         eventScope: EventScope,
         coroutineScope: CoroutineScope,
-        events: Array<out Event>,
-        observer: TaskRuntime.Observer? = null
-    ): Boolean {
+        events: Array<out Event>
+    ) {
         if (isExecuting && currentRuntime?.isSuspending != true) {
-            return false
+            return
         }
+        val snapshot = TaskSnapshot(checksum)
         val runtime = obtainRuntime(eventScope, coroutineScope, events)
-        runtime.observer = observer
+        runtime.observer = SnapshotObserver(snapshot)
         try {
+            snapshot.startTimestamp = System.currentTimeMillis()
             currentRuntime = runtime
-            onStateChangedListener?.onStarted(runtime)
+            taskStateListener?.onStarted(runtime)
             runtime.isSuccessful = requireFlow().apply(runtime).isSuccessful
             if (runtime.isSuccessful) {
-                onStateChangedListener?.onSuccess(runtime)
+                taskStateListener?.onSuccess(runtime)
             } else {
-                onStateChangedListener?.onFailure(runtime)
+                taskStateListener?.onFailure(runtime)
             }
-            return runtime.isSuccessful
         } catch (t: Throwable) {
+            runtime.isSuccessful = false
             when (t) {
-                is FlowFailureException -> onStateChangedListener?.onFailure(runtime)
-                is CancellationException -> onStateChangedListener?.onCancelled(runtime)
-                else -> onStateChangedListener?.onError(runtime, t)
+                is FlowFailureException -> taskStateListener?.onFailure(runtime)
+                is CancellationException -> {
+                    taskStateListener?.onCancelled(runtime)
+                    snapshots.remove(snapshot)
+                }
+                else -> taskStateListener?.onError(runtime, t)
             }
-            return false
         } finally {
+            snapshot.endTimestamp = System.currentTimeMillis()
+            snapshot.isSuccessful = runtime.isSuccessful
+            snapshots.removeIf {
+                it.isRedundantTo(snapshot)
+            }
+            if (snapshots.size > 10) {
+                snapshots.pollLast()
+            }
             currentRuntime = null
             runtime.recycle()
         }

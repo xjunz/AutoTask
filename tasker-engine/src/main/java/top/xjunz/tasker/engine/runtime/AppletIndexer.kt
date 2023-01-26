@@ -14,6 +14,22 @@ import top.xjunz.tasker.engine.applet.base.Applet.Companion.MAX_FLOW_CHILD_COUNT
  */
 class AppletIndexer {
 
+    companion object {
+
+        fun parse(hierarchy: Long): Array<Int> {
+            var index: Long
+            var depth = 0
+            val indexes = mutableListOf<Int>()
+            do {
+                index = hierarchy ushr (++depth - 1) * FLOW_CHILD_COUNT_BITS and
+                        MAX_FLOW_CHILD_COUNT.toLong()
+                if (index > 0)
+                    indexes.add(index.toInt() - 1)
+            } while (index > 0)
+            return indexes.toTypedArray()
+        }
+    }
+
     /**
      * The depth of currently executed applet starting from 0, which means the flow is not yet started
      * or has completed.
@@ -76,6 +92,10 @@ class AppletIndexer {
         return IntArray(depth) {
             getIndexInDepth(it + 1)
         }
+    }
+
+    fun getCurrentHierarchy(): Long {
+        return trace
     }
 
     fun formatHierarchy(): String {

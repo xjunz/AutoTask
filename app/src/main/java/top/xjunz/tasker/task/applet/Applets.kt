@@ -20,15 +20,6 @@ import java.util.*
 inline val Applet.isContainer: Boolean get() = this is ContainerFlow
 
 /**
- * The nearest non-container parent of this applet, may be itself.
- */
-val Applet.scopeFlow: Flow
-    get() {
-        if (this is Flow && !isContainer) return this
-        return requireParent().scopeFlow
-    }
-
-/**
  * The nearest parent [ControlFlow].
  */
 val Applet.controlFlow: ControlFlow?

@@ -43,6 +43,20 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletOrdinal(0x00_00)
+    val isCertainApp = invertibleApplicationOption(R.string.is_certain_app) {
+        ArgumentCriterion<ComponentInfoWrapper, String, ComponentInfoWrapper>(Applet.VAL_TYPE_TEXT,
+            { it.packageName }) { info, pkgName ->
+            info.packageName == pkgName
+        }
+    }.withBinaryArgument<String, ComponentInfoWrapper>(
+        R.string.is_which_app,
+        VariantType.TEXT_PACKAGE_NAME,
+        R.string.a_certain_app
+    ).withValueDescriber<String> {
+        PackageManagerBridge.loadLabelOfPackage(it)
+    }.hasCompositeTitle()
+
+    @AppletOrdinal(0x00_01)
     val appCollection = invertibleApplicationOption(R.string.in_app_collection) {
         collectionCriterion<ComponentInfoWrapper, String> {
             it.packageName
@@ -50,18 +64,17 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<String>(R.string.app_collection, VariantType.TEXT_APP_LIST)
         .withValueDescriber<Collection<String>> { value ->
             if (value.size == 1) {
-                val first = value.first()
-                PackageManagerBridge.loadPackageInfo(first)?.wrapped()?.label ?: first
+                PackageManagerBridge.loadLabelOfPackage(value.first())
             } else {
                 R.string.format_pkg_collection_desc.formatSpans(
                     value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                        (PackageManagerBridge.loadPackageInfo(name)?.wrapped()?.label ?: name)
+                        PackageManagerBridge.loadLabelOfPackage(name)
                     }.joinToString("、"), value.size.toString().bold()
                 )
             }
         }
 
-    @AppletOrdinal(0x00_01)
+    @AppletOrdinal(0x00_02)
     val activityCollection = invertibleApplicationOption(R.string.in_activity_collection) {
         collectionCriterion<ComponentInfoWrapper, String> {
             it.activityName?.run {
@@ -80,7 +93,7 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             }
         }.withTitleModifier("Activity")
 
-    @AppletOrdinal(0x00_02)
+    @AppletOrdinal(0x00_03)
     val paneTitle = applicationOption(R.string.with_pane_title) {
         newCriterion<ComponentInfoWrapper, String> { t, v ->
             t.paneTitle == v

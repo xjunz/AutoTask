@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.uiautomator.Direction
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.action.singleArgAction
+import top.xjunz.tasker.engine.applet.action.singleArgValueAction
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.service.uiDevice
@@ -33,7 +33,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     private inline fun <reified V> uiObjectActionOption(
         title: Int, crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
     ) = appletOption(title) {
-        singleArgAction<AccessibilityNodeInfo, V> { node, value ->
+        singleArgValueAction<AccessibilityNodeInfo, V> { node, value ->
             requireNotNull(node) {
                 "Node is not captured?!"
             }
@@ -67,7 +67,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         uiDevice.wrapUiObject2(node).drag(IntValueUtil.parseCoordinate(v))
         true
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
-        .withArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
+        .withUnaryArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
         .withValueDescriber<Int> {
             val p = IntValueUtil.parseCoordinate(it)
             R.string.format_coordinate.format(p.x, p.y)
@@ -98,7 +98,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             true
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.input_field)
-        .withArgument<String>(R.string.text)
+        .withUnaryArgument<String>(R.string.text)
         .hasCompositeTitle()
 
 }

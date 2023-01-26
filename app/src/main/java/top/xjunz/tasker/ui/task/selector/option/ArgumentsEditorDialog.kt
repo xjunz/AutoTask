@@ -82,7 +82,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     }
 
     private fun showValueInputDialog(which: Int, arg: ValueDescriptor) {
-        when (arg.variantType) {
+        when (arg.variantValueType) {
             VariantType.INT_COORDINATE -> {
                 val point = applet.value?.let {
                     IntValueUtil.parseCoordinate(it.casted())
@@ -101,7 +101,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     .show(childFragmentManager)
 
             VariantType.TEXT_APP_LIST, VariantType.TEXT_PACKAGE_NAME -> {
-                val singleSelection = arg.variantType == VariantType.TEXT_PACKAGE_NAME
+                val singleSelection = arg.variantValueType == VariantType.TEXT_PACKAGE_NAME
                 val value: Collection<String>? = if (singleSelection) applet.value?.let {
                     Collections.singleton(it as String)
                 } else applet.value?.casted()
@@ -111,15 +111,15 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                         vm.onItemChanged.value = arg
                     }
                     .setSingleSelection(singleSelection)
-                    .setTitle(option.dummyTitle)
+                    .setTitle(option.loadDummyTitle(applet))
                     .show(childFragmentManager)
             }
             VariantType.TEXT_ACTIVITY, VariantType.TEXT_ACTIVITY_LIST -> {
-                val singleSelection = arg.variantType == VariantType.TEXT_ACTIVITY
+                val singleSelection = arg.variantValueType == VariantType.TEXT_ACTIVITY
                 val value: Collection<String>? = if (singleSelection) applet.value?.let {
                     Collections.singleton(it as String)
                 } else applet.value?.casted()
-                ComponentSelectorDialog().setTitle(option.dummyTitle)
+                ComponentSelectorDialog().setTitle(option.loadDummyTitle(applet))
                     .setSelectedActivities(value ?: emptyList())
                     .doOnCompleted {
                         applet.value = if (singleSelection) it.single() else it
@@ -130,7 +130,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     .show(childFragmentManager)
             }
             else -> TextEditorDialog().configEditText { et ->
-                et.configInputType(arg.type, true)
+                et.configInputType(arg.valueType, true)
                 et.maxLines = 10
             }.setCaption(option.helpText).init(arg.name, applet.value?.toString()) set@{
                 val parsed = arg.parseValueFromInput(it) ?: return@set R.string.error_mal_format.str
@@ -143,8 +143,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private fun showReferenceSelectorDialog(whichArg: Int, arg: ArgumentDescriptor, id: String?) {
         FlowEditorDialog().init(gvm.root, true)
-            .setReferentToSelect(applet, arg, id)
-            .doOnReferentSelected { referent ->
+            .setArgumentToSelect(applet, arg, id)
+            .doOnArgumentSelected { referent ->
                 gvm.referenceEditor.setReference(applet, arg, whichArg, referent)
                 vm.onItemChanged.value = arg
             }.show(childFragmentManager)
@@ -212,7 +212,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvArgument.adapter = adapter
-        binding.tvTitle.text = option.dummyTitle
+        binding.tvTitle.text = option.loadDummyTitle(applet)
         binding.btnCancel.setOnClickListener {
             gvm.referenceEditor.revokeAll()
             dismiss()

@@ -92,13 +92,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         try {
             launchedInInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
             instance = WeakReference(this)
+            uiAutomationHidden = UiAutomationHidden(mainLooper, this)
+            uiAutomationHidden.connect()
             if (!launchedInInspectorMode) {
-                uiAutomationHidden = UiAutomationHidden(mainLooper, this)
-                uiAutomationHidden.connect()
                 residentTaskScheduler = ResidentTaskScheduler(LocalTaskManager)
                 residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
             }
-            a11yEventDispatcher.startProcessing()
+            a11yEventDispatcher.startProcessing(uiAutomatorBridge)
             runningState.value = true
             startTimestamp = System.currentTimeMillis()
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -156,7 +156,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
-        a11yEventDispatcher.destroy()
+        //  a11yEventDispatcher.destroy()
         if (::residentTaskScheduler.isInitialized) {
             residentTaskScheduler.release()
         }

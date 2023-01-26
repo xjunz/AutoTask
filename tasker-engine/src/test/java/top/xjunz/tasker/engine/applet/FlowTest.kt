@@ -65,7 +65,7 @@ internal class FlowTest {
                 }
             }
         }
-        mockTask.enable(object : XTask.OnStateChangedListener {
+        mockTask.enable(object : XTask.TaskStateListener {
             override fun onStarted(runtime: TaskRuntime) {
                 println("---- onTaskStarted ----")
             }
@@ -103,7 +103,7 @@ internal class FlowTest {
             }
         }
         GlobalScope.launch {
-            assert(mockTask.launch(EventScope(), this, events, observer))
+            assert(mockTask.launch(EventScope(), this, events))
         }
     }
 

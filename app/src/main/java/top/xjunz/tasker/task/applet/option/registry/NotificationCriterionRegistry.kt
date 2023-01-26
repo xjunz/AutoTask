@@ -13,7 +13,6 @@ import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.NotificationFlow
 import top.xjunz.tasker.task.applet.value.VariantType
-import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
  * @author xjunz 2022/11/16
@@ -29,11 +28,11 @@ class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withValueDescriber<Collection<String>> {
             if (it.size == 1) {
                 val first = it.first()
-                PackageManagerBridge.loadPackageInfo(first)?.wrapped()?.label ?: first
+                PackageManagerBridge.loadLabelOfPackage(first)
             } else {
                 R.string.format_pkg_collection_desc.format(
                     it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                        PackageManagerBridge.loadPackageInfo(name)?.wrapped()?.label ?: name
+                        PackageManagerBridge.loadLabelOfPackage(name)
                     }.joinToString("、"), it.size
                 )
             }

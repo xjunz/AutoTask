@@ -204,9 +204,20 @@ class AppletOption(
 
     val dummyTitle get() = loadTitle(null, isInverted)
 
-    fun findResults(descriptor: ValueDescriptor): List<ValueDescriptor> {
+    /**
+     * Non-spanned title considering inversion status of the [applet].
+     */
+    fun loadDummyTitle(applet: Applet): CharSequence? {
+        return loadTitle(null, applet.isInverted)
+    }
+
+    fun findResults(argument: ArgumentDescriptor): List<ValueDescriptor> {
         return results.filter {
-            it.type == descriptor.type && it.variantType == descriptor.variantType
+            if (argument.referenceType == null) {
+                it.valueType == argument.valueType && it.variantValueType == argument.variantValueType
+            } else {
+                it.valueType == argument.referenceType
+            }
         }
     }
 
@@ -291,7 +302,8 @@ class AppletOption(
 
     private fun composeTitle(applet: Applet?): CharSequence {
         if (applet == null) {
-            return titleResource.format(*Array(arguments.size) {
+            val res = if (isInverted) invertedTitleResource else titleResource
+            return res.format(*Array(arguments.size) {
                 arguments[it].substitution
             })
         }
@@ -348,15 +360,54 @@ class AppletOption(
         return this
     }
 
-    inline fun <reified T> withArgument(
+    /**
+     * An argument whose value and ref type are of the same type.
+     */
+    inline fun <reified V> withUnaryArgument(
         @StringRes name: Int,
         variantType: Int = -1,
         isRef: Boolean? = null,
         @StringRes substitution: Int = -1,
     ): AppletOption {
+        return withArgument(name, V::class.java, null, variantType, isRef, substitution)
+    }
+
+    /**
+     * An argument whose value and argument are of different types.
+     */
+    inline fun <reified V, reified Ref> withBinaryArgument(
+        @StringRes name: Int,
+        variantValueType: Int = -1,
+        @StringRes substitution: Int = -1
+    ): AppletOption {
+        return withArgument(
+            name,
+            V::class.java,
+            Ref::class.java,
+            variantValueType,
+            null,
+            substitution
+        )
+    }
+
+    fun withArgument(
+        @StringRes name: Int,
+        valueType: Class<*>,
+        referenceType: Class<*>?,
+        variantType: Int,
+        isRef: Boolean?,
+        @StringRes substitution: Int,
+    ): AppletOption {
         if (arguments == Collections.EMPTY_LIST) arguments = mutableListOf()
         (arguments as MutableList<ArgumentDescriptor>).add(
-            ArgumentDescriptor(name, substitution, T::class.java, variantType, isRef)
+            ArgumentDescriptor(
+                name,
+                substitution,
+                valueType,
+                referenceType,
+                variantType,
+                isRef
+            )
         )
         return this
     }
@@ -364,19 +415,22 @@ class AppletOption(
     /**
      * Describe [Applet.value] as an argument.
      */
-    inline fun <reified T> withValueArgument(
+    inline fun <reified V> withValueArgument(
         @StringRes name: Int,
-        variantType: Int = -1
+        variantValueType: Int = -1
     ): AppletOption {
-        return withArgument<T>(name, variantType, false)
+        return withUnaryArgument<V>(name, variantValueType, false)
     }
 
-    inline fun <reified T> withRefArgument(
+    /**
+     * An argument which is a reference.
+     */
+    inline fun <reified Ref> withRefArgument(
         @StringRes name: Int,
-        variantType: Int = -1,
+        variantValueType: Int = -1,
         @StringRes substitution: Int = -1,
     ): AppletOption {
-        return withArgument<T>(name, variantType, true, substitution)
+        return withUnaryArgument<Ref>(name, variantValueType, true, substitution)
     }
 
     inline fun <T : Any> withValueChecker(crossinline checker: (T?) -> String?): AppletOption {

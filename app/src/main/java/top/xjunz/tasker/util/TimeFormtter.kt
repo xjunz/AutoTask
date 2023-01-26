@@ -14,7 +14,7 @@ import java.util.*
  */
 
 private val dateFormat by lazy {
-    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.getDefault())
 }
 
 fun Long.formatTime(): String = dateFormat.format(Date(this))

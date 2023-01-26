@@ -135,7 +135,7 @@ class AppletOperationMenuHelper(
                 menu.findItem(R.id.item_toggle_ability).title = R.string.enable.text
             }
             popup.setOnMenuItemClickListener {
-                onMenuItemClick(anchor, applet, it.itemId, it.title)
+                triggerMenuItem(anchor, applet, it.itemId, it.title)
             }
         }
         return popup
@@ -191,7 +191,7 @@ class AppletOperationMenuHelper(
         return true
     }
 
-    fun onMenuItemClick(
+    fun triggerMenuItem(
         anchor: View?,
         applet: Applet,
         id: Int,
@@ -202,7 +202,7 @@ class AppletOperationMenuHelper(
         when (id) {
             R.id.item_open_in_new -> {
                 val dialog = FlowEditorDialog().init(
-                    applet as Flow, viewModel.isSelectingReferent
+                    applet as Flow, viewModel.isSelectingArgument
                 ).doAfterFlowEdited { edited ->
                     if (edited.isEmpty() && applet.isContainer) {
                         // If all children in a container is removed, remove the container as well
@@ -221,10 +221,10 @@ class AppletOperationMenuHelper(
                 }.setStaticError(viewModel.staticError).doSplit {
                     viewModel.splitContainerFlow(applet)
                 }
-                if (viewModel.isSelectingReferent) {
-                    dialog.doOnReferentSelected(viewModel.doOnRefSelected)
-                    dialog.setReferentToSelect(
-                        viewModel.referentAnchor, viewModel.referentDescriptor, null
+                if (viewModel.isSelectingArgument) {
+                    dialog.doOnArgumentSelected(viewModel.doOnRefSelected)
+                    dialog.setArgumentToSelect(
+                        viewModel.referentAnchor, viewModel.argumentDescriptor, null
                     )
                 }
                 dialog.show(fm)

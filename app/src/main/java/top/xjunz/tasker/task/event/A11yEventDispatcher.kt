@@ -8,6 +8,7 @@ import android.app.Notification
 import android.os.Handler
 import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
+import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import top.xjunz.tasker.BuildConfig
@@ -38,13 +39,13 @@ class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
 
     private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
-    fun startProcessing() {
-        uiAutomatorBridge.addOnAccessibilityEventListener {
+    fun startProcessing(bridge: UiAutomatorBridge) {
+        bridge.addOnAccessibilityEventListener {
             launch {
                 processAccessibilityEvent(it)
             }
         }
-        uiAutomatorBridge.startReceivingEvents()
+        bridge.startReceivingEvents()
     }
 
     override fun destroy() {
