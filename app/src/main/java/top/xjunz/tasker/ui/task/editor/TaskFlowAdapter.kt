@@ -6,7 +6,6 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
@@ -30,13 +29,12 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
 
     private val viewModel: FlowEditorViewModel by fragment.viewModels()
 
-    private val globalViewModel: GlobalFlowEditorViewModel by fragment.activityViewModels()
-
-    private val itemViewBinder = FlowItemViewBinder(viewModel, globalViewModel)
+    private val itemViewBinder = FlowItemViewBinder(viewModel)
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    val menuHelper = AppletOperationMenuHelper(viewModel, fragment.childFragmentManager)
+    val menuHelper =
+        AppletOperationMenuHelper(viewModel, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -64,9 +62,9 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
                 return super.shouldBeInvolvedInSwipe(next, origin)
             }
 
-            override fun doRemove(parent: Flow, from: Applet) {
+            override fun doRemove(parent: Flow, from: Applet): Set<Applet> {
+                val removed = mutableSetOf<Applet>()
                 if (viewModel.isMultiSelected(from)) {
-                    val removed = mutableSetOf<Applet>()
                     viewModel.selections.forEach {
                         if (it.requiredIndex == -1) {
                             parent.remove(it)
@@ -76,7 +74,8 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
                     if (viewModel.selections.removeAll(removed))
                         viewModel.selectionLiveData.notifySelfChanged()
                 }
-                super.doRemove(parent, from)
+                removed.addAll(super.doRemove(parent, from))
+                return removed
             }
         }).attachToRecyclerView(recyclerView)
         // Always clear single selection on attached

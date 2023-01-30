@@ -135,7 +135,7 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x00_00)
     val isType = appletOption(R.string.with_type) {
         nodeCriterion<String> { t, v ->
-            t.className == v
+            t.className?.toString() == v
         }
     }.withPresetArray(R.array.a11y_class_names, R.array.a11y_class_full_names)
 
@@ -151,49 +151,49 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x01_00)
     val textEquals = invertibleAppletOption(R.string.with_text) {
         nodeCriterion<String> { t, v ->
-            t.text == v
+            t.text?.toString() == v
         }
     }
 
     @AppletOrdinal(0x01_01)
     val textStartsWith = invertibleAppletOption(R.string.text_starts_with) {
         nodeCriterion<String> { t, v ->
-            t.text?.startsWith(v) == true
+            t.text?.toString()?.startsWith(v) == true
         }
     }
 
     @AppletOrdinal(0x01_02)
     val textEndsWith = invertibleAppletOption(R.string.text_ends_with) {
         nodeCriterion<String> { t, v ->
-            t.text?.endsWith(v) == true
+            t.text?.toString()?.endsWith(v) == true
         }
     }
 
     @AppletOrdinal(0x01_03)
     val textLengthRange = appletOption(R.string.in_length_range) {
-        numberRangeCriterion<AccessibilityNodeInfo, Int> {
-            it.text?.length ?: -1
+        numberRangeCriterion<UiObjectTarget, Int> {
+            it.source.text?.length ?: -1
         }
     }.withDefaultRangeDescriber()
 
     @AppletOrdinal(0x01_04)
     val textContains = appletOption(R.string.contains_text) {
         nodeCriterion<String> { t, v ->
-            t.text?.contains(v) == true
+            t.text?.toString()?.contains(v) == true
         }
     }
 
     @AppletOrdinal(0x01_05)
     val textPattern = invertibleAppletOption(R.string.text_matches_pattern) {
         nodeCriterion<String> { t, v ->
-            t.text?.matches(Regex(v)) == true
+            t.text?.toString()?.matches(Regex(v)) == true
         }
     }
 
     @AppletOrdinal(0x01_06)
     val contentDesc = appletOption(R.string.content_desc) {
         nodeCriterion<String> { t, v ->
-            t.contentDescription == v
+            t.contentDescription?.toString() == v
         }
     }.withTitleModifier("Content Description")
 

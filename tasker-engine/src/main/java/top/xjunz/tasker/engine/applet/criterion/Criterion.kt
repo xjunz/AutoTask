@@ -7,6 +7,7 @@ package top.xjunz.tasker.engine.applet.criterion
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.applet.base.ContainerFlow
 import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
@@ -20,21 +21,32 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
-    protected inline val isScoped get() = parent is ScopeFlow<*>
-
     protected open fun T.getActualValue(): Any? {
         return this
+    }
+
+    protected val isScoped by lazy {
+        var p = parent
+        while (p is ContainerFlow) {
+            p = p?.parent
+        }
+        p is ScopeFlow<*>
     }
 
     private fun getTarget(runtime: TaskRuntime): T {
         if (isScoped) {
             return runtime.getTarget()
         }
-        return runtime.getArgument(this, 0)!!.casted()
+        val arg = runtime.getArgument(this, 0)?.casted<T>()
+        if (arg != null) {
+            runtime.updateFingerprint(arg)
+            return arg
+        }
+        return Unit.casted()
     }
 
     /**
-     * The default value when [value] is null. The default implementation is the second argument.
+     * The default value when [value] is null.
      */
     open fun getDefaultValue(runtime: TaskRuntime): V {
         throw NotImplementedError("Default value is not defined while value is null!")
@@ -42,11 +54,13 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val expected = value?.casted() ?: getDefaultValue(runtime)
-        val target = getTarget(runtime)
-        return if (isInverted != matchTarget(target, expected)) {
+        val actual = getTarget(runtime)
+        return if (isInverted != matchTarget(actual, expected)) {
             AppletResult.SUCCESS
+        } else if (actual === Unit) {
+            AppletResult.FAILURE
         } else {
-            AppletResult.failed(expected, target.getActualValue())
+            AppletResult.failed(actual.getActualValue())
         }
     }
 

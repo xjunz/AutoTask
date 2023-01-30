@@ -6,6 +6,7 @@ package top.xjunz.tasker.ktx
 
 import android.graphics.Typeface
 import android.os.Build
+import android.os.SystemClock
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
@@ -14,6 +15,7 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.core.text.set
 import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.util.AntiMonkeyUtil
 
 /**
  * @author xjunz 2022/11/25
@@ -54,13 +56,22 @@ fun CharSequence.linked(url: String) = setSpan(URLSpan(url))
 
 fun CharSequence.clickable(underlined: Boolean = false, doOnClick: (View) -> Unit) =
     setSpan(object : ClickableSpan() {
+
+        var prevClickTimestamp = -1L
+
+        override fun onClick(v: View) {
+            val uptime = SystemClock.uptimeMillis()
+            if (prevClickTimestamp == -1L
+                || uptime - prevClickTimestamp >= AntiMonkeyUtil.THRESHOLD_INTERVAL
+            ) {
+                doOnClick(v)
+                prevClickTimestamp = uptime
+            }
+        }
+
         override fun updateDrawState(ds: TextPaint) {
             super.updateDrawState(ds)
             ds.isUnderlineText = underlined
-        }
-
-        override fun onClick(widget: View) {
-            doOnClick(widget)
         }
     })
 

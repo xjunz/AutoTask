@@ -19,7 +19,9 @@ class ArgumentCriterion<T : Any, V : Any, Arg : Any>(
 ) : Criterion<T, V>() {
 
     override fun getDefaultValue(runtime: TaskRuntime): V {
-        return mapper(runtime.getArgument(this, if (isScoped) 0 else 1)!!.casted())
+        val value = mapper(runtime.getArgument(this, if (isScoped) 0 else 1)!!.casted())
+        runtime.updateFingerprint(value)
+        return value
     }
 
     override fun matchTarget(target: T, value: V): Boolean {

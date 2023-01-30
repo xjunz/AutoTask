@@ -7,7 +7,8 @@ package top.xjunz.tasker.ui.task.editor
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
+import androidx.core.text.parseAsHtml
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogSnapshotSelectorBinding
 import top.xjunz.tasker.databinding.ItemTaskSnapshotBinding
@@ -15,6 +16,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.formatMinSecMills
 import top.xjunz.tasker.util.formatTime
 
 /**
@@ -25,7 +27,7 @@ import top.xjunz.tasker.util.formatTime
 class TaskSnapshotSelectorDialog : BaseBottomSheetDialog<DialogSnapshotSelectorBinding>() {
 
     private val gvm by lazy {
-        requireActivity().viewModels<GlobalFlowEditorViewModel>().value
+        requireParentFragment().casted<FlowEditorDialog>().gvm
     }
 
     private val adapter by lazy {
@@ -35,21 +37,24 @@ class TaskSnapshotSelectorDialog : BaseBottomSheetDialog<DialogSnapshotSelectorB
                 dismiss()
             }
         }) { binding, index, snapshot ->
-            binding.root.isSelected = gvm.currentSnapshotIndex.value == index
-            binding.tvInfo.text = R.string.format_task_snapshot_info_2.format(
-                snapshot.startTimestamp.formatTime(),
-                if (snapshot.isRunning) "-" else snapshot.endTimestamp.formatTime(),
-                if (snapshot.isRunning) "-" else "1毫秒"
-            )
-            if (snapshot.isRunning) {
-                binding.tvResult.setText(R.string.running)
-                binding.tvResult.setDrawableStart(R.drawable.ic_help_24px)
-            } else if (snapshot.isSuccessful) {
-                binding.tvResult.setText(R.string.succeeded)
-                binding.tvResult.setDrawableStart(R.drawable.ic_check_circle_24px)
+            binding.root.isSelected = gvm.currentSnapshotIndex eq index
+            binding.tvInfo.text = if (snapshot.isSuccessful && snapshot.duration != 0) {
+                R.string.format_task_snapshot_info_2.format(
+                    snapshot.startTimestamp.formatTime(), formatMinSecMills(snapshot.duration)
+                )
             } else {
-                binding.tvResult.setText(R.string.failed)
-                binding.tvResult.setDrawableStart(R.drawable.ic_cancel_24px)
+                snapshot.startTimestamp.formatTime()
+            }.parseAsHtml()
+
+            if (snapshot.isRunning) {
+                binding.ivResult.contentDescription = R.string.running.str
+                binding.ivResult.setImageResource(R.drawable.ic_help_24px)
+            } else if (snapshot.isSuccessful) {
+                binding.ivResult.contentDescription = R.string.succeeded.str
+                binding.ivResult.setImageResource(R.drawable.ic_check_circle_24px)
+            } else {
+                binding.ivResult.contentDescription = R.string.failed.str
+                binding.ivResult.setImageResource(R.drawable.ic_cancel_24px)
             }
             binding.tvNumber.text = (index + 1).toString()
         }

@@ -96,17 +96,16 @@ inline val Applet.hierarchy: Long get() = hierarchyInAncestor(null)
 fun Applet.hierarchyInAncestor(ancestor: Flow?): Long {
     var hierarchy = 0L
     var p: Applet? = this
-    var d = 0
-    while (p != null && p != ancestor) {
+    while (p != null && p != ancestor && p.index >= 0) {
         // Note: We need index + 1, because the index starts from 0. Zero does not change
         // hierarchy value when it's left shifted.
-        hierarchy = hierarchy or (p.index + 1 shl d++ * Applet.FLOW_CHILD_COUNT_BITS).toLong()
+        hierarchy = hierarchy shl Applet.FLOW_CHILD_COUNT_BITS or (p.index + 1L)
         p = p.parent
     }
     return hierarchy
 }
 
-fun Flow.requireChild(hierarchy: Long): Applet {
+fun Flow.findChild(hierarchy: Long): Applet {
     var child: Applet = this
     for (d in 0 until Applet.MAX_FLOW_NESTED_DEPTH) {
         val index =

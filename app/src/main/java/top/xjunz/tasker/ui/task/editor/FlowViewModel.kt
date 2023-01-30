@@ -56,9 +56,9 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
         ref.addAll(flatmapFlow())
     }
 
-    fun updateChildrenIndexesIfNeeded(flow: Flow): Boolean {
-        if (flow.depthInAncestor(this.flow) <= 2) {
-            flow.forEachIndexed { index, applet ->
+    fun updateChildrenIndexesIfNeeded(parent: Flow): Boolean {
+        if (parent.depthInAncestor(flow) <= 2) {
+            parent.forEachIndexed { index, applet ->
                 applet.index = index
                 onAppletChanged.value = applet
             }

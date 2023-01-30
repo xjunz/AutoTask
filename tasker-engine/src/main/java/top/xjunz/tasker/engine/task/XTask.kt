@@ -91,7 +91,7 @@ class XTask {
     }
 
     /**
-     * Halt the runtime if is running.
+     * Halt the runtime if running.
      */
     fun halt() {
         currentRuntime?.halt()
@@ -105,17 +105,16 @@ class XTask {
         override fun onAppletStarted(victim: Applet, runtime: TaskRuntime) {
             if (victim is Flow)
                 logcat(indent(runtime.tracker.depth) + victim.isAndToString() + victim)
+            snapshot.current = runtime.tracker.getCurrentHierarchy()
         }
 
         override fun onAppletTerminated(victim: Applet, runtime: TaskRuntime) {
             val indents = indent(runtime.tracker.depth)
             logcat(indents + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
             if (!runtime.isSuccessful) {
-                val failure = runtime.getFailure(victim)
-                if (failure != null) {
-                    logcat(indents + "expected: ${failure.first}, actual: ${failure.second}")
-                }
+                logcat(indents + "actual: ${runtime.result.actual}")
             }
+            snapshot.current = -1
             if (victim is When) {
                 if (runtime.isSuccessful) {
                     eventHit = true

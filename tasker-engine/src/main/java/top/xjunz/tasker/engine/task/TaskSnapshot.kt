@@ -6,8 +6,13 @@ package top.xjunz.tasker.engine.task
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.ArrayMap
 import androidx.core.os.ParcelCompat
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.runtime.AppletIndexer
 
 /**
  * @author xjunz 2023/01/24
@@ -28,6 +33,42 @@ class TaskSnapshot(
 
     var failures: MutableSet<Failure> = mutableSetOf()
 
+    var current: Long = -1
+
+    val duration: Int get() = (endTimestamp - startTimestamp).toInt()
+
+    lateinit var succeededApplets: List<Applet>
+
+    lateinit var failedApplets: Map<Applet, Failure>
+
+    var currentApplet: Applet? =null
+
+    private var appletsLoaded = false
+
+    fun loadApplets(root: RootFlow) {
+        if (appletsLoaded) return
+        succeededApplets = successes.map {
+            getAppletWithHierarchy(root, it)
+        }
+        val failed = ArrayMap<Applet, Failure>()
+        failures.forEach {
+            failed[getAppletWithHierarchy(root, it.hierarchy)] = it
+        }
+        failedApplets = failed
+        if (current != -1L)
+            currentApplet = getAppletWithHierarchy(root, current)
+        appletsLoaded = true
+    }
+
+    private fun getAppletWithHierarchy(root: RootFlow, hierarchy: Long): Applet {
+        val parsed = AppletIndexer.parse(hierarchy)
+        var applet: Applet = root
+        parsed.forEach { i ->
+            applet = (applet as Flow)[i]
+        }
+        return applet
+    }
+
     constructor(parcel: Parcel) : this(
         parcel.readLong(),
         parcel.readLong(),
@@ -40,6 +81,7 @@ class TaskSnapshot(
             Failure::class.java.classLoader,
             Failure::class.java
         )!!.toMutableSet()
+        current = parcel.readLong()
     }
 
 
@@ -50,6 +92,7 @@ class TaskSnapshot(
         parcel.writeByte(if (isSuccessful) 1 else 0)
         parcel.writeLongArray(successes.toLongArray())
         parcel.writeParcelableArray(failures.toTypedArray(), 0)
+        parcel.writeLong(current)
     }
 
     override fun describeContents(): Int {

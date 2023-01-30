@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.runtime.LocalTaskManager
@@ -21,6 +22,10 @@ import top.xjunz.tasker.task.storage.TaskStorage
  */
 class TaskShowcaseViewModel : ViewModel() {
 
+    val requestTrackTask = MutableLiveData<XTask>()
+
+    val requestEditTask = MutableLiveData<Pair<XTask, Flow?>>()
+
     val isPaused = MutableLiveData<Boolean>()
 
     val requestDeleteTask = MutableLiveData<XTask>()
@@ -29,7 +34,7 @@ class TaskShowcaseViewModel : ViewModel() {
 
     val appbarHeight = MutableLiveData<Int>()
 
-    val bottomBarHeight = MutableLiveData<Int>()
+    val paddingBottom = MutableLiveData<Int>()
 
     val requestToggleTask = MutableLiveData<XTask>()
 

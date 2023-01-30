@@ -13,7 +13,7 @@ import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 /**
  * @author xjunz 2022/08/25
  */
-class EventCriterion(eventType: Int) : Applet() {
+class EventFilter(eventType: Int) : Applet() {
 
     init {
         value = eventType
@@ -26,7 +26,7 @@ class EventCriterion(eventType: Int) : Applet() {
             it.type == value
         }
         return if (hit == null) {
-            AppletResult.failed(value, runtime.events)
+            AppletResult.failed(runtime.events.joinToString())
         } else {
             val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)
             if (hit.type == Event.EVENT_ON_NOTIFICATION_RECEIVED) {

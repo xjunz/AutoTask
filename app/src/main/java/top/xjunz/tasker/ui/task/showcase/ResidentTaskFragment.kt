@@ -22,6 +22,9 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTransient(viewModel.onNewTaskAdded) {
+            // This may happen when the page is not yet enter its stage while
+            // a new task is added.
+            if (taskList.contains(it)) return@observeTransient
             taskList.add(it)
             if (taskList.size == 1) togglePlaceholder(false)
             adapter.notifyItemInserted(taskList.lastIndex)

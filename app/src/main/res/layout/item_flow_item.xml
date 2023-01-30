@@ -81,12 +81,12 @@
             android:id="@+id/tv_desc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:layout_marginEnd="8dp"
             android:duplicateParentState="true"
             android:ellipsize="end"
             android:maxLines="5"
-            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+            android:textColor="?android:textColorTertiary"
             app:layout_constraintBottom_toTopOf="@+id/tv_comment"
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
@@ -114,9 +114,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@drawable/bg_selectable_circle"
-            android:contentDescription="@{@string/invert}"
             android:scaleType="centerInside"
-            app:contentPadding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -135,8 +133,7 @@
             app:layout_constraintEnd_toStartOf="@+id/ib_action"
             app:layout_constraintStart_toEndOf="@+id/bullet"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title"
-            tools:visibility="visible">
+            app:layout_constraintTop_toBottomOf="@+id/tv_title">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/cg_refs"
@@ -148,7 +145,7 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_referent_1"
-                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checkable="true"
@@ -158,7 +155,7 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_referent_2"
-                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checkable="true"
@@ -168,7 +165,7 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_referent_3"
-                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checkable="true"

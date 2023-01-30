@@ -8,7 +8,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -30,7 +29,6 @@ import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
-import top.xjunz.tasker.ui.task.editor.GlobalFlowEditorViewModel
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import java.util.*
 
@@ -75,11 +73,11 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val vm by viewModels<InnerViewModel>()
 
-    private val gvm by activityViewModels<GlobalFlowEditorViewModel>()
-
     private val pvm by lazy {
-        requireParentFragment().viewModels<FlowEditorViewModel>().value
+        getParentViewModel<FlowEditorDialog, FlowEditorViewModel>()
     }
+
+    private val gvm get() = pvm.global
 
     private fun showValueInputDialog(which: Int, arg: ValueDescriptor) {
         when (arg.variantValueType) {
@@ -142,7 +140,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     }
 
     private fun showReferenceSelectorDialog(whichArg: Int, arg: ArgumentDescriptor, id: String?) {
-        FlowEditorDialog().init(gvm.root, true)
+        FlowEditorDialog().init(pvm.task, gvm.root, true, gvm)
             .setArgumentToSelect(applet, arg, id)
             .doOnArgumentSelected { referent ->
                 gvm.referenceEditor.setReference(applet, arg, whichArg, referent)

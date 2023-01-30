@@ -9,9 +9,7 @@ import android.content.Intent
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ContextBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
-import top.xjunz.tasker.engine.applet.action.binaryArgValueAction
-import top.xjunz.tasker.engine.applet.action.singleArgAction
-import top.xjunz.tasker.engine.applet.action.unaryArgValueAction
+import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.privileged.ActivityManagerUtil
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
@@ -55,7 +53,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0003)
     val launchActivity = appletOption(R.string.launch_activity) {
-        unaryArgValueAction<String> {
+        valueAction<String> {
             ContextBridge.getContext().startActivity(
                 Intent().setComponent(ComponentName.unflattenFromString(it))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

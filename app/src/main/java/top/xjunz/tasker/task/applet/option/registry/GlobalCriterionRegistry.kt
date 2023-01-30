@@ -17,18 +17,17 @@ import top.xjunz.tasker.task.applet.criterion.simpleNumberRangeCriterion
  */
 class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-
     @AppletOrdinal(0x0000)
     val isScreenPortrait = invertibleAppletOption(R.string.screen_orientation_portrait) {
-        PropertyCriterion<Unit> {
+        PropertyCriterion<Any> {
             val realSize = DisplayManagerBridge.size
-            realSize.x > realSize.y
+            realSize.x < realSize.y
         }
     }
 
     @AppletOrdinal(0x0010)
     val isBatteryCharging = invertibleAppletOption(R.string.is_charging) {
-        PropertyCriterion<Unit> {
+        PropertyCriterion<Any> {
             BatteryManagerBridge.isCharging
         }
     }

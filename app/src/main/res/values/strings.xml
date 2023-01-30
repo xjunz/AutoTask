@@ -119,7 +119,7 @@
     <string name="custom_task">自定义任务</string>
     <string name="caption_custom_task">管理或创建自定义任务</string>
     <string name="task_list">任务列表</string>
-    <string name="create_task">创建任务</string>
+    <string name="add_task">添加任务</string>
     <string name="turn_on_floating_assistant">打开悬浮助手</string>
     <string name="dismiss">关闭</string>
     <string name="select">选中</string>
@@ -253,7 +253,7 @@
     <string name="error_merge_single_applet">选中多个规则才可以合并哦！</string>
     <string name="quit_multi_selection">退出多选模式</string>
     <string name="too_deeply_nested">合并失败，请勿嵌套过深！</string>
-    <string name="prompt_split_container_flow">确定要解散当前规则组吗？</string>
+    <string name="prompt_split_container_flow">确定要解散当前规则组吗？这可能导致规则的逻辑发生变化。</string>
     <string name="unable_to_merge">无法合并所选规则</string>
     <string name="ui_object_operations">控件操作</string>
     <string name="format_copy_text">复制%s到剪贴板</string>
@@ -308,10 +308,9 @@
     <string name="error_not_removable">无法移除此规则！</string>
     <string name="not_removable">不可移除</string>
     <string name="resident_task">常驻任务</string>
-    <string name="desc_long_running_task">长期在后台运行的轻量级任务，由事件驱动</string>
-    <string name="desc_oneshot_task">单次运行的(耗时)任务，执行完成后即停止，用户可随时启动</string>
+    <string name="desc_long_running_task">创建长期在后台运行的轻量级任务，常驻任务由事件驱动</string>
+    <string name="desc_oneshot_task">创建单次运行的(耗时)任务，执行完成后即停止，用户可随时重新启动</string>
     <string name="oneshot_task">单次任务</string>
-    <string name="oneshot_task_creation_shortcut">快速创建单次任务</string>
     <string name="quick_click_mode">连点器</string>
     <string name="record_gesture">录制手势</string>
     <string name="tip_edit_task_metadata">* 您稍后仍然可以修改以上信息</string>
@@ -322,12 +321,11 @@
     <string name="enabled">已启用</string>
     <string name="start_task">启动任务</string>
     <string name="preload_task">预置任务</string>
-    <string name="track_task_flow">任务追踪</string>
     <string name="format_error_code">发生错误(%d)</string>
     <string name="format_error_occurred">发生错误: %s</string>
     <string name="import_tasks">导入任务</string>
     <string name="desc_import_tasks">从本地文件中导入任务</string>
-    <string name="prompt_disable_task">你确定要禁用该任务吗？</string>
+    <string name="prompt_disable_task">你确定要停用该任务吗？</string>
     <string name="prompt_enable_task">你确定要启用该任务吗？</string>
     <string name="nothing_here">空空如也</string>
     <string name="desc_preload_tasks">添加应用内预置的任务</string>
@@ -336,7 +334,7 @@
     <string name="added">已添加</string>
     <string name="format_new_task_added">已添加任务⌈%s⌋</string>
     <string name="format_task_removed">已移除任务⌈%s⌋</string>
-    <string name="prompt_delete_task">你确定要删除此任务吗？此操作不可撤销。</string>
+    <string name="prompt_delete_task">你确定要删除此任务吗？<b>此操作不可撤销</b>。</string>
     <string name="format_equals_to">等于%s</string>
     <string name="error_require_positive_num">请输入大于0的数</string>
     <string name="hint_millisecond">毫秒(1秒=1000毫秒)</string>
@@ -398,13 +396,14 @@
     <string name="app_info">应用信息</string>
     <string name="format_task_snapshots">历史运行记录（%d/%d）</string>
     <string name="no_task_snapshots">该任务没有运行记录</string>
-    <string name="format_task_snapshot_info_1">开始时间: %s\n结束时间: %s\n运行结果: %s</string>
-    <string name="format_task_snapshot_info_2">开始时间: \n%s\n结束时间: \n%s\n用时: %s</string>
+    <string name="format_task_snapshot_info_1"><![CDATA[<b>开始时间</b>: %s<br><b>结束时间</b>: %s<br><b>运行结果</b>: %s]]></string>
+    <string name="format_task_snapshot_info_2"><![CDATA[%s<br><b>用时</b>: %s]]></string>
+    <string name="format_task_snapshot_info_3"><![CDATA[<b>开始时间</b>: <br>%s]]></string>
     <string name="succeeded">成功</string>
-    <string name="icons">图例</string>
+    <string name="legend">图例</string>
     <string name="executed_successfully">执行成功</string>
     <string name="executed_unsuccessfully">执行失败</string>
-    <string name="not_executed_or_skipped">未执行或已跳过</string>
+    <string name="not_executed_or_skipped">未执行</string>
     <string name="task_snapshots">运行记录</string>
     <string name="running">运行中</string>
     <string name="is_certain_app">%s是%s</string>
@@ -413,4 +412,5 @@
     <string name="format_failure_value">错误值：%s</string>
     <string name="format_failure_exception">发生错误：%s</string>
     <string name="a_certain_app">某个应用</string>
+    <string name="executing">执行中</string>
 </resources>

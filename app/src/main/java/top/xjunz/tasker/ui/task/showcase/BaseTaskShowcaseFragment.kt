@@ -5,15 +5,12 @@
 package top.xjunz.tasker.ui.task.showcase
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -28,7 +25,6 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseFragment
-import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -66,44 +62,14 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                     toast(R.string.no_task_snapshots)
                     return@setAntiMoneyClickListener
                 }
-                spyOnFragment(
-                    FlowEditorDialog().init(task).setTrackMode().show(childFragmentManager)
-                )
+                viewModel.requestTrackTask.value = task
             }
             binding.ibEdit.setAntiMoneyClickListener {
-                val task = taskList[adapterPosition]
-                val prevChecksum = task.checksum
-                spyOnFragment(FlowEditorDialog().init(task).doOnTaskEdited {
-                    viewModel.updateTask(prevChecksum, task)
-                }.show(childFragmentManager))
+                viewModel.requestEditTask.value = taskList[adapterPosition] to null
             }
         }
     }
 
-    private fun spyOnFragment(fragment: Fragment) {
-        val tag = fragment.tag
-        childFragmentManager.registerFragmentLifecycleCallbacks(
-            object : FragmentLifecycleCallbacks() {
-                override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
-                    super.onFragmentDestroyed(fm, f)
-                    if (f.tag === tag) {
-                        viewModel.isPaused.value = false
-                        childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
-                    }
-                }
-
-                override fun onFragmentAttached(
-                    fm: FragmentManager,
-                    f: Fragment,
-                    context: Context
-                ) {
-                    if (f.tag === tag) {
-                        viewModel.isPaused.value = true
-                    }
-                }
-            }, false
-        )
-    }
 
     protected inner class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -145,7 +111,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.msEnabled.setText(R.string.not_is_enabled)
                 b.wave.fadeOut()
             }
-            if (viewModel.isPaused.value == true) {
+            if (viewModel.isPaused.isTrue) {
                 b.wave.pause()
             } else {
                 b.wave.resume()
@@ -167,20 +133,26 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         observe(viewModel.appbarHeight) {
             binding.rvTaskList.updatePadding(top = it)
         }
-        observe(viewModel.bottomBarHeight) {
+        observe(viewModel.paddingBottom) {
             binding.rvTaskList.updatePadding(bottom = it)
         }
         val mvm = peekMainViewModel()
         observe(mvm.allTaskLoaded) {
             taskList.clear()
             taskList.addAll(initTaskList())
-            binding.rvTaskList.adapter = adapter
-            if (taskList.isEmpty()) {
-                togglePlaceholder(true)
+            if (viewModel.paddingBottom.isNull()) {
+                binding.rvTaskList.doOnPreDraw {
+                    binding.rvTaskList.beginAutoTransition(MaterialFadeThrough())
+                    binding.rvTaskList.adapter = adapter
+                }
+            } else {
+                binding.rvTaskList.adapter = adapter
             }
+            if (taskList.isEmpty()) togglePlaceholder(true)
         }
         observe(mvm.isServiceRunning) {
             adapter.notifyItemRangeChanged(0, taskList.size, 0)

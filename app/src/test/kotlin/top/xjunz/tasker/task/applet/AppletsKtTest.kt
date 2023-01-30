@@ -37,12 +37,15 @@ internal class AppletsKtTest {
         val d1i1 = Flow()
         root.add(d1)
         root.add(d1i1)
+        val d1i2 = Flow()
+        root.add(d1i2)
         val d2 = Flow()
         d1.add(d2)
         root.buildHierarchy()
-        assert(root.requireChild(d2.hierarchy) === d2)
-        assert(root.requireChild(d1i1.hierarchy) === d1i1)
-        assert(root.requireChild(0) === root)
+        assert(root.findChild(d2.hierarchy) === d2)
+        assert(root.findChild(d1i1.hierarchy) === d1i1)
+        assert(root.findChild(d1i2.hierarchy) === d1i2)
+        assert(root.findChild(0) === root)
     }
 
     @Test

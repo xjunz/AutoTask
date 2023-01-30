@@ -30,11 +30,6 @@
         <item name="android:paddingBottom">2dp</item>
     </style>
 
-    <style name="Sade">
-        <item name="android:windowEnterAnimation">@anim/dialog_window_enter</item>
-        <item name="android:windowExitAnimation">@anim/dialog_window_exit</item>
-    </style>
-
     <style name="BottomSheetDialogStyle" parent="ThemeOverlay.Material3.DayNight.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
         <item name="android:backgroundDimAmount">0.32</item>

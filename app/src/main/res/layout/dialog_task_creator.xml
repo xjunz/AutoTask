@@ -16,7 +16,7 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/create_task"
+            android:text="@string/add_task"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             android:textColor="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
@@ -137,17 +137,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     app:dividerColor="@color/material_on_surface_stroke" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/oneshot_task_creation_shortcut"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="?colorPrimary"
-                    android:visibility="gone" />
 
                 <GridLayout
                     android:layout_width="match_parent"

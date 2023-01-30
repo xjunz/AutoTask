@@ -8,12 +8,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.base.StaticError
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.dto.ChecksumUtil
 import top.xjunz.tasker.engine.task.XTask
+import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
@@ -30,13 +29,17 @@ import top.xjunz.tasker.task.storage.TaskStorage
  */
 class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
-    lateinit var task: XTask
-
     val metadata: XTask.Metadata by lazy {
         task.metadata.copy()
     }
 
-    lateinit var factory: AppletOptionFactory
+    lateinit var global: GlobalFlowEditorViewModel
+
+    lateinit var task: XTask
+
+    var flowToNavigate: Long = -1
+
+    val factory = AppletOptionFactory
 
     val selectionLiveData = MutableLiveData(Flow())
 
@@ -56,7 +59,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showMergeConfirmation = MutableLiveData<Boolean>()
 
-    val isBase: Boolean get() = ::task.isInitialized
+    val isBase: Boolean get() = flow is RootFlow
 
     val selectedApplet = MutableLiveData<Applet>()
 
@@ -70,11 +73,13 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var onTaskCompleted: () -> Unit
 
-    lateinit var doOnRefSelected: (String) -> Unit
+    lateinit var doOnArgSelected: (String) -> Unit
 
     lateinit var doSplit: () -> Unit
 
     var staticError: StaticError? = null
+
+    var isInTrackMode: Boolean = false
 
     private fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
@@ -87,7 +92,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     }
 
     fun isSelected(applet: Applet): Boolean {
-        return selectedApplet.value == applet || isMultiSelected(applet)
+        return selectedApplet eq applet || isMultiSelected(applet)
     }
 
     fun toggleMultiSelection(applet: Applet) {
@@ -189,11 +194,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     }
 
     fun initialize(
-        appletOptionFactory: AppletOptionFactory,
         initialFlow: Flow,
         readonly: Boolean,
     ) {
-        factory = appletOptionFactory
         isReadyOnly = readonly
         flow = if (readonly) initialFlow else initialFlow.clone(factory)
     }
@@ -297,5 +300,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     fun calculateChecksum(): Long {
         return ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
+    }
+
+    fun generateDefaultFlow(taskType: Int): RootFlow {
+        val root = factory.flowRegistry.rootFlow.yield() as RootFlow
+        root.add(factory.flowRegistry.preloadFlow.yield())
+        if (taskType == XTask.TYPE_RESIDENT) {
+            val whenFlow = factory.flowRegistry.whenFlow.yield() as When
+            whenFlow.add(factory.eventRegistry.contentChanged.yield())
+            root.add(whenFlow)
+        }
+        root.add(factory.flowRegistry.ifFlow.yield())
+        root.add(factory.flowRegistry.doFlow.yield())
+        return root
     }
 }

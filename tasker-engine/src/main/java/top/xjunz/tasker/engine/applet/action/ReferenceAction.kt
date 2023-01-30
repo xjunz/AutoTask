@@ -24,7 +24,11 @@ abstract class ReferenceAction<V>(valueType: Int) : Action<V>(valueType) {
         check(references.isNotEmpty()) {
             "Need references!"
         }
-        return doWithArgs(runtime.getArguments(this), value?.casted(), runtime)
+        val args = runtime.getArguments(this)
+        args.forEach {
+            runtime.updateFingerprint(it)
+        }
+        return doWithArgs(args, value?.casted(), runtime)
     }
 }
 

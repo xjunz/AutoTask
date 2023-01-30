@@ -59,7 +59,8 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
 
         }
         binding.tvRecordGesture.setAntiMoneyClickListener {
-            FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER).show(childFragmentManager)
+            FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER)
+                .show(childFragmentManager)
         }
         binding.containerPreloadTasks.setAntiMoneyClickListener {
             PreloadTaskDialog().show(requireParentFragment().childFragmentManager)
@@ -67,7 +68,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
         observeTransient(viewModel.onMetadataEdited) { metadata ->
             val task = XTask()
             task.metadata = metadata
-            FlowEditorDialog().init(task).doOnTaskEdited {
+            FlowEditorDialog().initBase(task, false).doOnTaskEdited {
                 parentViewModel.requestAddNewTask.value = task
             }.show(parentFragmentManager)
         }

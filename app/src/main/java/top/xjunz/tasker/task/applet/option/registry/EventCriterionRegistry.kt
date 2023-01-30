@@ -8,7 +8,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.criterion.EventCriterion
+import top.xjunz.tasker.task.applet.criterion.EventFilter
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 
 /**
@@ -18,7 +18,7 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun eventFilterOption(@Event.EventType event: Int, label: Int) =
         appletOption(label) {
-            EventCriterion(event)
+            EventFilter(event)
         }.hasInnateValue()
 
     @AppletOrdinal(0)

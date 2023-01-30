@@ -92,7 +92,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
         inspector.observe(vm.showNodeTree) {
             if (rootView.isVisible == it) return@observe
             if (it) {
-                if (vm.highlightNode.value != null) {
+                if (!vm.highlightNode.isNull()) {
                     vm.currentNodeTree.value = vm.highlightNode.value
                     vm.makeToast(R.string.navigated_to_selected_node)
                 }

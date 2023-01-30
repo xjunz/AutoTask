@@ -30,7 +30,7 @@
     </style>
 
     <style name="Detail" parent="Theme.MaterialComponents.Dialog.Alert">
-        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimationSade</item>
         <item name="android:windowMinWidthMajor">80%</item>
         <item name="android:windowMinWidthMinor">70%</item>
     </style>
@@ -42,7 +42,6 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
         <item name="android:backgroundDimAmount">.3</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
@@ -53,7 +52,7 @@
     <style name="Base.FragmentDialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackground">?colorBackgroundFloating</item>
-        <item name="android:windowAnimationStyle">@style/Sade</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimationSlide</item>
     </style>
 
     <style name="Base.FragmentDialog.Min">
@@ -62,6 +61,7 @@
         <item name="android:windowMinWidthMinor">85%</item>
         <item name="android:windowMinWidthMajor">45%</item>
         <item name="android:windowElevation">6dp</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimationSade</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
@@ -81,8 +81,13 @@
         <item name="cornerSize">@dimen/corner_dialog</item>
     </style>
 
-    <style name="AlertDialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/dialog_window_enter</item>
-        <item name="android:windowExitAnimation">@anim/dialog_window_exit</item>
+    <style name="DialogAnimationSlide">
+        <item name="android:windowEnterAnimation">@anim/dialog_window_enter_slide</item>
+        <item name="android:windowExitAnimation">@anim/dialog_window_exit_slide</item>
+    </style>
+
+    <style name="DialogAnimationSade">
+        <item name="android:windowEnterAnimation">@anim/dialog_window_enter_sade</item>
+        <item name="android:windowExitAnimation">@anim/dialog_window_exit_sade</item>
     </style>
 </resources>

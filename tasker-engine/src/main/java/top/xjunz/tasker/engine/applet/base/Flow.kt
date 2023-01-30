@@ -50,6 +50,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
                 applet.apply(runtime)
             } catch (t: Throwable) {
                 if (t is CancellationException) throw t
+                t.printStackTrace()
                 AppletResult.error(t)
             }
             if (registerResultsForChildren) {

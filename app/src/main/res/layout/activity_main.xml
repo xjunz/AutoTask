@@ -277,7 +277,7 @@
                         style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/statistics"
-                        android:src="@drawable/ic_baseline_history_24" />
+                        android:src="@drawable/ic_history_24px" />
 
                     <TextView
                         android:id="@+id/tv_stats"

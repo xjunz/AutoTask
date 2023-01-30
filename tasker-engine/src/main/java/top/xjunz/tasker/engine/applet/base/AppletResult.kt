@@ -16,9 +16,6 @@ class AppletResult private constructor(private var successful: Boolean) {
     var returns: Array<out Any?>? = null
         private set
 
-    var expected: Any? = null
-        private set
-
     var actual: Any? = null
         private set
 
@@ -36,7 +33,6 @@ class AppletResult private constructor(private var successful: Boolean) {
         private fun obtain(
             isSuccessful: Boolean,
             returns: Array<out Any?>? = null,
-            expected: Any? = null,
             actual: Any? = null,
             throwable: Throwable? = null
         ): AppletResult {
@@ -44,7 +40,6 @@ class AppletResult private constructor(private var successful: Boolean) {
                 it.successful = isSuccessful
                 it.returns = returns
                 it.actual = actual
-                it.expected = expected
                 it.throwable = throwable
             }
         }
@@ -53,8 +48,8 @@ class AppletResult private constructor(private var successful: Boolean) {
             return if (returns.isNotEmpty()) obtain(true, returns) else SUCCESS
         }
 
-        fun failed(expected: Any?, actual: Any?): AppletResult {
-            return obtain(false, expected = expected, actual = actual)
+        fun failed(actual: Any?): AppletResult {
+            return obtain(false, actual = actual)
         }
 
         fun error(throwable: Throwable): AppletResult {
@@ -64,7 +59,6 @@ class AppletResult private constructor(private var successful: Boolean) {
 
     fun recycle() {
         returns = null
-        expected = null
         actual = null
         throwable = null
         Pool.release(this)

@@ -223,7 +223,7 @@ class AppletOption(
 
     private fun loadTitle(applet: Applet?, isInverted: Boolean): CharSequence? {
         if (isTitleComposite) {
-            return composeTitle(applet)
+            return composeTitle(applet, isInverted)
         }
         return if (isInverted) invertedTitle else rawTitle
     }
@@ -300,14 +300,13 @@ class AppletOption(
         return this
     }
 
-    private fun composeTitle(applet: Applet?): CharSequence {
+    private fun composeTitle(applet: Applet?, isInverted: Boolean): CharSequence {
+        val res = if (isInverted) invertedTitleResource else titleResource
         if (applet == null) {
-            val res = if (isInverted) invertedTitleResource else titleResource
             return res.format(*Array(arguments.size) {
                 arguments[it].substitution
             })
         }
-        val res = if (applet.isInverted) invertedTitleResource else titleResource
         val split = res.str.split("%s")
         var title: CharSequence = split[0]
         for (i in 1..split.lastIndex) {

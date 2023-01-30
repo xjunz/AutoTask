@@ -59,8 +59,7 @@
                     android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginHorizontal="4dp"
                     android:background="?selectableItemBackground"
                     android:drawableTint="?colorPrimary"
                     android:ellipsize="end"
@@ -70,17 +69,17 @@
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_split"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_menu"
                     app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/ib_dismiss"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="@string/edit_task" />
+                    tools:text="@tools:sample/lorem/random" />
 
                 <ImageButton
                     android:id="@+id/ib_check"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/complete}"
                     android:src="@drawable/ic_baseline_check_24"
@@ -93,12 +92,12 @@
                     android:id="@+id/ib_dismiss"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="4dp"
                     android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/dismiss}"
-                    android:src="@drawable/ic_baseline_close_24"
+                    android:src="@drawable/ic_arrow_back_24px"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_check"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_goneMarginEnd="12dp"
                     app:tint="?colorOnPrimaryContainer" />
@@ -112,7 +111,7 @@
                     android:contentDescription="@{@string/more}"
                     android:src="@drawable/ic_baseline_menu_24"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_dismiss"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_split"
                     app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
                     app:tint="?colorOnPrimaryContainer" />
 
@@ -125,7 +124,7 @@
                     android:contentDescription="@{@string/split_merged_rules}"
                     android:src="@drawable/ic_baseline_call_split_24"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_menu"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_check"
                     app:layout_constraintTop_toTopOf="@+id/ib_menu"
                     app:tint="?colorOnPrimaryContainer" />
 
@@ -161,14 +160,16 @@
                         android:textColor="?colorPrimary"
                         app:layout_constraintEnd_toStartOf="@+id/ib_snapshot_selector"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="@tools:sample/lorem" />
 
                     <TextView
                         android:id="@+id/tv_snapshot_desc"
-                        android:maxLines="5"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="5"
                         app:layout_constraintEnd_toEndOf="@+id/tv_snapshot_title"
                         app:layout_constraintStart_toStartOf="@+id/tv_snapshot_title"
                         app:layout_constraintTop_toBottomOf="@id/tv_snapshot_title"
@@ -180,7 +181,7 @@
                         android:layout_height="48dp"
                         android:background="@drawable/bg_selectable_circle"
                         android:contentDescription="@{@string/more}"
-                        android:src="@drawable/ic_baseline_menu_24"
+                        android:src="@drawable/ic_timeline_24px"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -214,6 +215,8 @@
             android:id="@+id/rv_task_editor"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             tools:itemCount="10"
@@ -226,6 +229,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="16dp"
+            app:layout_dodgeInsetEdges="bottom"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

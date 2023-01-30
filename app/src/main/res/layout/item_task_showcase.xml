@@ -47,6 +47,7 @@
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_goneMarginEnd="16dp"
                 tools:text="@tools:sample/lorem/random" />
 
             <TextView
@@ -113,8 +114,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:contentDescription="@{@string/edit}"
-                    android:insetTop="6dp"
-                    android:insetBottom="6dp"
                     app:icon="@drawable/ic_edit_24dp"
                     app:iconTint="@color/color_text_control_normal" />
 
@@ -132,8 +131,8 @@
                     style="@style/Widget.Material3.Button.IconButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="@{@string/track_task_flow}"
-                    app:icon="@drawable/ic_timeline_24px"
+                    android:contentDescription="@{@string/task_snapshots}"
+                    app:icon="@drawable/ic_history_24px"
                     app:iconTint="@color/color_text_control_normal" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -39,7 +39,7 @@ fun MutableLiveData<Int>.dec(post: Boolean = false) {
     }
 }
 
-fun <T : Any> LiveData<T>.require(): T {
+fun <T> LiveData<T>.require(): T & Any {
     return this.value!!
 }
 

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.text.parseAsHtml
 import androidx.core.view.*
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -39,6 +40,8 @@ import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
+import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
+import top.xjunz.tasker.ui.task.showcase.TaskShowcaseViewModel
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.formatTime
 
@@ -49,7 +52,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     private val vm by viewModels<FlowEditorViewModel>()
 
-    private val gvm by activityViewModels<GlobalFlowEditorViewModel>()
+    val gvm get() = vm.global
 
     private val mvm by activityViewModels<MainViewModel>()
 
@@ -79,19 +82,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vm.notifyFlowChanged()
-        initGlobalViewModel()
         initViews()
         observeLiveData()
-    }
-
-    private fun initGlobalViewModel() {
-        if (vm.isBase) {
-            gvm.setRoot(vm.flow as RootFlow)
-            vm.addCloseable {
-                gvm.clearRootFlow()
-                gvm.clearSnapshots()
-            }
-        }
     }
 
     private fun initViews() {
@@ -103,28 +95,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
         }
-        if (gvm.isInTrackMode) {
-            binding.cvMetadata.isVisible = true
-            binding.divider.isInvisible = true
-            binding.appBarContainer.updateLayoutParams<AppBarLayout.LayoutParams> {
-                scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
-                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP or
-                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
-            }
-            binding.appBar.addOnOffsetChangedListener { _, verticalOffset ->
-                val alpha = 1F - (-verticalOffset.toFloat() / binding.appBarContainer.height)
-                binding.appBarContainer.alpha = alpha
-            }
-            binding.appBar.isLiftOnScroll = false
-        } else if (vm.isBase) {
-            binding.tvTitle.setAntiMoneyClickListener {
-                TaskMetadataEditor().init(vm.metadata) {
-                    vm.selectionLiveData.notifySelfChanged()
-                }.show(childFragmentManager)
-            }
-        }
         binding.appBar.addLiftOnScrollListener { _, _ ->
-            if (!gvm.isInTrackMode)
+            if (!vm.isInTrackMode)
                 binding.divider.isInvisible = binding.appBar.isLifted
         }
         binding.rvTaskEditor.adapter = adapter
@@ -199,6 +171,48 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         binding.ibSnapshotSelector.setAntiMoneyClickListener {
             TaskSnapshotSelectorDialog().show(childFragmentManager)
         }
+        if (vm.isInTrackMode) {
+            binding.cvMetadata.isVisible = true
+            binding.divider.isInvisible = true
+            binding.appBarContainer.updateLayoutParams<AppBarLayout.LayoutParams> {
+                scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+            }
+            binding.appBar.addOnOffsetChangedListener { _, verticalOffset ->
+                val alpha = 1F - (-verticalOffset.toFloat() / binding.appBarContainer.height)
+                binding.appBarContainer.alpha = alpha
+            }
+            binding.appBar.isLiftOnScroll = false
+            binding.ibCheck.isVisible = true
+            binding.ibCheck.setImageResource(R.drawable.ic_edit_24dp)
+            val pvm = getParentViewModel<TaskShowcaseDialog, TaskShowcaseViewModel>()
+            binding.ibCheck.setAntiMoneyClickListener {
+                if (vm.isBase) {
+                    pvm.requestEditTask.value = vm.task to null
+                } else {
+                    pvm.requestEditTask.value = vm.task to vm.flow
+                }
+            }
+            observeTransient(pvm.requestEditTask) {
+                dismiss()
+            }
+        } else if (vm.isBase) {
+            binding.tvTitle.setAntiMoneyClickListener {
+                TaskMetadataEditor().init(vm.metadata) {
+                    vm.selectionLiveData.notifySelfChanged()
+                }.show(childFragmentManager)
+            }
+        }
+        navigateToDestFlow()
+    }
+
+    private fun navigateToDestFlow() {
+        val dest = vm.flowToNavigate
+        if (dest != -1L) {
+            menuHelper.triggerMenuItem(null, vm.flow.findChild(dest), R.id.item_open_in_new)
+            vm.flowToNavigate = -1L
+        }
     }
 
     private fun confirmArgumentSelections() {
@@ -208,7 +222,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         if (referentNames.size == 1 && gvm.selectedReferents.size == referentNamesList.size) {
             val referent = referentNames.single()
             gvm.setReferentForSelections(referent)
-            vm.doOnRefSelected(referent)
+            vm.doOnArgSelected(referent)
             gvm.onReferentSelected.value = true
             return
         }
@@ -235,7 +249,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             }
             gvm.setReferentForSelections(it)
             gvm.renameReferentInRoot(referentNames, it)
-            vm.doOnRefSelected(it)
+            vm.doOnArgSelected(it)
             gvm.onReferentSelected.value = true
             return@init null
         }
@@ -333,7 +347,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             }
         }
         observeNotNull(gvm.currentSnapshotIndex) {
-            if (!gvm.isInTrackMode) return@observeNotNull
+            if (!vm.isInTrackMode) return@observeNotNull
             val snapshot = gvm.allSnapshots.require()[it]
             gvm.currentSnapshot = snapshot
             binding.tvSnapshotTitle.text = R.string.format_task_snapshots.format(
@@ -345,7 +359,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 if (snapshot.isRunning) R.string.running.str
                 else if (snapshot.isSuccessful) R.string.succeeded.str
                 else R.string.failed.str
-            )
+            ).parseAsHtml()
             adapter.notifyItemRangeChanged(0, adapter.currentList.size)
         }
         mvm.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
@@ -369,7 +383,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             val option = factory.requireOption(applet)
             val whichArg = applet.whichReference(referent)
             val arg = option.arguments[whichArg]
-            FlowEditorDialog().init(gvm.root, true)
+            FlowEditorDialog().init(vm.task, gvm.root, true, gvm)
                 .setArgumentToSelect(applet, arg, referent)
                 .doOnArgumentSelected { newReferent ->
                     gvm.referenceEditor.setReference(applet, arg, whichArg, newReferent)
@@ -392,12 +406,21 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     override fun onBackPressed(): Boolean {
         if (vm.isInMultiSelectionMode) {
             vm.clearSelections()
-        } else if (vm.isBase && vm.calculateChecksum() != vm.task.checksum) {
+        } else if (vm.isBase && !vm.isReadyOnly && vm.calculateChecksum() != vm.task.checksum) {
             vm.showQuitConfirmation.value = true
         } else {
             dismiss()
         }
         return true
+    }
+
+    fun setFlowToNavigate(dest: Long?): FlowEditorDialog {
+        if (dest != null) {
+            doWhenCreated {
+                vm.flowToNavigate = dest
+            }
+        }
+        return this
     }
 
     fun setArgumentToSelect(victim: Applet, ref: ArgumentDescriptor, referent: String?) =
@@ -413,7 +436,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
 
     fun doOnArgumentSelected(block: (String) -> Unit) = doWhenCreated {
-        vm.doOnRefSelected = block
+        vm.doOnArgSelected = block
     }
 
     fun doAfterFlowEdited(block: (Flow) -> Unit) = doWhenCreated {
@@ -429,8 +452,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     }
 
     fun setTrackMode() = doWhenCreated {
-        gvm.isInTrackMode = true
-        vm.isReadyOnly = true
+        vm.isInTrackMode = true
+        if (!gvm.allSnapshots.isNull()) return@doWhenCreated
         lifecycleScope.launch(Dispatchers.Default) {
             gvm.allSnapshots.postValue(LocalTaskManager.getAllSnapshots(vm.task))
             gvm.currentSnapshotIndex.postValue(0)
@@ -442,15 +465,24 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             vm.staticError = StaticError(vm.flow[error.victim.index], error.code, error.arg)
     }
 
-    fun init(task: XTask) = doWhenCreated {
+    fun initBase(task: XTask, readonly: Boolean) = doWhenCreated {
         if (task.flow == null) {
-            task.flow = gvm.generateDefaultFlow(task.metadata.taskType)
+            task.flow = vm.generateDefaultFlow(task.metadata.taskType)
         }
         vm.task = task
-        vm.initialize(factory, task.requireFlow(), false)
+        vm.initialize(task.requireFlow(), readonly)
+        vm.global = viewModels<GlobalFlowEditorViewModel>().value
+        gvm.root = vm.flow as RootFlow
     }
 
-    fun init(flow: Flow, readonly: Boolean) = doWhenCreated {
-        vm.initialize(factory, flow, readonly)
+    fun init(
+        task: XTask,
+        flow: Flow,
+        readonly: Boolean,
+        gvm: GlobalFlowEditorViewModel
+    ): FlowEditorDialog = doWhenCreated {
+        vm.task = task
+        vm.global = gvm
+        vm.initialize(flow, readonly)
     }
 }

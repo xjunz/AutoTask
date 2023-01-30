@@ -4,12 +4,14 @@
 
 package top.xjunz.tasker.ui.task.showcase
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -20,11 +22,13 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.hierarchy
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
+import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -65,9 +69,9 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         }
         binding.bottomBar.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
-            v.doOnPreDraw {
-                viewModel.bottomBarHeight.value = it.height
-            }
+        }
+        binding.fabAction.doOnPreDraw {
+            viewModel.paddingBottom.value = it.height + binding.bottomBar.height
         }
         binding.bottomBar.background.let {
             it as MaterialShapeDrawable
@@ -90,6 +94,9 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             binding.viewPager.currentItem = binding.bottomBar.menu.indexOf(it)
             return@setOnItemSelectedListener true
         }
+        binding.ibDismiss.setAntiMoneyClickListener {
+            dismiss()
+        }
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -101,6 +108,18 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 binding.appBar.setLiftOnScrollTargetView(fragments[position]?.getScrollTarget())
             }
         })
+        observeTransient(viewModel.requestEditTask) {
+            val task = it.first
+            val prevChecksum = task.checksum
+            spyOnFragment(FlowEditorDialog().initBase(task, false).doOnTaskEdited {
+                viewModel.updateTask(prevChecksum, task)
+            }.setFlowToNavigate(it.second?.hierarchy).show(childFragmentManager))
+        }
+        observeTransient(viewModel.requestTrackTask) {
+            spyOnFragment(
+                FlowEditorDialog().initBase(it, true).setTrackMode().show(childFragmentManager)
+            )
+        }
         observeDialog(viewModel.requestToggleTask) {
             val title = if (it.isEnabled) R.string.prompt_disable_task.text
             else R.string.prompt_enable_task.text
@@ -134,4 +153,31 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             }
         }
     }
+
+    private fun spyOnFragment(fragment: Fragment) {
+        val tag = fragment.tag
+        childFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
+                    super.onFragmentDestroyed(fm, f)
+                    if (f.tag === tag) {
+                        viewModel.isPaused.value = false
+                        childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
+                        binding.appBar.setLiftOnScrollTargetView(fragments[binding.viewPager.currentItem]?.getScrollTarget())
+                    }
+                }
+
+                override fun onFragmentAttached(
+                    fm: FragmentManager,
+                    f: Fragment,
+                    context: Context
+                ) {
+                    if (f.tag === tag) {
+                        viewModel.isPaused.value = true
+                    }
+                }
+            }, false
+        )
+    }
+
 }

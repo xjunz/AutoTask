@@ -5,18 +5,20 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.graphics.Canvas
+import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import com.google.android.material.snackbar.Snackbar
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import java.util.*
@@ -80,8 +82,9 @@ open class FlowItemTouchHelperCallback(
         return false
     }
 
-    protected open fun doRemove(parent: Flow, from: Applet) {
+    protected open fun doRemove(parent: Flow, from: Applet): Set<Applet> {
         parent.remove(from)
+        return Collections.singleton(from)
     }
 
     private val layoutManager: LinearLayoutManager by lazy {
@@ -232,8 +235,25 @@ open class FlowItemTouchHelperCallback(
         val pos = viewHolder.adapterPosition
         val from = currentList[pos]
         val parent = from.requireParent()
-        doRemove(parent, from)
-        toast(R.string.removed)
+        val removed = doRemove(parent, from)
+        val rootView = viewHolder.itemView.rootView
+        val fab = rootView.findViewById<View>(R.id.fab_action)
+        val snackBar = Snackbar.make(rootView, R.string.removed, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                removed.sortedBy { it.index }.forEach {
+                    if (it.index == parent.size) {
+                        parent.add(it)
+                    } else {
+                        parent.add(it.index, it)
+                    }
+                }
+                viewModel.notifyFlowChanged()
+                viewModel.updateChildrenIndexesIfNeeded(parent)
+            }
+        if (fab != null && fab.isVisible) {
+            snackBar.anchorView = fab
+        }
+        snackBar.show()
         if (from is Flow) {
             // Update relation text
             if (from.index == 0 && parent.isNotEmpty())

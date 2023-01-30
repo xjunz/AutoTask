@@ -8,10 +8,7 @@ import android.view.WindowManager
 import androidx.core.view.isVisible
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayBubbleCollapsedBinding
-import top.xjunz.tasker.ktx.doWhenEnd
-import top.xjunz.tasker.ktx.eq
-import top.xjunz.tasker.ktx.observe
-import top.xjunz.tasker.ktx.toggle
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -74,7 +71,7 @@ class CollapsedBubbleOverlay(
         }
         binding.ibCenter.setAntiMoneyClickListener {
             if (vm.currentMode eq InspectorMode.COMPONENT) {
-                if (vm.currentComp eq null) {
+                if (vm.currentComp.isNull()) {
                     vm.makeToast(R.string.no_comp_detected)
                 } else {
                     vm.showNodeInfo.value = true

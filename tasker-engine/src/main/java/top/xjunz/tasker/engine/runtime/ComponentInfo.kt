@@ -14,4 +14,9 @@ class ComponentInfo {
     var activityName: String? = null
 
     var paneTitle: String? = null
+
+    override fun toString(): String {
+        return "ComponentInfo(packageName='$packageName', activityName=$activityName, paneTitle=$paneTitle)"
+    }
+
 }

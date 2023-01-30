@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -13,11 +12,7 @@
         android:fromAlpha="0"
         android:toAlpha="1" />
 
-    <scale
-        android:fromXScale=".98"
-        android:fromYScale=".98"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
+    <translate
+        android:fromXDelta="-15%"
+        android:toXDelta="0" />
 </set>

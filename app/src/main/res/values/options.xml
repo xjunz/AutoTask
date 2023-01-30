@@ -45,8 +45,8 @@
     <string name="not_is_launcher">%s不是桌面</string>
 
     <string name="with_type">控件类型为</string>
-    <string name="with_text">指定文本内容</string>
-    <string name="not_with_text">排除文本内容</string>
+    <string name="with_text">文本内容是</string>
+    <string name="not_with_text">文本内容不是</string>
     <string name="in_length_range">文本长度范围</string>
     <string name="content_desc">内容描述为</string>
     <string name="is_clickable">可点击</string>

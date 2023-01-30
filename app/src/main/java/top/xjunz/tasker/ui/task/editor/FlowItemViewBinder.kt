@@ -22,10 +22,7 @@ import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 /**
  * @author xjunz 2022/11/07
  */
-class FlowItemViewBinder(
-    private val vm: FlowEditorViewModel,
-    private val gvm: GlobalFlowEditorViewModel
-) {
+class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
 
     companion object {
         const val ACTION_COLLAPSE = 0
@@ -34,6 +31,8 @@ class FlowItemViewBinder(
         const val ACTION_EDIT = 3
         const val ACTION_ADD = 4
     }
+
+    private val gvm get() = vm.global
 
     private val errorPrompts by lazy {
         R.array.static_error_prompts.array
@@ -65,11 +64,9 @@ class FlowItemViewBinder(
             if (option.descAsTitle) {
                 title = desc
             } else if (applet.isContainer) {
-                title = if (applet.controlFlow is If) {
+                title = if (applet.controlFlow is If)
                     R.string.matches_rule_set.text
-                } else {
-                    R.string.execute_rule_set.text
-                }
+                else R.string.execute_rule_set.text
             }
             if (title != null && applet.index != 0 && applet !is ControlFlow) {
                 title = AppletOption.makeRelationSpan(
@@ -79,10 +76,12 @@ class FlowItemViewBinder(
 
             val depth = applet.depthInAncestor(vm.flow)
             // Set text style
-            when (depth) {
-                1 -> tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
+            when {
+                depth == 1 && applet is ControlFlow -> tvTitle.setTextAppearance(
+                    TextAppearance_Material3_TitleLarge
+                )
 
-                2 -> {
+                depth == 2 || depth == 1 -> {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                     bullet.isVisible = true
                 }
@@ -93,15 +92,14 @@ class FlowItemViewBinder(
                     tvNumber.text = (applet.index + 1).toString()
                     tvTitle.setTextAppearance(TextAppearance_Material3_LabelLarge)
                     if (applet is Flow) {
-                        val size = applet.size.toString().foreColored()
-                        desc = R.string.format_applet_count.formatSpans(size)
+                        desc = R.string.format_applet_count.formatSpans(
+                            applet.size.toString().foreColored()
+                        )
                     }
                 }
             }
             if (applet is ControlFlow) {
                 tvTitle.setTextColor(controlFlowTextTint)
-            } else if (depth == 1) {
-                title = title?.relativeSize(.8F)
             }
             // Set action
             if (applet is Flow) {
@@ -197,25 +195,26 @@ class FlowItemViewBinder(
                 tvComment.text = (R.string.comment.text.bold() + applet.comment!!)
                     .quoted(ColorScheme.colorTertiaryContainer)
             }
-            if (gvm.isInTrackMode) {
-                if (gvm.succeededApplets.contains(applet)) {
+            if (vm.isInTrackMode && gvm.currentSnapshot != null) {
+                val snapshot = gvm.currentSnapshot!!
+                if (snapshot.succeededApplets.contains(applet)) {
                     tvTitle.setDrawableStart(R.drawable.ic_check_circle_24px)
-                } else if (gvm.failedApplets.containsKey(applet)) {
+                } else if (snapshot.failedApplets.containsKey(applet)) {
                     tvTitle.setDrawableStart(R.drawable.ic_cancel_24px)
-                    val failure = gvm.failedApplets[applet]
+                    val failure = snapshot.failedApplets[applet]
                     if (failure?.actual != null) {
                         tvComment.isVisible = true
                         tvComment.isEnabled = true
-                        tvComment.text =
-                            R.string.format_failure_value.format(failure.actual!!)
-                                .quoted(ColorScheme.colorTertiaryContainer)
+                        tvComment.text = R.string.format_failure_value.format(failure.actual)
+                            .quoted(ColorScheme.colorTertiaryContainer)
                     } else if (failure?.exception != null) {
                         tvComment.isVisible = true
                         tvComment.isEnabled = true
-                        tvComment.text =
-                            R.string.format_failure_exception.format(failure.exception!!)
-                                .quoted(ColorScheme.colorTertiaryContainer)
+                        tvComment.text = R.string.format_failure_exception.format(failure.exception)
+                            .quoted(ColorScheme.colorTertiaryContainer)
                     }
+                } else if (snapshot.currentApplet === applet) {
+                    tvTitle.setDrawableStart(R.drawable.ic_help_24px)
                 } else {
                     tvTitle.setDrawableStart(R.drawable.ic_do_not_disturb_24px)
                 }
@@ -258,8 +257,8 @@ class FlowItemViewBinder(
         applet: Applet,
         index: Int,
         which: Int,
-        refName: CharSequence,
-        referent: String?
+        referentLabel: CharSequence,
+        referentName: String?
     ) {
         val chip = getReferenceChip(index)
         chip.isVisible = true
@@ -267,10 +266,12 @@ class FlowItemViewBinder(
         chip.setAntiMoneyClickListener {
             toggleSelectReference(applet, which)
         }
-        chip.text = if (referent == null) {
-            refName
+        chip.text = if (referentName == null) {
+            referentLabel
+        } else if (referentLabel == referentName) {
+            referentLabel.foreColored()
         } else {
-            refName + " [$referent]".foreColored()
+            referentLabel + " /*$referentName*/".foreColored()
         }
     }
 }

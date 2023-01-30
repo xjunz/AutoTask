@@ -15,6 +15,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
+import java.util.zip.CRC32
 
 
 private typealias Referred = () -> Any?
@@ -92,6 +93,17 @@ class TaskRuntime private constructor() {
 
     val result: AppletResult get() = _result!!
 
+    private val crc = CRC32()
+
+    /**
+     * Identify all arguments applied to the task runtime.
+     */
+    val fingerprint: Long get() = crc.value
+
+    fun updateFingerprint(any: Any?) {
+        crc.update(any.hashCode())
+    }
+
     fun ensureActive() {
         runtimeScope?.ensureActive()
     }
@@ -150,8 +162,6 @@ class TaskRuntime private constructor() {
         _result = result
         if (result.isSuccessful && result.returns != null) {
             registerAllReferents(applet, *result.returns!!)
-        } else {
-            eventScope.registerFailure(applet, result.expected, result.actual)
         }
     }
 
@@ -163,10 +173,6 @@ class TaskRuntime private constructor() {
 
     fun registerReferent(applet: Applet, which: Int, referred: Referred) {
         referents[applet.referents[which]] = referred
-    }
-
-    fun getFailure(applet: Applet): Pair<Any?, Any?>? {
-        return eventScope.failures[applet]
     }
 
     private fun getReferentByName(name: String?): Any? {
@@ -200,6 +206,7 @@ class TaskRuntime private constructor() {
         _result = null
         target = null
         isSuccessful = true
+        crc.reset()
         Pool.release(this)
     }
 

@@ -13,8 +13,10 @@ import android.view.View.OnClickListener
  */
 object AntiMonkeyUtil {
 
+    const val THRESHOLD_INTERVAL = 350
+
     inline fun View.setAntiMoneyClickListener(
-        thresholdInterval: Int = 350,
+        thresholdInterval: Int = THRESHOLD_INTERVAL,
         crossinline listener: (View) -> Unit
     ) {
         setOnClickListener(object : OnClickListener {

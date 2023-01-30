@@ -145,8 +145,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)
-        binding.tvTitle.oneShotApplySystemInsets { v, insets ->
+        binding.topBar.oneShotApplySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
+        }
+        binding.ibDismiss.setOnClickListener {
+            dismiss()
         }
         binding.shoppingCart.circularRevealContainer.doOnPreDraw {
             binding.rvRight.updatePadding()
