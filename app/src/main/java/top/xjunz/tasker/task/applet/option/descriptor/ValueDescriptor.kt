@@ -12,23 +12,24 @@ import top.xjunz.tasker.ktx.text
  */
 open class ValueDescriptor(
     @StringRes private val nameRes: Int,
-    val valueType: Class<*>,
-    val variantValueType: Int
+    val valueClass: Class<*>,
+    val variantValueType: Int,
+    val isCollection: Boolean,
 ) {
 
     val name: CharSequence get() = nameRes.text
 
     fun parseValueFromInput(str: String): Any? {
-        if (valueType == String::class.java)
+        if (valueClass == String::class.java)
             return str
 
-        if (valueType == Int::class.java)
+        if (valueClass == Int::class.java)
             return str.toIntOrNull()
 
-        if (valueType == Long::class.java)
+        if (valueClass == Long::class.java)
             return str.toLongOrNull()
 
-        if (valueType == Float::class.java)
+        if (valueClass == Float::class.java)
             return str.toFloatOrNull()
 
         return null

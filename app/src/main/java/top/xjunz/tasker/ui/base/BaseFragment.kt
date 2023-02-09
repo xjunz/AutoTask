@@ -39,6 +39,6 @@ open class BaseFragment<T : ViewBinding> : Fragment(), HasDefaultViewModelProvid
         return binding.root
     }
 
-    override fun getDefaultViewModelProviderFactory() = InnerViewModelFactory
+    override val defaultViewModelProviderFactory = InnerViewModelFactory
 
 }

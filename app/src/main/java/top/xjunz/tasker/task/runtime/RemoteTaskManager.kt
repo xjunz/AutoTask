@@ -48,10 +48,6 @@ object RemoteTaskManager : TaskManager<Long, XTaskDTO>() {
             return RemoteTaskManager.getSnapshotCount(identifier)
         }
 
-        override fun getSnapshot(identifier: Long, index: Int): TaskSnapshot? {
-            return RemoteTaskManager.getSnapshot(identifier, index)
-        }
-
         override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
             return RemoteTaskManager.getAllSnapshots(identifier)
         }

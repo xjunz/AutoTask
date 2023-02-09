@@ -168,7 +168,7 @@ class BitsValueEditorDialog : BaseDialogFragment<DialogBitsValueEditorBinding>()
         val inputLayout = bindings[index].getInputLayout()
         if (value.isNullOrEmpty()) {
             inputLayout.shake()
-            toast(R.string.format_not_specified.format(hint))
+            toast(R.string.error_unspecified.format(hint))
             return null
         }
         when (type) {

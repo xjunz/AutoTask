@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -23,58 +22,50 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_resident_tasks"
-            style="@style/Widget.Material3.CardView.Filled"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container_resident_tasks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="?colorSurface"
-            app:cardCornerRadius="@dimen/corner_dialog"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title">
+            android:background="@drawable/bg_selectable_surface"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:layout_editor_absoluteX="16dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container_resident_tasks"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/iv_enter"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_selectable_item"
-                android:padding="16dp">
+                android:src="@drawable/ic_baseline_chevron_right_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
-                <ImageView
-                    android:id="@+id/iv_enter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_chevron_right_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/tv_long_running"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="@string/resident_task"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary"
+                app:drawableStartCompat="@drawable/ic_hourglass_bottom_24px"
+                app:drawableTint="?colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/tv_long_running"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="8dp"
-                    android:gravity="center"
-                    android:text="@string/resident_task"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="?colorPrimary"
-                    app:drawableStartCompat="@drawable/ic_hourglass_bottom_24px"
-                    app:drawableTint="?colorPrimary"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/desc_long_running_task"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_enter"
-                    app:layout_constraintStart_toStartOf="@+id/tv_long_running"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_long_running" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/desc_long_running_task"
+                app:layout_constraintEnd_toStartOf="@+id/iv_enter"
+                app:layout_constraintStart_toStartOf="@+id/tv_long_running"
+                app:layout_constraintTop_toBottomOf="@+id/tv_long_running" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cv_oneshot_tasks"
@@ -84,7 +75,7 @@
             android:layout_marginTop="8dp"
             app:cardBackgroundColor="?colorSurface"
             app:cardCornerRadius="@dimen/corner_dialog"
-            app:layout_constraintTop_toBottomOf="@+id/cv_resident_tasks">
+            app:layout_constraintTop_toBottomOf="@+id/container_resident_tasks">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -145,156 +136,138 @@
                     android:layout_marginBottom="16dp"
                     android:columnCount="2">
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/tv_click_mode"
+                        style="?materialIconButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginStart="16dp"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/bg_selectable_primary_surface"
-                        android:drawablePadding="8dp"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:layout_marginEnd="4dp"
+                        android:gravity="center"
                         android:text="@string/quick_click_mode"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        app:drawableStartCompat="@drawable/ic_touch_app_24px"
-                        app:drawableTint="?colorPrimary" />
+                        app:icon="@drawable/ic_touch_app_24px"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="?colorPrimary"
+                        app:strokeColor="@color/material_on_surface_stroke"
+                        app:strokeWidth="1dp" />
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/tv_record_gesture"
+                        style="?materialIconButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@drawable/bg_selectable_primary_surface"
-                        android:drawablePadding="8dp"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:gravity="center"
                         android:text="@string/record_gesture"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        app:drawableStartCompat="@drawable/ic_gesture_24px"
-                        app:drawableTint="?colorPrimary" />
+                        app:icon="@drawable/ic_gesture_24px"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="?colorPrimary"
+                        app:strokeColor="@color/material_on_surface_stroke"
+                        app:strokeWidth="1dp" />
                 </GridLayout>
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_import_tasks"
-            style="@style/Widget.Material3.CardView.Filled"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container_import_tasks"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            app:cardBackgroundColor="?colorSurface"
-            app:cardCornerRadius="@dimen/corner_dialog"
-            app:layout_constraintEnd_toStartOf="@+id/cv_preload_tasks"
+            android:background="@drawable/bg_selectable_surface"
+            android:padding="16dp"
+            app:layout_constraintEnd_toStartOf="@+id/container_preload_tasks"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cv_oneshot_tasks">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container_import_tasks"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/iv_enter_3"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_selectable_item"
-                android:padding="16dp">
+                android:src="@drawable/ic_baseline_chevron_right_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
-                <ImageView
-                    android:id="@+id/iv_enter_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_chevron_right_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/tv_import_tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="@string/import_tasks"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary"
+                app:drawableStartCompat="@drawable/ic_import_24dp"
+                app:drawableTint="?colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/tv_import_tasks"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="8dp"
-                    android:gravity="center"
-                    android:text="@string/import_tasks"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="?colorPrimary"
-                    app:drawableStartCompat="@drawable/ic_import_24dp"
-                    app:drawableTint="?colorPrimary"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/desc_import_tasks"
+                app:layout_constraintEnd_toStartOf="@+id/iv_enter_3"
+                app:layout_constraintStart_toStartOf="@+id/tv_import_tasks"
+                app:layout_constraintTop_toBottomOf="@+id/tv_import_tasks" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/desc_import_tasks"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_enter_3"
-                    app:layout_constraintStart_toStartOf="@+id/tv_import_tasks"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_import_tasks" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_preload_tasks"
-            style="@style/Widget.Material3.CardView.Filled"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container_preload_tasks"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:cardBackgroundColor="?colorSurface"
-            app:cardCornerRadius="@dimen/corner_dialog"
+            android:background="@drawable/bg_selectable_surface"
+            android:padding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/cv_import_tasks"
+            app:layout_constraintStart_toEndOf="@+id/container_import_tasks"
             app:layout_constraintTop_toBottomOf="@+id/cv_oneshot_tasks">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container_preload_tasks"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/iv_enter_4"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_selectable_item"
-                android:padding="16dp">
+                android:src="@drawable/ic_baseline_chevron_right_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
-                <ImageView
-                    android:id="@+id/iv_enter_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_chevron_right_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/tv_preload_tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="@string/preload_task"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="?colorPrimary"
+                app:drawableStartCompat="@drawable/ic_widgets_24px"
+                app:drawableTint="?colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/tv_preload_tasks"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="8dp"
-                    android:gravity="center"
-                    android:text="@string/preload_task"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="?colorPrimary"
-                    app:drawableStartCompat="@drawable/ic_widgets_24px"
-                    app:drawableTint="?colorPrimary"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/desc_preload_tasks"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_enter_4"
-                    app:layout_constraintStart_toStartOf="@+id/tv_preload_tasks"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_preload_tasks" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/desc_preload_tasks"
+                app:layout_constraintEnd_toStartOf="@+id/iv_enter_4"
+                app:layout_constraintStart_toStartOf="@+id/tv_preload_tasks"
+                app:layout_constraintTop_toBottomOf="@+id/tv_preload_tasks" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

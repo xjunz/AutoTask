@@ -92,20 +92,20 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         isServiceRunning.postValue(false)
     }
 
-    inline fun doOnHostRouted(
+    fun doOnRouted(
         lifecycleOwner: LifecycleOwner,
         host: String,
-        crossinline block: () -> Unit
+        block: () -> Unit
     ) {
         lifecycleOwner.observeTransient(onNewIntent) {
             if (it.host == host) block()
         }
     }
 
-    inline fun doOnAction(
+    fun doOnAction(
         lifecycleOwner: LifecycleOwner,
         actionName: String,
-        crossinline block: (value: String) -> Unit
+        block: (value: String) -> Unit
     ) {
         lifecycleOwner.observeTransient(onNewIntent) {
             if (it.host == Router.HOST_ACTION

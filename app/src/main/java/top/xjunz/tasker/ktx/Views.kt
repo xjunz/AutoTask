@@ -6,6 +6,7 @@ package top.xjunz.tasker.ktx
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.res.TypedArray
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.text.InputFilter
@@ -14,12 +15,14 @@ import android.text.method.DigitsKeyListener
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
+import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.DrawableRes
+import androidx.annotation.StyleableRes
 import androidx.core.graphics.Insets
 import androidx.core.graphics.applyCanvas
 import androidx.core.view.WindowInsetsCompat
@@ -207,4 +210,18 @@ fun CompoundButton.setOnInteractiveCheckedChangedListener(listener: (v: Compound
         }
         fromInteraction = false
     }
+}
+
+inline fun View.useStyledAttributes(
+    set: AttributeSet?, @StyleableRes attrs: IntArray, block: (TypedArray) -> Unit
+) {
+    val ta = context.theme.obtainStyledAttributes(set, attrs, 0, 0)
+    block(ta)
+    ta.recycle()
+}
+
+
+@SuppressLint("ClickableViewAccessibility")
+fun View.blockTouch() {
+    setOnTouchListener { _, _ -> true }
 }

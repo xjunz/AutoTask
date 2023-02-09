@@ -64,7 +64,7 @@ class ShoppingCartIntegration(
             viewToFitBottom.updatePadding(bottom = it)
         }
         var insetTop = 0
-        circularRevealContainer.oneShotApplySystemInsets { container, insets ->
+        circularRevealContainer.applySystemInsets { container, insets ->
             insetTop = insets.top - 8.dp
             container.doOnPreDraw {
                 behavior.peekHeight = it.height + insets.bottom
@@ -112,8 +112,6 @@ class ShoppingCartIntegration(
             return@setOnKeyListener false
         }
     }
-
-    val isAnimatorRunning get() = ::animator.isInitialized && animator.isStarted
 
     fun animateIntoShopCart(view: View, addBackground: Boolean = true) {
         val rootView = view.rootView as ViewGroup

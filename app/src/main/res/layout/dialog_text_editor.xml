@@ -113,12 +113,38 @@
             style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@android:string/ok"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@+id/btn_negative"
-            app:layout_constraintTop_toBottomOf="@id/et_barrier" />
+            app:layout_constraintTop_toBottomOf="@+id/cv_container" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_container"
+            style="@style/Widget.Material3.CardView.Filled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="?colorTertiaryContainer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_barrier"
+            app:rippleColor="?colorControlHighlight">
+
+            <TextView
+                android:id="@+id/tv_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="16dp"
+                android:text="@string/tip_select_pane_title_with_inspector"
+                android:textColor="?colorTertiary"
+                app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24"
+                app:drawableStartCompat="@drawable/ic_twotone_layers_24"
+                app:drawableTint="?colorTertiary" />
+        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

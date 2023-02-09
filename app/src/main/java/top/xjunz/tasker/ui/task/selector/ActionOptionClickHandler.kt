@@ -16,7 +16,7 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.TextEditorDialog
-import top.xjunz.tasker.ui.task.selector.option.ArgumentsEditorDialog
+import top.xjunz.tasker.ui.task.editor.ArgumentsEditorDialog
 import top.xjunz.tasker.ui.task.selector.option.TimeIntervalEditorDialog
 
 /**

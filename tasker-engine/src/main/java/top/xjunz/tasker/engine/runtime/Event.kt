@@ -5,7 +5,6 @@
 package top.xjunz.tasker.engine.runtime
 
 import androidx.annotation.IntDef
-import androidx.core.util.Pools.SynchronizedPool
 
 /**
  * @author xjunz 2022/10/30
@@ -15,8 +14,6 @@ class Event private constructor() {
     var type: Int = EVENT_UNDEFINED
 
     val componentInfo = ComponentInfo()
-
-    private object Pool : SynchronizedPool<Event>(10)
 
     companion object {
         /**
@@ -50,17 +47,11 @@ class Event private constructor() {
             actName: String? = null,
             paneTitle: String? = null
         ): Event {
-            return (Pool.acquire() ?: Event()).apply {
+            return Event().apply {
                 type = t
                 componentInfo.packageName = pkgName
                 componentInfo.activityName = actName
                 componentInfo.paneTitle = paneTitle
-            }
-        }
-
-        internal fun drainPool() {
-            while (Pool.acquire() != null) {
-                /* no-op */
             }
         }
     }
@@ -69,10 +60,6 @@ class Event private constructor() {
         EVENT_UNDEFINED, EVENT_ON_PACKAGE_ENTERED, EVENT_ON_PACKAGE_EXITED, EVENT_ON_CONTENT_CHANGED
     )
     annotation class EventType
-
-    fun recycle() {
-        Pool.release(this)
-    }
 
     override fun toString(): String {
         val typeName = when (type) {

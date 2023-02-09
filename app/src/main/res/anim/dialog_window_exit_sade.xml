@@ -15,6 +15,6 @@
         android:fromYScale="1.0"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:toXScale=".98"
-        android:toYScale=".98" />
+        android:toXScale=".95"
+        android:toYScale=".95" />
 </set>

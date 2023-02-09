@@ -14,8 +14,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class ScopeFlow<Target : Any> : Flow() {
 
-    override val registerResultsForChildren: Boolean = false
-
     /**
      * The key used to register target to runtime, equivalent to [id] by default, which means
      * all flows with the same id will share an identical target at runtime.

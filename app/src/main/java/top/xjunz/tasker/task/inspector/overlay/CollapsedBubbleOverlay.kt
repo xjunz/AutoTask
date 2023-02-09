@@ -72,9 +72,9 @@ class CollapsedBubbleOverlay(
         binding.ibCenter.setAntiMoneyClickListener {
             if (vm.currentMode eq InspectorMode.COMPONENT) {
                 if (vm.currentComp.isNull()) {
-                    vm.makeToast(R.string.no_comp_detected)
+                    vm.makeToast(R.string.error_no_comp_detected)
                 } else {
-                    vm.showNodeInfo.value = true
+                    vm.onComponentSelected.value = true
                 }
             } else {
                 vm.isCollapsed.toggle()

@@ -41,7 +41,7 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
 
     val addedItem = MutableLiveData<Any>()
 
-    val removedItem = MutableLiveData<Any>()
+    val itemToRemove = MutableLiveData<Any>()
 
     val onSelectionCleared = MutableLiveData<Boolean>()
 

@@ -6,9 +6,14 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
+import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction
 import top.xjunz.tasker.engine.applet.action.Processor.Companion.unaryArgProcessor
 import top.xjunz.tasker.engine.applet.action.unaryArgValueAction
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.firstGroupValue
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.formatSpans
+import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 
 /**
@@ -35,4 +40,22 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withUnaryArgument<String>(R.string.text)
         .hasCompositeTitle()
+
+    @AppletOrdinal(0x0003)
+    val makeToast = appletOption(R.string.format_make_toast) {
+        LambdaReferenceAction<String>(Applet.VAL_TYPE_TEXT) { args, value, _ ->
+            currentService.overlayToastBridge.showOverlayToast(value?.format(*args))
+            true
+        }
+    }.withUnaryArgument<String>(
+        name = R.string.msg_to_toast,
+        substitution = R.string.text_message,
+        isRef = false,
+        isCollection = true
+    ).withDescriber<String> { applet, t ->
+        val bolds = applet.references.values.map {
+            it.foreColored()
+        }.toTypedArray()
+        t?.formatSpans(*bolds)
+    }.hasCompositeTitle()
 }

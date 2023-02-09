@@ -18,14 +18,13 @@ import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.ui.common.TextEditorDialog
+import top.xjunz.tasker.ui.task.editor.ArgumentsEditorDialog
 import top.xjunz.tasker.ui.task.selector.option.*
 
 /**
  * @author xjunz 2022/10/08
  */
-open class AppletOptionClickHandler(
-    private val fragmentManager: FragmentManager
-) {
+open class AppletOptionClickHandler(private val fragmentManager: FragmentManager) {
 
     private val factory = AppletOptionFactory
 
@@ -43,8 +42,7 @@ open class AppletOptionClickHandler(
 
             option.isValueInnate -> onCompleted()
 
-            applet is Action<*> ->
-                actionOptionClickHandler.onClick(applet, option, onCompleted)
+            applet is Action<*> -> actionOptionClickHandler.onClick(applet, option, onCompleted)
 
             option == factory.applicationRegistry.appCollection
                     || option == factory.notificationRegistry.appCollection ->

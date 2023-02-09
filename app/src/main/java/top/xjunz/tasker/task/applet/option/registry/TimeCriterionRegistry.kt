@@ -101,7 +101,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             start == null && stop != null -> R.string.format_before.format(format(stop))
             start != null && stop == null -> R.string.format_after.format(format(start))
             start != null && stop != null ->
-                if (start == stop) {
+                if (start != stop) {
                     R.string.format_range.format(format(start), format(stop))
                 } else {
                     format(start)

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
@@ -75,7 +76,7 @@ class TaskShowcaseViewModel : ViewModel() {
             onNewTaskAdded.value = task
             toast(R.string.format_new_task_added.format(task.metadata.title))
         }.invokeOnError {
-            it.printStackTrace()
+            it.logcatStackTrace()
             toastUnexpectedError(it)
         }
     }
@@ -90,7 +91,7 @@ class TaskShowcaseViewModel : ViewModel() {
                 TaskStorage.removeTask(task)
                 removed = true
             } catch (t: Throwable) {
-                t.printStackTrace()
+                t.logcatStackTrace()
                 toastUnexpectedError(t)
             }
             // Restore checksum to current one

@@ -9,8 +9,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:background="@drawable/selector_bg_selectable_surface_item"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_selectable_surface"
         android:minHeight="48dp"
         android:paddingHorizontal="12dp"
         android:paddingVertical="8dp">

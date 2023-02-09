@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.EMAIL_ADDRESS
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
@@ -65,7 +66,7 @@ fun Context.launchIntentSafely(intent: Intent) {
         if (peekActivity() == null) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }.onFailure {
-        it.printStackTrace()
+        it.logcatStackTrace()
         toast(R.string.app_not_found)
     }
 }

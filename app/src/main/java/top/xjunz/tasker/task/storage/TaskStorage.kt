@@ -10,6 +10,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
@@ -136,7 +137,7 @@ object TaskStorage {
                             LocalTaskManager.enableResidentTask(task)
                         }
                     }.onFailure {
-                        it.printStackTrace()
+                        it.logcatStackTrace()
                     }
                 }
             }

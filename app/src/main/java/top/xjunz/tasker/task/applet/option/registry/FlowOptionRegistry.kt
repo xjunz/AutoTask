@@ -101,6 +101,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0006)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
         .withResult<ComponentInfoWrapper>(R.string.current_top_app)
+        .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
 
     @AppletOrdinal(0x000F)
     val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)

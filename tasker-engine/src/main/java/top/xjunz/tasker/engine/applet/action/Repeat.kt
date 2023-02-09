@@ -4,7 +4,6 @@
 
 package top.xjunz.tasker.engine.applet.action
 
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -16,12 +15,16 @@ class Repeat : Flow() {
 
     override val valueType: Int = VAL_TYPE_INT
 
-    private var count: Int = 0
+    private val count by lazy {
+        value as Int
+    }
+
+    override val isRepetitive: Boolean = true
 
     var shouldBreak: Boolean = false
 
     override fun staticCheckMyself(): Int {
-        check(value != null && value!!.casted<Int>() > 0) {
+        check(value != null && (value as Int) > 0) {
             "Repeat count must be specified!"
         }
         return super.staticCheckMyself()

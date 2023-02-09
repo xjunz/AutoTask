@@ -7,6 +7,7 @@ package top.xjunz.tasker.ui.model
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import top.xjunz.tasker.app
+import top.xjunz.tasker.bridge.ContextBridge
 import java.io.File
 
 /**
@@ -28,7 +29,7 @@ class PackageInfoWrapper(val source: PackageInfo) {
     var selectedActCount: Int = 0
 
     val label: CharSequence by lazy {
-        source.applicationInfo.loadLabel(app.packageManager)
+        source.applicationInfo.loadLabel(ContextBridge.getContext().packageManager)
     }
 
     var packageName: String = source.packageName

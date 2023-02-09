@@ -44,11 +44,9 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
             }
             ibConfirm.setAntiMoneyClickListener {
                 if (vm.currentMode eq InspectorMode.UI_OBJECT) {
-                    if (vm.highlightNode.isNull()) {
-                        vm.makeToast(R.string.no_node_selected)
-                    } else {
-                        vm.showNodeInfo.value = true
-                    }
+                    vm.showNodeInfo.value = true
+                } else if (vm.currentMode eq InspectorMode.COMPONENT) {
+                    vm.onComponentSelected.value = true
                 } else if (vm.currentMode eq InspectorMode.COORDS) {
                     vm.onCoordinateSelected.value = true
                 }

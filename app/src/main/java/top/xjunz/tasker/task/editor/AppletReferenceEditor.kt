@@ -38,6 +38,8 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
 
     private val referentRevocations = ArrayMap<AppletArg, () -> Unit>()
 
+    private val varargReferentsRevocations = ArrayMap<Applet, () -> Unit>()
+
     private fun MutableMap<AppletArg, () -> Unit>.putIfNeeded(
         applet: Applet,
         which: Int,
@@ -93,6 +95,20 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
+    fun setVarargReferences(applet: Applet, referentNames: List<String>) {
+        val prevReferences = applet.references
+        val map = ArrayMap<Int, String>()
+        referentNames.forEachIndexed { index, s ->
+            map[index] = s
+        }
+        applet.references = map
+        if (revocable) {
+            varargReferentsRevocations.putIfAbsent(applet) {
+                applet.references = prevReferences
+            }
+        }
+    }
+
     fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, referent: String?) {
         val prevReferent = applet.references[whichArg]
         val prevValue = applet.value
@@ -130,6 +146,7 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
     fun reset() {
         referenceRevocations.clear()
         referentRevocations.clear()
+        varargReferentsRevocations.clear()
     }
 
     fun revokeAll() {
@@ -137,6 +154,9 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
             u.invoke()
         }
         referentRevocations.forEach { (_, u) ->
+            u.invoke()
+        }
+        varargReferentsRevocations.forEach { (_, u) ->
             u.invoke()
         }
         reset()

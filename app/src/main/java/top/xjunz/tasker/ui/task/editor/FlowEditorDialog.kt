@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.text.parseAsHtml
 import androidx.core.view.*
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -20,6 +19,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.transition.platform.MaterialFadeThrough
+import com.google.android.material.transition.platform.MaterialSharedAxis
+import io.ktor.util.reflect.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
@@ -82,11 +83,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vm.notifyFlowChanged()
-        initViews()
+        initViews(savedInstanceState)
         observeLiveData()
     }
 
-    private fun initViews() {
+    private fun initViews(savedInstanceState: Bundle?) {
         binding.fabAction.applySystemInsets { v, insets ->
             v.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = insets.bottom + 16.dp
@@ -99,7 +100,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             if (!vm.isInTrackMode)
                 binding.divider.isInvisible = binding.appBar.isLifted
         }
-        binding.rvTaskEditor.adapter = adapter
+        binding.rvTaskEditor.applySystemInsets { v, insets ->
+            v.updatePadding(bottom = insets.bottom + 16.dp)
+        }
+        if (savedInstanceState == null) {
+            binding.rvTaskEditor.post {
+                binding.rvTaskEditor.beginAutoTransition(
+                    MaterialSharedAxis(MaterialSharedAxis.X, false)
+                )
+                binding.rvTaskEditor.adapter = adapter
+            }
+        } else {
+            binding.rvTaskEditor.adapter = adapter
+        }
         vm.isFabVisible.value =
             vm.isInEditionMode || (vm.isSelectingArgument && gvm.selectedReferents.isNotEmpty())
         if (vm.isInEditionMode) {
@@ -137,7 +150,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             vm.onAppletChanged.value = vm.staticError?.victim
             vm.staticError = error
             if (error != null && error.victim !== vm.flow) {
-                toast(R.string.prompt_fix_static_error)
                 if (!adapter.currentList.contains(error.victim)) {
                     if (error.victim.parent == null) {
                         // Too deep that the hierarchy is not yet built
@@ -146,13 +158,13 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     adapter.menuHelper.triggerMenuItem(
                         null, error.victim.requireParent(), R.id.item_open_in_new
                     )
+                    toast(R.string.prompt_fix_static_errors)
                 } else {
                     vm.onAppletChanged.value = error.victim
-                    val item = binding.rvTaskEditor.findViewHolderForAdapterPosition(
-                        adapter.currentList.indexOf(error.victim)
-                    )?.itemView
-                    if (item != null && item.isActivated) {
-                        item.shake()
+                    val i = adapter.currentList.indexOf(error.victim)
+                    binding.rvTaskEditor.scrollPositionToCenterVertically(i, true) {
+                        it.shake()
+                        toast(R.string.prompt_fix_static_errors)
                     }
                 }
             } else {
@@ -186,7 +198,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             binding.appBar.isLiftOnScroll = false
             binding.ibCheck.isVisible = true
             binding.ibCheck.setImageResource(R.drawable.ic_edit_24dp)
-            val pvm = getParentViewModel<TaskShowcaseDialog, TaskShowcaseViewModel>()
+            val pvm = peekParentViewModel<TaskShowcaseDialog, TaskShowcaseViewModel>()
             binding.ibCheck.setAntiMoneyClickListener {
                 if (vm.isBase) {
                     pvm.requestEditTask.value = vm.task to null
@@ -349,17 +361,19 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         observeNotNull(gvm.currentSnapshotIndex) {
             if (!vm.isInTrackMode) return@observeNotNull
             val snapshot = gvm.allSnapshots.require()[it]
-            gvm.currentSnapshot = snapshot
+            if (gvm.currentSnapshot !== snapshot) {
+                gvm.currentSnapshot = snapshot
+            }
             binding.tvSnapshotTitle.text = R.string.format_task_snapshots.format(
                 it + 1, gvm.allSnapshots.require().size
             )
-            binding.tvSnapshotDesc.text = R.string.format_task_snapshot_info_1.format(
+            binding.tvSnapshotDesc.text = R.string.format_task_snapshot_info_1.formatAsHtml(
                 snapshot.startTimestamp.formatTime(),
                 if (snapshot.isRunning) "-" else snapshot.endTimestamp.formatTime(),
                 if (snapshot.isRunning) R.string.running.str
                 else if (snapshot.isSuccessful) R.string.succeeded.str
                 else R.string.failed.str
-            ).parseAsHtml()
+            )
             adapter.notifyItemRangeChanged(0, adapter.currentList.size)
         }
         mvm.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {

@@ -53,7 +53,7 @@ abstract class BaseComponentFragment : BaseFragment<FragmentComponentSelectorBin
         observeTransient(viewModel.addedItem) {
             notifyItemChanged(it)
         }
-        observeTransient(viewModel.removedItem) {
+        observeTransient(viewModel.itemToRemove) {
             notifyItemChanged(it)
         }
         observe(viewModel.appBarHeight) {

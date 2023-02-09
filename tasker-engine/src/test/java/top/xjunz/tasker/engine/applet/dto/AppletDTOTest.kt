@@ -7,9 +7,11 @@ package top.xjunz.tasker.engine.applet.dto
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Test
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.DslFlow
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.UnaryCriterion
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
-import top.xjunz.tasker.engine.runtime.Event
 
 /**
  * @author xjunz 2022/10/28
@@ -21,7 +23,6 @@ internal class AppletDTOTest {
         val rootFlow = DslFlow {
             id = 1
             comment = "RootFlow"
-            When(Event.EVENT_ON_PACKAGE_ENTERED)
             If {
                 id = 3
                 UnaryCriterion<String> {

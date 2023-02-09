@@ -5,21 +5,24 @@
 package top.xjunz.tasker.service
 
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.annotation.SuppressLint
 import android.app.UiAutomation
 import android.app.UiAutomationConnection
 import android.app.UiAutomationHidden
-import android.os.Binder
-import android.os.HandlerThread
+import android.graphics.Typeface
+import android.os.*
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.Keep
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.rethrowInRemoteProcess
 import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
+import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -65,7 +68,15 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     override val a11yEventDispatcher by lazy {
-        A11yEventDispatcher(looper)
+        A11yEventDispatcher(looper, uiAutomatorBridge)
+    }
+
+    override val overlayToastBridge: OverlayToastBridge by lazy {
+        OverlayToastBridge(looper)
+    }
+
+    private fun listenToKeyEvents() {
+
     }
 
     @Keep
@@ -121,6 +132,17 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         return RemoteTaskManager.Delegate
     }
 
+    /**
+     * A decompiled code snippet from `TakoStats`. **Praise Rikka**!
+     */
+    @SuppressLint("BlockedPrivateApi")
+    override fun setSystemTypefaceSharedMemory(mem: SharedMemory) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            Typeface::class.java.getDeclaredMethod("setSystemFontMap", SharedMemory::class.java)
+                .invoke(null, mem)
+        }
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
@@ -140,8 +162,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
+            listenToKeyEvents()
             residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
-            a11yEventDispatcher.startProcessing(uiAutomatorBridge)
+            a11yEventDispatcher.startProcessing()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()
@@ -154,15 +177,16 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             delegate.destroy()
         } else try {
             a11yEventDispatcher.destroy()
-            residentTaskScheduler.release()
-            if (::uiAutomationHidden.isInitialized)
+            residentTaskScheduler.shutdown()
+            if (::uiAutomationHidden.isInitialized) {
+                Binder.clearCallingIdentity()
                 uiAutomationHidden.disconnect()
-
+            }
             if (handlerThread.isAlive)
                 handlerThread.quitSafely()
 
         } catch (t: Throwable) {
-            t.printStackTrace()
+            t.logcatStackTrace()
         } finally {
             exitProcess(0)
         }

@@ -16,6 +16,10 @@ fun logcat(any: Any?, priority: Int = Log.INFO, tag: String = DEF_LOGCAT_TAG) {
     Log.println(priority, tag, any.toString())
 }
 
+fun Throwable.logcatStackTrace() {
+    Log.e(DEF_LOGCAT_TAG, Log.getStackTraceString(this))
+}
+
 fun Any?.logit(priority: Int = Log.INFO, tag: String = DEF_LOGCAT_TAG) {
     logcat(this, priority, tag)
 }

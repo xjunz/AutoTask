@@ -10,8 +10,8 @@ package top.xjunz.tasker.engine.task
 interface TaskScheduler : EventDispatcher.Callback {
 
     fun scheduleTasks(dispatcher: EventDispatcher) {
-        dispatcher.addCallback(this)
+        dispatcher.addCallbackIfAbsent(this)
     }
 
-    fun release()
+    fun shutdown()
 }

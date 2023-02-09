@@ -11,7 +11,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.annotation.Privileged
 
 @Privileged
-class ThemedWindowBridgeContext(private val binder: Binder, context: Context) :
+class ThemedWindowBridgeContext(context: Context, private val binder: Binder) :
     ContextThemeWrapper(context, R.style.AppTheme) {
 
     override fun getSystemService(name: String): Any {

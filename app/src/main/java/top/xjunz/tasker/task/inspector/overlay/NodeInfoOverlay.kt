@@ -5,23 +5,17 @@
 package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
-import android.content.ComponentName
-import android.graphics.Rect
 import android.view.WindowManager
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
-import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
 import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.applet.value.Distance
 import top.xjunz.tasker.task.inspector.FloatingInspector
-import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
-import top.xjunz.tasker.util.Router
 import top.xjunz.tasker.util.Router.launchRoute
 import java.util.*
 
@@ -33,9 +27,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val uncheckedOptions = mutableSetOf<AppletOption>()
 
-    private val uiObjectRegistry = AppletOptionFactory.uiObjectRegistry
-
-    private val pkgRegistry = AppletOptionFactory.applicationRegistry
+    private val uiObjectRegistry get() = AppletOptionFactory.uiObjectRegistry
 
     private val options = mutableListOf<AppletOption>()
 
@@ -66,23 +58,6 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     }
 
     private fun collectProperties() {
-        if (vm.currentMode eq InspectorMode.COMPONENT || vm.showExtraOptions) {
-            vm.currentComp.value?.let {
-                options.add(pkgRegistry.appCollection.withValue(Collections.singleton(it.packageName)))
-
-                if (it.activityName != null) {
-                    val compName = ComponentName(it.packageName, it.activityName!!).flattenToShortString()
-                    options.add(
-                        pkgRegistry.activityCollection.withValue(Collections.singleton(compName))
-                    )
-                }
-
-                if (it.paneTitle != null)
-                    options.add(pkgRegistry.paneTitle.withValue(it.paneTitle))
-            }
-        }
-        if (vm.currentMode eq InspectorMode.COMPONENT) return
-
         val node = vm.highlightNode.require().source
         if (node.className != null)
             options.add(uiObjectRegistry.isType.withValue(node.className))
@@ -121,20 +96,6 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         options.add(uiObjectRegistry.isScrollable.withValue(node.isScrollable))
         if (!node.isScrollable)
             uncheckedOptions.add(options.last())
-
-        val rScreen = Rect()
-        node.getBoundsInScreen(rScreen)
-
-        options.add(uiObjectRegistry.left.withValue(Distance.exactPxInScreen(rScreen.left)))
-
-        options.add(uiObjectRegistry.right.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.x - rScreen.right)))
-
-        options.add(uiObjectRegistry.top.withValue(Distance.exactPxInScreen(rScreen.top)))
-
-        options.add(uiObjectRegistry.bottom.withValue(Distance.exactPxInScreen(DisplayManagerBridge.size.y - rScreen.bottom)))
-
-        options.add(uiObjectRegistry.width.withValue(Distance.exactPx(rScreen.width())))
-        options.add(uiObjectRegistry.height.withValue(Distance.exactPx(rScreen.height())))
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -147,7 +108,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             checkedOptions = options - uncheckedOptions
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false
-            context.launchRoute(Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR)
+            context.launchRoute(FloatingInspector.ACTION_NODE_INFO_SELECTED)
         }
         binding.container.background = context.createMaterialShapeDrawable()
         inspector.observe(vm.showNodeInfo) {
@@ -155,6 +116,8 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
                 animateHide()
                 options.clear()
                 uncheckedOptions.clear()
+            } else if (vm.highlightNode.isNull()) {
+                vm.makeToast(R.string.no_node_selected)
             } else {
                 binding.tvTitle.text =
                     R.string.format_current.format(vm.currentMode.require().label)

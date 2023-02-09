@@ -12,12 +12,13 @@ import top.xjunz.tasker.ktx.text
  */
 class ArgumentDescriptor(
     nameRes: Int,
-    @StringRes private val substitutionRes: Int,
-    valueType: Class<*>,
-    val referenceType: Class<*>?,
+    private val substitutionRes: Int,
+    valueClass: Class<*>,
+    val referenceClass: Class<*>?,
     variantValueType: Int,
-    private val isReference: Boolean?
-) : ValueDescriptor(nameRes, valueType, variantValueType) {
+    private val isReference: Boolean?,
+    isCollection: Boolean
+) : ValueDescriptor(nameRes, valueClass, variantValueType, isCollection) {
 
     val substitution: CharSequence get() = if (substitutionRes == -1) name else substitutionRes.text
 
@@ -26,4 +27,53 @@ class ArgumentDescriptor(
     val isValueOnly get() = isReference == false
 
     val isTolerant get() = isReference == null
+
+    class Builder(private val nameRes: Int, private val isReference: Boolean? = null) {
+
+        lateinit var valueClass: Class<*>
+
+        inline fun <reified T> ofType() {
+            valueClass = T::class.java
+        }
+
+        @StringRes
+        private var substitutionRes: Int = -1
+
+        fun withSubstitution(@StringRes res: Int): Builder {
+            substitutionRes = res
+            return this
+        }
+
+        var variantValueType = -1
+
+        fun withVariantValueType(variantValueType: Int): Builder {
+            this.variantValueType = variantValueType
+            return this
+        }
+
+        var referenceClass: Class<*>? = null
+
+        fun withReferenceClass(referenceClass: Class<*>?): Builder {
+            this.referenceClass = referenceClass
+            return this
+        }
+
+        var isCollection = false
+
+        fun asCollection() {
+            isCollection = true
+        }
+
+        fun build(): ArgumentDescriptor {
+            return ArgumentDescriptor(
+                nameRes,
+                substitutionRes,
+                valueClass,
+                referenceClass,
+                variantValueType,
+                isReference,
+                isCollection
+            )
+        }
+    }
 }

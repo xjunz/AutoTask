@@ -13,7 +13,6 @@ import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.floatingInspector
-import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.addSafely
 import top.xjunz.tasker.task.applet.controlFlow
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
@@ -70,9 +69,6 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         if (scope is ScopeFlow<*>) {
             isScoped = true
             registryOptions = arrayOf(factory.requireRegistryOption(scope.appletId))
-            // If scoped, do not show extra options from other registry, like showing component
-            // options while showing ui object options.
-            if (isFloatingInspectorShown) floatingInspector.viewModel.showExtraOptions = false
         } else {
             isScoped = false
             registryOptions = when (control) {

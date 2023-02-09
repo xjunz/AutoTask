@@ -36,6 +36,7 @@ import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
@@ -43,7 +44,6 @@ import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
-import top.xjunz.tasker.util.Router
 
 /**
  * @author xjunz 2022/09/26
@@ -171,16 +171,13 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     requireActivity().pressHome()
                 }
             } else {
-                FloatingInspectorDialog().setMode(mode).doOnSucceeded {
-                    floatingInspector.viewModel.showExtraOptions = !viewModel.isScoped
-                }.show(parentFragmentManager)
+                FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
             }
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
         if (viewModel.isScoped) binding.cvHeader.doOnPreDraw {
             if (isFloatingInspectorShown) {
-                floatingInspector.viewModel.showExtraOptions = false
                 val mode = it.tag?.casted<InspectorMode>() ?: return@doOnPreDraw
                 if (floatingInspector.mode != mode) {
                     floatingInspector.mode = mode
@@ -211,21 +208,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             transition.addTransition(MaterialFadeThrough().addTarget(binding.cvHeader))
             binding.rootView.beginAutoTransition(transition)
             val flowRegistry = AppletOptionFactory.flowRegistry
-            when (viewModel.registryOptions[it]) {
-                flowRegistry.appCriteria -> {
-                    binding.cvHeader.tag = InspectorMode.COMPONENT
-                    binding.cvHeader.isVisible = true
-                    binding.tvHeader.text =
-                        R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.COMPONENT.label)
-                }
-                flowRegistry.uiObjectCriteria -> {
-                    binding.cvHeader.tag = InspectorMode.UI_OBJECT
-                    binding.cvHeader.isVisible = true
-                    binding.tvHeader.text =
-                        R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.UI_OBJECT.label)
-                }
-                else -> binding.cvHeader.isVisible = false
-            }
+            if (viewModel.registryOptions[it] == flowRegistry.uiObjectCriteria) {
+                binding.cvHeader.tag = InspectorMode.UI_OBJECT
+                binding.cvHeader.isVisible = true
+                binding.tvHeader.text =
+                    R.string.format_enable_floating_inspector.formatAsHtml(InspectorMode.UI_OBJECT.label)
+            } else binding.cvHeader.isVisible = false
         }
         observe(viewModel.applets) {
             binding.shoppingCart.btnCount.text =
@@ -252,7 +240,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             viewModel.applets.require()[index].toggleRelation()
             bottomAdapter.notifyItemChanged(index)
         }
-        mainViewModel.doOnHostRouted(this, Router.HOST_ACCEPT_OPTIONS_FROM_INSPECTOR) {
+        mainViewModel.doOnRouted(this, FloatingInspector.ACTION_NODE_INFO_SELECTED) {
             val prevSize = bottomAdapter.itemCount
             viewModel.acceptAppletsFromInspector()
             shopCartIntegration.expand()

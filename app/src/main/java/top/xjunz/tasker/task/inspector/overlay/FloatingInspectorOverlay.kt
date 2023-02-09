@@ -29,6 +29,7 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
     protected val context get() = inspector.context
 
     protected val vm get() = inspector.viewModel
+
     protected fun updateViewLayout() {
         windowManager.updateViewLayout(rootView, layoutParams)
     }

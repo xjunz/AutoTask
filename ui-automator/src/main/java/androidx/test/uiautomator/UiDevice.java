@@ -95,7 +95,6 @@ public class UiDevice implements Searchable {
         if (UiDevice.API_LEVEL_ACTUAL >= Build.VERSION_CODES.LOLLIPOP) {
             // Subscribe to window information
             AccessibilityServiceInfo info = getUiAutomation().getServiceInfo();
-            Log.i("AutomatorTrace", info.toString());
             info.flags |= AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
             getUiAutomation().setServiceInfo(info);
         }

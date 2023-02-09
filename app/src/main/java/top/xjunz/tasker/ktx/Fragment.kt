@@ -32,14 +32,10 @@ fun DialogFragment.show(fm: FragmentManager): Fragment {
     return this
 }
 
-inline fun <reified T : Fragment> Fragment.peekParentFragment(): T {
+inline fun <reified F : Fragment, reified VM : ViewModel> Fragment.peekParentViewModel(): VM {
     var parent = requireParentFragment()
-    while (parent.javaClass != T::class.java) {
+    while (parent.javaClass != F::class.java) {
         parent = parent.requireParentFragment()
     }
-    return parent.casted()
-}
-
-inline fun <reified F : Fragment, reified VM : ViewModel> Fragment.getParentViewModel(): VM {
-    return peekParentFragment<F>().viewModels<VM>().value
+    return parent.casted<F>().viewModels<VM>().value
 }

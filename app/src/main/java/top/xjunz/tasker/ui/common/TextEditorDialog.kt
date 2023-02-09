@@ -14,11 +14,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
-import top.xjunz.tasker.ktx.doWhenCreated
-import top.xjunz.tasker.ktx.setSelectionToEnd
-import top.xjunz.tasker.ktx.textString
+import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
 /**
@@ -26,13 +28,11 @@ import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
  */
 class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
 
-    companion object {
-        const val ACTION_INPUT = "input"
-    }
-
     override val isFullScreen: Boolean = false
 
     private class InnerViewModel : ViewModel() {
+
+        var variantType: Int = -1
 
         var allowEmptyInput = false
 
@@ -84,6 +84,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.allowEmptyInput = true
     }
 
+    fun setVariantType(variantType: Int) = doWhenCreated {
+        viewModel.variantType = variantType
+    }
+
     private lateinit var inputBox: EditText
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -113,7 +117,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                 etMenu.threshold = Int.MAX_VALUE
             } else {
                 inputBox = etInput
-                tilMenu.isVisible =false
+                tilMenu.isVisible = false
                 tilInput.isVisible = true
             }
             viewModel.editTextConfig?.invoke(inputBox)
@@ -167,9 +171,17 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             }
             return@l false
         }
-        peekMainViewModel().doOnAction(this, ACTION_INPUT) {
-            inputBox.setText(it)
-            inputBox.setSelection(it.length)
+        binding.cvContainer.isVisible = viewModel.variantType != -1
+        binding.cvContainer.setAntiMoneyClickListener {
+            FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
+        }
+        peekMainViewModel().doOnRouted(this, FloatingInspector.ACTION_COMPONENT_SELECTED) {
+            val component = floatingInspector.viewModel.currentComp.require()
+            component.paneTitle?.let {
+                inputBox.setText(it)
+                inputBox.setSelectionToEnd()
+                toast(R.string.format_added.format(it))
+            }
         }
     }
 

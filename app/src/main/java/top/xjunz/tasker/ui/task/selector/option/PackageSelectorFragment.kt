@@ -51,7 +51,7 @@ class PackageSelectorFragment : BaseComponentFragment() {
                 }
             }
         }
-        observeTransient(viewModel.removedItem) {
+        observeTransient(viewModel.itemToRemove) {
             if (viewModel.mode == ComponentSelectorDialog.MODE_ACTIVITY) {
                 it as ComponentName
                 val index = viewModel.currentPackages.require().indexOfFirst { info ->

@@ -34,7 +34,7 @@ object ContextBridge {
     }
 
     @Anywhere
-    fun getAppContext(): Context {
+    fun getAppResourceContext(): Context {
         return if (isAppProcess) app else createAppContext()
     }
 
@@ -67,10 +67,9 @@ object ContextBridge {
         return if (OsUtil.isInRootProcess) {
             sysCtx
         } else try {
-            val ctx: Context =
-                sysCtx.casted<ContextHidden>().createPackageContextAsUser(
-                    SHELL_APPLICATION_ID, 0, UserHandleHidden.of(0)
-                )
+            val ctx: Context = sysCtx.casted<ContextHidden>().createPackageContextAsUser(
+                SHELL_APPLICATION_ID, 0, UserHandleHidden.of(0)
+            )
             val cls = Class.forName("android.app.ContextImpl")
             val method: Method = cls.getDeclaredMethod(
                 "createAppContext",

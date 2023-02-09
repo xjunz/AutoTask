@@ -5,7 +5,7 @@ buildscript {
         compile_sdk_version =33
         min_sdk_version =24
         target_sdk_version =33
-        kotlin_version = "1.7.21"
+        kotlin_version = "1.8.0"
         refine_version = "3.1.1"
         shizuku_version = '12.1.0'
         ktor_version = '2.1.1'
@@ -19,7 +19,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.0'
+        classpath 'com.android.tools.build:gradle:7.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "dev.rikka.tools.refine:gradle-plugin:$refine_version"
 

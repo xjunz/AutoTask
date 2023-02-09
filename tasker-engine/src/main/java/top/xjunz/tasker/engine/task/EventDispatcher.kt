@@ -18,8 +18,13 @@ abstract class EventDispatcher : CoroutineScope {
 
     abstract fun destroy()
 
-    fun addCallback(callback: Callback) {
+    fun addCallbackIfAbsent(callback: Callback) {
+        if (callbacks.contains(callback)) return
         callbacks.offer(callback)
+    }
+
+    fun removeCallback(callback: Callback) {
+        callbacks.remove(callback)
     }
 
     fun dispatchEvents(vararg events: Event) {

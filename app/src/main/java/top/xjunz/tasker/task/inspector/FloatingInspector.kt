@@ -26,7 +26,9 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     companion object {
 
-        const val ACTION_SELECT_COORDINATE = "inspector.action.SELECT_COORDINATE"
+        const val ACTION_COORDINATE_SELECTED = "inspector.action.COORDINATE_SELECTED"
+        const val ACTION_COMPONENT_SELECTED = "inspector.action.COMPONENT_SELECTED"
+        const val ACTION_NODE_INFO_SELECTED = "inspector.action.NODE_INFO_SELECTED"
 
         fun isReady(): Boolean {
             return Settings.canDrawOverlays(app) && A11yAutomatorService.get() != null

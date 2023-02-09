@@ -7,6 +7,7 @@ package top.xjunz.tasker.engine.applet.base
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import kotlinx.coroutines.CancellationException
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -25,7 +26,10 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     override val valueType: Int = VAL_TYPE_IRRELEVANT
 
-    protected open val registerResultsForChildren: Boolean = true
+    /**
+     * Whether the applets are repeated executed.
+     */
+    open val isRepetitive: Boolean = false
 
     @CallSuper
     @CheckResult
@@ -38,26 +42,30 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
             if (index != 0 && applet.isAnd != runtime.isSuccessful) {
-                runtime.observer?.onAppletSkipped(applet, runtime)
+                if (!isRepetitive) {
+                    runtime.observer?.onAppletSkipped(applet, runtime)
+                }
                 return@`continue`
             }
             applet.parent = this
             applet.index = index
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
-            runtime.observer?.onAppletStarted(applet, runtime)
+            if (!isRepetitive) {
+                runtime.observer?.onAppletStarted(applet, runtime)
+            }
             val result = try {
                 applet.apply(runtime)
             } catch (t: Throwable) {
                 if (t is CancellationException) throw t
-                t.printStackTrace()
+                t.logcatStackTrace()
                 AppletResult.error(t)
             }
-            if (registerResultsForChildren) {
-                runtime.registerResult(applet, result)
-            }
             runtime.isSuccessful = result.isSuccessful
-            runtime.observer?.onAppletTerminated(applet, runtime)
+            if (!isRepetitive) {
+                runtime.registerResult(applet, result)
+                runtime.observer?.onAppletTerminated(applet, runtime)
+            }
         }
         return if (runtime.isSuccessful) AppletResult.SUCCESS else AppletResult.FAILURE
     }
@@ -82,7 +90,6 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         // Code layer checks: find bugs
         check(size <= maxSize)
         if (requiredSize != -1) {
-            check(size == requiredSize)
             check(isEnabled)
         }
         // User layer checks: find improper operations

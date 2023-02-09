@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.applet.criterion
 
+import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.Event
@@ -26,13 +27,21 @@ class EventFilter(eventType: Int) : Applet() {
             it.type == value
         }
         return if (hit == null) {
-            AppletResult.failed(runtime.events.joinToString())
+            AppletResult.FAILURE
         } else {
+            runtime.hitEvent = hit
             val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)
-            if (hit.type == Event.EVENT_ON_NOTIFICATION_RECEIVED) {
-                AppletResult.succeeded(hit.componentInfo.paneTitle, wrapper)
-            } else {
-                AppletResult.succeeded(wrapper, wrapper.packageName)
+            when (hit.type) {
+                Event.EVENT_ON_NOTIFICATION_RECEIVED -> {
+                    AppletResult.succeeded(hit.componentInfo.paneTitle, wrapper)
+                }
+                Event.EVENT_ON_PACKAGE_ENTERED, Event.EVENT_ON_PACKAGE_EXITED -> {
+                    AppletResult.succeeded(
+                        wrapper,
+                        lazy { PackageManagerBridge.loadLabelOfPackage(wrapper.packageName) }
+                    )
+                }
+                else -> AppletResult.succeeded(wrapper, wrapper.packageName)
             }
         }
     }

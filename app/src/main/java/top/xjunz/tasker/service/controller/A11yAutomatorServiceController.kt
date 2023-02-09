@@ -30,7 +30,7 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
         }
     }
 
-    private val errorObserver = Observer<Throwable> {
+    private val errorObserver = Observer<Throwable?> {
         if (it != null) {
             listener?.onError(it)
             launchError.value = null

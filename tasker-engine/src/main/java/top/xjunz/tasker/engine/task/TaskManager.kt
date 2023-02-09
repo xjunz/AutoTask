@@ -60,7 +60,9 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         return findTask(id).snapshots.toTypedArray()
     }
 
-    open fun getSnapshot(id: TaskIdentifier, index: Int): TaskSnapshot? {
-        return findTask(id).snapshots.getOrNull(index)
+    fun clearAllSnapshots() {
+        enabled.forEach {
+            it.snapshots.clear()
+        }
     }
 }

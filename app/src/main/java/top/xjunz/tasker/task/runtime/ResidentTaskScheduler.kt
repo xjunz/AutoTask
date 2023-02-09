@@ -4,7 +4,9 @@
 
 package top.xjunz.tasker.task.runtime
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.EventScope
@@ -23,7 +25,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     /**
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
-    override fun release() {
+    override fun shutdown() {
         TaskRuntime.drainPool()
     }
 
@@ -31,7 +33,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
         override fun onStarted(runtime: TaskRuntime) {
             super.onStarted(runtime)
             logcat("\n\n")
-            logcat("******** $runtime Started ********")
+            logcat("******** $runtime Started[${Thread.currentThread()}] ********")
         }
 
         override fun onError(runtime: TaskRuntime, t: Throwable) {
@@ -57,17 +59,18 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     }
 
     override suspend fun onEvents(events: Array<out Event>) {
-        val eventScope = EventScope()
-        try {
-            for (task in taskManager.getEnabledTasks()) {
-                task.taskStateListener = listener
+        val scope = EventScope()
+        for (task in taskManager.getEnabledTasks()) {
+            if (!task.isExecuting || task.isSuspending) {
+                // Create a new coroutine scope, do not suspend current coroutine
                 coroutineScope {
-                    task.launch(eventScope, this, events)
+                    launch(Dispatchers.Default) {
+                        task.taskStateListener = listener
+                        task.launch(scope, this, events)
+                    }
                 }
-            }
-        } finally {
-            events.forEach {
-                it.recycle()
+            } else {
+                logcat("${task.title} is ignored [$${Thread.currentThread()}]")
             }
         }
     }

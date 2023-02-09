@@ -17,7 +17,5 @@ interface IRemoteTaskManager {
 
     int getSnapshotCount(long identifier);
 
-    TaskSnapshot getSnapshot(long identifier, int index);
-
     TaskSnapshot[] getAllSnapshots(long identifier);
 }

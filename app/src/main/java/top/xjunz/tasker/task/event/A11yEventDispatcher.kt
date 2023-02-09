@@ -5,9 +5,10 @@
 package top.xjunz.tasker.task.event
 
 import android.app.Notification
-import android.os.Handler
 import android.os.Looper
+import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
+import androidx.core.os.HandlerCompat
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
@@ -15,7 +16,6 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
-import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
@@ -23,53 +23,66 @@ import kotlin.coroutines.CoroutineContext
 /**
  * @author xjunz 2022/10/29
  */
-class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
+class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge) :
+    EventDispatcher() {
 
     override val coroutineContext: CoroutineContext =
-        Handler(looper).asCoroutineDispatcher() + SupervisorJob()
+        HandlerCompat.createAsync(looper)
+            .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
 
-    private val activityHashCache = mutableSetOf<Int>()
+    private val activityHashCache = ArraySet<Int>()
 
-    private var curEventTime: Long = -1
-    private var curPackageName: String? = null
-    private var curActivityName: String? = null
-    private var curPanelTitle: String? = null
+    private var latestEventTime: Long = -1
+    private var latestPackageName: String? = null
+    private var latestActivityName: String? = null
+    private var latestPaneTitle: String? = null
 
-    var contentChangedTimeout = 250L
+    var contentChangeRateLimitMills = 100L
 
     private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
-    fun startProcessing(bridge: UiAutomatorBridge) {
+    fun startProcessing() {
         bridge.addOnAccessibilityEventListener {
-            launch {
-                processAccessibilityEvent(it)
-            }
+            processAccessibilityEvent(it)
         }
         bridge.startReceivingEvents()
     }
 
     override fun destroy() {
         cancel()
-        uiAutomatorBridge.stopReceivingEvents()
+        bridge.stopReceivingEvents()
     }
 
-    private suspend fun processAccessibilityEvent(event: AccessibilityEvent) {
-        val packageName = event.packageName?.toString() ?: return
-        // Do not send events from the host application!
-        if (packageName == BuildConfig.APPLICATION_ID) return
-        if (packageName == "com.android.systemui") return
-        if (event.eventTime < curEventTime && !event.isFullScreen) return
-        val className = event.className?.toString()
-        if (className == "android.inputmethodservice.SoftInputWindow") return
-        curEventTime = event.eventTime
+    private fun processAccessibilityEvent(event: AccessibilityEvent) {
+        try {
+            val packageName = event.packageName?.toString() ?: return
+            // Do not send events from the host application!
+            if (packageName == BuildConfig.APPLICATION_ID) return
+            if (packageName == "com.android.systemui") return
+            if (event.eventTime < latestEventTime && !event.isFullScreen) return
+            val className = event.className?.toString()
+            if (className == "android.inputmethodservice.SoftInputWindow") return
+            dispatchEventsFromAccessibilityEvent(event, packageName, className)
+        } finally {
+            @Suppress("DEPRECATION")
+            event.recycle()
+        }
+    }
+
+    private fun dispatchEventsFromAccessibilityEvent(
+        event: AccessibilityEvent,
+        packageName: String,
+        className: String?
+    ) {
+        latestEventTime = event.eventTime
         val firstText = event.text.firstOrNull()?.toString()
-        val prevPanelTitle = curPanelTitle
+        val prevPanelTitle = latestPaneTitle
         if (firstText != null
             && event.eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             && event.contentChangeTypes != AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
-            && packageName == curPackageName
+            && packageName == latestPackageName
         )
-            curPanelTitle = firstText
+            latestPaneTitle = firstText
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
@@ -77,48 +90,49 @@ class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
                     dispatchEvents(
                         Event.obtain(
                             Event.EVENT_ON_NOTIFICATION_RECEIVED,
-                            packageName, curActivityName, firstText
+                            packageName, latestActivityName, firstText,
                         )
                     )
                 }
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
 
-                val prevActivityName = curActivityName
+                val prevActivityName = latestActivityName
                 val isNewActivity = className != null && className != prevActivityName
                         && isActivityExistent(packageName, className)
 
                 if (isNewActivity) {
-                    curActivityName = className
+                    latestActivityName = className
                 }
 
                 if (
                     event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED
                     // Only full screen windows, because there may be overlay windows
+                    // todo: Need this?
                     && event.isFullScreen
                 ) {
-                    val prevPkgName = curPackageName
-                    curPanelTitle = firstText
+                    val prevPkgName = latestPackageName
+                    latestPaneTitle = firstText
                     // New package detected
                     if (prevPkgName != packageName) {
-                        curPackageName = packageName
+                        latestPackageName = packageName
 
-                        val pkgEnterEvent = Event.obtain(
+                        val enterEvent = Event.obtain(
                             Event.EVENT_ON_PACKAGE_ENTERED,
                             packageName,
-                            curActivityName,
-                            curPanelTitle
+                            latestActivityName,
+                            latestPaneTitle
                         )
                         if (prevPkgName != null) {
-                            val pkgExitEvent = Event.obtain(
+                            val exitEvent = Event.obtain(
                                 Event.EVENT_ON_PACKAGE_EXITED,
                                 prevPkgName,
                                 prevActivityName,
                                 prevPanelTitle
                             )
-                            dispatchEvents(pkgEnterEvent, pkgExitEvent)
+                            dispatchEvents(enterEvent, exitEvent)
                         } else {
-                            dispatchEvents(pkgEnterEvent)
+                            dispatchEvents(enterEvent)
                         }
                         return
                     }
@@ -127,9 +141,9 @@ class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                 eventDispatchScope?.get()?.cancel()
-                coroutineScope {
+                launch {
                     eventDispatchScope = WeakReference(this)
-                    delay(contentChangedTimeout)
+                    delay(contentChangeRateLimitMills)
                     dispatchContentChanged(packageName)
                 }
             }
@@ -137,18 +151,20 @@ class A11yEventDispatcher(looper: Looper) : EventDispatcher() {
         }
     }
 
-    private suspend fun dispatchContentChanged(packageName: String) {
-        if (packageName != curPackageName) return
+    private fun dispatchContentChanged(packageName: String) {
+        if (packageName != latestPackageName) return
         dispatchEvents(
             Event.obtain(
                 Event.EVENT_ON_CONTENT_CHANGED,
-                packageName, curActivityName, curPanelTitle
+                packageName,
+                latestActivityName,
+                latestPaneTitle,
             )
         )
     }
 
     fun getCurrentComponentInfo(): ComponentInfoWrapper {
-        return ComponentInfoWrapper(curPackageName!!, curActivityName, curPanelTitle)
+        return ComponentInfoWrapper(latestPackageName!!, latestActivityName, latestPaneTitle)
     }
 
     private fun isActivityExistent(pkgName: String, actName: String): Boolean {

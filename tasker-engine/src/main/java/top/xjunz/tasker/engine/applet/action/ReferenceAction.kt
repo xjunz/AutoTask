@@ -21,9 +21,6 @@ abstract class ReferenceAction<V>(valueType: Int) : Action<V>(valueType) {
     ): AppletResult
 
     final override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        check(references.isNotEmpty()) {
-            "Need references!"
-        }
         val args = runtime.getArguments(this)
         args.forEach {
             runtime.updateFingerprint(it)

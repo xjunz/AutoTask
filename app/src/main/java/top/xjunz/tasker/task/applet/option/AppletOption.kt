@@ -170,9 +170,6 @@ class AppletOption(
     val rawTitle: CharSequence?
         get() = if (titleResource == TITLE_NONE) null else titleResource.text
 
-    // TODO
-    var valueChecker: ((Any?) -> String?)? = null
-
     /**
      * The applet's value is innate and hence not modifiable.
      */
@@ -213,10 +210,10 @@ class AppletOption(
 
     fun findResults(argument: ArgumentDescriptor): List<ValueDescriptor> {
         return results.filter {
-            if (argument.referenceType == null) {
-                it.valueType == argument.valueType && it.variantValueType == argument.variantValueType
+            if (argument.referenceClass == null) {
+                it.valueClass == argument.valueClass && it.variantValueType == argument.variantValueType
             } else {
-                it.valueType == argument.referenceType
+                it.valueClass == argument.referenceClass
             }
         }
     }
@@ -350,11 +347,12 @@ class AppletOption(
 
     inline fun <reified T> withResult(
         @StringRes name: Int,
-        variantType: Int = -1
+        variantType: Int = -1,
+        isCollection: Boolean = false
     ): AppletOption {
         if (results == Collections.EMPTY_LIST) results = mutableListOf()
         (results as MutableList<ValueDescriptor>).add(
-            ValueDescriptor(name, T::class.java, variantType)
+            ValueDescriptor(name, T::class.java, variantType, isCollection)
         )
         return this
     }
@@ -364,11 +362,20 @@ class AppletOption(
      */
     inline fun <reified V> withUnaryArgument(
         @StringRes name: Int,
+        @StringRes substitution: Int = -1,
         variantType: Int = -1,
         isRef: Boolean? = null,
-        @StringRes substitution: Int = -1,
+        isCollection: Boolean = false,
     ): AppletOption {
-        return withArgument(name, V::class.java, null, variantType, isRef, substitution)
+        return withArgument(
+            name,
+            substitution,
+            V::class.java,
+            null,
+            variantType,
+            isRef,
+            isCollection
+        )
     }
 
     /**
@@ -376,26 +383,29 @@ class AppletOption(
      */
     inline fun <reified V, reified Ref> withBinaryArgument(
         @StringRes name: Int,
+        @StringRes substitution: Int = -1,
         variantValueType: Int = -1,
-        @StringRes substitution: Int = -1
+        isCollection: Boolean = false,
     ): AppletOption {
         return withArgument(
             name,
+            substitution,
             V::class.java,
             Ref::class.java,
             variantValueType,
             null,
-            substitution
+            isCollection
         )
     }
 
     fun withArgument(
         @StringRes name: Int,
+        @StringRes substitution: Int,
         valueType: Class<*>,
         referenceType: Class<*>?,
         variantType: Int,
         isRef: Boolean?,
-        @StringRes substitution: Int,
+        isCollection: Boolean
     ): AppletOption {
         if (arguments == Collections.EMPTY_LIST) arguments = mutableListOf()
         (arguments as MutableList<ArgumentDescriptor>).add(
@@ -405,7 +415,8 @@ class AppletOption(
                 valueType,
                 referenceType,
                 variantType,
-                isRef
+                isRef,
+                isCollection
             )
         )
         return this
@@ -416,9 +427,16 @@ class AppletOption(
      */
     inline fun <reified V> withValueArgument(
         @StringRes name: Int,
-        variantValueType: Int = -1
+        variantValueType: Int = -1,
+        isCollection: Boolean = false
     ): AppletOption {
-        return withUnaryArgument<V>(name, variantValueType, false)
+        return withUnaryArgument<V>(
+            name,
+            substitution = -1,
+            variantValueType,
+            isRef = false,
+            isCollection
+        )
     }
 
     /**
@@ -426,17 +444,11 @@ class AppletOption(
      */
     inline fun <reified Ref> withRefArgument(
         @StringRes name: Int,
-        variantValueType: Int = -1,
         @StringRes substitution: Int = -1,
+        variantValueType: Int = -1,
+        isCollection: Boolean = false,
     ): AppletOption {
-        return withUnaryArgument<Ref>(name, variantValueType, true, substitution)
-    }
-
-    inline fun <T : Any> withValueChecker(crossinline checker: (T?) -> String?): AppletOption {
-        valueChecker = {
-            checker(it?.casted())
-        }
-        return this
+        return withUnaryArgument<Ref>(name, substitution, variantValueType, true, isCollection)
     }
 
     fun withHelperText(@StringRes res: Int): AppletOption {

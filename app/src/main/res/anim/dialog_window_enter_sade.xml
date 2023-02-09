@@ -12,8 +12,8 @@
         android:toAlpha="1" />
 
     <scale
-        android:fromXScale=".98"
-        android:fromYScale=".98"
+        android:fromXScale=".95"
+        android:fromYScale=".95"
         android:pivotX="50%"
         android:pivotY="50%"
         android:toXScale="1"

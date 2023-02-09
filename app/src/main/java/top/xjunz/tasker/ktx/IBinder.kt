@@ -29,7 +29,7 @@ inline fun IBinder.transactOneWay(code: Int, paramSetter: (Parcel) -> Unit = {})
 }
 
 fun IBinder.execShellCmd(vararg args: String) {
-    transactOneWay(IBinderHidden.SHELL_COMMAND_TRANSACTION) {
+    transact(IBinderHidden.SHELL_COMMAND_TRANSACTION) {
         it.writeFileDescriptor(FileDescriptor.`in`)
         it.writeFileDescriptor(FileDescriptor.out)
         it.writeFileDescriptor(FileDescriptor.err)

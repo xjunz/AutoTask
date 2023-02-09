@@ -43,7 +43,7 @@ class CoordinateEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        peekMainViewModel().doOnAction(this, FloatingInspector.ACTION_SELECT_COORDINATE) {
+        peekMainViewModel().doOnAction(this, FloatingInspector.ACTION_COORDINATE_SELECTED) {
             val point = IntValueUtil.parseCoordinate(it.toInt())
             binding.etX.setText(point.x.toString())
             binding.etY.setText(point.y.toString())
@@ -88,11 +88,11 @@ class CoordinateEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>
             if (x == null) {
                 binding.tilX.shake()
                 binding.tilX.requestFocus()
-                toast(R.string.format_not_specified.format(R.string.x_coordinate.str))
+                toast(R.string.error_unspecified.format(R.string.x_coordinate.str))
             } else if (y == null) {
                 binding.tilY.shake()
                 binding.tilY.requestFocus()
-                toast(R.string.format_not_specified.format(R.string.y_coordinate.str))
+                toast(R.string.error_unspecified.format(R.string.y_coordinate.str))
             } else {
                 viewModel.onCompletion(x, y)
                 dismiss()

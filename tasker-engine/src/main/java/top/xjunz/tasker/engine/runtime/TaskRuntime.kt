@@ -5,7 +5,7 @@
 package top.xjunz.tasker.engine.runtime
 
 import android.util.ArrayMap
-import androidx.core.util.Pools.SimplePool
+import androidx.core.util.Pools.SynchronizedPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
@@ -17,9 +17,6 @@ import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
-
-private typealias Referred = () -> Any?
-
 /**
  * The structure storing runtime information of a running [XTask].
  *
@@ -27,7 +24,9 @@ private typealias Referred = () -> Any?
  */
 class TaskRuntime private constructor() {
 
-    private object Pool : SimplePool<TaskRuntime>(25)
+    fun interface Referred : () -> Any?
+
+    private object Pool : SynchronizedPool<TaskRuntime>(25)
 
     interface Observer {
 
@@ -58,7 +57,6 @@ class TaskRuntime private constructor() {
             while (Pool.acquire() != null) {
                 /* no-op */
             }
-            Event.drainPool()
         }
     }
 
@@ -76,6 +74,8 @@ class TaskRuntime private constructor() {
 
     val events: Array<out Event> get() = _events!!
 
+    @get:Synchronized
+    @set:Synchronized
     private var runtimeScope: CoroutineScope? = null
 
     /**
@@ -171,14 +171,18 @@ class TaskRuntime private constructor() {
         }
     }
 
-    fun registerReferent(applet: Applet, which: Int, referred: Referred) {
+    fun registerReferent(applet: Applet, which: Int, referred: Any) {
         referents[applet.referents[which]] = referred
     }
 
     private fun getReferentByName(name: String?): Any? {
         if (name == null) return null
         val referent = referents[name]
-        return if (referent is Referred) referent.invoke() else referent
+        return if (referent is Referred) {
+            referent.invoke()
+        } else if (referent is Lazy<*>) {
+            referent.value
+        } else referent
     }
 
     fun setTarget(any: Any?) {

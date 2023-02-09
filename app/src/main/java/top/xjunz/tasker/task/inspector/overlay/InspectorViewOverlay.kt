@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayInspectorBinding
 import top.xjunz.tasker.ktx.*
@@ -27,6 +28,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.task.inspector.StableNodeInfo.Companion.freeze
 import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.util.Router.launchRoute
 
 /**
  * @author xjunz 2022/10/16
@@ -102,7 +104,7 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
             inspector.observeTransient(vm.onCoordinateSelected) {
                 if (binding.inspectorView.isPointerMoved()) {
                     context.launchAction(
-                        FloatingInspector.ACTION_SELECT_COORDINATE,
+                        FloatingInspector.ACTION_COORDINATE_SELECTED,
                         IntValueUtil.composeCoordinate(
                             binding.inspectorView.getCoordinateX(),
                             binding.inspectorView.getCoordinateY()
@@ -110,6 +112,13 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                     )
                 } else {
                     toast(R.string.error_no_coordinate_selected)
+                }
+            }
+            inspector.observeTransient(vm.onComponentSelected) {
+                if (vm.currentComp.isNull()) {
+                    toast(R.string.error_no_selection)
+                } else {
+                    context.launchRoute(FloatingInspector.ACTION_COMPONENT_SELECTED)
                 }
             }
         }
@@ -142,7 +151,7 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                                         )?.clip(binding.inspectorView.visibleBounds)
                                     }
                                 } catch (t: Throwable) {
-                                    t.printStackTrace()
+                                    t.logcatStackTrace()
                                     vm.makeToast(R.string.screenshot_failed.str)
                                 }
                                 vm.pinScreenShot.notifySelfChanged()

@@ -41,12 +41,12 @@ fun <V> LifecycleOwner.observeNostalgic(ld: LiveData<V>, observer: (prev: V?, cu
     }
 }
 
-inline fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, crossinline observer: (V) -> Unit) {
+fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, observer: (V) -> Unit) {
     observe(ld, object : Observer<V> {
-        override fun onChanged(t: V) {
-            if (t != null) {
+        override fun onChanged(value: V) {
+            if (value != null) {
                 ld.removeObserver(this)
-                observer(t)
+                observer(value)
             }
         }
     })
@@ -56,9 +56,9 @@ inline fun <V> LifecycleOwner.observeOnce(ld: LiveData<V>, crossinline observer:
  * Observe a [MutableLiveData] as transient, whose value will be set to `null` once the
  * [observer] is triggered and the observer will not response to a `null` value.
  */
-inline fun <V> LifecycleOwner.observeTransient(
+fun <V> LifecycleOwner.observeTransient(
     ld: MutableLiveData<V>,
-    crossinline observer: (V) -> Unit
+    observer: (V) -> Unit
 ) {
     ld.observe(this) {
         if (it != null) {
@@ -69,18 +69,18 @@ inline fun <V> LifecycleOwner.observeTransient(
     }
 }
 
-inline fun <V> LifecycleOwner.observeNotNull(
+fun <V> LifecycleOwner.observeNotNull(
     ld: MutableLiveData<V>,
-    crossinline observer: (V & Any) -> Unit
+    observer: (V & Any) -> Unit
 ) {
     ld.observe(this) {
         if (it != null) observer.invoke(it)
     }
 }
 
-inline fun <V> LifecycleOwner.observeDialog(
+fun <V> LifecycleOwner.observeDialog(
     ld: MutableLiveData<V>,
-    crossinline block: (V) -> Dialog?
+    block: (V) -> Dialog?
 ) {
     ld.observe(this) {
         if (it == null) return@observe
@@ -113,18 +113,18 @@ fun <V : Throwable> LifecycleOwner.observeError(ld: MutableLiveData<V>) {
     }
 }
 
-inline fun LifecycleOwner.observeConfirmation(
+fun LifecycleOwner.observeConfirmation(
     ld: MutableLiveData<*>,
     @StringRes promptTextRes: Int,
-    crossinline onConfirmed: () -> Unit
+    onConfirmed: () -> Unit
 ) {
     observeConfirmation(ld, promptTextRes.text, onConfirmed)
 }
 
-inline fun LifecycleOwner.observeConfirmation(
+fun LifecycleOwner.observeConfirmation(
     ld: MutableLiveData<*>,
     promptText: CharSequence,
-    crossinline onConfirmed: () -> Unit
+    onConfirmed: () -> Unit
 ) {
     ld.observe(this) {
         if (it == null || it == false) return@observe

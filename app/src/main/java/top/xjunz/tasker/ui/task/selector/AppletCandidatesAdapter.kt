@@ -89,9 +89,7 @@ class AppletCandidatesAdapter(
             var title = if (option.descAsTitle) option.describe(applet)
             else option.loadTitle(applet)
             if (title != null && showRelation) {
-                title = AppletOption.makeRelationSpan(
-                    title, applet, viewModel.isInCriterionScope
-                )
+                title = AppletOption.makeRelationSpan(title, applet, viewModel.isInCriterionScope)
             }
             if (!option.descAsTitle) {
                 it.tvDesc.text = option.describe(applet)

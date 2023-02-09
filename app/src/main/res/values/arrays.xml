@@ -7,6 +7,7 @@
         <item>按钮(Button)</item>
         <item>图片按钮(ImageButton)</item>
         <item>文本(TextView)</item>
+        <item>输入框(EditText)</item>
         <item>图片(ImageView)</item>
         <item>多选按钮(CheckBox)</item>
         <item>单选按钮(RadioButton)</item>
@@ -24,6 +25,7 @@
         <item>android.widget.Button</item>
         <item>android.widget.ImageButton</item>
         <item>android.widget.TextView</item>
+        <item>android.widget.EditText</item>
         <item>android.widget.ImageView</item>
         <item>android.widget.CheckBox</item>
         <item>android.widget.RadioButton</item>

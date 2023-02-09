@@ -9,6 +9,7 @@ import android.view.*
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewbinding.ViewBinding
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
@@ -30,7 +31,7 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
 
     open val isFullScreen = true
 
-    open val decorFitsSystemWindows = false
+    open val decorFitsSystemWindows get() = !isFullScreen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,5 +88,5 @@ open class BaseDialogFragment<T : ViewBinding> : DialogFragment(),
         binding.root.rootView.shake()
     }
 
-    override fun getDefaultViewModelProviderFactory() = InnerViewModelFactory
+    override val defaultViewModelProviderFactory: ViewModelProvider.Factory = InnerViewModelFactory
 }

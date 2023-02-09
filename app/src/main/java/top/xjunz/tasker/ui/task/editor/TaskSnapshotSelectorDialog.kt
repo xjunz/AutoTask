@@ -7,7 +7,6 @@ package top.xjunz.tasker.ui.task.editor
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.core.text.parseAsHtml
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogSnapshotSelectorBinding
@@ -39,12 +38,12 @@ class TaskSnapshotSelectorDialog : BaseBottomSheetDialog<DialogSnapshotSelectorB
         }) { binding, index, snapshot ->
             binding.root.isSelected = gvm.currentSnapshotIndex eq index
             binding.tvInfo.text = if (snapshot.isSuccessful && snapshot.duration != 0) {
-                R.string.format_task_snapshot_info_2.format(
+                R.string.format_task_snapshot_info_2.formatAsHtml(
                     snapshot.startTimestamp.formatTime(), formatMinSecMills(snapshot.duration)
                 )
             } else {
                 snapshot.startTimestamp.formatTime()
-            }.parseAsHtml()
+            }
 
             if (snapshot.isRunning) {
                 binding.ivResult.contentDescription = R.string.running.str

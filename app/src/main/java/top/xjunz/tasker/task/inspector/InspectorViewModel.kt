@@ -27,6 +27,8 @@ class InspectorViewModel {
 
     val onCoordinateSelected = MutableLiveData<Boolean>()
 
+    val onComponentSelected = MutableLiveData<Boolean>()
+
     val isCollapsed = MutableLiveData(true)
 
     val showGamePad = MutableLiveData(false)
@@ -42,8 +44,6 @@ class InspectorViewModel {
     val showNodeTree = MutableLiveData(false)
 
     val highlightNode = MutableLiveData<StableNodeInfo>()
-
-    var showExtraOptions: Boolean = true
 
     var windowWidth: Int = -1
 

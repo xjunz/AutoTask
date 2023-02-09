@@ -14,7 +14,7 @@ object OsUtil {
 
     val uid: Int
 
-    val aid: Int
+    private val aid: Int
 
     inline val isInShellProcess get() = uid == 2000
 

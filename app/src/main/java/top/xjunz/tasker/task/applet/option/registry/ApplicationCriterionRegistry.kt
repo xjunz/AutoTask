@@ -49,9 +49,9 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             info.packageName == pkgName
         }
     }.withBinaryArgument<String, ComponentInfoWrapper>(
-        R.string.is_which_app,
+        name = R.string.is_which_app,
+        substitution = R.string.a_certain_app,
         VariantType.TEXT_PACKAGE_NAME,
-        R.string.a_certain_app
     ).withValueDescriber<String> {
         PackageManagerBridge.loadLabelOfPackage(it)
     }.hasCompositeTitle()
@@ -61,27 +61,28 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         collectionCriterion<ComponentInfoWrapper, String> {
             it.packageName
         }
-    }.withValueArgument<String>(R.string.app_collection, VariantType.TEXT_APP_LIST)
-        .withValueDescriber<Collection<String>> { value ->
-            if (value.size == 1) {
-                PackageManagerBridge.loadLabelOfPackage(value.first())
-            } else {
-                R.string.format_pkg_collection_desc.formatSpans(
-                    value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                        PackageManagerBridge.loadLabelOfPackage(name)
-                    }.joinToString("、"), value.size.toString().bold()
-                )
-            }
+    }.withValueArgument<String>(
+        R.string.app_collection,
+        VariantType.TEXT_PACKAGE_NAME,
+        true
+    ).withValueDescriber<Collection<String>> { value ->
+        if (value.size == 1) {
+            PackageManagerBridge.loadLabelOfPackage(value.first())
+        } else {
+            R.string.format_pkg_collection_desc.formatSpans(
+                value.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
+                    PackageManagerBridge.loadLabelOfPackage(name)
+                }.joinToString("、"), value.size.toString().bold()
+            )
         }
+    }
 
     @AppletOrdinal(0x00_02)
     val activityCollection = invertibleApplicationOption(R.string.in_activity_collection) {
         collectionCriterion<ComponentInfoWrapper, String> {
-            it.activityName?.run {
-                ComponentName(it.packageName, this).flattenToShortString()
-            }
+            it.getComponentName()?.flattenToShortString()
         }
-    }.withValueArgument<String>(R.string.activity_collection, VariantType.TEXT_ACTIVITY_LIST)
+    }.withValueArgument<String>(R.string.activity_collection, VariantType.TEXT_ACTIVITY, true)
         .withValueDescriber<Collection<String>> {
             if (it.size == 1) {
                 val comp = ComponentName.unflattenFromString(it.single())!!
@@ -98,7 +99,7 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         newCriterion<ComponentInfoWrapper, String> { t, v ->
             t.paneTitle == v
         }
-    }.withValueArgument<String>(R.string.pane_title)
+    }.withValueArgument<String>(R.string.pane_title, VariantType.TEXT_PANE_TITLE)
 
     @AppletOrdinal(0x01_00)
     private val isSystem = invertibleApplicationOption(R.string.is_system_app) {

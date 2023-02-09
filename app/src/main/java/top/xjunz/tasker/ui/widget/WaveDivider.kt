@@ -22,6 +22,7 @@ import androidx.core.content.res.getDimensionPixelSizeOrThrow
 import androidx.core.view.doOnPreDraw
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import top.xjunz.tasker.R
+import top.xjunz.tasker.ktx.useStyledAttributes
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -188,7 +189,7 @@ class WaveDivider @JvmOverloads constructor(
     }
 
     init {
-        context.obtainStyledAttributes(attrs, R.styleable.WaveDivider).use {
+        useStyledAttributes(attrs, R.styleable.WaveDivider) {
             paint.strokeWidth =
                 it.getDimensionPixelSizeOrThrow(R.styleable.WaveDivider_waveStrokeWidth).toFloat()
             waveStrokeColor = it.getColorOrThrow(R.styleable.WaveDivider_waveStrokeColor)

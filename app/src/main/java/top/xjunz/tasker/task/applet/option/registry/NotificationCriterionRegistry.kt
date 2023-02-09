@@ -24,19 +24,22 @@ class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         collectionCriterion<NotificationFlow.NotificationTarget, String> {
             it.packageName
         }
-    }.withValueArgument<String>(R.string.app_collection, VariantType.TEXT_APP_LIST)
-        .withValueDescriber<Collection<String>> {
-            if (it.size == 1) {
-                val first = it.first()
-                PackageManagerBridge.loadLabelOfPackage(first)
-            } else {
-                R.string.format_pkg_collection_desc.format(
-                    it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
-                        PackageManagerBridge.loadLabelOfPackage(name)
-                    }.joinToString("、"), it.size
-                )
-            }
+    }.withValueArgument<String>(
+        R.string.app_collection,
+        variantValueType = VariantType.TEXT_PACKAGE_NAME,
+        isCollection = true
+    ).withValueDescriber<Collection<String>> {
+        if (it.size == 1) {
+            val first = it.first()
+            PackageManagerBridge.loadLabelOfPackage(first)
+        } else {
+            R.string.format_pkg_collection_desc.format(
+                it.asSequence().filterIndexed { index, _ -> index <= 2 }.map { name ->
+                    PackageManagerBridge.loadLabelOfPackage(name)
+                }.joinToString("、"), it.size
+            )
         }
+    }
 
     @AppletOrdinal(0x00_01)
     val contentContains = invertibleAppletOption(R.string.notification_contains) {

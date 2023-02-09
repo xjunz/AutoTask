@@ -58,6 +58,20 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_inspector"
+            style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="16dp"
+            android:alpha=".89"
+            android:stateListAnimator="@animator/sla_extended_fab"
+            android:text="@string/enable_floating_inspector"
+            app:icon="@drawable/ic_twotone_layers_24"
+            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+            tools:layout_marginBottom="84dp" />
+
         <include
             android:id="@+id/shopping_cart"
             layout="@layout/layout_shopping_cart" />

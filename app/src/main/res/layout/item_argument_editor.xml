@@ -18,7 +18,7 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="?colorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,11 +29,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="?selectableItemBackground"
             android:drawablePadding="8dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="5"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             app:drawableTint="?colorPrimary"
             app:layout_constrainedWidth="true"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,36 +44,36 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_refer"
-            style="@style/Widget.Material3.Button.TextButton.Icon"
+            style="?materialIconButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
             android:text="@string/refer_to"
             android:textColor="?android:textColorPrimary"
-            app:backgroundTint="@color/color_primary_background"
             app:icon="@drawable/ic_baseline_add_link_24"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
             app:iconTint="?colorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/btn_specify"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_value" />
+            app:layout_constraintTop_toBottomOf="@id/tv_value"
+            app:strokeColor="@color/material_on_surface_stroke" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_specify"
-            style="@style/Widget.Material3.Button.TextButton.Icon"
+            style="?materialIconButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/edit"
             android:textColor="?android:textColorPrimary"
-            app:backgroundTint="@color/color_primary_background"
             app:icon="@drawable/ic_edit_24dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_refer"
-            app:layout_constraintTop_toBottomOf="@+id/tv_value" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_value"
+            app:strokeColor="@color/material_on_surface_stroke" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

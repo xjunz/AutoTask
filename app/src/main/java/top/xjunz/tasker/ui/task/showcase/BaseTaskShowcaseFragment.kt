@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.transition.platform.MaterialFadeThrough
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
 import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
@@ -146,7 +147,9 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             taskList.addAll(initTaskList())
             if (viewModel.paddingBottom.isNull()) {
                 binding.rvTaskList.doOnPreDraw {
-                    binding.rvTaskList.beginAutoTransition(MaterialFadeThrough())
+                    binding.rvTaskList.beginAutoTransition(
+                        MaterialSharedAxis(MaterialSharedAxis.Z, true)
+                    )
                     binding.rvTaskList.adapter = adapter
                 }
             } else {

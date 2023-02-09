@@ -215,11 +215,21 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                     }
                 } else if (snapshot.currentApplet === applet) {
                     tvTitle.setDrawableStart(R.drawable.ic_help_24px)
+                } else if (applet.isRepeated()) {
+                    tvTitle.setDrawableStart(null)
                 } else {
                     tvTitle.setDrawableStart(R.drawable.ic_do_not_disturb_24px)
                 }
             }
         }
+    }
+
+    private fun Applet.isRepeated(): Boolean {
+        var p = parent
+        while (p != null && !p.isRepetitive) {
+            p = p.parent
+        }
+        return p?.isRepetitive == true
     }
 
     private fun ItemFlowItemBinding.getReferenceChip(index: Int): Chip {

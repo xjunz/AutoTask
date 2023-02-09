@@ -20,6 +20,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.button.MaterialButton
 import top.xjunz.tasker.R
+import top.xjunz.tasker.ktx.useStyledAttributes
 
 /**
  * A container [ViewGroup] wrapping a [MaterialButton] to perform a spreading ripple animation,
@@ -54,33 +55,34 @@ class MaterialButtonSpreadContainer @JvmOverloads constructor(
 
     init {
         setWillNotDraw(false)
-        val ta = context.obtainStyledAttributes(attrs, R.styleable.MaterialButtonSpreadContainer)
-        spreadHorizontal =
-            ta.getDimensionPixelSizeOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadHorizontal)
-        spreadVertical =
-            ta.getDimensionPixelSizeOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadVertical)
-        paint.color = ta.getColorOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadColor)
-        spreadAlpha =
-            ta.getFloat(R.styleable.MaterialButtonSpreadContainer_spreadAlpha, spreadAlpha)
-        spreadCenterColor = ta.getColor(
-            R.styleable.MaterialButtonSpreadContainer_spreadCenterColor,
-            spreadCenterColor
-        )
-        val spreadStyle = ta.getInt(R.styleable.MaterialButtonSpreadContainer_spreadStyle, 0)
-        if (spreadStyle == 0) {
-            paint.style = Paint.Style.STROKE
-        } else if (spreadStyle == 1) {
-            paint.style = Paint.Style.FILL
-        }
-        spreadCount = ta.getInt(R.styleable.MaterialButtonSpreadContainer_spreadCount, spreadCount)
-        spreadDuration =
-            ta.getInt(R.styleable.MaterialButtonSpreadContainer_spreadDuration, spreadDuration)
-        if (ta.getBoolean(R.styleable.MaterialButtonSpreadContainer_spreadAutoStart, true)) {
-            doOnPreDraw {
-                startSpreading()
+        useStyledAttributes(attrs, R.styleable.MaterialButtonSpreadContainer) {
+            spreadHorizontal =
+                it.getDimensionPixelSizeOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadHorizontal)
+            spreadVertical =
+                it.getDimensionPixelSizeOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadVertical)
+            paint.color = it.getColorOrThrow(R.styleable.MaterialButtonSpreadContainer_spreadColor)
+            spreadAlpha =
+                it.getFloat(R.styleable.MaterialButtonSpreadContainer_spreadAlpha, spreadAlpha)
+            spreadCenterColor = it.getColor(
+                R.styleable.MaterialButtonSpreadContainer_spreadCenterColor,
+                spreadCenterColor
+            )
+            val spreadStyle = it.getInt(R.styleable.MaterialButtonSpreadContainer_spreadStyle, 0)
+            if (spreadStyle == 0) {
+                paint.style = Paint.Style.STROKE
+            } else if (spreadStyle == 1) {
+                paint.style = Paint.Style.FILL
+            }
+            spreadCount =
+                it.getInt(R.styleable.MaterialButtonSpreadContainer_spreadCount, spreadCount)
+            spreadDuration =
+                it.getInt(R.styleable.MaterialButtonSpreadContainer_spreadDuration, spreadDuration)
+            if (it.getBoolean(R.styleable.MaterialButtonSpreadContainer_spreadAutoStart, true)) {
+                doOnPreDraw {
+                    startSpreading()
+                }
             }
         }
-        ta.recycle()
     }
 
     private val button: MaterialButton by lazy {

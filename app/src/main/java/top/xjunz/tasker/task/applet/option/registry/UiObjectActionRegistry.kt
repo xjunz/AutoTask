@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.uiautomator.Direction
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.singleArgValueAction
+import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.service.uiDevice
@@ -46,7 +47,12 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         if (it.isClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_CLICK)
         } else {
-            uiDevice.wrapUiObject2(it).click()
+            if (isPrivilegedProcess) {
+                uiDevice.wrapUiObject2(it).click()
+            } else {
+                // StrokeDescription must have a positive duration in a11y mode.
+                uiDevice.wrapUiObject2(it).click(5)
+            }
             true
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
@@ -67,7 +73,10 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         uiDevice.wrapUiObject2(node).drag(IntValueUtil.parseCoordinate(v))
         true
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
-        .withUnaryArgument<Int>(R.string.specified_coordinate, VariantType.INT_COORDINATE)
+        .withUnaryArgument<Int>(
+            R.string.specified_coordinate,
+            variantType = VariantType.INT_COORDINATE
+        )
         .withValueDescriber<Int> {
             val p = IntValueUtil.parseCoordinate(it)
             R.string.format_coordinate.format(p.x, p.y)

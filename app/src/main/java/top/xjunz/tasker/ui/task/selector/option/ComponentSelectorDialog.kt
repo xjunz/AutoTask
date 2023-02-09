@@ -13,7 +13,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
@@ -21,10 +20,15 @@ import top.xjunz.tasker.databinding.DialogComponentSelectorBinding
 import top.xjunz.tasker.databinding.ItemActivityInfoBinding
 import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.task.inspector.FloatingInspector
+import top.xjunz.tasker.task.inspector.InspectorMode
+import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.model.ActivityInfoWrapper
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
+import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
 import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
 
@@ -76,29 +80,19 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         inlineAdapter(
             viewModel.selectedPackages, ItemApplicationInfoBinding::class.java,
             {
-                binding.tvApplicationName.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
                 binding.root.background = R.drawable.bg_selectable_surface.getDrawable()
                 binding.root.updateLayoutParams<MarginLayoutParams> {
-                    updateMargins(4.dp, 0, 4.dp, 4.dp)
-                }
-                binding.ivIcon.updateLayoutParams {
-                    width = 40.dp
-                    height = 40.dp
-                }
-                binding.root.updatePadding(top = 8.dp, bottom = 8.dp)
-                binding.tvApplicationName.updateLayoutParams<MarginLayoutParams> {
-                    marginStart = 8.dp
+                    updateMargins(0, 0, 0, 4.dp)
                 }
                 binding.root.setAntiMoneyClickListener {
-                    val pkgName = viewModel.selectedPackages.reversed()[adapterPosition]
-                    viewModel.removedItem.value = pkgName
-                    viewModel.selectedPackages.remove(pkgName)
+                    viewModel.itemToRemove.value =
+                        viewModel.selectedPackages.reversed()[adapterPosition]
                 }
             }) { b, p, _ ->
             val pkgName = viewModel.selectedPackages[viewModel.selectedPackages.lastIndex - p]
             val info = viewModel.findPackageInfo(pkgName)
             b.tvExtraInfo.isVisible = false
-            b.tvPkgName.isVisible = false
+            b.tvPkgName.text = pkgName
             b.tvApplicationName.text = info?.label ?: pkgName
             viewModel.iconLoader.loadIconTo(info, b.ivIcon, this)
         }
@@ -108,13 +102,15 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         inlineAdapter(
             viewModel.selectedActivities, ItemActivityInfoBinding::class.java,
             {
+                binding.root.background = R.drawable.bg_selectable_surface.getDrawable()
+                binding.root.updateLayoutParams<MarginLayoutParams> {
+                    updateMargins(0, 0, 0, 4.dp)
+                }
                 binding.tvActivityName.isVisible = false
                 binding.tvBadge.isVisible = false
-                binding.root.updatePadding(bottom = 12.dp, top = 12.dp)
                 binding.root.setAntiMoneyClickListener {
-                    val comp = viewModel.selectedActivities.reversed()[adapterPosition]
-                    viewModel.removedItem.value = comp
-                    viewModel.selectedActivities.remove(comp)
+                    viewModel.itemToRemove.value =
+                        viewModel.selectedActivities.reversed()[adapterPosition]
                 }
             }) { b, p, _ ->
             val comp = viewModel.selectedActivities[viewModel.selectedActivities.lastIndex - p]
@@ -181,10 +177,6 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.appBar.doOnPreDraw {
             viewModel.appBarHeight.value = it.height
         }
-        if (viewModel.mode == MODE_PACKAGE) {
-            binding.shoppingCart.rvBottom.layoutManager =
-                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        }
         binding.ibSortBy.setOnTouchListener(popupMenu.dragToOpenListener)
         binding.ibSortBy.setAntiMoneyClickListener {
             popupMenu.show()
@@ -200,6 +192,11 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             if (viewModel.selectedCount notEq 0)
                 viewModel.showClearAllDialog.value = true
         }
+        binding.shoppingCart.circularRevealContainer.doOnPreDraw {
+            binding.fabInspector.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = it.height + 48.dp
+            }
+        }
         binding.shoppingCart.btnComplete.setAntiMoneyClickListener {
             if (viewModel.complete()) {
                 dismiss()
@@ -207,26 +204,50 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 toast(R.string.nothing_selected)
             }
         }
+        binding.fabInspector.setAntiMoneyClickListener {
+            FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
+        }
         observeLiveData()
+    }
+
+    private fun selectPackage(pkgName: String): Boolean {
+        if (viewModel.selectedPackages.contains(pkgName)) {
+            viewModel.itemToRemove.value = pkgName
+            return false
+        } else {
+            if (viewModel.isSingleSelection) {
+                val removed = viewModel.selectedPackages.singleOrNull()
+                if (removed != null) {
+                    viewModel.itemToRemove.value = removed
+                }
+            }
+            viewModel.selectedPackages.add(pkgName)
+            viewModel.addedItem.value = pkgName
+            return true
+        }
+    }
+
+    private fun selectActivity(compName: ComponentName): Boolean {
+        if (viewModel.selectedActivities.contains(compName)) {
+            viewModel.itemToRemove.value = compName
+            return false
+        } else {
+            if (viewModel.isSingleSelection) {
+                val removed = viewModel.selectedActivities.singleOrNull()
+                if (removed != null) {
+                    viewModel.itemToRemove.value = removed
+                }
+            }
+            viewModel.selectedActivities.add(compName)
+            viewModel.addedItem.value = compName
+            return true
+        }
     }
 
     fun onPackageItemClicked(info: PackageInfoWrapper, binding: ItemApplicationInfoBinding) {
         if (viewModel.mode == MODE_PACKAGE) {
-            val pkgName = info.packageName
-            if (viewModel.selectedPackages.contains(pkgName)) {
-                viewModel.removedItem.value = pkgName
-                viewModel.selectedPackages.remove(pkgName)
-            } else {
-                if (viewModel.isSingleSelection) {
-                    val removed = viewModel.selectedPackages.singleOrNull()
-                    if (removed != null) {
-                        viewModel.selectedPackages.remove(removed)
-                        viewModel.removedItem.value = removed
-                    }
-                }
-                viewModel.selectedPackages.add(pkgName)
+            if (selectPackage(info.packageName)) {
                 shoppingCartIntegration.animateIntoShopCart(binding.ivIcon, false)
-                viewModel.addedItem.value = pkgName
             }
         } else {
             viewModel.selectedPackage.value = info
@@ -235,21 +256,8 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
     }
 
     fun onActivityItemClicked(info: ActivityInfoWrapper, binding: ItemActivityInfoBinding) {
-        val compName = info.componentName
-        if (viewModel.selectedActivities.contains(compName)) {
-            viewModel.removedItem.value = compName
-            viewModel.selectedActivities.remove(compName)
-        } else {
-            if (viewModel.isSingleSelection) {
-                val removed = viewModel.selectedActivities.singleOrNull()
-                if (removed != null) {
-                    viewModel.selectedActivities.remove(removed)
-                    viewModel.removedItem.value = removed
-                }
-            }
-            viewModel.selectedActivities.add(compName)
+        if (selectActivity(info.componentName)) {
             shoppingCartIntegration.animateIntoShopCart(binding.ivIcon, false)
-            viewModel.addedItem.value = compName
         }
     }
 
@@ -272,13 +280,15 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             binding.shoppingCart.rvBottom.scrollToPosition(0)
             viewModel.selectedCount.inc()
         }
-        observeTransient(viewModel.removedItem) {
+        observeTransient(viewModel.itemToRemove) {
             if (viewModel.mode == MODE_PACKAGE) {
                 val index = viewModel.selectedPackages.indexOf(it)
-                bottomPkgAdapter.notifyItemRemoved(viewModel.selectedPackages.lastIndex - index)
+                viewModel.selectedPackages.removeAt(index)
+                bottomPkgAdapter.notifyItemRemoved(viewModel.selectedPackages.size - index)
             } else {
                 val index = viewModel.selectedActivities.indexOf(it)
-                bottomActAdapter.notifyItemRemoved(viewModel.selectedActivities.lastIndex - index)
+                viewModel.selectedActivities.removeAt(index)
+                bottomActAdapter.notifyItemRemoved(viewModel.selectedActivities.size - index)
             }
             viewModel.selectedCount.dec()
         }
@@ -301,6 +311,24 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 binding.shoppingCart.rvBottom.adapter = bottomActAdapter
             else
                 binding.shoppingCart.rvBottom.adapter = bottomPkgAdapter
+        }
+        peekMainViewModel().doOnRouted(this, FloatingInspector.ACTION_COMPONENT_SELECTED) {
+            val component = floatingInspector.viewModel.currentComp.require()
+            if (viewModel.mode == MODE_PACKAGE) {
+                if (viewModel.selectedPackages.contains(component.packageName)) {
+                    toast(R.string.format_already_existed.format(component.packageName))
+                } else {
+                    toast(R.string.format_added.format(component.packageName))
+                    selectPackage(component.packageName)
+                }
+            } else component.getComponentName()?.let {
+                if (viewModel.selectedActivities.contains(it)) {
+                    toast(R.string.format_already_existed.format(component.activityName))
+                } else {
+                    toast(R.string.format_added.format(component.activityName))
+                    selectActivity(it)
+                }
+            }
         }
     }
 

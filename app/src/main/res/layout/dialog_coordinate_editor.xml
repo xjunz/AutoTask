@@ -120,7 +120,7 @@
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cv_container"
-            style="@style/Widget.Material3.CardView.Elevated"
+            style="@style/Widget.Material3.CardView.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

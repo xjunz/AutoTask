@@ -11,16 +11,13 @@ import top.xjunz.tasker.engine.applet.base.Applet
  */
 object VariantType {
 
-    const val BITS_SWIPE = Applet.VAL_TYPE_LONG shl 8 or 2
+    const val BITS_SWIPE = 1 shl 16 or Applet.VAL_TYPE_LONG
 
-    const val INT_COORDINATE = Applet.VAL_TYPE_INT shl 8 or 1
+    const val INT_COORDINATE = 1 shl 16 or Applet.VAL_TYPE_INT
 
-    const val TEXT_PACKAGE_NAME = Applet.VAL_TYPE_TEXT shl 8 or 1
+    const val TEXT_PACKAGE_NAME = 1 shl 16 or Applet.VAL_TYPE_TEXT
 
-    const val TEXT_ACTIVITY = Applet.VAL_TYPE_TEXT shl 8 or 2
+    const val TEXT_ACTIVITY = 2 shl 16 or Applet.VAL_TYPE_TEXT
 
-    const val TEXT_APP_LIST = Applet.VAL_TYPE_TEXT shl 8 or 3
-
-    const val TEXT_ACTIVITY_LIST = Applet.VAL_TYPE_TEXT shl 8 or 4
-
+    const val TEXT_PANE_TITLE = 3 shl 16 or Applet.VAL_TYPE_TEXT
 }

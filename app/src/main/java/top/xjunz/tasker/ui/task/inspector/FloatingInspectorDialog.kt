@@ -75,9 +75,9 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                     // Wait for the service to be pulled up
                     val start = SystemClock.uptimeMillis()
                     while (A11yAutomatorService.get() == null
-                        || SystemClock.uptimeMillis() - start <= 500
+                        && SystemClock.uptimeMillis() - start <= 1000
                     ) {
-                        delay(32)
+                        delay(50)
                     }
                 } catch (t: Throwable) {
                     onError.value = t
@@ -91,6 +91,9 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     private fun showInspectorAndDismissSelf() {
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
+        if (viewModel.mode == InspectorMode.COMPONENT) {
+            a11yAutomatorService.startListeningComponentChanges()
+        }
         viewModel.doOnSucceeded?.run()
         dismiss()
         toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)

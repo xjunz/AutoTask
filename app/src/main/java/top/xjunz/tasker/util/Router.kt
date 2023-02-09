@@ -5,7 +5,10 @@
 package top.xjunz.tasker.util
 
 import android.content.Context
-import top.xjunz.tasker.ktx.viewUrlSafely
+import android.content.Intent
+import android.net.Uri
+import top.xjunz.tasker.app
+import top.xjunz.tasker.ui.MainActivity
 import java.net.URLEncoder
 
 /**
@@ -16,19 +19,18 @@ import java.net.URLEncoder
 object Router {
 
     private const val SCHEME = "xtsk"
-    const val HOST_ACCEPT_OPTIONS_FROM_INSPECTOR = "options-from-inspector"
     const val HOST_NONE = "no-op"
     const val HOST_ACTION = "action"
 
     fun Context.launchRoute(host: String) {
-        viewUrlSafely("$SCHEME://$host")
+        routeTo("$SCHEME://$host")
     }
 
     fun Context.launchAction(actionName: String, value: Any) {
-        query(HOST_ACTION, actionName to value)
+        launchQuery(actionName to value)
     }
 
-    fun Context.query(host: String, vararg queries: Pair<String, Any>) {
+    private fun Context.launchQuery(vararg queries: Pair<String, Any>) {
         check(queries.isNotEmpty()) {
             "No query provided!"
         }
@@ -39,6 +41,13 @@ object Router {
             ).append("&")
         }
         query.deleteCharAt(query.lastIndex)
-        viewUrlSafely("$SCHEME://$host/?$query")
+        routeTo("$SCHEME://$HOST_ACTION/?$query")
+    }
+
+    private fun Context.routeTo(url: String) {
+        startActivity(
+            Intent(Intent.ACTION_VIEW).setClass(app, MainActivity::class.java)
+                .setData(Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
     }
 }

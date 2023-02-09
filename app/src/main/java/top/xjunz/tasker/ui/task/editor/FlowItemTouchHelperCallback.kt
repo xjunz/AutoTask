@@ -16,9 +16,7 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.google.android.material.snackbar.Snackbar
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.ControlFlow
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import java.util.*
@@ -217,6 +215,15 @@ open class FlowItemTouchHelperCallback(
         }
     }
 
+    private val Applet.scope: Flow?
+        get() {
+            var p = parent
+            while (p != null && (p !is ScopeFlow<*> || p !is Do || p !is If)) {
+                p = p.parent
+            }
+            return p
+        }
+
     override fun canDropOver(
         recyclerView: RecyclerView,
         current: RecyclerView.ViewHolder,
@@ -226,8 +233,10 @@ open class FlowItemTouchHelperCallback(
         if (from == RecyclerView.NO_POSITION) return false
         val to = target.adapterPosition
         if (to == RecyclerView.NO_POSITION) return false
-        if (currentList[from] is ControlFlow) return false
-        if (currentList[from].parent != currentList[to].parent) return false
+        val fromApplet = currentList[from]
+        val toApplet = currentList[to]
+        if (fromApplet.parent != currentList[to].parent) return false
+        if (fromApplet is ControlFlow && toApplet is ControlFlow) return false
         return true
     }
 

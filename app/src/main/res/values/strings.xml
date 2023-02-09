@@ -110,7 +110,7 @@
     <string name="script">脚本</string>
     <string name="drop_target">目标位置</string>
     <string name="common_check_result_prompt">该项是否测试成功？</string>
-    <string name="format_check_case_ordinal">测试项（%d/%d）</string>
+    <string name="format_check_case_ordinal">测试项（%$1d/%$2d）</string>
     <string name="check_case_list">测试项列表</string>
     <string name="exam">测试</string>
     <string name="checked">通过</string>
@@ -151,7 +151,7 @@
     <string name="show_system_apps">显示系统应用</string>
     <string name="launcher_activity">启动页</string>
     <string name="format_enable_floating_inspector"><![CDATA[使用<b>悬浮助手</b>帮助您快速选择%s]]></string>
-    <string name="enable_floating_inspector">启用悬浮助手</string>
+    <string name="enable_floating_inspector">使用悬浮助手</string>
     <string name="enable">启用</string>
     <string name="goto_grant">去授权</string>
     <string name="overlay_permission">悬浮窗权限</string>
@@ -184,7 +184,7 @@
     <string name="ui_object">控件</string>
     <string name="child_node">子节点</string>
     <string name="seekbar">拖动条</string>
-    <string name="tip_floating_inspector_enabled">悬浮助手已启用，点击悬浮图标，即可选择屏幕上的内容。</string>
+    <string name="tip_floating_inspector_enabled">悬浮助手已启用，请点击悬浮图标。</string>
     <string name="options_from_inspector_added">已添加%d条规则</string>
     <string name="prompt_clear_all_options">确定要清空所有规则吗？</string>
     <string name="format_applet_is_removed">已移除%d条规则</string>
@@ -228,7 +228,7 @@
     <string name="format_before">%s之前</string>
     <string name="format_after">%s之后</string>
     <string name="with_pane_title">%s所处页面标题为</string>
-    <string name="no_comp_detected">暂未检测到任何应用和页面</string>
+    <string name="error_no_comp_detected">暂未检测到任何应用和页面</string>
     <string name="format_switch_mode">悬浮助手已切换到%s模式</string>
     <string name="coords">坐标点</string>
     <string name="format_current">当前%s</string>
@@ -332,6 +332,8 @@
     <string name="prompt_repeated_task">操作失败，因为已经存在完全相同的任务，请修改当前任务的<b>名称、描述或规则</b>。</string>
     <string name="add">添加</string>
     <string name="added">已添加</string>
+    <string name="format_added">已添加%s</string>
+    <string name="format_already_existed">⌈%s⌋已存在</string>
     <string name="format_new_task_added">已添加任务⌈%s⌋</string>
     <string name="format_task_removed">已移除任务⌈%s⌋</string>
     <string name="prompt_delete_task">你确定要删除此任务吗？<b>此操作不可撤销</b>。</string>
@@ -341,7 +343,7 @@
     <string name="millisecond">毫秒</string>
     <string name="second">秒</string>
     <string name="minute">分钟</string>
-    <string name="prompt_fix_static_error">操作失败，请先修正错误。</string>
+    <string name="prompt_fix_static_errors">操作失败，请先修正错误。</string>
     <string name="edit_task_metadata">编辑任务信息</string>
     <string name="start_service">启动服务</string>
     <string name="stop_service">停止服务</string>
@@ -367,6 +369,7 @@
     <string name="x_coordinate">X坐标</string>
     <string name="y_coordinate">Y坐标</string>
     <string name="tip_select_coordinate_with_inspector">使用悬浮助手帮助您从屏幕上选择坐标点</string>
+    <string name="tip_select_pane_title_with_inspector">使用悬浮助手帮助您选择页面标题</string>
     <string name="format_screen_width_height">屏幕左上角坐标为(0,0)，屏幕右下角坐标为(%1$d,%2$d)</string>
     <string name="error_no_coordinate_selected">未选中坐标</string>
     <string name="swipe_args">滑动参数</string>
@@ -397,7 +400,7 @@
     <string name="format_task_snapshots">历史运行记录（%d/%d）</string>
     <string name="no_task_snapshots">该任务没有运行记录</string>
     <string name="format_task_snapshot_info_1"><![CDATA[<b>开始时间</b>: %s<br><b>结束时间</b>: %s<br><b>运行结果</b>: %s]]></string>
-    <string name="format_task_snapshot_info_2"><![CDATA[%s<br><b>用时</b>: %s]]></string>
+    <string name="format_task_snapshot_info_2"><![CDATA[%1$s<br><b>用时</b>: %2$s]]></string>
     <string name="format_task_snapshot_info_3"><![CDATA[<b>开始时间</b>: <br>%s]]></string>
     <string name="succeeded">成功</string>
     <string name="legend">图例</string>
@@ -413,4 +416,12 @@
     <string name="format_failure_exception">发生错误：%s</string>
     <string name="a_certain_app">某个应用</string>
     <string name="executing">执行中</string>
+    <string name="format_make_toast">弹出%s</string>
+    <string name="text_message">文本提示</string>
+    <string name="msg_to_toast">要显示的文本</string>
+    <string name="error_unspecified">此项未指定</string>
+    <string name="tip_vararg_text">*所有项将会拼接成为一段文本</string>
+    <string name="name_of_app_entered">进入的应用名称</string>
+    <string name="name_of_app_exited">退出的应用名称</string>
+    <string name="current_focus_input">当前输入的文本框</string>
 </resources>

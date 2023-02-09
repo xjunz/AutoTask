@@ -43,10 +43,7 @@ class TaskSnapshot(
 
     var currentApplet: Applet? =null
 
-    private var appletsLoaded = false
-
     fun loadApplets(root: RootFlow) {
-        if (appletsLoaded) return
         succeededApplets = successes.map {
             getAppletWithHierarchy(root, it)
         }
@@ -57,7 +54,6 @@ class TaskSnapshot(
         failedApplets = failed
         if (current != -1L)
             currentApplet = getAppletWithHierarchy(root, current)
-        appletsLoaded = true
     }
 
     private fun getAppletWithHierarchy(root: RootFlow, hierarchy: Long): Applet {

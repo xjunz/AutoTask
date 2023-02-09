@@ -64,14 +64,6 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         return super.getSnapshotCount(id)
     }
 
-    override fun getSnapshot(id: XTask, index: Int): TaskSnapshot? {
-        val remote = peer
-        if (remote != null) {
-            return remote.getSnapshot(id.checksum, index)
-        }
-        return super.getSnapshot(id, index)
-    }
-
     override fun getAllSnapshots(id: XTask): Array<TaskSnapshot> {
         val remote = peer
         if (remote != null) {

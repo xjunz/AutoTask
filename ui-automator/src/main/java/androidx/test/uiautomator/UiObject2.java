@@ -609,7 +609,6 @@ public class UiObject2 implements Searchable {
 
     /**
      * Set the text content by sending individual key codes.
-     *
      */
     public void legacySetText(String text) {
         AccessibilityNodeInfo node = getAccessibilityNodeInfo();
@@ -682,12 +681,18 @@ public class UiObject2 implements Searchable {
         }
     }
 
+    public AccessibilityNodeInfo getAccessibilityNodeInfo() {
+        if (mCachedNode == null) {
+            throw new IllegalStateException("This object has already been recycled");
+        }
+        return mCachedNode;
+    }
 
     /**
      * Returns an up-to-date {@link AccessibilityNodeInfo} corresponding to the {@link android.view.View} that
      * this object represents.
      */
-    public AccessibilityNodeInfo getAccessibilityNodeInfo() {
+    public AccessibilityNodeInfo ensureAccessibilityNodeInfo() {
 
         if (mCachedNode == null) {
             throw new IllegalStateException("This object has already been recycled");

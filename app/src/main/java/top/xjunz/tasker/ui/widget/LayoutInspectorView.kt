@@ -25,6 +25,7 @@ import androidx.core.os.HandlerCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.dpFloat
 import top.xjunz.tasker.ktx.getDrawable
+import top.xjunz.tasker.ktx.useStyledAttributes
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import kotlin.math.hypot
 
@@ -81,7 +82,7 @@ class LayoutInspectorView @JvmOverloads constructor(
     var onNodeSelectedListener: ((StableNodeInfo) -> Unit)? = null
 
     init {
-        context.obtainStyledAttributes(attrs, R.styleable.LayoutInspectorView).use {
+        useStyledAttributes(attrs, R.styleable.LayoutInspectorView) {
             normalPaint.color =
                 it.getColorOrThrow(R.styleable.LayoutInspectorView_inspectorStrokeColorNormal)
             highlightPaint.color =

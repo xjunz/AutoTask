@@ -69,6 +69,6 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         behaviour.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
-    override fun getDefaultViewModelProviderFactory() = InnerViewModelFactory
+    override val defaultViewModelProviderFactory = InnerViewModelFactory
 
 }

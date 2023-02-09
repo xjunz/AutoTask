@@ -4,9 +4,13 @@
 
 package top.xjunz.tasker.service.controller
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
+import android.graphics.Typeface
+import android.os.Build
 import android.os.IBinder
 import android.os.IInterface
+import android.os.SharedMemory
 import androidx.lifecycle.MutableLiveData
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
@@ -36,12 +40,18 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         ).processNameSuffix(SERVICE_NAME_SUFFIX).debuggable(BuildConfig.DEBUG)
             .version(BuildConfig.VERSION_CODE)
 
+    @SuppressLint("BlockedPrivateApi", "PrivateApi")
     override fun onServiceConnected(remote: IInterface) {
         remote as IRemoteAutomatorService
         service = ShizukuAutomatorService(remote)
         runCatching {
             if (!remote.isConnected) {
                 remote.connect()
+                if (Build.VERSION.SDK_INT >= 31) {
+                    val field = Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
+                    field.isAccessible = true
+                    remote.setSystemTypefaceSharedMemory(field.get(null) as SharedMemory)
+                }
             }
         }.onSuccess {
             val rtm = remote.taskManager

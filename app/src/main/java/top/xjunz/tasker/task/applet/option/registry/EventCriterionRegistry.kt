@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.runtime.Event
+import top.xjunz.tasker.engine.runtime.Event.*
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.EventFilter
 import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
@@ -16,7 +17,7 @@ import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
  */
 class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    private fun eventFilterOption(@Event.EventType event: Int, label: Int) =
+    private fun eventFilterOption(@EventType event: Int, label: Int) =
         appletOption(label) {
             EventFilter(event)
         }.hasInnateValue()
@@ -24,10 +25,12 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0)
     val pkgEntered = eventFilterOption(Event.EVENT_ON_PACKAGE_ENTERED, R.string.on_package_entered)
         .withResult<ComponentInfoWrapper>(R.string.app_entered)
+        .withResult<String>(R.string.name_of_app_entered)
 
     @AppletOrdinal(1)
     val pkgExited = eventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_left)
         .withResult<ComponentInfoWrapper>(R.string.app_left)
+        .withResult<String>(R.string.name_of_app_exited)
 
     @AppletOrdinal(2)
     val contentChanged =

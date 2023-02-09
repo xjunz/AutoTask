@@ -17,6 +17,7 @@ import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
  * The abstraction of an automator task.
@@ -47,11 +48,13 @@ class XTask {
     /**
      * Whether the task is traversing its [flow].
      */
-    private val isExecuting get() = currentRuntime?.isActive == true
+    val isExecuting get() = currentRuntime?.isActive == true
+
+    val isSuspending get() = currentRuntime?.isSuspending == true
 
     private var currentRuntime: TaskRuntime? = null
 
-    internal val snapshots = LinkedList<TaskSnapshot>()
+    internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
 
     class FlowFailureException(reason: String) : RuntimeException(reason)
 
@@ -112,7 +115,12 @@ class XTask {
             val indents = indent(runtime.tracker.depth)
             logcat(indents + victim.isAndToString() + "$victim -> ${runtime.isSuccessful}")
             if (!runtime.isSuccessful) {
-                logcat(indents + "actual: ${runtime.result.actual}")
+                if (runtime.result.actual != null) {
+                    logcat(indents + "actual: ${runtime.result.actual}")
+                }
+                if (runtime.result.throwable != null) {
+                    logcat(indents + "error: ${runtime.result.throwable}")
+                }
             }
             snapshot.current = -1
             if (victim is When) {
@@ -153,7 +161,7 @@ class XTask {
 
 
     /**
-     * Called when an event is received.
+     * Launch the task.
      *
      * @return `true` if the task starts executed and `false` otherwise
      */
@@ -162,9 +170,6 @@ class XTask {
         coroutineScope: CoroutineScope,
         events: Array<out Event>
     ) {
-        if (isExecuting && currentRuntime?.isSuspending != true) {
-            return
-        }
         val snapshot = TaskSnapshot(checksum)
         val runtime = obtainRuntime(eventScope, coroutineScope, events)
         runtime.observer = SnapshotObserver(snapshot)

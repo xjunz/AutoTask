@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.applet.flow
 
+import android.content.ComponentName
 import android.content.pm.PackageInfo
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
@@ -45,6 +46,12 @@ data class ComponentInfoWrapper(
         result = 31 * result + packageName.hashCode()
         result = 31 * result + (activityName?.hashCode() ?: 0)
         return result
+    }
+
+    fun getComponentName(): ComponentName? {
+        return activityName?.let {
+            ComponentName(packageName, it)
+        }
     }
 
     val packageInfo: PackageInfo by lazy {
