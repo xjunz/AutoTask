@@ -13,7 +13,7 @@ import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Icons
 import top.xjunz.tasker.util.Router
 import top.xjunz.tasker.util.Router.launchRoute

@@ -42,7 +42,7 @@ class UiObjectFlow : ScopeFlow<UiObjectTarget>() {
                     IntValueUtil.composeCoordinate(bounds.centerX(), bounds.centerY())
                 }
             )
-        } else AppletResult.FAILURE
+        } else AppletResult.EMPTY_FAILURE
     }
 
     /**

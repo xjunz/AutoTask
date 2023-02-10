@@ -41,9 +41,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val factory = AppletOptionFactory
 
-    val selectionLiveData = MutableLiveData(Flow())
+    val selectionLiveData = MutableLiveData(mutableListOf<Applet>())
 
-    inline val selections: Flow get() = selectionLiveData.require()
+    inline val selections: MutableList<Applet> get() = selectionLiveData.require()
 
     inline val isInMultiSelectionMode get() = selections.size > 0
 

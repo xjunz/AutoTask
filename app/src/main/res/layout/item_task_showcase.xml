@@ -14,7 +14,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginVertical="4dp"
         app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
-        app:strokeColor="?colorPrimary"
+        app:strokeWidth="1dp"
         tools:targetApi="p">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -87,7 +87,7 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintTop_toBottomOf="@+id/tv_task_desc"
                 app:waveRunningColor="?colorPrimary"
-                app:waveStrokeColor="@color/material_on_surface_stroke"
+                app:waveStrokeColor="?colorOutline"
                 app:waveStrokeWidth="1dp"
                 app:waveWidth="20dp" />
 

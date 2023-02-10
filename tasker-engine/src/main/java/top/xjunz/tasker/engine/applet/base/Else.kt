@@ -10,5 +10,5 @@ package top.xjunz.tasker.engine.applet.base
 class Else : Do() {
 
     // Once the previous result is success, do not execute this flow
-    override var isAnd = false
+    override var relation: Int = REL_OR
 }

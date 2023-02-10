@@ -40,7 +40,6 @@ abstract class AppletOptionRegistry(val id: Int) {
     fun reset() {
         allOptions.forEach {
             it.isInverted = false
-            it.value = null
         }
     }
 

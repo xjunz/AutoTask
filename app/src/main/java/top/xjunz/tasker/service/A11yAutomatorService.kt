@@ -128,7 +128,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         a11yEventDispatcher.removeCallback(componentChangeCallback)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onServiceConnected() {
         super.onServiceConnected()
         try {

@@ -29,7 +29,7 @@
             tools:text="@tools:sample/lorem" />
 
         <ImageButton
-            android:id="@+id/ib_add_after"
+            android:id="@+id/ib_add"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@drawable/bg_selectable_circle"
@@ -48,7 +48,7 @@
             android:contentDescription="@{@string/delete}"
             android:src="@drawable/ic_delete_forever_24px"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ib_add_after"
+            app:layout_constraintEnd_toStartOf="@id/ib_add"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

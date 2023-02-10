@@ -42,8 +42,6 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     var isScoped = false
 
-    var isInCriterionScope = false
-
     lateinit var onCompletion: (List<Applet>) -> Unit
 
     var title: CharSequence? = null
@@ -64,7 +62,6 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         checkNotNull(control) {
             "ControlFlow not found!"
         }
-        isInCriterionScope = control is If
         title = factory.requireOption(control).rawTitle
         if (scope is ScopeFlow<*>) {
             isScoped = true
@@ -117,22 +114,16 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     }
 
     fun acceptAppletsFromInspector() {
-        val options = floatingInspector.getSelectedOptions()
-        try {
-            val flowOption = factory.requireRegistryOption(options.first().registryId)
+        val options = floatingInspector.getSelectedApplets()
+        val flowOption = factory.requireRegistryOption(options.first().registryId)
 
-            if (!flow.addSafely(flowOption.yield() as Flow)) return
-            var count = 0
-            options.forEach {
-                if (!appendOption(it)) return@forEach
-                count++
-            }
-            toast(R.string.options_from_inspector_added.format(count))
-        } finally {
-            options.forEach {
-                it.value = null
-            }
+        if (!flow.addSafely(flowOption.yield() as Flow)) return
+        var count = 0
+        options.forEach {
+            if (!appendApplet(it)) return@forEach
+            count++
         }
+        toast(R.string.options_from_inspector_added.format(count))
         notifyFlowChanged()
     }
 

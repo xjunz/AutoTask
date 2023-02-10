@@ -16,7 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.LayoutProgressBinding
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/07/25

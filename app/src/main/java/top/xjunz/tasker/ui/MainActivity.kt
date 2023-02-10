@@ -161,7 +161,11 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             binding.tvMode.text = it.name
             binding.btnRun.isEnabled = it == OperatingMode.Accessibility
         }
-        observeConfirmation(viewModel.stopServiceConfirmation, R.string.prompt_stop_service) {
+        observeImportantConfirmation(
+            viewModel.stopServiceConfirmation,
+            R.string.prompt_stop_service,
+            R.string.stop
+        ) {
             viewModel.toggleService()
         }
     }

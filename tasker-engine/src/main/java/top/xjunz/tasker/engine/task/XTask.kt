@@ -154,7 +154,7 @@ class XTask {
         private fun Applet.isAndToString(): String {
             if (this is ControlFlow) return ""
             if (index == 0) return ""
-            return if (isAnd) "And " else "Or "
+            return if (isAnd) "And " else if (isOr) "Or " else "Anyway"
         }
 
     }

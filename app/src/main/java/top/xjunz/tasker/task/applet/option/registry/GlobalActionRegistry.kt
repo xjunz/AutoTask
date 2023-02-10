@@ -57,4 +57,11 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
         else -1
     ).restrictApiLevel(Build.VERSION_CODES.P)
+
+    @AppletOrdinal(0x0006)
+    val dismissNotificationShade = globalActionOption(
+        R.string.dismiss_notification_shade,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
+        else -1
+    ).restrictApiLevel(Build.VERSION_CODES.S)
 }

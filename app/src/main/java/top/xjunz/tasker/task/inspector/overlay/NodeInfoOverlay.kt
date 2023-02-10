@@ -10,12 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
 import top.xjunz.tasker.databinding.OverlayNodeInfoBinding
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Router.launchRoute
 import java.util.*
 
@@ -25,13 +25,13 @@ import java.util.*
 class NodeInfoOverlay(inspector: FloatingInspector) :
     FloatingInspectorOverlay<OverlayNodeInfoBinding>(inspector) {
 
-    private val uncheckedOptions = mutableSetOf<AppletOption>()
+    private val uncheckedApplets = mutableSetOf<Applet>()
 
     private val uiObjectRegistry get() = AppletOptionFactory.uiObjectRegistry
 
-    private val options = mutableListOf<AppletOption>()
+    private val allApplets = mutableListOf<Applet>()
 
-    private var checkedOptions = emptyList<AppletOption>()
+    private var checkedApplets = emptyList<Applet>()
 
     override fun modifyLayoutParams(base: WindowManager.LayoutParams) {
         super.modifyLayoutParams(base)
@@ -40,62 +40,63 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     }
 
     private val adapter: RecyclerView.Adapter<*> by lazy {
-        inlineAdapter(options, ItemNodeInfoBinding::class.java, {
+        inlineAdapter(allApplets, ItemNodeInfoBinding::class.java, {
             binding.root.setAntiMoneyClickListener {
-                val option = options[adapterPosition]
-                if (uncheckedOptions.contains(option)) {
-                    uncheckedOptions.remove(option)
+                val option = allApplets[adapterPosition]
+                if (uncheckedApplets.contains(option)) {
+                    uncheckedApplets.remove(option)
                 } else {
-                    uncheckedOptions.add(option)
+                    uncheckedApplets.add(option)
                 }
                 adapter.notifyItemChanged(adapterPosition, true)
             }
-        }) { b, _, p ->
-            b.tvAttrName.text = p.rawTitle
-            b.tvAttrValue.text = p.rawDescription
-            b.checkbox.isChecked = !uncheckedOptions.contains(p)
+        }) { b, _, applet ->
+            val option = AppletOptionFactory.requireOption(applet)
+            b.tvAttrName.text = option.loadDummyTitle(applet)
+            b.tvAttrValue.text = option.describe(applet)
+            b.checkbox.isChecked = !uncheckedApplets.contains(applet)
         }
     }
 
     private fun collectProperties() {
         val node = vm.highlightNode.require().source
         if (node.className != null)
-            options.add(uiObjectRegistry.isType.withValue(node.className))
+            allApplets.add(uiObjectRegistry.isType.yield(node.className))
 
         if (node.viewIdResourceName != null)
-            options.add(uiObjectRegistry.withId.withValue(node.viewIdResourceName))
+            allApplets.add(uiObjectRegistry.withId.yield(node.viewIdResourceName))
 
         if (node.text != null)
-            options.add(uiObjectRegistry.textEquals.withValue(node.text))
+            allApplets.add(uiObjectRegistry.textEquals.yield(node.text))
 
         if (node.contentDescription != null)
-            options.add(uiObjectRegistry.contentDesc.withValue(node.contentDescription))
+            allApplets.add(uiObjectRegistry.contentDesc.yield(node.contentDescription))
 
         if (node.isClickable)
-            options.add(uiObjectRegistry.isClickable.withValue(true))
+            allApplets.add(uiObjectRegistry.isClickable.yield(true))
 
         if (node.isLongClickable)
-            options.add(uiObjectRegistry.isLongClickable.withValue(true))
+            allApplets.add(uiObjectRegistry.isLongClickable.yield(true))
 
         if (!node.isEnabled)
-            options.add(uiObjectRegistry.isEnabled.withValue(node.isEnabled))
+            allApplets.add(uiObjectRegistry.isEnabled.yield(node.isEnabled))
 
         if (node.isCheckable)
-            options.add(uiObjectRegistry.isCheckable.withValue(true))
+            allApplets.add(uiObjectRegistry.isCheckable.yield(true))
 
         if (node.isChecked || node.isCheckable)
-            options.add(uiObjectRegistry.isChecked.withValue(node.isChecked))
+            allApplets.add(uiObjectRegistry.isChecked.yield(node.isChecked))
 
         if (node.isEditable)
-            options.add(uiObjectRegistry.isEditable.withValue(true))
+            allApplets.add(uiObjectRegistry.isEditable.yield(true))
 
-        options.add(uiObjectRegistry.isSelected.withValue(node.isSelected))
+        allApplets.add(uiObjectRegistry.isSelected.yield(node.isSelected))
         if (!node.isSelected)
-            uncheckedOptions.add(options.last())
+            uncheckedApplets.add(allApplets.last())
 
-        options.add(uiObjectRegistry.isScrollable.withValue(node.isScrollable))
+        allApplets.add(uiObjectRegistry.isScrollable.yield(node.isScrollable))
         if (!node.isScrollable)
-            uncheckedOptions.add(options.last())
+            uncheckedApplets.add(allApplets.last())
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -105,7 +106,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             vm.showNodeInfo.value = false
         }
         binding.btnComplete.setAntiMoneyClickListener {
-            checkedOptions = options - uncheckedOptions
+            checkedApplets = allApplets - uncheckedApplets
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false
             context.launchRoute(FloatingInspector.ACTION_NODE_INFO_SELECTED)
@@ -114,8 +115,8 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         inspector.observe(vm.showNodeInfo) {
             if (!it) {
                 animateHide()
-                options.clear()
-                uncheckedOptions.clear()
+                allApplets.clear()
+                uncheckedApplets.clear()
             } else if (vm.highlightNode.isNull()) {
                 vm.makeToast(R.string.no_node_selected)
             } else {
@@ -133,9 +134,9 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         }
     }
 
-    fun getCheckedOptions(): List<AppletOption> {
-        return ArrayList(checkedOptions).also {
-            checkedOptions = emptyList()
+    fun getCheckedOptions(): List<Applet> {
+        return ArrayList(checkedApplets).also {
+            checkedApplets = emptyList()
         }
     }
 }

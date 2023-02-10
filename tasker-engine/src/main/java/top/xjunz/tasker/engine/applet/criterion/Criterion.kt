@@ -56,9 +56,9 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         val expected = value?.casted() ?: getDefaultValue(runtime)
         val actual = getTarget(runtime)
         return if (isInverted != matchTarget(actual, expected)) {
-            AppletResult.SUCCESS
+            AppletResult.EMPTY_SUCCESS
         } else if (actual === Unit) {
-            AppletResult.FAILURE
+            AppletResult.EMPTY_FAILURE
         } else {
             AppletResult.failed(actual.getActualValue())
         }

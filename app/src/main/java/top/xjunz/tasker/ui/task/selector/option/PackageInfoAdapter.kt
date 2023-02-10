@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/07/03

@@ -24,7 +24,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.SavedStateViewModel
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Motions
 
 /**

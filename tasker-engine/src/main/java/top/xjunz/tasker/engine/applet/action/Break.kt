@@ -14,6 +14,6 @@ class Break : Action<Repeat>(VAL_TYPE_IRRELEVANT) {
 
     override suspend fun doAction(value: Repeat?, runtime: TaskRuntime): AppletResult {
         value?.shouldBreak = true
-        return AppletResult.SUCCESS
+        return AppletResult.EMPTY_SUCCESS
     }
 }

@@ -27,6 +27,8 @@ import androidx.core.graphics.Insets
 import androidx.core.graphics.applyCanvas
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
+import top.xjunz.tasker.R
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Motions
 
 /**
@@ -224,4 +226,11 @@ inline fun View.useStyledAttributes(
 @SuppressLint("ClickableViewAccessibility")
 fun View.blockTouch() {
     setOnTouchListener { _, _ -> true }
+}
+
+fun View.setHelp(help: CharSequence) {
+    background = android.R.attr.selectableItemBackground.resolvedId.getDrawable()
+    setAntiMoneyClickListener {
+        context.makeSimplePromptDialog(R.string.help.str, help).show()
+    }
 }

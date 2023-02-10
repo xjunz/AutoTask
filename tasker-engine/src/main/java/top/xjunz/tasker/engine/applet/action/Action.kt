@@ -19,6 +19,16 @@ abstract class Action<V>(override val valueType: Int) : Applet() {
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         return doAction(value?.casted(), runtime)
     }
+
+    override fun toggleRelation() {
+        relation = if (isAnd) {
+            REL_OR
+        } else if (isOr) {
+            REL_ANYWAY
+        } else {
+            REL_AND
+        }
+    }
 }
 
 class LambdaAction<V>(
@@ -26,7 +36,7 @@ class LambdaAction<V>(
     private inline val action: suspend (V?, TaskRuntime) -> Boolean
 ) : Action<V>(valueType) {
     override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        return if (action(value, runtime)) AppletResult.SUCCESS else AppletResult.FAILURE
+        return if (action(value, runtime)) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
     }
 }
 

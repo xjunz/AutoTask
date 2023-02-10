@@ -8,7 +8,6 @@ import android.view.Gravity
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.FragmentManager
-import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
@@ -103,13 +102,13 @@ class AppletOperationMenuHelper(
             if (applet !is Flow || applet.size == applet.maxSize) {
                 menu.removeItem(R.id.item_add_inside)
             }
-            if (!Preferences.showDragToMoveTip && !BuildConfig.DEBUG) {
+            if (!Preferences.showDragToMoveTip) {
                 menu.removeItem(R.id.item_move)
             }
-            if (!Preferences.showSwipeToRemoveTip && !BuildConfig.DEBUG) {
+            if (!Preferences.showSwipeToRemoveTip) {
                 menu.removeItem(R.id.item_remove)
             }
-            if (!Preferences.showLongClickToSelectTip && !BuildConfig.DEBUG) {
+            if (!Preferences.showLongClickToSelectTip) {
                 menu.removeItem(R.id.item_select)
             }
             if (applet !is Flow) {
@@ -263,7 +262,7 @@ class AppletOperationMenuHelper(
             R.id.item_add_inside -> {
                 val flow = applet as Flow
                 if (flow.size == flow.maxSize) {
-                    toast(R.string.error_reach_max_applet_size)
+                    toast(R.string.format_error_reach_max_applet_size.format(flow.maxSize))
                     return true
                 }
                 AppletSelectorDialog().init(flow) {
@@ -303,7 +302,7 @@ class AppletOperationMenuHelper(
                 } else {
                     val flow = applet.requireParent()
                     if (flow.size == flow.maxSize) {
-                        toast(R.string.error_reach_max_applet_size)
+                        toast(R.string.format_error_reach_max_applet_size.format(flow.maxSize))
                         return true
                     }
                     AppletSelectorDialog().init(flow) { peers ->

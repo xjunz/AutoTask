@@ -15,6 +15,8 @@ object VariantType {
 
     const val INT_COORDINATE = 1 shl 16 or Applet.VAL_TYPE_INT
 
+    const val INT_INTERVAL = 2 shl 16 or Applet.VAL_TYPE_INT
+
     const val TEXT_PACKAGE_NAME = 1 shl 16 or Applet.VAL_TYPE_TEXT
 
     const val TEXT_ACTIVITY = 2 shl 16 or Applet.VAL_TYPE_TEXT

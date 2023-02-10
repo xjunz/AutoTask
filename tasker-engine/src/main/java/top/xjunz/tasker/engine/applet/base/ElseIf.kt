@@ -11,9 +11,9 @@ import top.xjunz.shared.utils.unsupportedOperation
  */
 class ElseIf : If() {
 
-    override var isAnd: Boolean = false
+    override var relation: Int = REL_OR
         set(value) {
-            if (value) unsupportedOperation("ElseIf flow must not have its [isAnd] field true!")
+            if (value != REL_OR) unsupportedOperation("ElseIf flow must not have its [isAnd] field true!")
             field = value
         }
 

@@ -19,7 +19,7 @@ class NotificationFlow : ScopeFlow<NotificationFlow.NotificationTarget>() {
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         return if (runtime.hitEvent.type != Event.EVENT_ON_NOTIFICATION_RECEIVED) {
             runtime.observer?.onAppletSkipped(this, runtime)
-            AppletResult.FAILURE
+            AppletResult.EMPTY_FAILURE
         } else {
             super.applyFlow(runtime)
         }

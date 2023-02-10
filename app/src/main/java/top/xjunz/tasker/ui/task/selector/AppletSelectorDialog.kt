@@ -24,10 +24,12 @@ import com.google.android.material.transition.platform.MaterialFadeThrough
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogAppletSelectorBinding
 import top.xjunz.tasker.databinding.ItemAppletFactoryBinding
 import top.xjunz.tasker.databinding.ItemAppletOptionBinding
+import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ContainerFlow
 import top.xjunz.tasker.engine.applet.base.Flow
@@ -42,8 +44,9 @@ import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/09/26
@@ -229,7 +232,9 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             val vh = binding.rvRight.findViewHolderForAdapterPosition(it)
             if (vh != null) shopCartIntegration.animateIntoShopCart(vh.itemView)
         }
-        observeConfirmation(viewModel.showClearDialog, R.string.prompt_clear_all_options) {
+        observeImportantConfirmation(
+            viewModel.showClearDialog, R.string.prompt_clear_all_options, R.string.clear_all
+        ) {
             viewModel.clearAllCandidates()
         }
         mainViewModel.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
@@ -237,8 +242,16 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             val index = viewModel.applets.require().indexOfFirst { applet ->
                 applet.hashCode() == hashcode
             }
-            viewModel.applets.require()[index].toggleRelation()
-            bottomAdapter.notifyItemChanged(index)
+            val applet = viewModel.applets.require()[index]
+            applet.toggleRelation()
+            if (applet is Action<*>) {
+                PreferenceHelpDialog().init(
+                    R.string.tip, R.string.tip_applet_relation, Preferences.showToggleRelationTip
+                ) { noMore ->
+                    Preferences.showToggleRelationTip = !noMore
+                }.show(childFragmentManager)
+            }
+            bottomAdapter.notifyItemChanged(index, true)
         }
         mainViewModel.doOnRouted(this, FloatingInspector.ACTION_NODE_INFO_SELECTED) {
             val prevSize = bottomAdapter.itemCount

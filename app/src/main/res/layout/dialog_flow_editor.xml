@@ -136,7 +136,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
-                android:layout_marginBottom="8dp"
                 android:visibility="gone"
                 app:contentPaddingBottom="12dp"
                 app:contentPaddingLeft="12dp"

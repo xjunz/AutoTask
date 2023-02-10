@@ -13,10 +13,10 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.a11yAutomatorService
-import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.inspector.overlay.*
 
 /**
@@ -90,7 +90,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
-    fun getSelectedOptions(): List<AppletOption> {
+    fun getSelectedApplets(): List<Applet> {
         return nodeInfo.getCheckedOptions()
     }
 

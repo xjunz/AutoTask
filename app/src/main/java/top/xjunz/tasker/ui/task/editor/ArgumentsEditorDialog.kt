@@ -6,7 +6,9 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
@@ -30,7 +32,8 @@ import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.option.BitsValueEditorDialog
 import top.xjunz.tasker.ui.task.selector.option.ComponentSelectorDialog
 import top.xjunz.tasker.ui.task.selector.option.CoordinateEditorDialog
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.ui.task.selector.option.TimeIntervalEditorDialog
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import java.util.*
 
 /**
@@ -78,10 +81,24 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val gvm get() = pvm.global
 
-    private fun showValueInputDialog(which: Int, arg: ArgumentDescriptor) {
+    private fun showValueInputDialog(
+        standalone: Boolean,
+        which: Int,
+        arg: ArgumentDescriptor
+    ) {
+        val fragmentManager = if (standalone) {
+            parentFragmentManager
+        } else {
+            childFragmentManager
+        }
+
         fun updateValue(newValue: Any?) {
             gvm.referenceEditor.setValue(applet, which, newValue)
-            vm.onItemChanged.value = arg
+            if (standalone) {
+                vm.doOnCompletion.invoke()
+            } else {
+                vm.onItemChanged.value = arg
+            }
         }
         when (arg.variantValueType) {
             VariantType.INT_COORDINATE -> {
@@ -90,14 +107,21 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 }
                 CoordinateEditorDialog().init(arg.name, point) { x, y ->
                     updateValue(IntValueUtil.composeCoordinate(x, y))
-                }.show(childFragmentManager)
+                }.show(fragmentManager)
+            }
+            VariantType.INT_INTERVAL -> {
+                TimeIntervalEditorDialog().init(
+                    arg.name, (applet.value ?: applet.defaultValue) as Int
+                ) {
+                    updateValue(it)
+                }.show(fragmentManager)
             }
             VariantType.BITS_SWIPE ->
                 BitsValueEditorDialog().init(arg.name, applet.value as? Long, Swipe.COMPOSER) {
                     updateValue(it)
                 }.setEnums(0, R.array.swipe_directions)
                     .setHints(R.array.swipe_arg_hints)
-                    .show(childFragmentManager)
+                    .show(fragmentManager)
 
             VariantType.TEXT_PACKAGE_NAME -> {
                 val singleSelection = !arg.isCollection
@@ -110,7 +134,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     }
                     .setSingleSelection(singleSelection)
                     .setTitle(option.loadDummyTitle(applet))
-                    .show(childFragmentManager)
+                    .show(fragmentManager)
             }
             VariantType.TEXT_ACTIVITY -> {
                 val singleSelection = !arg.isCollection
@@ -124,13 +148,13 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     }
                     .setSingleSelection(singleSelection)
                     .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
-                    .show(childFragmentManager)
+                    .show(fragmentManager)
             }
             else -> if (arg.isCollection) {
                 VarargTextEditorDialog().init(arg.name, applet, arg) { value, referents ->
                     updateValue(value)
                     gvm.referenceEditor.setVarargReferences(applet, referents)
-                }.show(childFragmentManager)
+                }.show(fragmentManager)
             } else {
                 TextEditorDialog().configEditText { et ->
                     et.configInputType(arg.valueClass, true)
@@ -142,28 +166,46 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                                 ?: return@init R.string.error_mal_format.str
                         updateValue(parsed)
                         return@init null
-                    }.show(childFragmentManager)
+                    }.show(fragmentManager)
             }
         }
     }
 
-    private fun showReferenceSelectorDialog(whichArg: Int, arg: ArgumentDescriptor, id: String?) {
+    private fun showReferenceSelectorDialog(
+        standalone: Boolean,
+        whichArg: Int,
+        arg: ArgumentDescriptor,
+        id: String?
+    ) {
+        val fragmentManager = if (standalone) {
+            parentFragmentManager
+        } else {
+            childFragmentManager
+        }
         FlowEditorDialog().init(pvm.task, gvm.root, true, gvm)
             .setArgumentToSelect(applet, arg, id)
             .doOnArgumentSelected { referent ->
                 gvm.referenceEditor.setReference(applet, arg, whichArg, referent)
-                vm.onItemChanged.value = arg
-            }.show(childFragmentManager)
+                if (standalone) {
+                    vm.doOnCompletion.invoke()
+                } else {
+                    vm.onItemChanged.value = arg
+                }
+            }.show(fragmentManager)
     }
 
     private val adapter by lazy {
         inlineAdapter(option.arguments, ItemArgumentEditorBinding::class.java, {
             binding.btnRefer.setAntiMoneyClickListener {
                 val pos = adapterPosition
-                showReferenceSelectorDialog(pos, option.arguments[pos], applet.references[pos])
+                showReferenceSelectorDialog(
+                    false, pos,
+                    option.arguments[pos],
+                    applet.references[pos]
+                )
             }
             binding.btnSpecify.setAntiMoneyClickListener {
-                showValueInputDialog(adapterPosition, option.arguments[adapterPosition])
+                showValueInputDialog(false, adapterPosition, option.arguments[adapterPosition])
             }
             binding.tvValue.setAntiMoneyClickListener {
                 val position = adapterPosition
@@ -212,9 +254,29 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         gvm.referenceEditor.revokeAll()
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        pvm = peekParentViewModel<FlowEditorDialog, FlowEditorViewModel>()
+        if (vm.option.arguments.size == 1) {
+            val singleArg = vm.option.arguments.single()
+            if (singleArg.isReferenceOnly) {
+                showReferenceSelectorDialog(true, 0, option.arguments[0], applet.references[0])
+                dismiss()
+                return null
+            } else if (singleArg.isValueOnly) {
+                showValueInputDialog(true, 0, option.arguments[0])
+                dismiss()
+                return null
+            }
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        pvm = peekParentViewModel<FlowEditorDialog, FlowEditorViewModel>()
         binding.rvArgument.adapter = adapter
         binding.tvTitle.text = option.loadDummyTitle(applet)
         binding.btnCancel.setOnClickListener {

@@ -10,7 +10,6 @@ import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.co
 import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.newCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.NotificationFlow
 import top.xjunz.tasker.task.applet.value.VariantType
 
@@ -25,9 +24,7 @@ class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             it.packageName
         }
     }.withValueArgument<String>(
-        R.string.app_collection,
-        variantValueType = VariantType.TEXT_PACKAGE_NAME,
-        isCollection = true
+        R.string.app_collection, VariantType.TEXT_PACKAGE_NAME, true
     ).withValueDescriber<Collection<String>> {
         if (it.size == 1) {
             val first = it.first()
@@ -43,15 +40,15 @@ class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x00_01)
     val contentContains = invertibleAppletOption(R.string.notification_contains) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.paneTitle?.contains(v) == true
+        newCriterion<NotificationFlow.NotificationTarget, String> { t, v ->
+            t.content?.contains(v) == true
         }
     }
 
     @AppletOrdinal(0x00_02)
     val contentMatches = invertibleAppletOption(R.string.notification_matches) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.paneTitle?.matches(Regex(v)) == true
+        newCriterion<NotificationFlow.NotificationTarget, String> { t, v ->
+            t.content?.matches(Regex(v)) == true
         }
     }
 

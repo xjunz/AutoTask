@@ -23,7 +23,7 @@ import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2023/02/05
@@ -113,14 +113,40 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
                     popup.show()
                 }
             }
-            binding.ibAddAfter.setAntiMoneyClickListener {
-                val emptyArg = Arg()
-                if (adapterPosition == viewModel.args.lastIndex) {
-                    viewModel.args.add(emptyArg)
+            binding.ibAdd.setAntiMoneyClickListener { btn ->
+                val curArg = viewModel.args[adapterPosition]
+                if (curArg.isSpecified) {
+                    val popup = PopupMenu(requireContext(), btn)
+                    popup.menu.add(R.string.add_before)
+                    popup.menu.add(R.string.add_after)
+                    popup.setOnMenuItemClickListener {
+                        val emptyArg = Arg()
+                        when (it.title?.toString()) {
+                            R.string.add_before.str -> {
+                                viewModel.args.add(adapterPosition, emptyArg)
+                                adapter.notifyItemInserted(adapterPosition)
+                            }
+                            R.string.add_after.str -> {
+                                if (adapterPosition == viewModel.args.lastIndex) {
+                                    viewModel.args.add(emptyArg)
+                                } else {
+                                    viewModel.args.add(adapterPosition + 1, emptyArg)
+                                }
+                                adapter.notifyItemInserted(adapterPosition + 1)
+                            }
+                        }
+                        return@setOnMenuItemClickListener true
+                    }
+                    popup.show()
                 } else {
-                    viewModel.args.add(adapterPosition + 1, emptyArg)
+                    val emptyArg = Arg()
+                    if (adapterPosition == viewModel.args.lastIndex) {
+                        viewModel.args.add(emptyArg)
+                    } else {
+                        viewModel.args.add(adapterPosition + 1, emptyArg)
+                    }
+                    adapter.notifyItemInserted(adapterPosition + 1)
                 }
-                adapter.notifyItemInserted(adapterPosition + 1)
             }
             binding.ibRemove.setAntiMoneyClickListener {
                 if (viewModel.args.size == 1) {

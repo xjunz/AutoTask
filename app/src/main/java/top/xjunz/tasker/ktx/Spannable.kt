@@ -15,7 +15,7 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.core.text.set
 import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.util.AntiMonkeyUtil
+import top.xjunz.tasker.util.ClickUtil
 
 /**
  * @author xjunz 2022/11/25
@@ -62,7 +62,7 @@ fun CharSequence.clickable(underlined: Boolean = false, doOnClick: (View) -> Uni
         override fun onClick(v: View) {
             val uptime = SystemClock.uptimeMillis()
             if (prevClickTimestamp == -1L
-                || uptime - prevClickTimestamp >= AntiMonkeyUtil.THRESHOLD_INTERVAL
+                || uptime - prevClickTimestamp >= ClickUtil.THRESHOLD_INTERVAL
             ) {
                 doOnClick(v)
                 prevClickTimestamp = uptime

@@ -6,6 +6,7 @@ package top.xjunz.tasker.task.event
 
 import android.app.Notification
 import android.os.Looper
+import android.os.SystemClock
 import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.os.HandlerCompat
@@ -26,9 +27,8 @@ import kotlin.coroutines.CoroutineContext
 class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge) :
     EventDispatcher() {
 
-    override val coroutineContext: CoroutineContext =
-        HandlerCompat.createAsync(looper)
-            .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
+    override val coroutineContext: CoroutineContext = HandlerCompat.createAsync(looper)
+        .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
 
     private val activityHashCache = ArraySet<Int>()
 
@@ -36,8 +36,9 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
+    private var latestContentChange: Long = -1L
 
-    var contentChangeRateLimitMills = 100L
+    var contentChangeRateLimitMills = 250L
 
     private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
@@ -140,12 +141,8 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                 dispatchContentChanged(packageName)
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                eventDispatchScope?.get()?.cancel()
-                launch {
-                    eventDispatchScope = WeakReference(this)
-                    delay(contentChangeRateLimitMills)
-                    dispatchContentChanged(packageName)
-                }
+                //eventDispatchScope = WeakReference(this)
+                dispatchContentChanged(packageName)
             }
             else -> dispatchContentChanged(packageName)
         }
@@ -153,6 +150,7 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
 
     private fun dispatchContentChanged(packageName: String) {
         if (packageName != latestPackageName) return
+        if (SystemClock.uptimeMillis() - latestContentChange < contentChangeRateLimitMills) return
         dispatchEvents(
             Event.obtain(
                 Event.EVENT_ON_CONTENT_CHANGED,
@@ -161,6 +159,7 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                 latestPaneTitle,
             )
         )
+        latestContentChange = SystemClock.uptimeMillis()
     }
 
     fun getCurrentComponentInfo(): ComponentInfoWrapper {

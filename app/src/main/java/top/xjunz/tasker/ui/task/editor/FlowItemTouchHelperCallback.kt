@@ -6,6 +6,7 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.graphics.Canvas
 import android.view.View
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper.*
@@ -215,6 +216,7 @@ open class FlowItemTouchHelperCallback(
         }
     }
 
+    // todo: Allow move applets within same scope
     private val Applet.scope: Flow?
         get() {
             var p = parent
@@ -240,14 +242,21 @@ open class FlowItemTouchHelperCallback(
         return true
     }
 
+    private fun findSnackBarParent(anchor: View): CoordinatorLayout {
+        var p: View? = anchor
+        while (p != null && p !is CoordinatorLayout) {
+            p = p.parent as? View
+        }
+        return p!! as CoordinatorLayout
+    }
+
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val pos = viewHolder.adapterPosition
         val from = currentList[pos]
         val parent = from.requireParent()
         val removed = doRemove(parent, from)
-        val rootView = viewHolder.itemView.rootView
-        val fab = rootView.findViewById<View>(R.id.fab_action)
-        val snackBar = Snackbar.make(rootView, R.string.removed, Snackbar.LENGTH_LONG)
+        val coordinatorLayout = findSnackBarParent(viewHolder.itemView)
+        val snackBar = Snackbar.make(coordinatorLayout, R.string.removed, Snackbar.LENGTH_SHORT)
             .setAction(R.string.undo) {
                 removed.sortedBy { it.index }.forEach {
                     if (it.index == parent.size) {
@@ -259,6 +268,7 @@ open class FlowItemTouchHelperCallback(
                 viewModel.notifyFlowChanged()
                 viewModel.updateChildrenIndexesIfNeeded(parent)
             }
+        val fab = coordinatorLayout.findViewById<View>(R.id.fab_action)
         if (fab != null && fab.isVisible) {
             snackBar.anchorView = fab
         }

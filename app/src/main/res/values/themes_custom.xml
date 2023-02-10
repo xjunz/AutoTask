@@ -13,6 +13,15 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">?isLightTheme</item>
         <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
         <item name="materialButtonOutlinedStyle">@style/OutlinedButtonStyle</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogStyle.Elevated</item>
+    </style>
+
+    <style name="BottomSheetDialogStyle.Elevated">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle.Elevated</item>
+    </style>
+
+    <style name="BottomSheetStyle.Elevated">
+        <item name="android:elevation">4dp</item>
     </style>
 
     <style name="FlowEditorPopupMenuStyle" parent="@style/Widget.Material3.PopupMenu.Overflow">

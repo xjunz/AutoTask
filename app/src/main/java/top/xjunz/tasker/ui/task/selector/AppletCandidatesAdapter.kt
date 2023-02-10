@@ -22,7 +22,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import java.util.*
 
 /**
@@ -45,17 +45,15 @@ class AppletCandidatesAdapter(
             binding.root.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
-                    viewModel.toggleCollapse(applet)
-                    notifyItemChanged(adapterPosition, true)
+                    if (applet.isInvertible) {
+                        viewModel.toggleCollapse(applet)
+                        notifyItemChanged(adapterPosition, true)
+                    }
                 } else {
                     onClickListener.onClick(applet) {
                         notifyItemChanged(adapterPosition, true)
                     }
                 }
-            }
-            binding.tvTitle.setAntiMoneyClickListener {
-                currentList[adapterPosition].toggleRelation()
-                notifyItemChanged(adapterPosition, true)
             }
             binding.ibAction.setAntiMoneyClickListener {
                 val applet = currentList[adapterPosition]
@@ -66,6 +64,11 @@ class AppletCandidatesAdapter(
                 } else {
                     applet.toggleInversion()
                     notifyItemChanged(adapterPosition, true)
+                }
+            }
+            binding.tvTitle.setAntiMoneyClickListener {
+                if (AppletOption.assignedAction == null) {
+                    binding.root.performClick()
                 }
             }
         }
@@ -89,7 +92,7 @@ class AppletCandidatesAdapter(
             var title = if (option.descAsTitle) option.describe(applet)
             else option.loadTitle(applet)
             if (title != null && showRelation) {
-                title = AppletOption.makeRelationSpan(title, applet, viewModel.isInCriterionScope)
+                title = AppletOption.makeRelationSpan(title, applet)
             }
             if (!option.descAsTitle) {
                 it.tvDesc.text = option.describe(applet)
@@ -97,13 +100,11 @@ class AppletCandidatesAdapter(
             it.tvDesc.isVisible = !it.tvDesc.text.isNullOrEmpty()
             if (applet.parent === viewModel.flow) {
                 it.tvNumber.isVisible = false
-                //it.tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                 title = title?.relativeSize(1.2F)
             } else {
                 it.tvNumber.isVisible = true
                 it.tvNumber.text = (applet.index + 1).toString()
                 it.ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
-                //  it.tvTitle.setTextAppearance(TextAppearance_Material3_BodyMedium)
             }
             if (applet is Flow) {
                 it.ibAction.isVisible = true

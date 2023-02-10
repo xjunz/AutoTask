@@ -30,7 +30,7 @@ import top.xjunz.tasker.ui.model.ActivityInfoWrapper
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/10/07

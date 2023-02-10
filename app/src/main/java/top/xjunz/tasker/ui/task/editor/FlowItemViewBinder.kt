@@ -17,7 +17,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/11/07
@@ -64,20 +64,17 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             if (option.descAsTitle) {
                 title = desc
             } else if (applet.isContainer) {
-                title = if (applet.controlFlow is If)
-                    R.string.matches_rule_set.text
+                title = if (applet.controlFlow is If) R.string.matches_rule_set.text
                 else R.string.execute_rule_set.text
             }
             if (title != null && applet.index != 0 && applet !is ControlFlow) {
-                title = AppletOption.makeRelationSpan(
-                    title, applet, applet.controlFlow is If
-                )
+                title = AppletOption.makeRelationSpan(title, applet)
             }
 
             val depth = applet.depthInAncestor(vm.flow)
             // Set text style
             when {
-                depth == 1 && applet is ControlFlow -> tvTitle.setTextAppearance(
+                depth == 1 && applet is Flow -> tvTitle.setTextAppearance(
                     TextAppearance_Material3_TitleLarge
                 )
 
@@ -175,7 +172,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
 
             tvDesc.isVisible = !option.descAsTitle && !desc.isNullOrEmpty()
             if (tvDesc.isVisible) {
-                if (!tvDesc.isEnabled) {
+                if (!root.isEnabled) {
                     desc = desc?.toString()
                 }
                 tvDesc.text = desc

@@ -81,7 +81,7 @@ class Gestures {
      */
     public PointerGesture swipe(Point start, Point end, int speed) {
         // A swipe is a click that moves before releasing the pointer.
-        return click(start).move(end, speed);
+        return click(start).moveAtSpeed(end, speed);
     }
 
     /**
@@ -130,7 +130,7 @@ class Gestures {
      */
     public PointerGesture drag(Point start, Point end, int speed) {
         // A drag is a swipe that starts with a long click.
-        return longClick(start).move(end, speed);
+        return longClick(start).moveAtSpeed(end, speed);
     }
 
     /**

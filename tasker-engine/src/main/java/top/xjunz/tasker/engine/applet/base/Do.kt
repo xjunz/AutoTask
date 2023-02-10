@@ -9,5 +9,5 @@ package top.xjunz.tasker.engine.applet.base
  */
 open class Do : ControlFlow() {
 
-    override var isAnd: Boolean = true
+    override var relation: Int = REL_AND
 }

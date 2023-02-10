@@ -27,7 +27,7 @@ class EventFilter(eventType: Int) : Applet() {
             it.type == value
         }
         return if (hit == null) {
-            AppletResult.FAILURE
+            AppletResult.EMPTY_FAILURE
         } else {
             runtime.hitEvent = hit
             val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)

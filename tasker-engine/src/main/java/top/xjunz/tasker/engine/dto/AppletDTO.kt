@@ -25,8 +25,8 @@ import java.util.zip.CRC32
 @SerialName("E") // Element
 class AppletDTO(
     private val id: Int,
-    @SerialName("a")
-    private val isAnd: Boolean = true,
+    @SerialName("r")
+    private val relation: Int = Applet.REL_AND,
     @SerialName("en")
     private val isEnabled: Boolean = true,
     @SerialName("i")
@@ -35,9 +35,9 @@ class AppletDTO(
     private val serialized: String? = null,
     @SerialName("c")
     private val comment: String? = null,
-    @SerialName("q")
+    @SerialName("rft")
     private val referents: Map<Int, String>? = null,
-    @SerialName("r")
+    @SerialName("rfc")
     private val references: Map<Int, String>? = null,
 ) : Parcelable {
 
@@ -56,7 +56,7 @@ class AppletDTO(
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
-        parcel.readBool(),
+        parcel.readInt(),
         parcel.readBool(),
         parcel.readBool(),
         parcel.readString(),
@@ -72,7 +72,7 @@ class AppletDTO(
     internal fun calculateChecksum(crc32: CRC32) {
         crc32.apply {
             update(id)
-            update(isAnd.toInt())
+            update(relation)
             update(isEnabled.toInt())
             update(isInverted.toInt())
             serialized?.let {
@@ -107,7 +107,7 @@ class AppletDTO(
          */
         fun Applet.toDTO(): AppletDTO {
             val dto = AppletDTO(
-                id, isAnd, isEnabled, isInverted, serializeValue(), comment,
+                id, relation, isEnabled, isInverted, serializeValue(), comment,
                 referents.emptyToNull(), references.emptyToNull(),
             )
             if (this is Flow) {
@@ -121,7 +121,7 @@ class AppletDTO(
 
     fun toApplet(registry: AppletFactory): Applet {
         val prototype = registry.createAppletById(id)
-        prototype.isAnd = isAnd
+        prototype.relation = relation
         prototype.isEnabled = isEnabled
         prototype.isInverted = isInverted
         prototype.referents = referents ?: emptyMap()
@@ -138,7 +138,7 @@ class AppletDTO(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
-        parcel.writeBool(isAnd)
+        parcel.writeInt(relation)
         parcel.writeBool(isEnabled)
         parcel.writeBool(isInverted)
         parcel.writeString(serialized)

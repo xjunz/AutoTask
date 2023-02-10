@@ -4,7 +4,7 @@
 
 package top.xjunz.tasker.engine.applet.base
 
-import androidx.core.util.Pools.SimplePool
+import androidx.core.util.Pools.SynchronizedPool
 
 /**
  * @author xjunz 2023/01/15
@@ -22,13 +22,17 @@ class AppletResult private constructor(private var successful: Boolean) {
     var throwable: Throwable? = null
         private set
 
-    private object Pool : SimplePool<AppletResult>(25)
+    private object Pool : SynchronizedPool<AppletResult>(20)
 
     companion object {
 
-        val SUCCESS = AppletResult(true)
+        val EMPTY_SUCCESS = AppletResult(true)
 
-        val FAILURE = AppletResult(false)
+        val EMPTY_FAILURE = AppletResult(false)
+
+        fun emptyResult(success: Boolean): AppletResult {
+            return if (success) EMPTY_SUCCESS else EMPTY_FAILURE
+        }
 
         private fun obtain(
             isSuccessful: Boolean,
@@ -45,7 +49,7 @@ class AppletResult private constructor(private var successful: Boolean) {
         }
 
         fun succeeded(vararg returns: Any?): AppletResult {
-            return if (returns.isNotEmpty()) obtain(true, returns) else SUCCESS
+            return if (returns.isNotEmpty()) obtain(true, returns) else EMPTY_SUCCESS
         }
 
         fun failed(actual: Any?): AppletResult {

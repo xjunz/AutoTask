@@ -18,18 +18,19 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.shape.MaterialShapeDrawable
 import top.xjunz.shared.utils.illegalArgument
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.hierarchy
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
-import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setOnDoubleClickListener
 
 /**
  * @author xjunz 2022/07/30
@@ -61,6 +62,13 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.tvTitle.setOnDoubleClickListener {
+            Preferences.showDragToMoveTip = true
+            Preferences.showToggleRelationTip = true
+            Preferences.showSwipeToRemoveTip = true
+            Preferences.showLongClickToSelectTip = true
+            toast("Preferences reset!")
+        }
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
             v.doOnPreDraw {
@@ -127,11 +135,12 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 viewModel.toggleRequestedTask()
             }.show()
         }
-        observeDialog(viewModel.requestDeleteTask) {
-            requireActivity().makeSimplePromptDialog(msg = R.string.prompt_delete_task)
-                .setPositiveButton(R.string.delete.text.foreColored(ColorScheme.colorError)) { _, _ ->
-                    viewModel.deleteRequestedTask()
-                }.show()
+        observeImportantConfirmation(
+            viewModel.requestDeleteTask,
+            R.string.prompt_delete_task,
+            R.string.delete
+        ) {
+            viewModel.deleteRequestedTask()
         }
         observeTransient(viewModel.onNewTaskAdded) {
             when (it.metadata.taskType) {

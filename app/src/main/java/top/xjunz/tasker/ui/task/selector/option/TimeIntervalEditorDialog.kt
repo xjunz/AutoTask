@@ -14,7 +14,7 @@ import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/12/22

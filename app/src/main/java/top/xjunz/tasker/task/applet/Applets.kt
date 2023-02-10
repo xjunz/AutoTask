@@ -205,7 +205,7 @@ val Applet.isEnabledInHierarchy: Boolean
 fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = true): T {
     val cloned = factory.createAppletById(id)
     cloned.id = id
-    cloned.isAnd = isAnd
+    cloned.relation = relation
     cloned.isEnabled = isEnabled
     cloned.value = value
     cloned.isInverted = isInverted

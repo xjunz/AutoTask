@@ -18,8 +18,9 @@ import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
+import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/08/14
@@ -33,8 +34,7 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
 
     private val layoutInflater = LayoutInflater.from(fragment.requireContext())
 
-    val menuHelper =
-        AppletOperationMenuHelper(viewModel, fragment.childFragmentManager)
+    val menuHelper = AppletOperationMenuHelper(viewModel, fragment.childFragmentManager)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -86,6 +86,11 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
+            binding.tvTitle.setAntiMoneyClickListener {
+                if (AppletOption.assignedAction == null) {
+                    binding.root.performClick()
+                }
+            }
             binding.tvComment.setBackgroundColor(
                 ColorScheme.colorTertiaryContainer.alphaModified(.42F)
             )

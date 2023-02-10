@@ -21,7 +21,7 @@ import top.xjunz.tasker.databinding.ItemInputLayoutBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.value.BitwiseValueComposer
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import kotlin.math.ceil
 import kotlin.math.log10
 

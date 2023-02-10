@@ -19,6 +19,8 @@ class Suspension : Action<Int>(VAL_TYPE_INT) {
 
     private val scopes = WeakHashMap<Long, CoroutineScope>()
 
+    override val defaultValue: Int = 1000
+
     override suspend fun doAction(value: Int?, runtime: TaskRuntime): AppletResult {
         check(value != null)
         val fingerprint = runtime.fingerprint
@@ -31,7 +33,7 @@ class Suspension : Action<Int>(VAL_TYPE_INT) {
             runtime.isSuspending = false
             scopes.remove(fingerprint)
         }
-        return AppletResult.SUCCESS
+        return AppletResult.EMPTY_SUCCESS
     }
 
 }

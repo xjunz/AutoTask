@@ -18,7 +18,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.MaterialShapeDrawable
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.R
 import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
 
 /**
@@ -30,11 +29,6 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
     protected lateinit var binding: T
 
     protected open val bindingRequiredSuperClassDepth = 1
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_FRAME, R.style.BottomSheetDialogStyle)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -59,7 +53,7 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         )
         bottomSheet.doOnPreDraw {
             val bg = bottomSheet.background as? MaterialShapeDrawable
-            // keep full corner all the time
+            // keep full corner all the time if not full screen
             if (bg != null && bottomSheet.height != ((bottomSheet.parent) as View).height) {
                 behaviour.disableShapeAnimations()
                 bg.interpolation = 1F

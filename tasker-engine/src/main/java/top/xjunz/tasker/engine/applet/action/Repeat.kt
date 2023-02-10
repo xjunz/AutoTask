@@ -46,7 +46,7 @@ class Repeat : Flow() {
                 return result
             }
         }
-        return AppletResult.SUCCESS
+        return AppletResult.EMPTY_SUCCESS
     }
 
 }

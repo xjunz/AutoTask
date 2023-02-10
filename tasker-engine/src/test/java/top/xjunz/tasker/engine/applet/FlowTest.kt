@@ -34,14 +34,14 @@ internal class FlowTest {
                 }
 
                 UnaryCriterion {
-                    isAnd = true
+                    relation = Applet.REL_AND
                     comment = "equal"
                     Value("b")
                     Matcher { s, s2 -> s == s2 }
                 }
 
                 UnaryCriterion {
-                    isAnd = false
+                    relation = Applet.REL_OR
                     comment = "startsWith"
                     Value("x")
                     Matcher { s: String, s2: String -> s.startsWith(s2) }

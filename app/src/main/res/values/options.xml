@@ -8,8 +8,6 @@
     <string name="_do">那么</string>
     <string name="_and">并且</string>
     <string name="_or">或者</string>
-    <string name="on_success">然后</string>
-    <string name="on_failure">否则</string>
 
     <string name="current_app">所处的应用</string>
     <string name="current_top_app">当前应用</string>

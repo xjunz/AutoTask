@@ -6,8 +6,11 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.uiautomator.Direction
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction
 import top.xjunz.tasker.engine.applet.action.singleArgValueAction
+import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
@@ -100,11 +103,13 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .hasCompositeTitle()
 
     @AppletOrdinal(0x0010)
-    val setText = uiObjectActionOption<String>(R.string.format_perform_input_text) { node, value ->
-        if (!node.isEditable) false
-        else {
-            uiDevice.wrapUiObject2(node).text = value
-            true
+    val setText = appletOption(R.string.format_perform_input_text) {
+        LambdaReferenceAction<String>(Applet.VAL_TYPE_TEXT) { args, value, _ ->
+            val node = args[0] as AccessibilityNodeInfo
+            if (!node.isEditable) false else {
+                uiDevice.wrapUiObject2(node).text = args[1]?.casted() ?: value
+                true
+            }
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.input_field)
         .withUnaryArgument<String>(R.string.text)

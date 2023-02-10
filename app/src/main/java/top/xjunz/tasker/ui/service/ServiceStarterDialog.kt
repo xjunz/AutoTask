@@ -24,7 +24,7 @@ import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/12/24

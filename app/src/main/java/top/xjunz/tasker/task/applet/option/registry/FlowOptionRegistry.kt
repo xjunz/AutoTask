@@ -8,10 +8,13 @@ import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.util.formatMinSecMills
 
 open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
@@ -49,12 +52,13 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     }
 
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
-        // Regex("验证码.*?(\\d+?)")
+        // 验证码： Regex("\\D(\\d{4,})")
         return when (flow) {
             is If -> if (before) emptyArray() else arrayOf(doFlow)
-            is When -> if (before) emptyArray() else arrayOf(ifFlow, doFlow)
-            is Else -> if (before) emptyArray() else arrayOf(ifFlow)
-            is Do -> if (before) emptyArray() else arrayOf(ifFlow, elseIfFlow, elseFlow)
+            is When -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow, doFlow)
+            is Else -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow)
+            is Do -> if (before) emptyArray()
+            else arrayOf(ifFlow, elseIfFlow, elseFlow, waitUntilFlow)
             else -> illegalArgument("control flow", flow)
         }
     }
@@ -81,27 +85,35 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val rootFlow = flowOption<RootFlow>(AppletOption.TITLE_NONE)
 
     @AppletOrdinal(0x0001)
-    val whenFlow = flowOption<When>(R.string._when)
-
-    @AppletOrdinal(0x0002)
-    val ifFlow = flowOption<If>(R.string._if)
-
-    @AppletOrdinal(0x0003)
-    val doFlow = flowOption<Do>(R.string._do)
-
-    @AppletOrdinal(0x0004)
-    val elseIfFlow = flowOption<ElseIf>(R.string.else_if)
-
-    @AppletOrdinal(0x0005)
-    val elseFlow = flowOption<Else>(R.string._else)
-
-    @AppletOrdinal(0x0005)
-    val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
-
-    @AppletOrdinal(0x0006)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
         .withResult<ComponentInfoWrapper>(R.string.current_top_app)
         .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
+
+    @AppletOrdinal(0x0002)
+    val whenFlow = flowOption<When>(R.string._when)
+
+    @AppletOrdinal(0x0003)
+    val ifFlow = flowOption<If>(R.string._if)
+
+    @AppletOrdinal(0x0004)
+    val doFlow = flowOption<Do>(R.string._do)
+
+    @AppletOrdinal(0x0005)
+    val elseIfFlow = flowOption<ElseIf>(R.string.else_if)
+
+    @AppletOrdinal(0x0006)
+    val elseFlow = flowOption<Else>(R.string._else)
+
+    @AppletOrdinal(0x0007)
+    val waitUntilFlow = flowOption<WaitUntil>(R.string.wait_until)
+        .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+        .withHelperText(R.string.tip_wait_timeout)
+        .withValueDescriber<Int> {
+            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+        }
+
+    @AppletOrdinal(0x0008)
+    val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
 
     @AppletOrdinal(0x000F)
     val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)

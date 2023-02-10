@@ -5,11 +5,13 @@
 package top.xjunz.tasker.task.applet.option
 
 import android.annotation.SuppressLint
+import android.view.View
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
+import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
@@ -31,6 +33,8 @@ class AppletOption(
 ) : Comparable<AppletOption> {
 
     companion object {
+
+        var assignedAction: String? = null
 
         const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
         const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
@@ -70,14 +74,22 @@ class AppletOption(
             }
         }
 
-        fun makeRelationSpan(origin: CharSequence, applet: Applet, isCriterion: Boolean)
-                : CharSequence {
-            val relation = if (isCriterion) {
-                if (applet.isAnd) R.string._and.str else R.string._or.str
+        fun assignAction(view: View, action: String) {
+            assignedAction = action
+            view.post {
+                assignedAction = null
+            }
+        }
+
+        fun makeRelationSpan(origin: CharSequence, applet: Applet): CharSequence {
+            val relation = if (applet is Action<*>) {
+                if (applet.isAnd) R.string.then.str else if (applet.isOr) R.string._else.str
+                else R.string.anyway.str
             } else {
-                if (applet.isAnd) R.string.on_success.str else R.string.on_failure.str
+                if (applet.isAnd) R.string._and.str else R.string._or.str
             }
             return relation.clickable {
+                assignAction(it, ACTION_TOGGLE_RELATION)
                 app.launchAction(ACTION_TOGGLE_RELATION, applet.hashCode())
             }.bold().underlined() + origin
         }
@@ -85,9 +97,9 @@ class AppletOption(
         private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
             if (name == null) return null
             return name.clickable {
+                assignAction(it, ACTION_NAVIGATE_REFERENCE)
                 app.launchAction(
-                    ACTION_NAVIGATE_REFERENCE,
-                    "$name" + Char(0) + applet.hashCode()
+                    ACTION_NAVIGATE_REFERENCE, "$name" + Char(0) + applet.hashCode()
                 )
             }.foreColored().backColored().underlined()
         }
@@ -130,11 +142,6 @@ class AppletOption(
      * As per [Applet.isInvertible].
      */
     val isInvertible get() = invertedTitleRes != TITLE_NONE
-
-    /**
-     * As per [Applet.value].
-     */
-    var value: Any? = null
 
     var minApiLevel: Int = -1
 
@@ -239,20 +246,12 @@ class AppletOption(
         return this
     }
 
-    fun withValue(value: Any?): AppletOption {
-        this.value = value
-        return this
-    }
-
     fun hasInnateValue(): AppletOption {
         isValueInnate = true
         return this
     }
 
     fun describe(applet: Applet): CharSequence? = describer(applet, applet.value)
-
-    val rawDescription: CharSequence?
-        get() = if (value == null) null else describer(null, value!!)
 
     fun toggleInversion() {
         isInverted = !isInverted
@@ -263,7 +262,7 @@ class AppletOption(
         return this
     }
 
-    fun yield(): Applet {
+    fun yield(initialValue: Any? = null): Applet {
         check(isValid) {
             "Invalid applet option unable to yield an applet!"
         }
@@ -271,7 +270,9 @@ class AppletOption(
             it.id = registryId shl 16 or appletId
             it.isInverted = isInverted
             it.isInvertible = isInvertible
-            if (!isValueInnate) it.value = value
+            if (!isValueInnate) {
+                if (initialValue != null) it.value = initialValue else it.value = it.defaultValue
+            }
         }
     }
 
@@ -315,8 +316,8 @@ class AppletOption(
                 arg.isReferenceOnly -> makeReferenceText(applet, ref) ?: arg.substitution
                 arg.isValueOnly -> arg.substitution
                 else -> when {
-                    value == null && ref == null -> arg.substitution
-                    value == null && ref != null -> makeReferenceText(applet, ref)!!
+                    applet.value == null && ref == null -> arg.substitution
+                    applet.value == null && ref != null -> makeReferenceText(applet, ref)!!
                     ref == null -> arg.substitution
                     else -> error("Value and reference both specified!")
                 }

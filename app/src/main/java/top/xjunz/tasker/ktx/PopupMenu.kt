@@ -32,6 +32,7 @@ fun PopupMenu.configHeaderTitle() {
             .findViewById<TextView>(com.google.android.material.R.id.title)
         text.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
         text.setTextColor(ColorScheme.colorPrimary)
+        text.isClickable = false
     }
 }
 

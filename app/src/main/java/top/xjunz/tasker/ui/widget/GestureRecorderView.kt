@@ -7,15 +7,15 @@ package top.xjunz.tasker.ui.widget
 import android.animation.ValueAnimator
 import android.content.Context
 import android.gesture.GestureOverlayView
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.PathSegment
 import androidx.core.graphics.flatten
+import androidx.test.uiautomator.PointerGesture
+import top.xjunz.tasker.service.a11yAutomatorService
 
 /**
  * @author xjunz 2023/01/05
@@ -46,7 +46,7 @@ class GestureRecorderView @JvmOverloads constructor(
     private val paint by lazy {
         Paint().apply {
             isAntiAlias = true
-            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
             color = gestureColor
             strokeWidth = gestureStrokeWidth
@@ -54,12 +54,37 @@ class GestureRecorderView @JvmOverloads constructor(
     }
 
     init {
-        addOnGesturePerformedListener { _, gesture ->
+        addOnGesturePerformedListener { _, _ ->
             replayStrokes.clear()
-            replayStrokes.addAll(gesture.toPath().flatten())
+            val path = gesturePath
+            replayStrokes.addAll(path.flatten())
             replayPath.reset()
             animator.duration = duration
-            animator.start()
+            //animator.start()
+
+            fun PointF.toPoint(): Point {
+                return Point(x.toInt(), y.toInt())
+            }
+
+            fun PathSegment.getDuration(): Long {
+                return (duration * (endFraction - startFraction)).toLong()
+            }
+
+            var gesture: PointerGesture? = null
+            var start: PointF
+            var stop: PointF
+
+            for (segment in replayStrokes) {
+                start = segment.start
+                stop = segment.end
+                if (gesture == null) {
+                    gesture = PointerGesture(start.toPoint())
+                        .moveWithDuration(stop.toPoint(), segment.getDuration())
+                } else {
+                    gesture.moveWithDuration(stop.toPoint(), segment.getDuration())
+                }
+            }
+            a11yAutomatorService.uiAutomatorBridge.gestureController.performGesture(gesture)
         }
         addOnGesturingListener(object : OnGesturingListener {
             override fun onGesturingStarted(overlay: GestureOverlayView?) {
@@ -82,10 +107,11 @@ class GestureRecorderView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (replayStrokes.isEmpty()) return
         replayPath.reset()
+        var p = replayStrokes[0].start
+        replayPath.moveTo(p.x, p.y)
         for (i in 0..currentStroke) {
-            var p = replayStrokes[i].start
-            replayPath.moveTo(p.x, p.y)
             p = replayStrokes[i].end
             replayPath.lineTo(p.x, p.y)
         }

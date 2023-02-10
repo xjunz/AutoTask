@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import top.xjunz.tasker.ui.ColorScheme
 
 /**
  * @author xjunz 2022/05/09
@@ -119,6 +120,20 @@ fun LifecycleOwner.observeConfirmation(
     onConfirmed: () -> Unit
 ) {
     observeConfirmation(ld, promptTextRes.text, onConfirmed)
+}
+
+fun LifecycleOwner.observeImportantConfirmation(
+    ld: MutableLiveData<*>,
+    @StringRes promptTextRes: Int,
+    @StringRes importantText: Int,
+    onConfirmed: () -> Unit
+) {
+    observeDialog(ld) {
+        peekContext().makeSimplePromptDialog(msg = promptTextRes)
+            .setPositiveButton(importantText.text.foreColored(ColorScheme.colorError)) { _, _ ->
+                onConfirmed()
+            }.create()
+    }
 }
 
 fun LifecycleOwner.observeConfirmation(

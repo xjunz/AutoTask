@@ -5,7 +5,6 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,8 +22,10 @@ import com.google.android.material.transition.platform.MaterialSharedAxis
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogFlowEditorBinding
+import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
@@ -39,11 +40,12 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseViewModel
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.formatTime
 
 /**
@@ -128,8 +130,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     confirmArgumentSelections()
             } else {
                 val flow = vm.flow
-                if (flow.size == flow.requiredSize) {
-                    toast(R.string.error_reach_max_applet_size)
+                if (flow.size == flow.maxSize) {
+                    toast(R.string.format_error_reach_max_applet_size.format(flow.maxSize))
                     return@setAntiMoneyClickListener
                 }
                 AppletSelectorDialog().init(flow) {
@@ -329,14 +331,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         observeConfirmation(vm.showMergeConfirmation, R.string.prompt_merge_applets) {
             vm.mergeSelectedApplets()
         }
-        observeDialog(vm.showQuitConfirmation) {
-            requireContext().makeSimplePromptDialog(msg = R.string.prompt_discard_flow_changes) {
-                dismiss()
-            }.setPositiveButton(R.string.do_not_save) { _, _ ->
-                dismiss()
-            }.setNegativeButton(android.R.string.cancel, null).show().also {
-                it.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ColorScheme.colorError)
-            }
+        observeImportantConfirmation(
+            vm.showQuitConfirmation,
+            R.string.prompt_discard_flow_changes,
+            R.string.do_not_save
+        ) {
+            dismiss()
         }
         observeTransient(gvm.onReferentSelected) {
             if (vm.isSelectingArgument) dismiss()
@@ -379,11 +379,21 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         mvm.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
             val hashcode = it.toInt()
             // May not found in this dialog, check it
-            adapter.currentList.firstOrNull { applet ->
+            val applet = adapter.currentList.firstOrNull { applet ->
                 applet.hashCode() == hashcode
-            }?.run {
-                toggleRelation()
-                vm.onAppletChanged.value = this
+            } ?: return@doOnAction
+            if (vm.isMultiSelected(applet)) {
+                vm.toggleMultiSelection(applet)
+            } else {
+                if (applet is Action<*> && Preferences.showToggleRelationTip) {
+                    PreferenceHelpDialog().init(
+                        R.string.tip, R.string.tip_applet_relation
+                    ) { noMore ->
+                        Preferences.showToggleRelationTip = !noMore
+                    }.show(childFragmentManager)
+                }
+                applet.toggleRelation()
+                vm.onAppletChanged.value = applet
             }
         }
         if (vm.isSelectingArgument) return
@@ -393,6 +403,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             val applet = adapter.currentList.firstOrNull {
                 it.hashCode() == hashcode
             } ?: return@doOnAction
+            if (vm.isMultiSelected(applet)) {
+                vm.toggleMultiSelection(applet)
+                return@doOnAction
+            }
             val referent = split[0]
             val option = factory.requireOption(applet)
             val whichArg = applet.whichReference(referent)
@@ -413,7 +427,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             val applet = adapter.currentList.firstOrNull {
                 it.hashCode() == hashcode
             } ?: return@doOnAction
-            menuHelper.triggerMenuItem(null, applet, R.id.item_edit)
+            if (vm.isMultiSelected(applet)) {
+                vm.toggleMultiSelection(applet)
+            } else {
+                menuHelper.triggerMenuItem(null, applet, R.id.item_edit)
+            }
         }
     }
 

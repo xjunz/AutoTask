@@ -52,8 +52,14 @@ public class PointerGesture {
     /**
      * Adds an action that moves the pointer to {@code dest} at {@code speed} pixels per second.
      */
-    public PointerGesture move(Point dest, int speed) {
+    public PointerGesture moveAtSpeed(Point dest, int speed) {
         mActions.addLast(new PointerLinearMoveAction(mActions.peekLast().end, dest, speed));
+        mDuration += (mActions.peekLast().duration);
+        return this;
+    }
+
+    public PointerGesture moveWithDuration(Point dest, long duration) {
+        mActions.addLast(new PointerLinearMoveAction(mActions.peekLast().end, dest, duration));
         mDuration += (mActions.peekLast().duration);
         return this;
     }
@@ -147,6 +153,10 @@ public class PointerGesture {
 
         public PointerLinearMoveAction(Point startPoint, Point endPoint, int speed) {
             super(startPoint, endPoint, (long) (1000 * calcDistance(startPoint, endPoint) / speed));
+        }
+
+        public PointerLinearMoveAction(Point startPoint, Point endPoint, long duration) {
+            super(startPoint, endPoint, duration);
         }
 
         @Override

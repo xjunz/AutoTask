@@ -19,7 +19,7 @@ import top.xjunz.tasker.databinding.ItemMenuBinding
 import top.xjunz.tasker.databinding.LayoutMenuListBinding
 import top.xjunz.tasker.ktx.resolvedId
 import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.ReflectionUtil.invokeSuperMethod
 
 /**

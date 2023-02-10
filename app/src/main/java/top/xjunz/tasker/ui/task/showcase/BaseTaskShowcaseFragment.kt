@@ -24,9 +24,10 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
+import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseFragment
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/12/16
@@ -98,13 +99,16 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             }
             b.tvBadge.isVisible = task.isPreload
             b.ibTrack.isVisible = false
-            b.container.strokeWidth = 0
+            // b.container.strokeWidth = 0
+            b.container.strokeColor = com.google.android.material.R.attr.colorOutline.attrColor
+            //b.container.cardElevation = 0F
             if (task.isEnabled) {
                 b.msEnabled.setText(R.string.is_enabled)
                 if (serviceController.isServiceRunning) {
                     b.wave.fadeIn()
                     b.ibTrack.isVisible = true
-                    b.container.strokeWidth = 1.dp
+                    b.container.strokeColor = ColorScheme.colorPrimary
+                    b.container.cardElevation = 1.dpFloat
                 } else {
                     b.wave.fadeOut()
                 }

@@ -44,26 +44,6 @@ open class AppletOptionClickHandler(private val fragmentManager: FragmentManager
 
             applet is Action<*> -> actionOptionClickHandler.onClick(applet, option, onCompleted)
 
-            option == factory.applicationRegistry.appCollection
-                    || option == factory.notificationRegistry.appCollection ->
-                ComponentSelectorDialog().setSelectedPackages(applet.value?.casted() ?: emptyList())
-                    .doOnCompleted {
-                        applet.value = it
-                        onCompleted()
-                    }
-                    .setTitle(title)
-                    .show(fragmentManager)
-
-            option == factory.applicationRegistry.activityCollection ->
-                ComponentSelectorDialog().setTitle(option.rawTitle!!)
-                    .setSelectedActivities(applet.value?.casted() ?: emptyList())
-                    .doOnCompleted {
-                        applet.value = it
-                        onCompleted()
-                    }
-                    .setMode(ComponentSelectorDialog.MODE_ACTIVITY)
-                    .show(fragmentManager)
-
             option == factory.timeRegistry.timeRange -> {
                 val value = applet.value?.casted<Collection<Long>>()
                 DateTimeRangeEditorDialog().setRange(

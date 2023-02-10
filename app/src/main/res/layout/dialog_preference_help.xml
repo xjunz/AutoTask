@@ -11,31 +11,20 @@
         android:clipToPadding="false"
         android:paddingHorizontal="16dp">
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/ib_dismiss"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_selectable_circle"
-            android:src="@drawable/ic_baseline_close_24"
-            android:tint="?colorPrimary"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_title" />
-
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:drawablePadding="8dp"
             android:maxLines="3"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             android:textColor="?colorPrimary"
             app:drawableStartCompat="@drawable/ic_tips_and_updates_24dp"
             app:drawableTint="?colorPrimary"
-            app:layout_constraintEnd_toStartOf="@+id/ib_dismiss"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem/random" />
@@ -44,9 +33,8 @@
             android:id="@+id/tv_caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_title"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
             app:layout_constraintTop_toBottomOf="@+id/top_barrier"
             tools:text="@tools:sample/lorem" />
@@ -77,24 +65,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="tv_title,ib_dismiss" />
+            app:constraint_referenced_ids="tv_title"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="102dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_negative"
-            style="?materialButtonOutlinedStyle"
-            android:layout_width="0dp"
+            style="@style/Widget.Material3.Button.TextButton.Dialog.Flush"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="@android:string/cancel"
             app:layout_constraintEnd_toStartOf="@+id/btn_positive"
             app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/btn_positive"/>
+            app:layout_constraintTop_toTopOf="@id/btn_positive" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_positive"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
+            style="@style/Widget.Material3.Button.TextButton.Dialog.Flush"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
@@ -102,7 +91,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintStart_toEndOf="@+id/btn_negative"
             app:layout_constraintTop_toBottomOf="@+id/checkbox" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

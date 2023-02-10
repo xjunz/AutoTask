@@ -41,7 +41,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             runtime.ensureActive()
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
-            if (index != 0 && applet.isAnd != runtime.isSuccessful) {
+            if (index != 0 && (!applet.isAnyway && applet.isAnd != runtime.isSuccessful)) {
                 if (!isRepetitive) {
                     runtime.observer?.onAppletSkipped(applet, runtime)
                 }
@@ -59,7 +59,11 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             } catch (t: Throwable) {
                 if (t is CancellationException) throw t
                 t.logcatStackTrace()
-                AppletResult.error(t)
+                if (isRepetitive) {
+                    AppletResult.EMPTY_FAILURE
+                } else {
+                    AppletResult.error(t)
+                }
             }
             runtime.isSuccessful = result.isSuccessful
             if (!isRepetitive) {
@@ -67,7 +71,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
                 runtime.observer?.onAppletTerminated(applet, runtime)
             }
         }
-        return if (runtime.isSuccessful) AppletResult.SUCCESS else AppletResult.FAILURE
+        return if (runtime.isSuccessful) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
     }
 
     open fun performStaticCheck(): StaticError? {

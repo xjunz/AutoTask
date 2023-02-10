@@ -75,7 +75,12 @@ abstract class Applet {
             }
         }
 
+        const val REL_AND = 0
+        const val REL_OR = 1
+        const val REL_ANYWAY = 2
     }
+
+    open var relation = REL_AND
 
     /**
      * The logical relation to its previous peer applet. If true, representing `AND` relation and
@@ -83,7 +88,11 @@ abstract class Applet {
      * relation and this applet will not be executed when its previous peer succeeded. If this applet
      * is the first element of a flow, this field will be ignored.
      */
-    open var isAnd = true
+    val isAnd: Boolean get() = relation == REL_AND
+
+    val isOr: Boolean get() = relation == REL_OR
+
+    val isAnyway: Boolean get() = relation == REL_ANYWAY
 
     /**
      * If an applet is not enabled, the applet will not be executed as if it is removed from its parent.
@@ -144,6 +153,8 @@ abstract class Applet {
 
     var value: Any? = null
 
+    open val defaultValue: Any? = null
+
     /**
      * References to other [Applet]s as input.
      */
@@ -172,8 +183,8 @@ abstract class Applet {
         return any != null
     }
 
-    fun toggleRelation() {
-        isAnd = !isAnd
+    open fun toggleRelation() {
+        relation = if (relation == REL_AND) REL_OR else REL_AND
     }
 
     fun toggleInversion() {

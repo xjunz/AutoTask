@@ -18,7 +18,7 @@ import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.demo.Demonstration
-import top.xjunz.tasker.util.AntiMonkeyUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
  * @author xjunz 2022/12/02
@@ -32,7 +32,7 @@ class PreferenceHelpDialog : BaseDialogFragment<DialogPreferenceHelpBinding>() {
         lateinit var helpText: CharSequence
         var defCheckedState: Boolean = true
 
-        lateinit var doOnConfirmed: (Boolean) -> Unit
+        lateinit var doOnConfirmed: (noMore: Boolean) -> Unit
 
         var demoInitializer: ((Context) -> Demonstration)? = null
 
@@ -66,9 +66,6 @@ class PreferenceHelpDialog : BaseDialogFragment<DialogPreferenceHelpBinding>() {
             dismiss()
         }
         binding.btnNegative.setOnClickListener {
-            dismiss()
-        }
-        binding.ibDismiss.setOnClickListener {
             dismiss()
         }
         if (viewModel.demoInitializer != null) {
@@ -105,7 +102,7 @@ class PreferenceHelpDialog : BaseDialogFragment<DialogPreferenceHelpBinding>() {
         titleRes: Int,
         helpRes: Int,
         show: Boolean = true,
-        onConfirmation: (Boolean) -> Unit
+        onConfirmation: (noMore: Boolean) -> Unit
     ): PreferenceHelpDialog =
         doWhenCreated {
             viewModel.title = titleRes.text
