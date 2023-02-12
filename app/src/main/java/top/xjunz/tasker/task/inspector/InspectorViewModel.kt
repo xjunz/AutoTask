@@ -6,7 +6,7 @@ package top.xjunz.tasker.task.inspector
 
 import androidx.lifecycle.MutableLiveData
 import top.xjunz.tasker.ktx.text
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
 
 /**
  * @author xjunz 2022/10/13

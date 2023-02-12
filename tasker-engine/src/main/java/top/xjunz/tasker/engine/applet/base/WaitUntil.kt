@@ -10,7 +10,7 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
- * Waiting for something to happen...
+ * Wait until something happens...
  *
  * @author xjunz 2023/02/10
  */
@@ -30,11 +30,14 @@ class WaitUntil : If() {
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         val start = SystemClock.uptimeMillis()
-        var meet = false
-        while (!meet && SystemClock.uptimeMillis() - start < timeout) {
-            meet = super.applyFlow(runtime).isSuccessful
+        var successful = false
+        while (SystemClock.uptimeMillis() - start < timeout) {
+            if (super.applyFlow(runtime).isSuccessful) {
+                successful = true
+                break
+            }
             delay(POLL_INTERVAL)
         }
-        return AppletResult.emptyResult(meet)
+        return AppletResult.emptyResult(successful)
     }
 }

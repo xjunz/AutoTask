@@ -4,11 +4,10 @@
 
 package top.xjunz.tasker.task.event
 
-import android.app.Notification
 import android.os.Looper
-import android.os.SystemClock
 import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
 import androidx.core.os.HandlerCompat
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import kotlinx.coroutines.*
@@ -17,7 +16,8 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.NotificationReferent
 import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
 
@@ -36,9 +36,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
-    private var latestContentChange: Long = -1L
-
-    var contentChangeRateLimitMills = 250L
 
     private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
@@ -71,30 +68,28 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
     }
 
     private fun dispatchEventsFromAccessibilityEvent(
-        event: AccessibilityEvent,
+        a11yEvent: AccessibilityEvent,
         packageName: String,
         className: String?
     ) {
-        latestEventTime = event.eventTime
-        val firstText = event.text.firstOrNull()?.toString()
+        latestEventTime = a11yEvent.eventTime
+        val firstText = a11yEvent.text.firstOrNull()?.toString()
         val prevPanelTitle = latestPaneTitle
         if (firstText != null
-            && event.eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-            && event.contentChangeTypes != AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
+            && a11yEvent.eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            && a11yEvent.contentChangeTypes != AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
             && packageName == latestPackageName
         )
             latestPaneTitle = firstText
 
-        when (event.eventType) {
+        when (a11yEvent.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
-                if (className == Notification::class.java.name) {
-                    dispatchEvents(
-                        Event.obtain(
-                            Event.EVENT_ON_NOTIFICATION_RECEIVED,
-                            packageName, latestActivityName, firstText,
-                        )
-                    )
-                }
+                val event = Event(
+                    Event.EVENT_ON_NOTIFICATION_RECEIVED, packageName,
+                    latestActivityName, firstText,
+                )
+                event.putExtra(NotificationReferent.EXTRA_IS_TOAST, className == Toast::class.java.name)
+                dispatchEvents(event)
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
 
@@ -107,10 +102,10 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                 }
 
                 if (
-                    event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED
+                    a11yEvent.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED
                     // Only full screen windows, because there may be overlay windows
                     // todo: Need this?
-                    && event.isFullScreen
+                    && a11yEvent.isFullScreen
                 ) {
                     val prevPkgName = latestPackageName
                     latestPaneTitle = firstText
@@ -118,18 +113,14 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                     if (prevPkgName != packageName) {
                         latestPackageName = packageName
 
-                        val enterEvent = Event.obtain(
-                            Event.EVENT_ON_PACKAGE_ENTERED,
-                            packageName,
-                            latestActivityName,
-                            latestPaneTitle
+                        val enterEvent = Event(
+                            Event.EVENT_ON_PACKAGE_ENTERED, packageName,
+                            latestActivityName, latestPaneTitle
                         )
                         if (prevPkgName != null) {
-                            val exitEvent = Event.obtain(
-                                Event.EVENT_ON_PACKAGE_EXITED,
-                                prevPkgName,
-                                prevActivityName,
-                                prevPanelTitle
+                            val exitEvent = Event(
+                                Event.EVENT_ON_PACKAGE_EXITED, prevPkgName,
+                                prevActivityName, prevPanelTitle
                             )
                             dispatchEvents(enterEvent, exitEvent)
                         } else {
@@ -141,7 +132,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                 dispatchContentChanged(packageName)
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                //eventDispatchScope = WeakReference(this)
                 dispatchContentChanged(packageName)
             }
             else -> dispatchContentChanged(packageName)
@@ -150,16 +140,13 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
 
     private fun dispatchContentChanged(packageName: String) {
         if (packageName != latestPackageName) return
-        if (SystemClock.uptimeMillis() - latestContentChange < contentChangeRateLimitMills) return
+        //if (SystemClock.uptimeMillis() - latestContentChange < contentChangeRateLimitMills) return
         dispatchEvents(
-            Event.obtain(
-                Event.EVENT_ON_CONTENT_CHANGED,
-                packageName,
-                latestActivityName,
-                latestPaneTitle,
+            Event(
+                Event.EVENT_ON_CONTENT_CHANGED, packageName,
+                latestActivityName, latestPaneTitle,
             )
         )
-        latestContentChange = SystemClock.uptimeMillis()
     }
 
     fun getCurrentComponentInfo(): ComponentInfoWrapper {

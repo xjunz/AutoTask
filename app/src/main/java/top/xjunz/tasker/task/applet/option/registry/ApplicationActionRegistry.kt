@@ -10,7 +10,7 @@ import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.value.VariantType
 
 /**
@@ -18,7 +18,7 @@ import top.xjunz.tasker.task.applet.value.VariantType
  */
 class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    @AppletOrdinal(0x0001)
+    @AppletOrdinal(0x0000)
     val forceStopApp = appletOption(R.string.format_force_stop) {
         singleArgAction<ComponentInfoWrapper> {
             checkNotNull(it)
@@ -28,7 +28,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<ComponentInfoWrapper>(R.string.specified_app)
         .hasCompositeTitle().shizukuOnly()
 
-    @AppletOrdinal(0x0002)
+    @AppletOrdinal(0x0001)
     val launchApp = appletOption(R.string.format_launch) {
         binaryArgValueAction<String, ComponentInfoWrapper>({
             packageName
@@ -49,7 +49,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             PackageManagerBridge.loadLabelOfPackage(it)
         }
 
-    @AppletOrdinal(0x0003)
+    @AppletOrdinal(0x0002)
     val launchActivity = appletOption(R.string.launch_activity) {
         valueAction<String> {
             ActivityManagerBridge.startComponent(it)

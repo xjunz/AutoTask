@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.applet.flow
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.runtime.Referent
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiAutomation
@@ -16,7 +17,7 @@ import top.xjunz.tasker.service.uiAutomation
  *
  * @author xjunz 2023/01/23
  */
-class PreloadFlow : ControlFlow() {
+class PreloadFlow : ControlFlow(), Referent {
 
     override val requiredIndex: Int = 0
 
@@ -36,5 +37,13 @@ class PreloadFlow : ControlFlow() {
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         return super.applyFlow(runtime)
+    }
+
+    override fun getFieldValue(which: Int): Any {
+        when (which) {
+            0 -> currentService.a11yEventDispatcher.getCurrentComponentInfo()
+            1 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+        }
+        throwIfFieldNotFound(which)
     }
 }

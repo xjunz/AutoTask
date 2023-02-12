@@ -9,7 +9,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
 
 /**
  * @author xjunz 2022/08/25

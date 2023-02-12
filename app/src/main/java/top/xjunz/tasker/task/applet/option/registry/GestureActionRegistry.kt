@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.applet.value.VariantType
  */
 class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    @AppletOrdinal(0x00_01)
+    @AppletOrdinal(0x00_00)
     val click = appletOption(R.string.format_click) {
         unaryArgValueAction<Int> {
             val point = IntValueUtil.parseCoordinate(it)
@@ -31,7 +31,7 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
         variantType = VariantType.INT_COORDINATE
     ).hasCompositeTitle()
 
-    @AppletOrdinal(0x00_02)
+    @AppletOrdinal(0x00_01)
     val longClick = appletOption(R.string.format_long_click) {
         unaryArgValueAction<Int> {
             val point = IntValueUtil.parseCoordinate(it)

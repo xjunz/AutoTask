@@ -6,9 +6,11 @@ package top.xjunz.tasker.ui.task.selector
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
@@ -58,25 +60,17 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     fun setScope(origin: Flow) {
         val scope = origin.scopeFlow
         // Find its control flow, we need its control flow's option title to be shown
-        val control = if (scope is ControlFlow) scope else scope.controlFlow
-        checkNotNull(control) {
+        val controlFlow = if (scope is ControlFlow) scope else scope.controlFlow
+        checkNotNull(controlFlow) {
             "ControlFlow not found!"
         }
-        title = factory.requireOption(control).rawTitle
+        title = factory.requireOption(controlFlow).rawTitle
         if (scope is ScopeFlow<*>) {
             isScoped = true
             registryOptions = arrayOf(factory.requireRegistryOption(scope.appletId))
         } else {
             isScoped = false
-            registryOptions = when (control) {
-                is If -> factory.flowRegistry.criterionFlowOptions
-
-                is Do -> factory.flowRegistry.actionFlowOptions
-
-                is When -> arrayOf(factory.flowRegistry.eventCriteria)
-
-                else -> illegalArgument("control flow", control)
-            }
+            registryOptions = factory.flowRegistry.getRegistryOptions(controlFlow)
         }
     }
 

@@ -67,7 +67,7 @@ class AppletCandidatesAdapter(
                 }
             }
             binding.tvTitle.setAntiMoneyClickListener {
-                if (AppletOption.assignedAction == null) {
+                if (AppletOption.deliveringAction == null) {
                     binding.root.performClick()
                 }
             }

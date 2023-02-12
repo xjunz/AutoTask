@@ -2,12 +2,13 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.task.applet.flow
+package top.xjunz.tasker.task.applet.flow.model
 
 import android.content.ComponentName
 import android.content.pm.PackageInfo
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
+import top.xjunz.tasker.engine.runtime.Referent
 
 /**
  * @author xjunz 2022/10/18
@@ -16,12 +17,28 @@ data class ComponentInfoWrapper(
     var packageName: String,
     var activityName: String? = null,
     var paneTitle: String? = null,
-) {
+) : Referent {
 
     companion object {
 
         fun wrap(source: ComponentInfo) =
             ComponentInfoWrapper(source.packageName, source.activityName, source.paneTitle)
+    }
+
+    val packageInfo: PackageInfo by lazy {
+        PackageManagerBridge.loadPackageInfo(packageName)!!
+    }
+
+    val label: String? by lazy {
+        PackageManagerBridge.loadLabelOfPackage(packageName).toString()
+    }
+
+    override fun getFieldValue(which: Int): Any {
+        when (which) {
+            1 -> packageName
+            2 -> label
+        }
+        return super.getFieldValue(which)
     }
 
     override fun toString(): String {
@@ -54,8 +71,5 @@ data class ComponentInfoWrapper(
         }
     }
 
-    val packageInfo: PackageInfo by lazy {
-        PackageManagerBridge.loadPackageInfo(packageName)!!
-    }
 
 }

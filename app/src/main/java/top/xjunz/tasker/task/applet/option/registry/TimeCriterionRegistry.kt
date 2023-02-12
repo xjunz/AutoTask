@@ -44,7 +44,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    @AppletOrdinal(0x00_02)
+    @AppletOrdinal(0x00_01)
     val month = invertibleAppletOption(R.string.in_months) {
         timeCollectionCriterion {
             it.get(Calendar.MONTH)
@@ -56,7 +56,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    @AppletOrdinal(0x00_03)
+    @AppletOrdinal(0x00_02)
     val dayOfMonth = invertibleAppletOption(R.string.in_day_of_month) {
         numberRangeCriterion<Calendar, Int> {
             // The first day has value 1

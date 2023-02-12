@@ -70,6 +70,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
                     }
                 }
             } else {
+                task.requireCurrentRuntime().triggerWaitFor(events)
                 logcat("${task.title} is ignored [$${Thread.currentThread()}]")
             }
         }

@@ -14,6 +14,7 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.WaitFor
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
@@ -60,19 +61,45 @@ class TaskRuntime private constructor() {
         }
     }
 
+    val tracker = AppletIndexer()
+
     val isActive get() = runtimeScope?.isActive == true
+
+    val result: AppletResult get() = _result!!
+
+    val events: Array<out Event> get() = _events!!
+
+    /**
+     * Identify all arguments applied to the task runtime.
+     */
+    val fingerprint: Long get() = crc.value
 
     var isSuspending = false
 
+    var observer: Observer? = null
+
+    /**
+     * Whether the applying of current applet is successful.
+     */
+    var isSuccessful = true
+
+    var waitingFor: WaitFor? = null
+
+    lateinit var hitEvent: Event
+
     lateinit var task: XTask
 
-    private var _eventScope: EventScope? = null
+    lateinit var currentApplet: Applet
+
+    lateinit var currentFlow: Flow
 
     private val eventScope: EventScope get() = _eventScope!!
 
     private var _events: Array<out Event>? = null
 
-    val events: Array<out Event> get() = _events!!
+    private var _result: AppletResult? = null
+
+    private var _eventScope: EventScope? = null
 
     @get:Synchronized
     @set:Synchronized
@@ -83,22 +110,9 @@ class TaskRuntime private constructor() {
      */
     private var target: Any? = null
 
-    val tracker = AppletIndexer()
-
-    var observer: Observer? = null
-
-    lateinit var hitEvent: Event
-
-    private var _result: AppletResult? = null
-
-    val result: AppletResult get() = _result!!
-
     private val crc = CRC32()
 
-    /**
-     * Identify all arguments applied to the task runtime.
-     */
-    val fingerprint: Long get() = crc.value
+    private val referents = ArrayMap<String, Any?>()
 
     fun updateFingerprint(any: Any?) {
         crc.update(any.hashCode())
@@ -123,17 +137,6 @@ class TaskRuntime private constructor() {
         return eventScope.registry.getOrPut(key, initializer).casted()
     }
 
-    private val referents = ArrayMap<String, Any?>()
-
-    lateinit var currentApplet: Applet
-
-    lateinit var currentFlow: Flow
-
-    /**
-     * Whether the applying of current applet is successful.
-     */
-    var isSuccessful = true
-
     fun getArgument(applet: Applet, which: Int): Any? {
         val name = applet.references[which]
         if (name != null) {
@@ -145,7 +148,7 @@ class TaskRuntime private constructor() {
     /**
      * Get all arguments from registered results, which were registered by [registerResult].
      */
-    fun getArguments(applet: Applet): Array<Any?> {
+    fun getAllArguments(applet: Applet): Array<Any?> {
         return if (applet.references.isEmpty()) {
             emptyArray()
         } else {
@@ -199,6 +202,13 @@ class TaskRuntime private constructor() {
         }.casted()
     }
 
+    fun triggerWaitFor(events: Array<out Event>) {
+        waitingFor?.let {
+            _events = events
+            it.trigger()
+        }
+    }
+
     fun recycle() {
         _eventScope = null
         _events = null
@@ -210,6 +220,7 @@ class TaskRuntime private constructor() {
         _result = null
         target = null
         isSuccessful = true
+        waitingFor = null
         crc.reset()
         Pool.release(this)
     }

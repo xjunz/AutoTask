@@ -12,6 +12,7 @@ import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.*
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.util.formatMinSecMills
@@ -22,11 +23,12 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
 
         private const val ID_FLOW_OPTION_REGISTRY = 0
         const val ID_EVENT_FILTER_REGISTRY: Int = 0xF
-        const val ID_APP_OPTION_REGISTRY = 0x10
-        const val ID_UI_OBJECT_OPTION_REGISTRY = 0x11
-        const val ID_TIME_OPTION_REGISTRY = 0x12
-        const val ID_GLOBAL_OPTION_REGISTRY = 0x13
-        const val ID_NOTIFICATION_OPTION_REGISTRY = 0x14
+        const val ID_APP_CRITERION_REGISTRY = 0x10
+        const val ID_UI_OBJECT_CRITERION_REGISTRY = 0x11
+        const val ID_TIME_CRITERION_REGISTRY = 0x12
+        const val ID_GLOBAL_CRITERION_REGISTRY = 0x13
+        const val ID_NOTIFICATION_CRITERION_REGISTRY = 0x14
+        const val ID_TEXT_CRITERION_REGISTRY = 0x15
 
         const val ID_GLOBAL_ACTION_REGISTRY = 0x50
         const val ID_UI_OBJECT_ACTION_REGISTRY = 0x51
@@ -66,11 +68,11 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     /**
      * Applet flow is a container flow whose child has the same target.
      */
-    val criterionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(appCriteria, uiObjectCriteria, timeCriteria, notificationCriteria, globalCriteria)
+    private val criterionFlowOptions: Array<AppletOption> by lazy {
+        arrayOf(appCriteria, uiObjectCriteria, timeCriteria, textCriteria, globalCriteria)
     }
 
-    val actionFlowOptions: Array<AppletOption> by lazy {
+    private val actionFlowOptions: Array<AppletOption> by lazy {
         arrayOf(
             globalActions,
             uiObjectActions,
@@ -79,6 +81,18 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
             appActions,
             controlActions
         )
+    }
+
+    fun getRegistryOptions(flow: Flow): Array<AppletOption> {
+        return when (flow) {
+            is If -> criterionFlowOptions
+
+            is Do -> actionFlowOptions
+
+            is When -> arrayOf(eventCriteria)
+
+            else -> illegalArgument("control flow", flow)
+        }
     }
 
     @AppletOrdinal(0x0000)
@@ -105,6 +119,9 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     val elseFlow = flowOption<Else>(R.string._else)
 
     @AppletOrdinal(0x0007)
+    val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
+
+    @AppletOrdinal(0x0008)
     val waitUntilFlow = flowOption<WaitUntil>(R.string.wait_until)
         .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
@@ -112,32 +129,38 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
             R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
         }
 
-    @AppletOrdinal(0x0008)
-    val containerFlow = flowOption<ContainerFlow>(AppletOption.TITLE_NONE)
+    @AppletOrdinal(0x0009)
+    val waitForFlow = flowOption<WaitFor>(R.string.wait_for_event)
+        .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+        .withHelperText(R.string.tip_wait_timeout)
+        .withValueDescriber<Int> {
+            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+        }
 
-    @AppletOrdinal(0x000F)
-    val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
     @AppletOrdinal(0x0010)
-    val appCriteria = flowOptionWithId<PhantomFlow>(ID_APP_OPTION_REGISTRY, R.string.app_info)
+    val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
     @AppletOrdinal(0x0011)
+    val appCriteria = flowOptionWithId<PhantomFlow>(ID_APP_CRITERION_REGISTRY, R.string.app_info)
+
+    @AppletOrdinal(0x0012)
     val uiObjectCriteria =
-        flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_OPTION_REGISTRY, R.string.ui_object_exists)
+        flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_CRITERION_REGISTRY, R.string.ui_object_exists)
             .withResult<AccessibilityNodeInfo>(R.string.ui_object)
             .withResult<String>(R.string.matched_ui_object_text)
             .withResult<Int>(R.string.center_coordinate, VariantType.INT_COORDINATE)
 
-    @AppletOrdinal(0x0012)
-    val timeCriteria = flowOptionWithId<TimeFlow>(ID_TIME_OPTION_REGISTRY, R.string.current_time)
-
     @AppletOrdinal(0x0013)
-    val globalCriteria =
-        flowOptionWithId<PhantomFlow>(ID_GLOBAL_OPTION_REGISTRY, R.string.device_status)
+    val timeCriteria = flowOptionWithId<TimeFlow>(ID_TIME_CRITERION_REGISTRY, R.string.current_time)
 
     @AppletOrdinal(0x0014)
-    val notificationCriteria = flowOptionWithId<NotificationFlow>(
-        ID_NOTIFICATION_OPTION_REGISTRY, R.string.current_notification
+    val globalCriteria =
+        flowOptionWithId<PhantomFlow>(ID_GLOBAL_CRITERION_REGISTRY, R.string.device_status)
+
+    @AppletOrdinal(0x0015)
+    val textCriteria = flowOptionWithId<PhantomFlow>(
+        ID_TEXT_CRITERION_REGISTRY, R.string.text_criteria
     )
 
     @AppletOrdinal(0x0020)

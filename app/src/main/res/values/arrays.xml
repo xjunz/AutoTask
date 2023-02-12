@@ -82,7 +82,7 @@
         <item>请移除无效的引用(引用不存在或超前引用): %s</item>
         <item>请在该规则后添加规则</item>
         <item>请在该规则前添加规则</item>
-        <item>请在该规则前添加规则</item>
+        <item>请在该规则后添加规则</item>
         <item>请在该规则后添加规则</item>
     </string-array>
     <string-array name="swipe_arg_hints">

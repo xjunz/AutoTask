@@ -18,7 +18,7 @@ import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped

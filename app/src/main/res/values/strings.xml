@@ -422,7 +422,7 @@
     <string name="error_unspecified">此项未指定</string>
     <string name="tip_vararg_text">*所有项将会拼接成为一段文本</string>
     <string name="name_of_app_entered">进入的应用名称</string>
-    <string name="name_of_app_exited">退出的应用名称</string>
+    <string name="name_of_app_exited">离开的应用名称</string>
     <string name="current_focus_input">当前输入的文本框</string>
     <string name="dismiss_notification_shade">关闭弹出的通知</string>
     <string name="anyway">无论如何</string>
@@ -430,9 +430,28 @@
     <string name="tip_applet_relation"><b>然后：</b>只有上一条规则执行成功后才会执行当前规则。
 \n\n<b>否则：</b>只有上一条规则执行失败后才会执行当前规则。
 \n\n<b>无论如何：</b>无论上一条规则执行成功或失败，都会执行当前规则。</string>
-    <string name="wait_until">等待直到</string>
+    <string name="wait_until">等待条件满足</string>
     <string name="wait_timeout">最多等待时长</string>
     <string name="tip_wait_timeout">若超过最多等待时长后仍然未满足条件，将不会继续等待，视为执行失败。</string>
     <string name="delay_interval">延时时长</string>
     <string name="format_max_wait_interval">最多等待%s</string>
+    <string name="on_new_window">出现新窗口时</string>
+    <string name="tip_new_window">如弹出对话框、弹出菜单、进入新页面等</string>
+    <string name="wait_for_event">等待事件发生</string>
+    <string name="is_toast">是吐司通知</string>
+    <string name="notification">通知</string>
+    <string name="format_text_content">%s内容是</string>
+    <string name="not_format_text_content">%s内容不是</string>
+    <string name="content">内容</string>
+    <string name="format_starts_with">%s起始文本是</string>
+    <string name="not_format_starts_with">%s起始文本是</string>
+    <string name="format_ends_with">%s结束文本是</string>
+    <string name="not_format_ends_with">%s结束文本不是</string>
+    <string name="format_contains">%s包含</string>
+    <string name="not_format_contains">%s不包含文本</string>
+    <string name="format_matches_regex">%s满足正则表达式</string>
+    <string name="not_format_matches_regex">%s不满足正则表达式</string>
+    <string name="text_criteria">文本条件</string>
+    <string name="pkg_name_of_app_entered">进入的应用包名</string>
+    <string name="pkg_name_of_app_exited">离开的应用包名</string>
 </resources>

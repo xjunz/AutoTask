@@ -34,7 +34,7 @@ class AppletOption(
 
     companion object {
 
-        var assignedAction: String? = null
+        var deliveringAction: String? = null
 
         const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
         const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
@@ -75,9 +75,9 @@ class AppletOption(
         }
 
         fun assignAction(view: View, action: String) {
-            assignedAction = action
+            deliveringAction = action
             view.post {
-                assignedAction = null
+                deliveringAction = null
             }
         }
 

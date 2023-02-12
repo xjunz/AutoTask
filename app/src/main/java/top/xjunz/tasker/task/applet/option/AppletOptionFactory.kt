@@ -22,18 +22,18 @@ object AppletOptionFactory : AppletFactory {
 
     val eventRegistry = EventCriterionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_REGISTRY)
 
-    val applicationRegistry = ApplicationCriterionRegistry(FlowOptionRegistry.ID_APP_OPTION_REGISTRY)
+    private val applicationRegistry =
+        ApplicationCriterionRegistry(FlowOptionRegistry.ID_APP_CRITERION_REGISTRY)
 
     val uiObjectRegistry =
-        UiObjectCriterionRegistry(FlowOptionRegistry.ID_UI_OBJECT_OPTION_REGISTRY)
+        UiObjectCriterionRegistry(FlowOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
 
-    val timeRegistry = TimeCriterionRegistry(FlowOptionRegistry.ID_TIME_OPTION_REGISTRY)
+    val timeRegistry = TimeCriterionRegistry(FlowOptionRegistry.ID_TIME_CRITERION_REGISTRY)
 
     private val globalInfoRegistry =
-        GlobalCriterionRegistry(FlowOptionRegistry.ID_GLOBAL_OPTION_REGISTRY)
+        GlobalCriterionRegistry(FlowOptionRegistry.ID_GLOBAL_CRITERION_REGISTRY)
 
-    val notificationRegistry =
-        NotificationCriterionRegistry(FlowOptionRegistry.ID_NOTIFICATION_OPTION_REGISTRY)
+    private val textRegistry = TextCriterionRegistry(FlowOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
 
     private val globalActionRegistry =
         GlobalActionRegistry(FlowOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
@@ -49,7 +49,7 @@ object AppletOptionFactory : AppletFactory {
     private val appActionRegistry =
         ApplicationActionRegistry(FlowOptionRegistry.ID_APP_ACTION_REGISTRY)
 
-    val controlActionRegistry =
+    private val controlActionRegistry =
         ControlActionRegistry(FlowOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
     private val allRegistries = arrayOf(
@@ -61,7 +61,7 @@ object AppletOptionFactory : AppletFactory {
         uiObjectRegistry,
         timeRegistry,
         globalInfoRegistry,
-        notificationRegistry,
+        textRegistry,
         // action
         globalActionRegistry,
         uiObjectActionRegistry,
