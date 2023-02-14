@@ -19,7 +19,7 @@ class WaitFor : When() {
 
     override val requiredIndex: Int = -1
 
-    private var waitingScope: WeakReference<CoroutineScope>? = null
+    private var waitingJob: WeakReference<Job>? = null
 
     override val defaultValue: Int = 5_000
 
@@ -28,10 +28,8 @@ class WaitFor : When() {
     }
 
     fun trigger() {
-        waitingScope?.get()?.cancel(TriggeredCancellationException())
+        waitingJob?.get()?.cancel()
     }
-
-    private class TriggeredCancellationException : CancellationException("Triggered!")
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         var elapsed = 0L
@@ -39,12 +37,11 @@ class WaitFor : When() {
         while (elapsed < timeout) {
             val start = SystemClock.uptimeMillis()
             coroutineScope {
-                try {
-                    waitingScope = WeakReference(this)
-                    delay(timeout.toLong())
-                } catch (t: TriggeredCancellationException) {
-                    // ignored
+                val deferred = async(start = CoroutineStart.LAZY) {
+                    delay(timeout - elapsed)
                 }
+                waitingJob = WeakReference(deferred)
+                deferred.join()
             }
             elapsed += SystemClock.uptimeMillis() - start
             if (super.applyFlow(runtime).isSuccessful) {

@@ -92,6 +92,20 @@ public class PointerGesture {
         return mDelay;
     }
 
+
+    public Point pointAtIgnoringDelay(long time) {
+        if (time < 0) {
+            throw new IllegalArgumentException("Time cannot be negative");
+        }
+        for (PointerAction action : mActions) {
+            if (time < action.duration) {
+                return action.interpolate((float) time / action.duration);
+            }
+            time -= action.duration;
+        }
+        return mActions.peekLast().end;
+    }
+
     /**
      * Returns the pointer location at {@code time} milliseconds into this gesture.
      */

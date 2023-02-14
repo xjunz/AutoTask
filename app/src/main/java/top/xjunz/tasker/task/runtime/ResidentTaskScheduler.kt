@@ -5,8 +5,8 @@
 package top.xjunz.tasker.task.runtime
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.EventScope
@@ -22,10 +22,13 @@ import top.xjunz.tasker.engine.task.XTask
 class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventDispatcher.Callback,
     TaskScheduler {
 
+    override var isSuppressed = false
+
     /**
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
     override fun shutdown() {
+        isSuppressed = true
         TaskRuntime.drainPool()
     }
 
@@ -59,19 +62,19 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     }
 
     override suspend fun onEvents(events: Array<out Event>) {
-        val scope = EventScope()
+        if (isSuppressed) return
+        val eventScope = EventScope()
         for (task in taskManager.getEnabledTasks()) {
             if (!task.isExecuting || task.isSuspending) {
                 // Create a new coroutine scope, do not suspend current coroutine
-                coroutineScope {
+                supervisorScope {
                     launch(Dispatchers.Default) {
                         task.taskStateListener = listener
-                        task.launch(scope, this, events)
+                        task.launch(eventScope, this, events)
                     }
                 }
             } else {
                 task.requireCurrentRuntime().triggerWaitFor(events)
-                logcat("${task.title} is ignored [$${Thread.currentThread()}]")
             }
         }
     }

@@ -25,9 +25,14 @@ import java.util.zip.CRC32
  */
 class TaskRuntime private constructor() {
 
-    fun interface Referred : () -> Any?
+    private object Pool : SynchronizedPool<TaskRuntime>(10)
 
-    private object Pool : SynchronizedPool<TaskRuntime>(25)
+    private class IndexedReferent(val which: Int, private val referent: Any?) {
+
+        fun getReferentValue(): Any? {
+            return if (referent is Referent) referent.getReferredValue(which) else referent
+        }
+    }
 
     interface Observer {
 
@@ -112,7 +117,7 @@ class TaskRuntime private constructor() {
 
     private val crc = CRC32()
 
-    private val referents = ArrayMap<String, Any?>()
+    private val referents = ArrayMap<String, IndexedReferent>()
 
     fun updateFingerprint(any: Any?) {
         crc.update(any.hashCode())
@@ -137,7 +142,7 @@ class TaskRuntime private constructor() {
         return eventScope.registry.getOrPut(key, initializer).casted()
     }
 
-    fun getArgument(applet: Applet, which: Int): Any? {
+    fun getReferentOf(applet: Applet, which: Int): Any? {
         val name = applet.references[which]
         if (name != null) {
             return getReferentByName(name)
@@ -145,10 +150,7 @@ class TaskRuntime private constructor() {
         return null
     }
 
-    /**
-     * Get all arguments from registered results, which were registered by [registerResult].
-     */
-    fun getAllArguments(applet: Applet): Array<Any?> {
+    fun getAllReferentOf(applet: Applet): Array<Any?> {
         return if (applet.references.isEmpty()) {
             emptyArray()
         } else {
@@ -158,34 +160,21 @@ class TaskRuntime private constructor() {
         }
     }
 
-    /**
-     * Register all results of an applet.
-     */
+    fun registerReferent(applet: Applet, referent: Any?) {
+        applet.referents.forEach { (which, name) ->
+            referents[name] = IndexedReferent(which, referent)
+        }
+    }
+
     fun registerResult(applet: Applet, result: AppletResult) {
         _result = result
-        if (result.isSuccessful && result.returns != null) {
-            registerAllReferents(applet, *result.returns!!)
+        if (result.isSuccessful && result.returned != null) {
+            registerReferent(applet, result.returned!!)
         }
-    }
-
-    fun registerAllReferents(applet: Applet, vararg values: Any?) {
-        applet.referents.forEach { (which, name) ->
-            referents[name] = values[which]
-        }
-    }
-
-    fun registerReferent(applet: Applet, which: Int, referred: Any) {
-        referents[applet.referents[which]] = referred
     }
 
     private fun getReferentByName(name: String?): Any? {
-        if (name == null) return null
-        val referent = referents[name]
-        return if (referent is Referred) {
-            referent.invoke()
-        } else if (referent is Lazy<*>) {
-            referent.value
-        } else referent
+        return referents[name]?.getReferentValue()
     }
 
     fun setTarget(any: Any?) {

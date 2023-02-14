@@ -438,8 +438,8 @@
     <string name="on_new_window">出现新窗口时</string>
     <string name="tip_new_window">如弹出对话框、弹出菜单、进入新页面等</string>
     <string name="wait_for_event">等待事件发生</string>
-    <string name="is_toast">是吐司通知</string>
-    <string name="notification">通知</string>
+    <string name="format_is_toast">%s是吐司通知</string>
+    <string name="notification_received">收到的通知</string>
     <string name="format_text_content">%s内容是</string>
     <string name="not_format_text_content">%s内容不是</string>
     <string name="content">内容</string>
@@ -454,4 +454,7 @@
     <string name="text_criteria">文本条件</string>
     <string name="pkg_name_of_app_entered">进入的应用包名</string>
     <string name="pkg_name_of_app_exited">离开的应用包名</string>
+    <string name="notification_info">通知信息</string>
+    <string name="current_package_name">当前应用包名</string>
+    <string name="tip_gesture_recorder">请在屏幕上绘制手势</string>
 </resources>

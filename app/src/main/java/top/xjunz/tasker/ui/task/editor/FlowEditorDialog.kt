@@ -294,7 +294,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             adapter.notifyItemChanged(adapter.currentList.indexOf(it), true)
         }
         observeTransient(gvm.onAppletChanged) {
-            adapter.notifyItemChanged(adapter.currentList.indexOf(it))
+            adapter.notifyItemChanged(adapter.currentList.indexOf(it), true)
         }
         observe(vm.selectionLiveData) {
             if (vm.isSelectingArgument) {

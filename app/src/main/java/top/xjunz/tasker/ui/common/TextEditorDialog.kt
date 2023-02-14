@@ -138,7 +138,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     if (it?.toString() != viewModel.defText) {
                         btnNegative.setText(R.string.reset)
                     } else {
-                        btnNegative.setText(android.R.string.cancel)
+                        btnNegative.setText(R.string.clear_all)
                     }
                 }
             }
@@ -151,7 +151,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                 if (viewModel.defText.isNullOrEmpty()) {
                     dismiss()
                 } else if (inputBox.textString == viewModel.defText) {
-                    dismiss()
+                    inputBox.text.clear()
                 } else {
                     inputBox.setText(viewModel.defText)
                     inputBox.setSelectionToEnd()

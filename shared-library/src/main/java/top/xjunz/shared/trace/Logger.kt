@@ -20,6 +20,7 @@ fun Throwable.logcatStackTrace() {
     Log.e(DEF_LOGCAT_TAG, Log.getStackTraceString(this))
 }
 
-fun Any?.logit(priority: Int = Log.INFO, tag: String = DEF_LOGCAT_TAG) {
+fun <V> V.logit(priority: Int = Log.INFO, tag: String = DEF_LOGCAT_TAG): V {
     logcat(this, priority, tag)
+    return this
 }

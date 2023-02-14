@@ -6,6 +6,7 @@ package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.R.style.*
 import com.google.android.material.chip.Chip
@@ -52,8 +53,9 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             ibAction.tag = null
 
             tvNumber.isVisible = false
-            dividerTop.isVisible = false
-            dividerBott.isVisible = false
+            dividerTop.isInvisible = true
+            dividerBott.isInvisible = true
+            dividerVertical.isInvisible = true
 
             tvTitle.isEnabled = !vm.isReadyOnly
             bullet.isVisible = false
@@ -74,13 +76,20 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             val depth = applet.depthInAncestor(vm.flow)
             // Set text style
             when {
-                depth == 1 && applet is Flow -> tvTitle.setTextAppearance(
-                    TextAppearance_Material3_TitleLarge
-                )
-
+                depth == 1 && applet is Flow -> {
+                    tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
+                    if (applet is ControlFlow) {
+                        tvTitle.setTextColor(controlFlowTextTint)
+                    }
+                }
                 depth == 2 || depth == 1 -> {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                     bullet.isVisible = true
+                    if (depth == 2 && applet is Flow && applet.isNotEmpty()
+                        && !vm.isCollapsed(applet)
+                    ) {
+                        dividerVertical.isVisible = true
+                    }
                 }
                 else -> {
                     dividerTop.isVisible = true
@@ -94,9 +103,6 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                         )
                     }
                 }
-            }
-            if (applet is ControlFlow) {
-                tvTitle.setTextColor(controlFlowTextTint)
             }
             // Set action
             if (applet is Flow) {
@@ -129,9 +135,6 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                     ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
                     ibAction.setContentDescriptionAndTooltip(R.string.invert.text)
                 }
-            }
-            if (applet.valueType == Applet.VAL_TYPE_TEXT) {
-                desc = desc?.italic()
             }
             if (vm.isSelectingArgument) {
                 title = title?.toString()

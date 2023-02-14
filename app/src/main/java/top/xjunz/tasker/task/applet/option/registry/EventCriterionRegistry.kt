@@ -10,8 +10,8 @@ import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.Event.*
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.EventFilter
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
-import top.xjunz.tasker.task.applet.flow.model.NotificationReferent
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 
 /**
  * @author xjunz 2022/08/12
@@ -43,7 +43,7 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0003)
     val notificationReceived =
         eventFilterOption(Event.EVENT_ON_NOTIFICATION_RECEIVED, R.string.on_notification_received)
-            .withRefArgument<NotificationReferent>(R.string.notification)
+            .withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
             .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
 

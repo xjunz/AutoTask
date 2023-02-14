@@ -19,7 +19,7 @@ class ArgumentCriterion<T : Any, V : Any, Arg : Any>(
 ) : Criterion<T, V>() {
 
     override fun getDefaultValue(runtime: TaskRuntime): V {
-        val value = mapper(runtime.getArgument(this, if (isScoped) 0 else 1)!!.casted())
+        val value = mapper(runtime.getReferentOf(this, if (isScoped) 0 else 1)!!.casted())
         runtime.updateFingerprint(value)
         return value
     }

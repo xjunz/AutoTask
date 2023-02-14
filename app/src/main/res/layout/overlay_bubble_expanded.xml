@@ -101,12 +101,6 @@
                     android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/ib_record"
-                    style="@style/FloatingControllerImageButton"
-                    android:src="@drawable/ic_baseline_play_arrow_24"
-                    android:visibility="gone" />
-
-                <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ib_confirm"
                     style="@style/FloatingControllerImageButton"
                     android:paddingHorizontal="4dp"

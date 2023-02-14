@@ -20,14 +20,14 @@ class FloatingDraggableLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    private val touchSlop by lazy {
-        ViewConfiguration.get(context).scaledTouchSlop
-    }
-
     companion object {
         const val STATE_DRAG_STARTED = 0
         const val STATE_DRAGGING = 1
         const val STATE_DRAG_ENDED = 2
+    }
+
+    private val touchSlop by lazy {
+        ViewConfiguration.get(context).scaledTouchSlop
     }
 
     private val downPoint = FloatArray(2)
@@ -38,7 +38,11 @@ class FloatingDraggableLayout @JvmOverloads constructor(
 
     private var isDragging = false
 
-    var onDragListener: ((state: Int, offsetX: Float, offsetY: Float) -> Unit)? = null
+    private var onDragListener: ((state: Int, offsetX: Float, offsetY: Float) -> Unit)? = null
+
+    fun setOnDragListener(listener: (state: Int, offsetX: Float, offsetY: Float) -> Unit) {
+        onDragListener = listener
+    }
 
     private fun findTopChildUnder(x: Float, y: Float): View? {
         val childCount: Int = childCount

@@ -57,7 +57,11 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
     }
 
     fun updateChildrenIndexesIfNeeded(parent: Flow): Boolean {
-        if (parent.depthInAncestor(flow) <= 2) {
+        val depth = parent.depthInAncestor(flow)
+        if (depth <= 2) {
+            if (depth == 2) {
+                onAppletChanged.value = parent
+            }
             parent.forEachIndexed { index, applet ->
                 applet.index = index
                 onAppletChanged.value = applet

@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.RequiresApi
 import androidx.test.uiautomator.PointerGesture
+import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.utils.unsupportedOperation
 
 /**
@@ -50,18 +51,6 @@ object GestureGenerator {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun makeContinuableStroke(path: Path, duration: Long): StrokeDescription {
         return StrokeDescription(path, 0, duration, true)
-    }
-
-    private fun Path.toStroke(duration: Long, isContinuable: Boolean): StrokeDescription {
-        return if (isContinuable) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                unsupportedOperation("Continuable stroke is not supported under Android O")
-            } else {
-                StrokeDescription(this, 0, duration, true)
-            }
-        } else {
-            StrokeDescription(this, 0, duration)
-        }
     }
 
     private fun makeGesture(strokes: Iterable<StrokeDescription>): GestureDescription {
@@ -129,14 +118,6 @@ object GestureGenerator {
         )
     }
 
-    private fun PointerGesture.PointerAction.toPath(): Path {
-        return makePath(start, end)
-    }
-
-    private fun PointerGesture.PointerAction.buildStroke(isContinuable: Boolean): StrokeDescription {
-        return toPath().toStroke(duration, isContinuable)
-    }
-
     /**
      * Convert [PointerGesture]s to a [GestureDescription] for the accessibility service to perform.
      */
@@ -145,17 +126,42 @@ object GestureGenerator {
         val iterator = actions.iterator()
         var stroke: StrokeDescription? = null
         var duration = 0L
+        var prev: Point? = null
         while (iterator.hasNext()) {
             val action = iterator.next()
             // ignore actions with no duration
-            if (action.duration == 0L) continue
+            if (action.duration == 0L) {
+                logcat("ignored")
+                continue
+            }
+            val end = action.end
+            if (prev == null) {
+                prev = action.start
+            }
+            checkNotNull(prev)
+            val path: Path
+            if (end == prev) {
+                // make 1px offset
+                val offset = Point(end.x + 1, end.y)
+                path = makePath(prev, offset)
+                prev = offset
+            } else {
+                path = makePath(prev, end)
+                prev = end
+            }
             stroke = if (stroke == null) {
-                action.buildStroke(iterator.hasNext())
+                if (iterator.hasNext()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        StrokeDescription(path, 0, action.duration, true)
+                    } else {
+                        unsupportedOperation("Continuable stroke is not supported under Android O")
+                    }
+                } else {
+                    StrokeDescription(path, 0, action.duration)
+                }
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    stroke.continueStroke(
-                        action.toPath(), duration, action.duration, iterator.hasNext()
-                    )
+                    stroke.continueStroke(path, 0, action.duration, iterator.hasNext())
                 } else {
                     unsupportedOperation("Continuable stroke is not supported under Android O")
                 }

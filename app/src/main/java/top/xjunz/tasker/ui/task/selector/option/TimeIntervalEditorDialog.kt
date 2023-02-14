@@ -46,6 +46,15 @@ class TimeIntervalEditorDialog : BaseDialogFragment<DialogTimeIntervalEditorBind
             binding.etMills.setText("$mill")
             binding.etSecond.setText("$sec")
             binding.etMin.setText("$min")
+            showSoftInput(
+                if (sec != 0) {
+                    binding.etSecond
+                } else if (mill != 0) {
+                    binding.etMills
+                } else {
+                    binding.etMin
+                }
+            )
         }
         binding.tvTitle.text = viewModel.title
         binding.btnNegative.setOnClickListener {

@@ -2,7 +2,7 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.task.applet.flow.model
+package top.xjunz.tasker.task.applet.flow.ref
 
 import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
@@ -20,12 +20,12 @@ class UiObjectReferent(private val node: AccessibilityNodeInfo) : Referent {
         IntValueUtil.composeCoordinate(bounds.centerX(), bounds.centerY())
     }
 
-    override fun getFieldValue(which: Int): Any {
-        when (which) {
+    override fun getReferredValue(which: Int): Any? {
+        return when (which) {
             0 -> node
             1 -> node.text?.toString()
             2 -> centerCoordinate
+            else -> super.getReferredValue(which)
         }
-        return super.getFieldValue(which)
     }
 }

@@ -11,29 +11,19 @@
         android:layout_height="wrap_content"
         android:clipToPadding="false"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="2dp">
+        android:orientation="horizontal">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/cv_bread_crumb"
+            style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?selectableItemBackground"
-            app:cardBackgroundColor="?colorSurface"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp">
-
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:maxLines="1"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:textColor="?colorPrimary"
-                tools:text="@tools:sample/lorem" />
-        </androidx.cardview.widget.CardView>
+            android:insetLeft="8dp"
+            android:insetTop="6dp"
+            android:insetRight="8dp"
+            android:insetBottom="6dp"
+            android:maxLines="1"
+            android:textColor="?colorOnPrimary" />
 
         <ImageView
             android:id="@+id/iv_chevron_right"

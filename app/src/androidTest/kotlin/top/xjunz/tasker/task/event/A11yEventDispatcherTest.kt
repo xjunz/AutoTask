@@ -20,7 +20,6 @@ internal class A11yEventDispatcherTest : CoroutineScope {
 
     @Test
     fun processAccessibilityEvent() {
-        val dispatcher = A11yEventDispatcher()
         UiAutomationRegistry.getUiAutomation().setOnAccessibilityEventListener {
             println(it)
         }

@@ -18,7 +18,7 @@ import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
@@ -54,7 +54,7 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         VariantType.TEXT_PACKAGE_NAME,
     ).withValueDescriber<String> {
         PackageManagerBridge.loadLabelOfPackage(it)
-    }.hasCompositeTitle()
+    }
 
     @AppletOrdinal(0x00_01)
     val appCollection = invertibleApplicationOption(R.string.in_app_collection) {
@@ -115,35 +115,7 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    @AppletOrdinal(0x02_00)
-    private val startsWith = invertibleApplicationOption(R.string.pkg_name_starts_with) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.packageName.startsWith(v)
-        }
-    }.withValueArgument<String>(R.string.prefix)
-
-    @AppletOrdinal(0x02_01)
-    private val endsWith = invertibleApplicationOption(R.string.pkg_name_ends_with) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.packageName.endsWith(v)
-        }
-    }.withValueArgument<String>(R.string.suffix)
-
-    @AppletOrdinal(0x02_02)
-    private val containsText = invertibleApplicationOption(R.string.pkg_name_contains_text) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.packageName.contains(v)
-        }
-    }.withValueArgument<String>(R.string.containment)
-
-    @AppletOrdinal(0x02_03)
-    private val matchesPattern = invertibleApplicationOption(R.string.pkg_name_matches_pattern) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.packageName.matches(Regex(v))
-        }
-    }.withValueArgument<String>(R.string.regex)
-
     override val categoryNames: IntArray =
-        intArrayOf(R.string.component_info, R.string.property, R.string.package_name)
+        intArrayOf(R.string.component_info, R.string.property)
 
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
-package top.xjunz.tasker.task.applet.flow.model
+package top.xjunz.tasker.task.applet.flow.ref
 
 import android.content.ComponentName
 import android.content.pm.PackageInfo
@@ -33,12 +33,12 @@ data class ComponentInfoWrapper(
         PackageManagerBridge.loadLabelOfPackage(packageName).toString()
     }
 
-    override fun getFieldValue(which: Int): Any {
-        when (which) {
+    override fun getReferredValue(which: Int): Any? {
+        return when (which) {
             1 -> packageName
             2 -> label
+            else -> super.getReferredValue(which)
         }
-        return super.getFieldValue(which)
     }
 
     override fun toString(): String {

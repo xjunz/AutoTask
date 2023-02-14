@@ -43,7 +43,7 @@ class CollapsedBubbleOverlay(
 
     override fun onOverlayInflated() {
         super.onOverlayInflated()
-        binding.bubbleWrapper.onDragListener = { state, offsetX, offsetY ->
+        binding.bubbleWrapper.setOnDragListener { state, offsetX, offsetY ->
             when (state) {
                 FloatingDraggableLayout.STATE_DRAG_STARTED -> {
                     trashBinOverlay.layout()

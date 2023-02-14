@@ -9,14 +9,10 @@ package top.xjunz.tasker.engine.runtime
  */
 interface Referent {
 
-    fun getFieldValue(which: Int): Any {
+    fun getReferredValue(which: Int): Any? {
         if (which == 0) {
             return this
         }
-        throwIfFieldNotFound(which)
-    }
-
-    fun throwIfFieldNotFound(which: Int): Nothing {
         throw NullPointerException("Field $which is not found!")
     }
 

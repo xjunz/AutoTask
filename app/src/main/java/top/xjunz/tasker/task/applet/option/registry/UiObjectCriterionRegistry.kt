@@ -17,7 +17,7 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.criterion.numberRangeCriterion
-import top.xjunz.tasker.task.applet.flow.UiObjectTarget
+import top.xjunz.tasker.task.applet.flow.UiObjectFlow.UiObjectTarget
 import top.xjunz.tasker.task.applet.value.Distance
 
 /**

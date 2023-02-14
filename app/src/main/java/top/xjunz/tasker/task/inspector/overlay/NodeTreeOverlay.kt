@@ -6,11 +6,7 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.*
 import top.xjunz.tasker.ktx.*
@@ -44,10 +40,12 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
                     vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
             }
         }) { b, p, n ->
-            b.tvTitle.text = n.shortClassName
+            b.cvBreadCrumb.text = n.shortClassName
             b.ivChevronRight.isVisible = p != nodeBreadCrumbs.lastIndex
         }
     }
+
+    private var selectedIndex: Int = -1
 
     private val nodeAdapter by lazy {
         inlineAdapter(childrenNodes, ItemNodeTreeBinding::class.java, {
@@ -67,18 +65,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             b.tvDesc.text = n.source.className
             b.btnMore.isVisible = n.children.isNotEmpty()
             b.btnMore.text = n.children.size.toString()
-            b.root.isSelected =
-                n == vm.highlightNode.value || vm.highlightNode.value?.isChildOf(n) == true
-            if (!vm.shouldAnimateItems) return@inlineAdapter
-            val staggerAnimOffsetMills = 30L
-            val easeIn = AnimationUtils.loadAnimation(context, R.anim.mtrl_item_ease_enter)
-            easeIn.startOffset = (staggerAnimOffsetMills + p) * p
-            b.root.startAnimation(easeIn)
-            if (p != 0) return@inlineAdapter
-            inspector.lifecycleScope.launch {
-                delay(staggerAnimOffsetMills)
-                vm.shouldAnimateItems = false
-            }
+            b.root.isSelected = p == selectedIndex
         }
     }
 
@@ -127,13 +114,22 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             if (nodeBreadCrumbs.isNotEmpty()) {
                 childrenNodes.addAll(nodeBreadCrumbs.last().children)
             }
+            selectedIndex = childrenNodes.indexOfFirst { nodeInfo ->
+                nodeInfo == vm.highlightNode.value || vm.highlightNode.value?.isChildOf(nodeInfo) == true
+            }
             if (binding.rvNodes.adapter == null) {
                 binding.rvNodes.adapter = nodeAdapter
             } else {
-                vm.shouldAnimateItems = true
+                //binding.rvNodes.beginAutoTransition(MaterialFadeThrough())
                 nodeAdapter.notifyDataSetChanged()
-                if (childrenNodes.isNotEmpty()) {
-                    binding.rvNodes.smoothScrollToPosition(0)
+                if (selectedIndex >= 0) {
+                    binding.rvNodes.post {
+                        binding.rvNodes.scrollPositionToCenterVertically(selectedIndex)
+                    }
+                } else {
+                    if (childrenNodes.isNotEmpty()) {
+                        binding.rvNodes.smoothScrollToPosition(0)
+                    }
                 }
             }
         }

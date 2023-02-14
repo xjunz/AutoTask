@@ -18,39 +18,42 @@ object AppletOptionFactory : AppletFactory {
 
     private var preloaded = false
 
-    val flowRegistry = FlowOptionRegistry()
+    val flowRegistry = BootstrapOptionRegistry()
 
-    val eventRegistry = EventCriterionRegistry(FlowOptionRegistry.ID_EVENT_FILTER_REGISTRY)
+    val eventRegistry = EventCriterionRegistry(BootstrapOptionRegistry.ID_EVENT_FILTER_REGISTRY)
 
     private val applicationRegistry =
-        ApplicationCriterionRegistry(FlowOptionRegistry.ID_APP_CRITERION_REGISTRY)
+        ApplicationCriterionRegistry(BootstrapOptionRegistry.ID_APP_CRITERION_REGISTRY)
 
     val uiObjectRegistry =
-        UiObjectCriterionRegistry(FlowOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
+        UiObjectCriterionRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
 
-    val timeRegistry = TimeCriterionRegistry(FlowOptionRegistry.ID_TIME_CRITERION_REGISTRY)
+    val timeRegistry = TimeCriterionRegistry(BootstrapOptionRegistry.ID_TIME_CRITERION_REGISTRY)
 
     private val globalInfoRegistry =
-        GlobalCriterionRegistry(FlowOptionRegistry.ID_GLOBAL_CRITERION_REGISTRY)
+        GlobalCriterionRegistry(BootstrapOptionRegistry.ID_GLOBAL_CRITERION_REGISTRY)
 
-    private val textRegistry = TextCriterionRegistry(FlowOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
+    private val textRegistry = TextCriterionRegistry(BootstrapOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
+
+    private val notificationRegistry =
+        NotificationCriterionRegistry(BootstrapOptionRegistry.ID_NOTIFICATION_CRITERION_REGISTRY)
 
     private val globalActionRegistry =
-        GlobalActionRegistry(FlowOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
+        GlobalActionRegistry(BootstrapOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
 
     private val uiObjectActionRegistry =
-        UiObjectActionRegistry(FlowOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
+        UiObjectActionRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
     private val gestureActionRegistry =
-        GestureActionRegistry(FlowOptionRegistry.ID_GESTURE_ACTION_REGISTRY)
+        GestureActionRegistry(BootstrapOptionRegistry.ID_GESTURE_ACTION_REGISTRY)
 
-    private val textActionRegistry = TextActionRegistry(FlowOptionRegistry.ID_TEXT_ACTION_REGISTRY)
+    private val textActionRegistry = TextActionRegistry(BootstrapOptionRegistry.ID_TEXT_ACTION_REGISTRY)
 
     private val appActionRegistry =
-        ApplicationActionRegistry(FlowOptionRegistry.ID_APP_ACTION_REGISTRY)
+        ApplicationActionRegistry(BootstrapOptionRegistry.ID_APP_ACTION_REGISTRY)
 
     private val controlActionRegistry =
-        ControlActionRegistry(FlowOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
+        ControlActionRegistry(BootstrapOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
     private val allRegistries = arrayOf(
         // meta
@@ -62,6 +65,7 @@ object AppletOptionFactory : AppletFactory {
         timeRegistry,
         globalInfoRegistry,
         textRegistry,
+        notificationRegistry,
         // action
         globalActionRegistry,
         uiObjectActionRegistry,

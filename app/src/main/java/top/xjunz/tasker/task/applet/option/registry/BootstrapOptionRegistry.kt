@@ -12,16 +12,17 @@ import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.*
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.util.formatMinSecMills
 
-open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
+open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY) {
 
     companion object {
 
-        private const val ID_FLOW_OPTION_REGISTRY = 0
+        private const val ID_BOOTSTRAP_REGISTRY = 0
         const val ID_EVENT_FILTER_REGISTRY: Int = 0xF
         const val ID_APP_CRITERION_REGISTRY = 0x10
         const val ID_UI_OBJECT_CRITERION_REGISTRY = 0x11
@@ -56,11 +57,12 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
         // 验证码： Regex("\\D(\\d{4,})")
         return when (flow) {
+            is When -> if (before) emptyArray()
+            else arrayOf(ifFlow, doFlow, waitUntilFlow, waitForFlow)
             is If -> if (before) emptyArray() else arrayOf(doFlow)
-            is When -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow, doFlow)
-            is Else -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow)
+            is Else -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow, waitForFlow)
             is Do -> if (before) emptyArray()
-            else arrayOf(ifFlow, elseIfFlow, elseFlow, waitUntilFlow)
+            else arrayOf(ifFlow, elseIfFlow, elseFlow)
             else -> illegalArgument("control flow", flow)
         }
     }
@@ -69,7 +71,14 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
      * Applet flow is a container flow whose child has the same target.
      */
     private val criterionFlowOptions: Array<AppletOption> by lazy {
-        arrayOf(appCriteria, uiObjectCriteria, timeCriteria, textCriteria, globalCriteria)
+        arrayOf(
+            appCriteria,
+            uiObjectCriteria,
+            textCriteria,
+            timeCriteria,
+            notificationCriteria,
+            globalCriteria
+        )
     }
 
     private val actionFlowOptions: Array<AppletOption> by lazy {
@@ -101,6 +110,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0001)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
         .withResult<ComponentInfoWrapper>(R.string.current_top_app)
+        .withResult<String>(R.string.current_package_name)
         .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
 
     @AppletOrdinal(0x0002)
@@ -147,7 +157,7 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0012)
     val uiObjectCriteria =
         flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_CRITERION_REGISTRY, R.string.ui_object_exists)
-            .withResult<AccessibilityNodeInfo>(R.string.ui_object)
+            .withResult<UiObjectReferent>(R.string.ui_object)
             .withResult<String>(R.string.matched_ui_object_text)
             .withResult<Int>(R.string.center_coordinate, VariantType.INT_COORDINATE)
 
@@ -161,6 +171,11 @@ open class FlowOptionRegistry : AppletOptionRegistry(ID_FLOW_OPTION_REGISTRY) {
     @AppletOrdinal(0x0015)
     val textCriteria = flowOptionWithId<PhantomFlow>(
         ID_TEXT_CRITERION_REGISTRY, R.string.text_criteria
+    )
+
+    @AppletOrdinal(0x0016)
+    val notificationCriteria = flowOptionWithId<PhantomFlow>(
+        ID_NOTIFICATION_CRITERION_REGISTRY, R.string.notification_info
     )
 
     @AppletOrdinal(0x0020)

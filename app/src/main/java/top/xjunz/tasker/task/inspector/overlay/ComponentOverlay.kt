@@ -20,7 +20,7 @@ class ComponentOverlay(inspector: FloatingInspector) :
 
     override fun onOverlayInflated() {
         super.onOverlayInflated()
-        binding.draggableRoot.onDragListener = { state: Int, offsetX: Float, offsetY: Float ->
+        binding.draggableRoot.setOnDragListener { state: Int, offsetX: Float, offsetY: Float ->
             if (state == FloatingDraggableLayout.STATE_DRAGGING) {
                 offsetViewInWindow(offsetX.toInt(), offsetY.toInt())
             }

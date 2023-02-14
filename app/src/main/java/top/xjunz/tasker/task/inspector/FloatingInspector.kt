@@ -16,7 +16,6 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.overlay.*
 
 /**
@@ -32,10 +31,6 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
         fun isReady(): Boolean {
             return Settings.canDrawOverlays(app) && A11yAutomatorService.get() != null
-        }
-
-        fun require(): FloatingInspector {
-            return a11yAutomatorService.inspector
         }
     }
 

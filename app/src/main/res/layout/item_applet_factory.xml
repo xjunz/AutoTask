@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -12,9 +11,9 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_selector_applet_factory"
         android:gravity="center|end"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp"
         android:minHeight="48dp"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="12dp"
         android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
         android:textColor="@color/color_text_selectable"
         tools:text="@tools:sample/first_names" />

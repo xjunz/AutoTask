@@ -47,8 +47,6 @@ abstract class Applet {
         const val VAL_TYPE_IRRELEVANT = 0
         const val VAL_TYPE_TEXT = 1
 
-        @Deprecated("Unsupported! Use [Applet.isInverted] to control boolean value.")
-        const val VAL_TYPE_BOOL = VAL_TYPE_IRRELEVANT
         const val VAL_TYPE_INT = 3
         const val VAL_TYPE_FLOAT = 4
         const val VAL_TYPE_LONG = 5
@@ -82,12 +80,6 @@ abstract class Applet {
 
     open var relation = REL_AND
 
-    /**
-     * The logical relation to its previous peer applet. If true, representing `AND` relation and
-     * this applet will not be executed when its previous peer failed, otherwise representing `OR`
-     * relation and this applet will not be executed when its previous peer succeeded. If this applet
-     * is the first element of a flow, this field will be ignored.
-     */
     val isAnd: Boolean get() = relation == REL_AND
 
     val isOr: Boolean get() = relation == REL_OR

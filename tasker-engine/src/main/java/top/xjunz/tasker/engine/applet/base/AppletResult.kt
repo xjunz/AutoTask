@@ -13,7 +13,7 @@ class AppletResult private constructor(private var successful: Boolean) {
 
     val isSuccessful get() = successful
 
-    var returns: Array<out Any?>? = null
+    var returned: Any? = null
         private set
 
     var actual: Any? = null
@@ -36,20 +36,20 @@ class AppletResult private constructor(private var successful: Boolean) {
 
         private fun obtain(
             isSuccessful: Boolean,
-            returns: Array<out Any?>? = null,
+            returned: Any? = null,
             actual: Any? = null,
             throwable: Throwable? = null
         ): AppletResult {
             return (Pool.acquire() ?: AppletResult(false)).also {
                 it.successful = isSuccessful
-                it.returns = returns
+                it.returned = returned
                 it.actual = actual
                 it.throwable = throwable
             }
         }
 
-        fun succeeded(vararg returns: Any?): AppletResult {
-            return if (returns.isNotEmpty()) obtain(true, returns) else EMPTY_SUCCESS
+        fun succeeded(returned: Any?): AppletResult {
+            return if (returned != null) obtain(true, returned) else EMPTY_SUCCESS
         }
 
         fun failed(actual: Any?): AppletResult {
@@ -62,7 +62,7 @@ class AppletResult private constructor(private var successful: Boolean) {
     }
 
     fun recycle() {
-        returns = null
+        returned = null
         actual = null
         throwable = null
         Pool.release(this)

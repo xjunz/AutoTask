@@ -37,7 +37,7 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         if (isScoped) {
             return runtime.getTarget()
         }
-        val arg = runtime.getArgument(this, 0)?.casted<T>()
+        val arg = runtime.getReferentOf(this, 0)?.casted<T>()
         if (arg != null) {
             runtime.updateFingerprint(arg)
             return arg

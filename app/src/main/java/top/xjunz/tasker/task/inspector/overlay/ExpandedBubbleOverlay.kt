@@ -37,7 +37,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
             ibLeft.asPointerController(KeyEvent.KEYCODE_DPAD_LEFT)
             ibRight.asPointerController(KeyEvent.KEYCODE_DPAD_RIGHT)
             ibTop.asPointerController(KeyEvent.KEYCODE_DPAD_UP)
-            draggableRoot.onDragListener = { _, offsetX, offsetY ->
+            draggableRoot.setOnDragListener { _, offsetX, offsetY ->
                 offsetViewInWindow(offsetX.toInt(), offsetY.toInt())
                 vm.bubbleX = layoutParams.x
                 vm.bubbleY = layoutParams.y
@@ -121,7 +121,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                         ibGamePad.isVisible = true
                     }
                     InspectorMode.GESTURE_RECORDER -> {
-                        ibRecord.isVisible = true
+                       // ibRecord.isVisible = true
                     }
                 }
             }

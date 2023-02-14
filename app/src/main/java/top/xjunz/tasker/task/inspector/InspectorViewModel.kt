@@ -5,8 +5,9 @@
 package top.xjunz.tasker.task.inspector
 
 import androidx.lifecycle.MutableLiveData
+import androidx.test.uiautomator.PointerGesture
 import top.xjunz.tasker.ktx.text
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 
 /**
  * @author xjunz 2022/10/13
@@ -44,6 +45,12 @@ class InspectorViewModel {
     val showNodeTree = MutableLiveData(false)
 
     val highlightNode = MutableLiveData<StableNodeInfo>()
+
+    val playbackGesture = MutableLiveData<PointerGesture>()
+
+    val currentDuration = MutableLiveData<Long>()
+
+    val onGesturePerformed = MutableLiveData<Boolean>()
 
     var windowWidth: Int = -1
 

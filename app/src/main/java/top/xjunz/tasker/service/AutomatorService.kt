@@ -4,9 +4,7 @@
 
 package top.xjunz.tasker.service
 
-import android.view.KeyEvent
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
@@ -27,10 +25,6 @@ interface AutomatorService {
     val a11yEventDispatcher: A11yEventDispatcher
 
     val overlayToastBridge: OverlayToastBridge
-
-    fun processKeyEvent(event: KeyEvent) {
-        logcat("${event.keyCode}")
-    }
 
     fun destroy()
 

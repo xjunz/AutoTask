@@ -14,9 +14,9 @@
 
         <View
             android:id="@+id/bullet"
-            android:layout_width="6dp"
-            android:layout_height="6dp"
-            android:layout_marginStart="10dp"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginStart="9dp"
             android:background="@drawable/bg_solid_circle"
             android:backgroundTint="@color/color_text_control_normal"
             android:duplicateParentState="true"
@@ -48,6 +48,17 @@
             app:layout_constraintEnd_toEndOf="@id/tv_number"
             app:layout_constraintStart_toStartOf="@id/tv_number"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider_vertical"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            app:dividerColor="?colorPrimaryContainer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/bullet"
+            app:layout_constraintStart_toStartOf="@+id/bullet"
+            app:layout_constraintTop_toBottomOf="@+id/bullet" />
 
         <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider_bott"

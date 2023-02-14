@@ -53,7 +53,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<Int>(R.string.delay_interval, VariantType.INT_INTERVAL)
         .withDescriber<Int> { applet, t ->
             R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
-                AppletOption.assignAction(it, AppletOption.ACTION_EDIT_VALUE)
+                AppletOption.deliverAction(it, AppletOption.ACTION_EDIT_VALUE)
                 app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())
             })
         }.descAsTitle()
@@ -63,7 +63,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
         Repeat()
     }.withDescriber<Int> { applet, t ->
         R.string.format_repeat.formatSpans(t.toString().foreColored().clickable {
-            AppletOption.assignAction(it, AppletOption.ACTION_EDIT_VALUE)
+            AppletOption.deliverAction(it, AppletOption.ACTION_EDIT_VALUE)
             app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())
         })
     }.descAsTitle().withHelperText(R.string.input_repeat_count)

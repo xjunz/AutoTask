@@ -22,4 +22,6 @@ object VariantType {
     const val TEXT_ACTIVITY = 2 shl 16 or Applet.VAL_TYPE_TEXT
 
     const val TEXT_PANE_TITLE = 3 shl 16 or Applet.VAL_TYPE_TEXT
+
+    const val TEXT_GESTURE = 4 shl 16 or Applet.VAL_TYPE_TEXT
 }

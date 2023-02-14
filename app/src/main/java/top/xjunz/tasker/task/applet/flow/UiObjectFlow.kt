@@ -4,19 +4,19 @@
 
 package top.xjunz.tasker.task.applet.flow
 
-import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.trace.logcat
+import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.uiAutomation
-import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 
 /**
  * @author xjunz 2022/08/25
  */
-class UiObjectFlow : ScopeFlow<UiObjectTarget>() {
+class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
 
     private val rootNodeKey = generateUniqueKey(1)
 
@@ -35,13 +35,7 @@ class UiObjectFlow : ScopeFlow<UiObjectTarget>() {
             super.applyFlow(runtime).isSuccessful
         }
         return if (node != null) {
-            AppletResult.succeeded(
-                node, node.text?.toString(), lazy {
-                    val bounds = Rect()
-                    node.getBoundsInScreen(bounds)
-                    IntValueUtil.composeCoordinate(bounds.centerX(), bounds.centerY())
-                }
-            )
+            AppletResult.succeeded(UiObjectReferent(node))
         } else AppletResult.EMPTY_FAILURE
     }
 
@@ -76,5 +70,22 @@ class UiObjectFlow : ScopeFlow<UiObjectTarget>() {
             }
         }
         return null
+    }
+
+    class UiObjectTarget {
+
+        lateinit var source: AccessibilityNodeInfo
+
+        val density: Float by lazy {
+            DisplayManagerBridge.density
+        }
+
+        private val realSize by lazy {
+            DisplayManagerBridge.size
+        }
+
+        val screenWidthPixels get() = realSize.x
+
+        val screenHeightPixels get() = realSize.y
     }
 }

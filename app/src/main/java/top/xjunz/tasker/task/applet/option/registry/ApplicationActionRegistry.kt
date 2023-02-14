@@ -10,7 +10,7 @@ import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.value.VariantType
 
 /**

@@ -31,10 +31,13 @@ import top.xjunz.tasker.task.runtime.IRemoteTaskManager
 import top.xjunz.tasker.task.runtime.RemoteTaskManager
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.uiautomator.ShizukuUiAutomatorBridge
+import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
-
+/**
+ * @see A11yAutomatorService
+ */
 class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     companion object {
@@ -51,7 +54,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private lateinit var delegate: IRemoteAutomatorService
 
-    private lateinit var uiAutomationHidden: UiAutomationHidden
+    private val uiAutomationHidden: UiAutomationHidden by lazy {
+        UiAutomationHidden(looper, UiAutomationConnection())
+    }
 
     private val handlerThread = HandlerThread("ShizukuAutomatorThread")
 
@@ -75,10 +80,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         OverlayToastBridge(looper)
     }
 
-    private fun listenToKeyEvents() {
-
-    }
-
     @Keep
     @Privileged
     constructor() {
@@ -90,8 +91,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     @Local
-    constructor(connection: IRemoteAutomatorService) {
-        delegate = connection
+    constructor(remote: IRemoteAutomatorService) {
+        delegate = remote
     }
 
     private fun ensurePrivilegedProcess() {
@@ -150,7 +151,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     override fun connect() {
         Binder.clearCallingIdentity()
         try {
-            uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
                 eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
@@ -162,7 +162,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
-            listenToKeyEvents()
             residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
             a11yEventDispatcher.startProcessing()
             startTimestamp = System.currentTimeMillis()
@@ -178,13 +177,13 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         } else try {
             a11yEventDispatcher.destroy()
             residentTaskScheduler.shutdown()
-            if (::uiAutomationHidden.isInitialized) {
+            if (::uiAutomationHidden.isLazilyInitialized) {
                 Binder.clearCallingIdentity()
                 uiAutomationHidden.disconnect()
             }
-            if (handlerThread.isAlive)
+            if (handlerThread.isAlive) {
                 handlerThread.quitSafely()
-
+            }
         } catch (t: Throwable) {
             t.logcatStackTrace()
         } finally {

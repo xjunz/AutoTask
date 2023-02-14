@@ -18,7 +18,7 @@ abstract class EventDispatcher : CoroutineScope {
 
     abstract fun destroy()
 
-    fun addCallbackIfAbsent(callback: Callback) {
+    fun addCallback(callback: Callback) {
         if (callbacks.contains(callback)) return
         callbacks.offer(callback)
     }

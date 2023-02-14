@@ -13,14 +13,11 @@ import android.app.accessibilityservice.AccessibilityServiceHidden
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
-import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -33,7 +30,7 @@ import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -46,6 +43,7 @@ import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import java.lang.ref.WeakReference
 
 /**
+ * @see ShizukuAutomatorService
  * @author xjunz 2022/07/12
  */
 class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutomationConnection,
@@ -53,6 +51,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     companion object {
 
+        /**
+         * Indicate that the service is served as [FloatingInspector].
+         */
         var FLAG_REQUEST_INSPECTOR_MODE: Boolean = false
 
         val launchError = MutableLiveData<Throwable>()
@@ -68,7 +69,15 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
+    var isInspectorMode = false
+        private set
+
+    lateinit var inspector: FloatingInspector
+        private set
+
     private val lifecycleRegistry = LifecycleRegistry(this)
+
+    private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
 
     private var startTimestamp: Long = -1
 
@@ -77,10 +86,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     private lateinit var uiAutomationHidden: UiAutomationHidden
 
     private lateinit var inspectorViewModel: InspectorViewModel
-
-    private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
-
-    lateinit var inspector: FloatingInspector
 
     override val residentTaskScheduler: ResidentTaskScheduler by lazy {
         ResidentTaskScheduler(LocalTaskManager)
@@ -100,14 +105,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         OverlayToastBridge(Looper.getMainLooper())
     }
 
-    override fun onKeyEvent(event: KeyEvent): Boolean {
-        processKeyEvent(event)
-        return false
-    }
-
-    private var isLaunchedInInspectorMode = false
-
-    private val componentChangeCallback by lazy {
+    private val componentChangeCallbackForInspector by lazy {
         EventDispatcher.Callback {
             val hit = it.find { event ->
                 event.type == Event.EVENT_ON_CONTENT_CHANGED
@@ -121,28 +119,27 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     fun startListeningComponentChanges() {
-        a11yEventDispatcher.addCallbackIfAbsent(componentChangeCallback)
+        a11yEventDispatcher.addCallback(componentChangeCallbackForInspector)
     }
 
     private fun stopListeningComponentChanges() {
-        a11yEventDispatcher.removeCallback(componentChangeCallback)
+        a11yEventDispatcher.removeCallback(componentChangeCallbackForInspector)
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onServiceConnected() {
         super.onServiceConnected()
         try {
-            isLaunchedInInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
+            isInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
             instance = WeakReference(this)
             uiAutomationHidden = UiAutomationHidden(mainLooper, this)
             uiAutomationHidden.connect()
-            if (!isLaunchedInInspectorMode) {
+            if (!isInspectorMode) {
                 residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
             }
             a11yEventDispatcher.startProcessing()
             runningState.value = true
-            startTimestamp = System.currentTimeMillis()
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
+            startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.logcatStackTrace()
             launchError.value = t
@@ -152,11 +149,19 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
+    fun suppressTaskScheduler() {
+        if (::residentTaskScheduler.isLazilyInitialized) {
+            residentTaskScheduler.isSuppressed = true
+        }
+    }
+
     fun destroyFloatingInspector() {
         inspector.dismiss()
         stopListeningComponentChanges()
-        if (isLaunchedInInspectorMode) {
+        if (isInspectorMode) {
             disableSelf()
+        } else if (::residentTaskScheduler.isLazilyInitialized) {
+            residentTaskScheduler.isSuppressed = false
         }
     }
 
@@ -176,7 +181,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (isInspectorShown()) {
-            // recreate the inspector
+            // Recreate the inspector
             inspector.dismiss()
             inspectorViewModel.onConfigurationChanged()
             inspector = FloatingInspector(this, inspectorViewModel)
@@ -203,7 +208,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
         LocalTaskManager.clearAllSnapshots()
         if (isInspectorShown()) inspector.dismiss()
-        if (!isLaunchedInInspectorMode) {
+        if (::uiAutomationHidden.isInitialized) {
             uiAutomationHidden.disconnect()
         }
         instance?.clear()

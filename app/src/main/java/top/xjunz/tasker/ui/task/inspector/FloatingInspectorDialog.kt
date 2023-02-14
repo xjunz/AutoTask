@@ -33,7 +33,6 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
-import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
@@ -90,6 +89,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
     private val viewModel by viewModels<InnerViewModel>()
 
     private fun showInspectorAndDismissSelf() {
+        a11yAutomatorService.suppressTaskScheduler()
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
         if (viewModel.mode == InspectorMode.COMPONENT) {
             a11yAutomatorService.startListeningComponentChanges()
@@ -220,8 +220,6 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        if (!isFloatingInspectorShown) {
-            A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
-        }
+        A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
     }
 }

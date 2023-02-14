@@ -74,7 +74,7 @@ class AppletOption(
             }
         }
 
-        fun assignAction(view: View, action: String) {
+        fun deliverAction(view: View, action: String) {
             deliveringAction = action
             view.post {
                 deliveringAction = null
@@ -89,7 +89,7 @@ class AppletOption(
                 if (applet.isAnd) R.string._and.str else R.string._or.str
             }
             return relation.clickable {
-                assignAction(it, ACTION_TOGGLE_RELATION)
+                deliverAction(it, ACTION_TOGGLE_RELATION)
                 app.launchAction(ACTION_TOGGLE_RELATION, applet.hashCode())
             }.bold().underlined() + origin
         }
@@ -97,7 +97,7 @@ class AppletOption(
         private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
             if (name == null) return null
             return name.clickable {
-                assignAction(it, ACTION_NAVIGATE_REFERENCE)
+                deliverAction(it, ACTION_NAVIGATE_REFERENCE)
                 app.launchAction(
                     ACTION_NAVIGATE_REFERENCE, "$name" + Char(0) + applet.hashCode()
                 )

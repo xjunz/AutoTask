@@ -6,14 +6,16 @@ package top.xjunz.tasker.uiautomator
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
-import android.view.MotionEvent
+import android.accessibilityservice.GestureDescription.StrokeDescription
 import androidx.test.uiautomator.GestureController
 import androidx.test.uiautomator.PointerGesture
 import androidx.test.uiautomator.UiDevice
-import top.xjunz.shared.ktx.casted
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.uiautomator.GestureGenerator.convertToStrokes
-import kotlin.math.ceil
 
 /**
  * @author xjunz 2021/9/20
@@ -21,75 +23,54 @@ import kotlin.math.ceil
 class A11yGestureController(private val service: A11yAutomatorService, device: UiDevice) :
     GestureController(device) {
 
-    private fun convertGesturesToPointerCoordsSeries(
-        vararg gestures: PointerGesture
-    ): Array<Array<MotionEvent.PointerCoords>> {
-        val pointerCoordsSeries = arrayOfNulls<Array<MotionEvent.PointerCoords>>(gestures.size)
-        gestures.forEachIndexed { index, gesture ->
-            val touchCount =
-                ceil(gesture.duration() / MOTION_EVENT_INJECTION_DELAY_MILLIS.toFloat()).toInt() + 1
-            val pointerCoordsSerial = Array(touchCount) array@{
-                return@array MotionEvent.PointerCoords().apply {
-                    size = 1F
-                    pressure = 1F
-                    if (it == touchCount - 1) {
-                        gesture.end()
-                    } else {
-                        gesture.pointAt(MOTION_EVENT_INJECTION_DELAY_MILLIS * it)
-                    }.let {
-                        x = it.x.toFloat()
-                        y = it.y.toFloat()
-                    }
-                }
-            }
-            pointerCoordsSeries[index] = pointerCoordsSerial
-        }
-        return pointerCoordsSeries.casted()
-    }
-
     override fun performGesture(vararg gestures: PointerGesture) {
-        performSinglePointerGesture(gestures[0])
+        performSinglePointerGesture(null, gestures[0], null)
     }
 
-    private fun GestureDescription.StrokeDescription.buildGesture(): GestureDescription {
+    suspend fun performGesture(
+        gesture: PointerGesture,
+        callback: (currentDuration: Long, succeeded: Boolean?) -> Unit
+    ) {
+        coroutineScope {
+            performSinglePointerGesture(this, gesture) { a, b ->
+                callback(a, b)
+                cancel()
+            }
+            awaitCancellation()
+        }
+    }
+
+    private fun StrokeDescription.buildGesture(): GestureDescription {
         return GestureDescription.Builder().addStroke(this).build()
     }
 
-    private fun Iterable<GestureDescription.StrokeDescription>.buildGesture(): GestureDescription {
-        return GestureDescription.Builder().apply {
-            forEach {
-                addStroke(it)
-            }
-        }.build()
-    }
-
-    private fun performSinglePointerGesture(gesture: PointerGesture) {
+    private fun performSinglePointerGesture(
+        coroutineScope: CoroutineScope?,
+        gesture: PointerGesture,
+        resultCallback: ((currentDuration: Long, succeeded: Boolean?) -> Unit)?,
+    ) {
         val strokes = gesture.convertToStrokes()
+        var currentIndex = 0
+        var duration = 0L
         val callback = object : AccessibilityService.GestureResultCallback() {
-            var currentIndex = 0
-            override fun onCompleted(gestureDescription: GestureDescription?) {
+            override fun onCompleted(gestureDescription: GestureDescription) {
                 super.onCompleted(gestureDescription)
+                duration += gestureDescription.getStroke(0).duration
                 if (++currentIndex <= strokes.lastIndex) {
+                    resultCallback?.invoke(duration, null)
                     service.dispatchGesture(strokes[currentIndex].buildGesture(), this, null)
+                } else {
+                    resultCallback?.invoke(duration, true)
+                    coroutineScope?.cancel()
                 }
+            }
+
+            override fun onCancelled(gestureDescription: GestureDescription?) {
+                super.onCancelled(gestureDescription)
+                resultCallback?.invoke(duration, false)
+                coroutineScope?.cancel()
             }
         }
         service.dispatchGesture(strokes[0].buildGesture(), callback, null)
     }
-
-    private fun performMultiPointerGesture(vararg gesture: PointerGesture) {
-        val strokesList = gesture.map { it.convertToStrokes() }
-        val strokes = strokesList[0]
-        val callback = object : AccessibilityService.GestureResultCallback() {
-            var currentIndex = 0
-            override fun onCompleted(gestureDescription: GestureDescription?) {
-                super.onCompleted(gestureDescription)
-                if (++currentIndex <= strokes.lastIndex) {
-                    service.dispatchGesture(strokes[currentIndex].buildGesture(), this, null)
-                }
-            }
-        }
-        service.dispatchGesture(strokes.buildGesture(), callback, null)
-    }
-
 }

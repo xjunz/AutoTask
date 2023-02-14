@@ -9,8 +9,10 @@ package top.xjunz.tasker.engine.task
  */
 interface TaskScheduler : EventDispatcher.Callback {
 
+    var isSuppressed: Boolean
+
     fun scheduleTasks(dispatcher: EventDispatcher) {
-        dispatcher.addCallbackIfAbsent(this)
+        dispatcher.addCallback(this)
     }
 
     fun shutdown()

@@ -49,7 +49,6 @@
                     tools:text="在内部添加" />
             </LinearLayout>
 
-
             <com.google.android.material.divider.MaterialDivider
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
@@ -59,14 +58,14 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_left"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:nestedScrollingEnabled="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constrainedHeight="true"
+                tools:listitem="@layout/item_applet_factory"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/rv_right"
-                app:layout_constraintHorizontal_weight=".3"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/top_bar" />
 
@@ -86,9 +85,11 @@
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="8dp"
                 app:cardBackgroundColor="?colorTertiaryContainer"
+                app:layout_constrainedWidth="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/rv_left"
                 app:layout_constraintTop_toBottomOf="@id/divider"
+                app:layout_constraintWidth_max="418dp"
                 app:rippleColor="?colorControlHighlight">
 
                 <TextView

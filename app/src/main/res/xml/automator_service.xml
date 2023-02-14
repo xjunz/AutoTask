@@ -6,10 +6,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:accessibilityEventTypes="typeAllMask"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestFilterKeyEvents|flagRequestFingerprintGestures"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestFilterKeyEvents"
     android:canPerformGestures="true"
     android:canRetrieveWindowContent="true"
     android:canTakeScreenshot="true"
     android:description="@string/accessibility_service_summary"
+    android:notificationTimeout="10"
     android:settingsActivity="top.xjunz.tasker.main.MainActivity"
     tools:ignore="UnusedAttribute" />

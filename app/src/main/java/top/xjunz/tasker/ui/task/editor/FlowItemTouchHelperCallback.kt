@@ -8,6 +8,8 @@ import android.graphics.Canvas
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.isDescendantOf
 import java.util.*
@@ -31,6 +34,8 @@ open class FlowItemTouchHelperCallback(
     private val viewModel: FlowViewModel
 ) : SimpleCallback(UP or DOWN, LEFT or RIGHT) {
 
+    private var undoSnackBar: Snackbar? = null
+
     init {
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -38,6 +43,10 @@ open class FlowItemTouchHelperCallback(
                 lastVisiblePosition = -1
             }
         })
+        rv.findFragment<Fragment>().observe(viewModel.applets) {
+            undoSnackBar?.dismiss()
+            undoSnackBar = null
+        }
     }
 
     object DiffCallback : DiffUtil.ItemCallback<Applet>() {
@@ -285,6 +294,7 @@ open class FlowItemTouchHelperCallback(
             notifyAppletChanged(parent)
         }
         viewModel.notifyFlowChanged()
+        undoSnackBar = snackBar
     }
 
     private fun notifyAppletChanged(applet: Applet) {

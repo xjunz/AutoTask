@@ -4,118 +4,63 @@
 
 package top.xjunz.tasker.ui.widget
 
-import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
-import android.gesture.GestureOverlayView
 import android.graphics.*
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
-import androidx.core.animation.doOnEnd
-import androidx.core.graphics.PathSegment
-import androidx.core.graphics.flatten
-import androidx.test.uiautomator.PointerGesture
-import top.xjunz.tasker.service.a11yAutomatorService
+import android.view.View
+import top.xjunz.tasker.ktx.alphaModified
+import top.xjunz.tasker.ktx.dpFloat
+import top.xjunz.tasker.uiautomator.GestureRecorder
 
 /**
- * @author xjunz 2023/01/05
+ * @author xjunz 2023/02/13
  */
 class GestureRecorderView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
-) : GestureOverlayView(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
 
-    private val replayPath = Path()
+    private lateinit var recorder: GestureRecorder
 
-    private val replayStrokes: MutableList<PathSegment> = mutableListOf()
+    private val drawingPath = Path()
 
-    private var currentStroke: Int = -1
-
-    private var duration: Long = 0
-
-    private val animator = ValueAnimator.ofFloat(0F, 1F).apply {
-        addUpdateListener {
-            currentStroke = (it.animatedFraction * replayStrokes.lastIndex).toInt()
-            invalidate()
-        }
-        doOnEnd {
-            replayStrokes.clear()
-            currentStroke = -1
-        }
+    private val pathPaint = Paint().apply {
+        isAntiAlias = true
+        style = Paint.Style.STROKE
+        strokeWidth = 8.dpFloat
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        color = Color.RED.alphaModified(.62F)
     }
 
-    private val paint by lazy {
-        Paint().apply {
-            isAntiAlias = true
-            strokeCap = Paint.Cap.ROUND
-            style = Paint.Style.STROKE
-            color = gestureColor
-            strokeWidth = gestureStrokeWidth
-        }
+    fun setRecorder(recorder: GestureRecorder) {
+        this.recorder = recorder
     }
 
-    init {
-        addOnGesturePerformedListener { _, _ ->
-            replayStrokes.clear()
-            val path = gesturePath
-            replayStrokes.addAll(path.flatten())
-            replayPath.reset()
-            animator.duration = duration
-            //animator.start()
-
-            fun PointF.toPoint(): Point {
-                return Point(x.toInt(), y.toInt())
-            }
-
-            fun PathSegment.getDuration(): Long {
-                return (duration * (endFraction - startFraction)).toLong()
-            }
-
-            var gesture: PointerGesture? = null
-            var start: PointF
-            var stop: PointF
-
-            for (segment in replayStrokes) {
-                start = segment.start
-                stop = segment.end
-                if (gesture == null) {
-                    gesture = PointerGesture(start.toPoint())
-                        .moveWithDuration(stop.toPoint(), segment.getDuration())
-                } else {
-                    gesture.moveWithDuration(stop.toPoint(), segment.getDuration())
-                }
-            }
-            a11yAutomatorService.uiAutomatorBridge.gestureController.performGesture(gesture)
-        }
-        addOnGesturingListener(object : OnGesturingListener {
-            override fun onGesturingStarted(overlay: GestureOverlayView?) {
-                duration = SystemClock.uptimeMillis()
-            }
-
-            override fun onGesturingEnded(overlay: GestureOverlayView?) {
-                duration = SystemClock.uptimeMillis() - duration
-            }
-
-        })
+    fun clearDrawingPath() {
+        drawingPath.reset()
+        invalidate()
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        if (animator.isRunning) {
-            animator.cancel()
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!recorder.isActivated) return super.onTouchEvent(event)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                drawingPath.reset()
+                drawingPath.moveTo(event.x, event.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                drawingPath.lineTo(event.x, event.y)
+                invalidate()
+            }
         }
-        return super.onInterceptTouchEvent(ev)
+        return recorder.onTouchEvent(event)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (replayStrokes.isEmpty()) return
-        replayPath.reset()
-        var p = replayStrokes[0].start
-        replayPath.moveTo(p.x, p.y)
-        for (i in 0..currentStroke) {
-            p = replayStrokes[i].end
-            replayPath.lineTo(p.x, p.y)
-        }
-        canvas.drawPath(replayPath, paint)
+        canvas.drawPath(drawingPath, pathPaint)
     }
-
 }

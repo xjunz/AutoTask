@@ -77,9 +77,17 @@ class LayoutInspectorView @JvmOverloads constructor(
     /**
      * The listener to be notified when a node is selected by the user.
      */
-    var onNodeClickedListener: ((StableNodeInfo) -> Unit)? = null
+    private var onNodeClickListener: ((StableNodeInfo) -> Unit)? = null
 
-    var onNodeSelectedListener: ((StableNodeInfo) -> Unit)? = null
+    fun setOnNodeClickListener(listener: (StableNodeInfo) -> Unit) {
+        onNodeClickListener = listener
+    }
+
+    private var onNodeSelectedListener: ((StableNodeInfo) -> Unit)? = null
+
+    fun setOnNodeSelectedListener(listener: (StableNodeInfo) -> Unit) {
+        onNodeSelectedListener = listener
+    }
 
     init {
         useStyledAttributes(attrs, R.styleable.LayoutInspectorView) {
@@ -271,7 +279,7 @@ class LayoutInspectorView @JvmOverloads constructor(
 
     override fun performClick(): Boolean {
         highlightNode?.let {
-            onNodeClickedListener?.invoke(it)
+            onNodeClickListener?.invoke(it)
         }
         return super.performClick()
     }

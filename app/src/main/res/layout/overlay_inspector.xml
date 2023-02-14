@@ -23,18 +23,9 @@
             app:inspectorStrokeWidthNormal="1dp" />
 
         <top.xjunz.tasker.ui.widget.GestureRecorderView
-            android:id="@+id/gesture_overlay_view"
+            android:id="@+id/gesture_recorder_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fadeDuration="@integer/material_motion_duration_medium_1"
-            android:fadeEnabled="true"
-            android:gestureColor="?colorPrimary"
-            android:gestureStrokeWidth="20"
-            android:gestureStrokeAngleThreshold="0"
-            android:gestureStrokeSquarenessThreshold="0"
-            android:gestureStrokeLengthThreshold="0"
-            android:gestureStrokeType="single"
-            android:uncertainGestureColor="?colorPrimaryContainer"
             android:visibility="gone" />
 
         <TextView

@@ -16,6 +16,7 @@ import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.applet.value.Swipe
@@ -58,7 +59,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             }
             true
         }
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
+    }.withRefArgument<UiObjectReferent>(R.string.ui_object).hasCompositeTitle()
 
     @AppletOrdinal(0x0002)
     val longClick = simpleUiObjectActionOption(R.string.format_perform_long_click) {
@@ -68,14 +69,14 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             uiDevice.wrapUiObject2(it).longClick()
             true
         }
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
+    }.withRefArgument<UiObjectReferent>(R.string.ui_object).hasCompositeTitle()
 
     @AppletOrdinal(0x00_03)
     val drag = uiObjectActionOption<Int>(R.string.format_drag) { node, v ->
         check(v != null)
         uiDevice.wrapUiObject2(node).drag(IntValueUtil.parseCoordinate(v))
         true
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
+    }.withRefArgument<UiObjectReferent>(R.string.ui_object)
         .withUnaryArgument<Int>(
             R.string.specified_coordinate,
             variantType = VariantType.INT_COORDINATE
@@ -92,7 +93,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         val swipe = Swipe.parse(v)
         uiDevice.wrapUiObject2(node).swipe(swipe.direction, swipe.percent, swipe.speed)
         true
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
+    }.withRefArgument<UiObjectReferent>(R.string.ui_object)
         .withValueArgument<Long>(R.string.swipe_args, VariantType.BITS_SWIPE)
         .withValueDescriber<Long> {
             val swipe = Swipe.parse(it)
@@ -111,7 +112,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
                 true
             }
         }
-    }.withRefArgument<AccessibilityNodeInfo>(R.string.input_field)
+    }.withRefArgument<UiObjectReferent>(R.string.input_field)
         .withUnaryArgument<String>(R.string.text)
         .hasCompositeTitle()
 

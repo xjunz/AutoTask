@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.model.NotificationReferent
+import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 
 /**
  * @author xjunz 2022/11/16
@@ -15,10 +15,13 @@ import top.xjunz.tasker.task.applet.flow.model.NotificationReferent
 class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x00_00)
-    val isToast = appletOption(R.string.is_toast) {
+    val isToast = appletOption(R.string.format_is_toast) {
         PropertyCriterion<NotificationReferent> {
             it.isToast
         }
-    }.withRefArgument<NotificationReferent>(R.string.notification)
+    }.withRefArgument<NotificationReferent>(R.string.notification_received, R.string.empty)
         .withTitleModifier("Toast")
+        .hasCompositeTitle()
+
+
 }

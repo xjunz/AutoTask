@@ -16,9 +16,8 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
-import top.xjunz.tasker.task.applet.flow.model.ComponentInfoWrapper
-import top.xjunz.tasker.task.applet.flow.model.NotificationReferent
-import java.lang.ref.WeakReference
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -36,8 +35,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
-
-    private var eventDispatchScope: WeakReference<CoroutineScope>? = null
 
     fun startProcessing() {
         bridge.addOnAccessibilityEventListener {
@@ -88,7 +85,10 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                     Event.EVENT_ON_NOTIFICATION_RECEIVED, packageName,
                     latestActivityName, firstText,
                 )
-                event.putExtra(NotificationReferent.EXTRA_IS_TOAST, className == Toast::class.java.name)
+                event.putExtra(
+                    NotificationReferent.EXTRA_IS_TOAST,
+                    className == Toast::class.java.name
+                )
                 dispatchEvents(event)
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -133,6 +133,9 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                 dispatchContentChanged(packageName)
+            }
+            AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START -> {
+
             }
             else -> dispatchContentChanged(packageName)
         }

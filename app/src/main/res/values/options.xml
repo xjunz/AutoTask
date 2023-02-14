@@ -18,14 +18,6 @@
     <string name="package_name">包名</string>
     <string name="component_info">应用和页面</string>
 
-    <string name="pkg_name_starts_with">%s包名起始文本是</string>
-    <string name="not_pkg_name_starts_with">%s包名起始文本不是</string>
-    <string name="pkg_name_ends_with">%s包名结束文本是</string>
-    <string name="not_pkg_name_ends_with">%s包名结束文本不是</string>
-    <string name="pkg_name_matches_pattern">%s包名满足正则表达式</string>
-    <string name="not_pkg_name_matches_pattern">%s包名不满足正则表达式</string>
-    <string name="pkg_name_contains_text">%s包名包含文本</string>
-    <string name="not_pkg_name_contains_text">%s包名不包含文本</string>
     <string name="contains_text">包含指定文本</string>
     <string name="not_contains_text">不包含指定文本</string>
     <string name="in_app_collection">%s在应用名单中</string>
