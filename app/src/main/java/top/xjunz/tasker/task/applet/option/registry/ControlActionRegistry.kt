@@ -5,7 +5,6 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
-import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.action.Break
 import top.xjunz.tasker.engine.applet.action.Repeat
 import top.xjunz.tasker.engine.applet.action.Suspension
@@ -18,7 +17,7 @@ import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
-import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.util.formatMinSecMills
 
 /**
@@ -35,7 +34,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
         .withValueDescriber<Int> {
-            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+            R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x0002)
@@ -44,7 +43,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
         .withValueDescriber<Int> {
-            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+            R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x00_03)
@@ -53,8 +52,8 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<Int>(R.string.delay_interval, VariantType.INT_INTERVAL)
         .withDescriber<Int> { applet, t ->
             R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
-                AppletOption.deliverAction(it, AppletOption.ACTION_EDIT_VALUE)
-                app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())
+                AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE)
+                EventCenter.sendEvent(AppletOption.EVENT_EDIT_VALUE, applet)
             })
         }.descAsTitle()
 
@@ -63,8 +62,8 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
         Repeat()
     }.withDescriber<Int> { applet, t ->
         R.string.format_repeat.formatSpans(t.toString().foreColored().clickable {
-            AppletOption.deliverAction(it, AppletOption.ACTION_EDIT_VALUE)
-            app.launchAction(AppletOption.ACTION_EDIT_VALUE, applet.hashCode())
+            AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE)
+            EventCenter.sendEvent(AppletOption.EVENT_EDIT_VALUE, applet)
         })
     }.descAsTitle().withHelperText(R.string.input_repeat_count)
         .withResult<Repeat>(R.string.loop)

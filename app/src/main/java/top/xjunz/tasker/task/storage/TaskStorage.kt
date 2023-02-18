@@ -33,7 +33,7 @@ object TaskStorage {
 
     var storageTaskLoaded = false
 
-    var preloadTaskLoaded = false
+    var presetTaskLoaded = false
 
     private val all = mutableListOf<XTask>()
 
@@ -79,7 +79,7 @@ object TaskStorage {
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun preloadTasks(factory: AppletFactory) {
+    suspend fun loadPresetTasks(factory: AppletFactory) {
         withContext(Dispatchers.IO) {
             ZipInputStream(app.assets.open("prextsks")).use {
                 var entry = it.nextEntry

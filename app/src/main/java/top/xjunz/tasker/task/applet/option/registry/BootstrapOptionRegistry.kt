@@ -136,7 +136,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
         .withValueDescriber<Int> {
-            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+            R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x0009)
@@ -144,7 +144,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
         .withValueDescriber<Int> {
-            R.string.format_max_wait_interval.formatSpans(formatMinSecMills(it).foreColored())
+            R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
 

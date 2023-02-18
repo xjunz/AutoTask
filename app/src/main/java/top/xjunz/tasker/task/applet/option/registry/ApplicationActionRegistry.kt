@@ -51,7 +51,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0002)
     val launchActivity = appletOption(R.string.launch_activity) {
-        valueAction<String> {
+        singleValueAction<String> {
             ActivityManagerBridge.startComponent(it)
             true
         }

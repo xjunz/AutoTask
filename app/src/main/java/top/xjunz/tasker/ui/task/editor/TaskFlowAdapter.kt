@@ -14,12 +14,12 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.util.isContainer
+import top.xjunz.tasker.engine.applet.util.isDescendantOf
 import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.notifySelfChanged
-import top.xjunz.tasker.task.applet.isContainer
-import top.xjunz.tasker.task.applet.isDescendantOf
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
@@ -87,7 +87,7 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
 
         init {
             binding.tvTitle.setAntiMoneyClickListener {
-                if (AppletOption.deliveringAction == null) {
+                if (AppletOption.deliveringEvent == null) {
                     binding.root.performClick()
                 }
             }

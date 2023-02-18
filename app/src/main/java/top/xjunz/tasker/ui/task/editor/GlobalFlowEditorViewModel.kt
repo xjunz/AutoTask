@@ -9,10 +9,10 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.applet.util.forEachReference
+import top.xjunz.tasker.engine.applet.util.forEachReferent
+import top.xjunz.tasker.engine.applet.util.isAheadOf
 import top.xjunz.tasker.engine.task.TaskSnapshot
-import top.xjunz.tasker.task.applet.forEachReference
-import top.xjunz.tasker.task.applet.forEachReferent
-import top.xjunz.tasker.task.applet.isAheadOf
 import top.xjunz.tasker.task.editor.AppletReferenceEditor
 
 /**

@@ -114,9 +114,9 @@ fun EditText.configInputType(type: Class<*>, allowMultiLine: Boolean = false) {
                 inputType = inputType or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             }
         }
-        Int::class.java, Long::class.java ->
+        Int::class.java, Long::class.java, Int::class.javaObjectType, Long::class.javaObjectType ->
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
-        Float::class.java ->
+        Float::class.java, Float::class.javaObjectType ->
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL or
                     InputType.TYPE_NUMBER_FLAG_SIGNED
     }
@@ -226,6 +226,10 @@ inline fun View.useStyledAttributes(
 @SuppressLint("ClickableViewAccessibility")
 fun View.blockTouch() {
     setOnTouchListener { _, _ -> true }
+}
+
+fun View.unblockTouch() {
+    setOnTouchListener(null)
 }
 
 fun View.setHelp(help: CharSequence) {

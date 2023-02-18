@@ -19,10 +19,10 @@ import top.xjunz.tasker.databinding.ItemVarargTextBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
-import top.xjunz.tasker.ui.ColorScheme
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**

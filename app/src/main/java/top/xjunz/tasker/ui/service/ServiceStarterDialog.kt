@@ -22,8 +22,8 @@ import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.serviceController
-import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
+import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
@@ -85,7 +85,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
             binding.btnStart.isEnabled = !it
             if (it) {
                 binding.spreadContainer.clearSpreading()
-                binding.tvState.text = R.string.starting.text
+                binding.tvState.text = R.string.launching.text
             } else {
                 binding.spreadContainer.startSpreading()
                 binding.tvState.text = R.string.service_not_started.text

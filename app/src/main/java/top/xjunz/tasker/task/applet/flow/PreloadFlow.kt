@@ -12,7 +12,7 @@ import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiAutomation
 
 /**
- * PreloadFlow initialize global referents at [onPrepare].
+ * PreloadFlow initialize global referents at [onPrepareApply].
  *
  * @author xjunz 2023/01/23
  */
@@ -24,9 +24,9 @@ class PreloadFlow : ControlFlow(), Referent {
 
     override val minSize: Int = 0
 
-    override fun onPrepare(runtime: TaskRuntime) {
-        super.onPrepare(runtime)
-        runtime.registerReferent(this, this)
+    override fun onPrepareApply(runtime: TaskRuntime) {
+        super.onPrepareApply(runtime)
+        runtime.registerReferent( this)
     }
 
     override fun getReferredValue(which: Int): Any? {

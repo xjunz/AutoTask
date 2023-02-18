@@ -31,9 +31,9 @@ import top.xjunz.tasker.databinding.ItemCheckCaseBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.IAvailabilityCheckerCallback
 import top.xjunz.tasker.service.currentService
-import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.ui.main.MainViewModel
 import java.util.*
 import kotlin.random.Random
 

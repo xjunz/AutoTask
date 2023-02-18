@@ -20,11 +20,8 @@ import top.xjunz.tasker.engine.runtime.AppletIndexer
 class TaskSnapshot(
     val checksum: Long,
     var startTimestamp: Long = -1,
-
     var endTimestamp: Long = -1,
-
     var isSuccessful: Boolean = false,
-
     ) : Parcelable {
 
     val isRunning get() = endTimestamp == -1L

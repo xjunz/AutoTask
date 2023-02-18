@@ -14,7 +14,6 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
@@ -40,11 +39,12 @@ import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
-import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
+import top.xjunz.tasker.ui.main.ColorScheme
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
@@ -58,8 +58,6 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     private val viewModel by viewModels<AppletSelectorViewModel>()
 
     private val rvBottom: RecyclerView get() = binding.shoppingCart.rvBottom
-
-    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
@@ -145,7 +143,6 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         if (viewModel.selectedFlowRegistry.isNull()) {
             viewModel.selectFlowRegistry(0)
         }
-
         binding.tvTitle.text = viewModel.title
         shopCartIntegration.init(this)
         binding.topBar.oneShotApplySystemInsets { v, insets ->
@@ -166,16 +163,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             dismiss()
         }
         binding.cvHeader.setAntiMoneyClickListener { v ->
-            val mode = v.tag.casted<InspectorMode>()
-            if (isFloatingInspectorShown) {
-                if (floatingInspector.mode != mode) {
-                    floatingInspector.mode = mode
-                    toast(R.string.format_switch_mode.format(mode.label))
-                    requireActivity().pressHome()
-                }
-            } else {
-                FloatingInspectorDialog().setMode(mode).show(parentFragmentManager)
-            }
+            FloatingInspectorDialog().setMode(v.tag.casted()).show(parentFragmentManager)
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
@@ -219,10 +207,8 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             } else binding.cvHeader.isVisible = false
         }
         observe(viewModel.applets) {
-            binding.shoppingCart.btnCount.text =
-                R.string.format_clear_applets.format(it.size)
-            if (it.isEmpty())
-                shopCartIntegration.collapse()
+            binding.shoppingCart.btnCount.text = R.string.format_clear_applets.format(it.size)
+            if (it.isEmpty()) shopCartIntegration.collapse()
             bottomAdapter.submitList(it)
         }
         observeTransient(viewModel.onAppletChanged) {
@@ -237,27 +223,21 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         ) {
             viewModel.clearAllCandidates()
         }
-        mainViewModel.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
-            val hashcode = it.toInt()
-            val index = viewModel.applets.require().indexOfFirst { applet ->
-                applet.hashCode() == hashcode
-            }
-            val applet = viewModel.applets.require()[index]
-            applet.toggleRelation()
-            if (applet is Action<*>) {
+        doOnEventReceived<Applet>(AppletOption.EVENT_TOGGLE_RELATION) {
+            it.toggleRelation()
+            if (it is Action<*>) {
                 PreferenceHelpDialog().init(
                     R.string.tip, R.string.tip_applet_relation, Preferences.showToggleRelationTip
                 ) { noMore ->
                     Preferences.showToggleRelationTip = !noMore
                 }.show(childFragmentManager)
             }
-            bottomAdapter.notifyItemChanged(index, true)
+            bottomAdapter.notifyItemChanged(viewModel.applets.require().indexOf(it), true)
         }
-        mainViewModel.doOnRouted(this, FloatingInspector.ACTION_NODE_INFO_SELECTED) {
-            val prevSize = bottomAdapter.itemCount
-            viewModel.acceptAppletsFromInspector()
+        doOnEventRouted<List<Applet>>(FloatingInspector.EVENT_NODE_INFO_SELECTED) {
+            viewModel.acceptApplets(it)
             shopCartIntegration.expand()
-            rvBottom.scrollToPosition(prevSize)
+            rvBottom.scrollToPosition(bottomAdapter.itemCount)
         }
     }
 }

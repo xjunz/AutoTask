@@ -15,8 +15,8 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
-import top.xjunz.tasker.util.Router.launchRoute
 import java.util.*
 
 /**
@@ -109,7 +109,10 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             checkedApplets = allApplets - uncheckedApplets
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false
-            context.launchRoute(FloatingInspector.ACTION_NODE_INFO_SELECTED)
+            EventCenter.routeEvent(
+                FloatingInspector.EVENT_NODE_INFO_SELECTED, ArrayList(checkedApplets)
+            )
+            checkedApplets = emptyList()
         }
         binding.container.background = context.createMaterialShapeDrawable()
         inspector.observe(vm.showNodeInfo) {
@@ -134,9 +137,4 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         }
     }
 
-    fun getCheckedOptions(): List<Applet> {
-        return ArrayList(checkedApplets).also {
-            checkedApplets = emptyList()
-        }
-    }
 }

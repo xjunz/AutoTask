@@ -21,10 +21,11 @@ fun Long.formatTime(): String = dateFormat.format(Date(this))
 
 fun formatCurrentTime(): String = dateFormat.format(Date(System.currentTimeMillis()))
 
-fun formatMinSecMills(mills: Int): String {
-    val min = mills / (60 * 1000)
-    val sec = mills % (60 * 1000) / 1000
-    val mill = mills % 1000
+fun formatMinSecMills(mills: Number): String {
+    val milliseconds = mills.toInt()
+    val min = milliseconds / (60 * 1000)
+    val sec = milliseconds % (60 * 1000) / 1000
+    val mill = milliseconds % 1000
     val sb = StringBuilder()
     if (min != 0) sb.append(min).append(R.string.minute.str)
     if (sec != 0) sb.append(sec).append(R.string.second.str)

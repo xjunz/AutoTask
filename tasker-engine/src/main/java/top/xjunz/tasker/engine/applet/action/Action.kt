@@ -36,11 +36,15 @@ class LambdaAction<V>(
     private inline val action: suspend (V?, TaskRuntime) -> Boolean
 ) : Action<V>(valueType) {
     override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        return if (action(value, runtime)) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
+        return if (action(
+                value,
+                runtime
+            )
+        ) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
     }
 }
 
-inline fun <reified V> valueAction(crossinline block: (V) -> Boolean): Action<*> {
+inline fun <reified V> singleValueAction(crossinline block: suspend (V) -> Boolean): Action<*> {
     return LambdaAction<V>(Applet.judgeValueType<V>()) { v, _ ->
         check(v != null) {
             "Value is not defined!"

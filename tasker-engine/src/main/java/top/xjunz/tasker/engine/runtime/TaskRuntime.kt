@@ -11,6 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
@@ -45,8 +46,11 @@ class TaskRuntime private constructor() {
 
     companion object {
 
+        const val GLOBAL_SCOPE_TASK = 1
+        const val GLOBAL_SCOPE_EVENT = 2
+
         fun XTask.obtainRuntime(
-            eventScope: EventScope,
+            eventValueRegistry: ValueRegistry,
             coroutineScope: CoroutineScope,
             events: Array<out Event>
         ): TaskRuntime {
@@ -55,7 +59,7 @@ class TaskRuntime private constructor() {
             instance.runtimeScope = coroutineScope
             instance.target = events
             instance._events = events
-            instance._eventScope = eventScope
+            instance._eventValueRegistry = eventValueRegistry
             return instance
         }
 
@@ -92,19 +96,19 @@ class TaskRuntime private constructor() {
 
     lateinit var hitEvent: Event
 
-    lateinit var task: XTask
-
     lateinit var currentApplet: Applet
 
     lateinit var currentFlow: Flow
 
-    private val eventScope: EventScope get() = _eventScope!!
+    private val eventValueRegistry: ValueRegistry get() = _eventValueRegistry!!
 
     private var _events: Array<out Event>? = null
 
     private var _result: AppletResult? = null
 
-    private var _eventScope: EventScope? = null
+    private var _eventValueRegistry: ValueRegistry? = null
+
+    private lateinit var task: XTask
 
     @get:Synchronized
     @set:Synchronized
@@ -132,14 +136,20 @@ class TaskRuntime private constructor() {
     }
 
     /**
-     * Get or put a global variable if absent. The variable can be shared across tasks. More specific,
-     * within an [EventScope].
+     * Get or put a global variable if absent. The variable is stored as per the [scope]. More specific,
+     * within an [ValueRegistry].
      */
-    fun <V : Any> getGlobal(key: Long, initializer: (() -> V)? = null): V {
-        if (initializer == null) {
-            return eventScope.registry.getValue(key).casted()
+    fun <V : Any> getGlobalValue(scope: Int, key: Any, initializer: () -> V): V {
+        val registry = when (scope) {
+            GLOBAL_SCOPE_EVENT -> eventValueRegistry
+            GLOBAL_SCOPE_TASK -> task
+            else -> illegalArgument("scope", scope)
         }
-        return eventScope.registry.getOrPut(key, initializer).casted()
+        return if (key is ValueRegistry.WeakKey) {
+            registry.getWeakValue(key, initializer)
+        } else {
+            registry.getValue(key, initializer)
+        }
     }
 
     fun getReferentOf(applet: Applet, which: Int): Any? {
@@ -160,7 +170,11 @@ class TaskRuntime private constructor() {
         }
     }
 
-    fun registerReferent(applet: Applet, referent: Any?) {
+    fun registerReferent(referent: Any?) {
+        registerReferentFor(currentApplet, referent)
+    }
+
+    private fun registerReferentFor(applet: Applet, referent: Any?) {
         applet.referents.forEach { (which, name) ->
             referents[name] = IndexedReferent(which, referent)
         }
@@ -169,7 +183,7 @@ class TaskRuntime private constructor() {
     fun registerResult(applet: Applet, result: AppletResult) {
         _result = result
         if (result.isSuccessful && result.returned != null) {
-            registerReferent(applet, result.returned!!)
+            registerReferentFor(applet, result.returned!!)
         }
     }
 
@@ -191,7 +205,7 @@ class TaskRuntime private constructor() {
         }.casted()
     }
 
-    fun triggerWaitFor(events: Array<out Event>) {
+    fun onNewEvents(events: Array<out Event>) {
         waitingFor?.let {
             _events = events
             it.trigger()
@@ -199,7 +213,7 @@ class TaskRuntime private constructor() {
     }
 
     fun recycle() {
-        _eventScope = null
+        _eventValueRegistry = null
         _events = null
         runtimeScope = null
         referents.clear()

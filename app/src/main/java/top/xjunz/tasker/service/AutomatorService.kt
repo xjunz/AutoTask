@@ -26,6 +26,8 @@ interface AutomatorService {
 
     val overlayToastBridge: OverlayToastBridge
 
+    fun suppressResidentTaskScheduler(suppress: Boolean)
+
     fun destroy()
 
     fun getStartTimestamp(): Long

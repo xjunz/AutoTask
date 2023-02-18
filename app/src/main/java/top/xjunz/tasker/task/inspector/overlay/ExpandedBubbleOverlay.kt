@@ -43,12 +43,11 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 vm.bubbleY = layoutParams.y
             }
             ibConfirm.setAntiMoneyClickListener {
-                if (vm.currentMode eq InspectorMode.UI_OBJECT) {
-                    vm.showNodeInfo.value = true
-                } else if (vm.currentMode eq InspectorMode.COMPONENT) {
-                    vm.onComponentSelected.value = true
-                } else if (vm.currentMode eq InspectorMode.COORDS) {
-                    vm.onCoordinateSelected.value = true
+                when (vm.currentMode.require()) {
+                    InspectorMode.UI_OBJECT -> vm.showNodeInfo.value = true
+                    InspectorMode.COMPONENT -> vm.onComponentSelected.value = true
+                    InspectorMode.COORDS -> vm.onCoordinateSelected.value = true
+                    InspectorMode.GESTURE_RECORDER -> vm.showGestures.value = true
                 }
             }
             ibLayers.setAntiMoneyClickListener {
@@ -106,7 +105,15 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     ibShowGrid.setImageResource(R.drawable.ic_baseline_grid_off_24)
                 }
             }
+            inspector.observe(vm.isConfirmButtonEnabled) {
+                ibConfirm.isEnabled = it
+            }
             inspector.observeNotNull(vm.currentMode) {
+                ibPinScreenshot.isVisible = false
+                ibLayers.isVisible = false
+                ibGamePad.isVisible = false
+                ibShowGrid.isVisible = false
+                ibRecordAction.isVisible = false
                 when (it) {
                     InspectorMode.UI_OBJECT -> {
                         ibPinScreenshot.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
@@ -121,8 +128,33 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                         ibGamePad.isVisible = true
                     }
                     InspectorMode.GESTURE_RECORDER -> {
-                       // ibRecord.isVisible = true
+                        ibRecordAction.isVisible = true
                     }
+                }
+            }
+            ibRecordAction.setAntiMoneyClickListener {
+                if (vm.isRecordingGesture.isTrue) {
+                    if (vm.recordedEvents.require().isEmpty()) {
+                        vm.makeToast(R.string.error_no_gesture_recorded)
+                    } else {
+                        vm.requestRecordingState.value = false
+                        vm.makeToast(R.string.gesture_record_finished)
+                    }
+                } else {
+                    vm.clearAllRecordedEvents()
+                    vm.requestRecordingState.value = true
+                    vm.makeToast(R.string.start_recording_gestures)
+                }
+            }
+            inspector.observe(vm.isRecordingGesture) {
+                if (it) {
+                    ibConfirm.isEnabled = false
+                    ibRecordAction.setImageResource(R.drawable.ic_baseline_stop_24)
+                    ibRecordAction.setContentDescriptionAndTooltip(R.string.stop.str)
+                } else {
+                    ibConfirm.isEnabled = true
+                    ibRecordAction.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+                    ibRecordAction.setContentDescriptionAndTooltip(R.string.record_gesture.str)
                 }
             }
         }

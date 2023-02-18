@@ -24,12 +24,12 @@ class BoundsCriterion<T : Any>(
         }
     }
 
-    override fun serializeToString(value: Any): String {
+    override fun serializeValueToString(value: Any): String {
         value as Distance
         return value.compose().toString(16)
     }
 
-    override fun deserializeFromString(src: String): Any {
+    override fun deserializeValueFromString(src: String): Any {
         return Distance.parse(src.toLong(16))
     }
 }

@@ -34,14 +34,14 @@ class BoundsDetectorOverlay(inspector: FloatingInspector) :
             vm.windowHeight = it.height
             vm.windowWidth = it.width
         }
-        inspector.observeTransient(vm.playbackGesture) {
+        inspector.observeTransient(vm.onGesturePlaybackStarted) {
             gesturePlaybackView.setGesture(it)
         }
-        inspector.observeTransient(vm.currentDuration) {
+        inspector.observeTransient(vm.currentGesturePlaybackDuration) {
             gesturePlaybackView.updateCurrentDuration(it)
         }
-        inspector.observeTransient(vm.onGesturePerformed) {
-            gesturePlaybackView.clear()
+        inspector.observeTransient(vm.onGesturePlaybackEnded) {
+            gesturePlaybackView.fadeOut()
         }
     }
 }

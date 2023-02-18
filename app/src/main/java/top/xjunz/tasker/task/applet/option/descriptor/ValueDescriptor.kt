@@ -23,13 +23,13 @@ open class ValueDescriptor(
         if (valueClass == String::class.java)
             return str
 
-        if (valueClass == Int::class.java)
+        if (valueClass == Int::class.java || valueClass == Int::class.javaObjectType)
             return str.toIntOrNull()
 
-        if (valueClass == Long::class.java)
+        if (valueClass == Long::class.java || valueClass == Long::class.javaObjectType)
             return str.toLongOrNull()
 
-        if (valueClass == Float::class.java)
+        if (valueClass == Float::class.java || valueClass == Float::class.javaObjectType)
             return str.toFloatOrNull()
 
         return null

@@ -12,11 +12,10 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
+import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 import top.xjunz.tasker.util.Icons
-import top.xjunz.tasker.util.Router
-import top.xjunz.tasker.util.Router.launchRoute
 
 /**
  * @author xjunz 2022/10/17
@@ -71,7 +70,7 @@ class CollapsedBubbleOverlay(
         }
         binding.ibCenter.setAntiMoneyClickListener {
             if (vm.currentMode eq InspectorMode.COMPONENT) {
-                if (vm.currentComp.isNull()) {
+                if (vm.currentComponent.isNull()) {
                     vm.makeToast(R.string.error_no_comp_detected)
                 } else {
                     vm.onComponentSelected.value = true
@@ -81,7 +80,7 @@ class CollapsedBubbleOverlay(
             }
         }
         binding.ibCenter.setOnLongClickListener {
-            context.launchRoute(Router.HOST_NONE)
+            EventCenter.launchHost()
             return@setOnLongClickListener true
         }
         inspector.observe(vm.isCollapsed) {

@@ -21,12 +21,12 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
+import top.xjunz.tasker.engine.applet.util.hierarchy
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.hierarchy
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
-import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener

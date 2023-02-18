@@ -14,7 +14,7 @@ import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.common.TextEditorDialog
-import top.xjunz.tasker.ui.task.editor.ArgumentsEditorDialog
+import top.xjunz.tasker.ui.task.selector.argument.ArgumentsEditorDialog
 
 /**
  * @author xjunz 2022/11/22

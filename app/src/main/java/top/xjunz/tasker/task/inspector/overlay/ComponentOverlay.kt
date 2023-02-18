@@ -29,7 +29,7 @@ class ComponentOverlay(inspector: FloatingInspector) :
             layoutParams.y = it.height / 2 - vm.windowHeight / 2
             updateViewLayout()
         }
-        inspector.observe(vm.currentComp) {
+        inspector.observe(vm.currentComponent) {
             binding.tvTitle.text = it.paneTitle
             if (it.paneTitle != null) {
                 binding.tvTitle.append("\n")

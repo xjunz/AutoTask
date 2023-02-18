@@ -25,6 +25,7 @@ import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
+import top.xjunz.tasker.ktx.isAlive
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager
@@ -52,8 +53,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    private lateinit var delegate: IRemoteAutomatorService
-
     private val uiAutomationHidden: UiAutomationHidden by lazy {
         UiAutomationHidden(looper, UiAutomationConnection())
     }
@@ -68,6 +67,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private var startTimestamp: Long = -1
 
+    @Local
+    private lateinit var delegate: IRemoteAutomatorService
+
     override val residentTaskScheduler by lazy {
         ResidentTaskScheduler(RemoteTaskManager)
     }
@@ -80,6 +82,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         OverlayToastBridge(looper)
     }
 
+    /**
+     * This constructor will be called by ShizukuServer, keep it!
+     */
     @Keep
     @Privileged
     constructor() {
@@ -102,8 +107,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     @Local
-    override val isRunning: Boolean
-        get() = delegate.asBinder().pingBinder() && delegate.asBinder().isBinderAlive
+    override val isRunning: Boolean get() = delegate.asBinder().isAlive
 
     @Privileged
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
@@ -144,6 +148,16 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
+    override fun suppressResidentTaskScheduler(suppress: Boolean) {
+        if (isAppProcess) {
+            delegate.suppressResidentTaskScheduler(suppress)
+        } else {
+            if (::residentTaskScheduler.isLazilyInitialized) {
+                residentTaskScheduler.isSuppressed = suppress
+            }
+        }
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
@@ -163,7 +177,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             }
             AppletOptionFactory.preloadIfNeeded()
             residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
-            a11yEventDispatcher.startProcessing()
+            a11yEventDispatcher.start()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()

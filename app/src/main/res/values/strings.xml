@@ -151,7 +151,7 @@
     <string name="show_system_apps">显示系统应用</string>
     <string name="launcher_activity">启动页</string>
     <string name="format_enable_floating_inspector"><![CDATA[使用<b>悬浮助手</b>帮助您快速选择%s]]></string>
-    <string name="enable_floating_inspector">使用悬浮助手</string>
+    <string name="enable_floating_inspector">启用悬浮助手</string>
     <string name="enable">启用</string>
     <string name="goto_grant">去授权</string>
     <string name="overlay_permission">悬浮窗权限</string>
@@ -347,8 +347,8 @@
     <string name="edit_task_metadata">编辑任务信息</string>
     <string name="start_service">启动服务</string>
     <string name="stop_service">停止服务</string>
-    <string name="start">启动</string>
-    <string name="starting">正在启动…</string>
+    <string name="launch">启动</string>
+    <string name="launching">正在启动…</string>
     <string name="tip_overlay_permission_for_task">用于在后台显示通知，未授权会导致相关任务运行失败。</string>
     <string name="service_started">服务已启动</string>
     <string name="retry">重试</string>
@@ -358,7 +358,6 @@
     <string name="take_screenshot">屏幕截图</string>
     <string name="text_operations">文本操作</string>
     <string name="app_operations">应用操作</string>
-    <string name="rename">重命名</string>
     <string name="format_long_click">长按%s</string>
     <string name="format_coordinate">(%d, %d)</string>
     <string name="format_drag">拖动%s到%s</string>
@@ -424,7 +423,6 @@
     <string name="name_of_app_entered">进入的应用名称</string>
     <string name="name_of_app_exited">离开的应用名称</string>
     <string name="current_focus_input">当前输入的文本框</string>
-    <string name="dismiss_notification_shade">关闭弹出的通知</string>
     <string name="anyway">无论如何</string>
     <string name="then">然后</string>
     <string name="tip_applet_relation"><b>然后：</b>只有上一条规则执行成功后才会执行当前规则。
@@ -434,7 +432,8 @@
     <string name="wait_timeout">最多等待时长</string>
     <string name="tip_wait_timeout">若超过最多等待时长后仍然未满足条件，将不会继续等待，视为执行失败。</string>
     <string name="delay_interval">延时时长</string>
-    <string name="format_max_wait_interval">最多等待%s</string>
+    <string name="format_max_wait_duration">最多等待%s</string>
+    <string name="max_wait_duration">最多等待时长</string>
     <string name="on_new_window">出现新窗口时</string>
     <string name="tip_new_window">如弹出对话框、弹出菜单、进入新页面等</string>
     <string name="wait_for_event">等待事件发生</string>
@@ -457,4 +456,31 @@
     <string name="notification_info">通知信息</string>
     <string name="current_package_name">当前应用包名</string>
     <string name="tip_gesture_recorder">请在屏幕上绘制手势</string>
+    <string name="error_no_gesture_recorded">未录制任何手势</string>
+    <string name="start_recording_gestures">开始录制手势</string>
+    <string name="recorded_gestures">已录制的手势</string>
+    <string name="format_gesture_duration">用时：%s</string>
+    <string name="format_gesture_desc">延时：%s，用时：%s</string>
+    <string name="format_gesture_delay">延时：%s</string>
+    <string name="perform_gesture">执行手势</string>
+    <string name="playback">回放</string>
+    <string name="playback_all">回放全部</string>
+    <string name="gesture_record_finished">录制结束</string>
+    <string name="playback_finished">回放结束</string>
+    <string name="perform_custom_gestures">执行自定义手势</string>
+    <string name="gesture">手势</string>
+    <string name="open_in_floating_inspector">在悬浮助手中打开</string>
+    <string name="gesture_name">手势名称</string>
+    <string name="gesture_delay">手势延时(毫秒)</string>
+    <string name="tip_gesture_delay">* 手势延时指的是当前手势开始时间距离上次手势结束时间的时长。</string>
+    <string name="press_volume_up">点击音量+</string>
+    <string name="press_volume_down">点击音量-</string>
+    <string name="gestures_updated">已更新手势</string>
+    <string name="format_gestures_desc">已指定%d个手势</string>
+    <string name="wait_for_idle">等待屏幕空闲</string>
+    <string name="idle_threshold">空闲门槛</string>
+    <string name="tip_wait_for_idle">屏幕空闲指的是当前屏幕没有内容的更新，比如滑动列表之后等待屏幕空闲，即可等待列表滚动停止。
+\n<b>空闲门槛</b>：即多长时间无屏幕内容的更新才被视为空闲，通常为100~500毫秒。
+\n<b>最多等待时长</b>：如果等待超过该时长仍然未检测到屏幕空闲，那么视为失败。</string>
+    <string name="format_wait_for_idle_desc">空闲门槛：%s，最多等待时长：%s</string>
 </resources>

@@ -13,7 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 
 /**
  * @author xjunz 2022/05/09
@@ -66,6 +66,17 @@ fun <V> LifecycleOwner.observeTransient(
             observer.invoke(it)
             // Must postValue(), otherwise the `null` value will fall through to other observers.
             ld.postValue(null)
+        }
+    }
+}
+
+fun LifecycleOwner.observeMultiple(
+    vararg lds: LiveData<*>,
+    observer: () -> Unit
+) {
+    lds.forEach {
+        it.observe(this) {
+            observer()
         }
     }
 }

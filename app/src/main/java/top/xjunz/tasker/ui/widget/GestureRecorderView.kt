@@ -12,7 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.dpFloat
-import top.xjunz.tasker.uiautomator.GestureRecorder
+import top.xjunz.tasker.task.gesture.GestureRecorder
 
 /**
  * @author xjunz 2023/02/13
@@ -21,6 +21,10 @@ class GestureRecorderView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
+    companion object {
+        const val STROKE_WIDTH_IN_DP = 16
+    }
+
     private lateinit var recorder: GestureRecorder
 
     private val drawingPath = Path()
@@ -28,7 +32,7 @@ class GestureRecorderView @JvmOverloads constructor(
     private val pathPaint = Paint().apply {
         isAntiAlias = true
         style = Paint.Style.STROKE
-        strokeWidth = 8.dpFloat
+        strokeWidth = STROKE_WIDTH_IN_DP.dpFloat
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
         color = Color.RED.alphaModified(.62F)

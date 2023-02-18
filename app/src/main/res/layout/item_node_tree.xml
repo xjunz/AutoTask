@@ -10,15 +10,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector_bg_selectable_item"
+        android:background="@drawable/selector_bg_selectable_surface_item"
         android:descendantFocusability="blocksDescendants"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="12dp"
         android:paddingVertical="12dp">
 
         <TextView
             android:id="@+id/tv_ordinal"
             android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="?colorOnSurface"

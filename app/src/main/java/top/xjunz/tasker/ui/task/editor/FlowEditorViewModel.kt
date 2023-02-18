@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.util.*
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.dto.ChecksumUtil
 import top.xjunz.tasker.engine.task.XTask
@@ -16,10 +17,7 @@ import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ktx.toast
-import top.xjunz.tasker.task.applet.clone
-import top.xjunz.tasker.task.applet.depth
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
-import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.storage.TaskStorage
@@ -224,14 +222,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         return true
     }
 
-    private fun Applet.hasResultWithDescriptor(): Boolean {
+    private fun Applet.hasResultWithDescriptor(isAttached: Boolean): Boolean {
         val option = factory.findOption(this)
-        if (option != null && option.findResults(argumentDescriptor).isNotEmpty()) {
+        if (option != null
+            && option.findResults(argumentDescriptor).isNotEmpty()
+            // If not attached, do not check isAheadOf
+            && (!isAttached || isAheadOf(referentAnchor))
+        ) {
             return true
         }
         if (this is Flow) {
             return any {
-                it.hasResultWithDescriptor()
+                it.hasResultWithDescriptor(isAttached)
             }
         }
         return false
@@ -239,7 +241,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     fun hasCandidateReferents(flow: Flow): Boolean {
         return flow.any {
-            it.hasResultWithDescriptor()
+            it.hasResultWithDescriptor(referentAnchor.isAttached)
         }
     }
 

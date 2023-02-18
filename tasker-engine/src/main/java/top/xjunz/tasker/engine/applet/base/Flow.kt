@@ -34,18 +34,16 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     @CallSuper
     @CheckResult
     protected open suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
-        forEachIndexed `continue`@{ index, applet ->
-            if (!applet.isEnabled) {
-                return@`continue`
-            }
+        for ((index: Int, applet: Applet) in withIndex()) {
             runtime.ensureActive()
+            if (!applet.isEnabled) continue
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
             if (index != 0 && (!applet.isAnyway && applet.isAnd != runtime.isSuccessful)) {
                 if (!isRepetitive) {
                     runtime.observer?.onAppletSkipped(applet, runtime)
                 }
-                return@`continue`
+                continue
             }
             applet.parent = this
             applet.index = index
@@ -71,7 +69,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
                 runtime.observer?.onAppletTerminated(applet, runtime)
             }
         }
-        return if (runtime.isSuccessful) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
+        return AppletResult.emptyResult(runtime.isSuccessful)
     }
 
     open fun performStaticCheck(): StaticError? {
@@ -107,9 +105,9 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
-        onPrepare(runtime)
-        // Backup the target, because sub-flows may change the target, we don't want the changed
-        // target to fall through.
+        onPrepareApply(runtime)
+        // Backup the target, because sub-flows may change the target,
+        // we don't want the changed target to fall through.
         val backup = runtime.getRawTarget()
         val succeeded = applyFlow(runtime)
         onPostApply(runtime)
@@ -122,7 +120,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     /**
      * Just before the flow executing its elements.
      */
-    protected open fun onPrepare(runtime: TaskRuntime) {
+    protected open fun onPrepareApply(runtime: TaskRuntime) {
         /* no-op */
     }
 

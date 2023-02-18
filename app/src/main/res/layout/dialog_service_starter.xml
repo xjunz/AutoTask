@@ -60,7 +60,7 @@
                     android:layout_weight="0"
                     android:insetTop="6dp"
                     android:insetBottom="6dp"
-                    android:text="@string/start"
+                    android:text="@string/launch"
                     app:icon="@drawable/ic_baseline_play_arrow_24" />
             </top.xjunz.tasker.ui.widget.MaterialButtonSpreadContainer>
 

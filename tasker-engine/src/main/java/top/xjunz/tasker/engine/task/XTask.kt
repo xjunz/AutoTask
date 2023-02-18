@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.task
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.SparseArray
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,9 +14,9 @@ import top.xjunz.shared.ktx.md5
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
+import top.xjunz.tasker.engine.runtime.ValueRegistry
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
  *
  * @author xjunz 2022/07/12
  */
-class XTask {
+class XTask : ValueRegistry() {
 
     companion object {
         const val TYPE_RESIDENT = 0
@@ -52,9 +53,11 @@ class XTask {
 
     val isSuspending get() = currentRuntime?.isSuspending == true
 
-    private var currentRuntime: TaskRuntime? = null
+    internal var registry = SparseArray<Any>()
 
     internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
+
+    private var currentRuntime: TaskRuntime? = null
 
     class FlowFailureException(reason: String) : RuntimeException(reason)
 
@@ -166,12 +169,12 @@ class XTask {
      * @return `true` if the task starts executed and `false` otherwise
      */
     suspend fun launch(
-        eventScope: EventScope,
+        eventValueRegistry: ValueRegistry,
         coroutineScope: CoroutineScope,
         events: Array<out Event>
     ) {
         val snapshot = TaskSnapshot(checksum)
-        val runtime = obtainRuntime(eventScope, coroutineScope, events)
+        val runtime = obtainRuntime(eventValueRegistry, coroutineScope, events)
         runtime.observer = SnapshotObserver(snapshot)
         try {
             snapshot.startTimestamp = System.currentTimeMillis()
@@ -207,7 +210,7 @@ class XTask {
         }
     }
 
-    fun requireCurrentRuntime(): TaskRuntime {
+    fun requireRuntime(): TaskRuntime {
         return requireNotNull(currentRuntime) {
             "No runtime bound!"
         }

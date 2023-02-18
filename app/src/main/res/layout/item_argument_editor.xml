@@ -44,10 +44,11 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_refer"
-            style="?materialIconButtonOutlinedStyle"
+            style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:text="@string/refer_to"
             android:textColor="?android:textColorPrimary"
             app:icon="@drawable/ic_baseline_add_link_24"
@@ -61,7 +62,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_specify"
-            style="?materialIconButtonOutlinedStyle"
+            style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -70,6 +71,7 @@
             app:icon="@drawable/ic_edit_24dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
+            app:iconTint="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_refer"
             app:layout_constraintTop_toBottomOf="@+id/tv_value"

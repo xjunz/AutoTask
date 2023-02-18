@@ -9,12 +9,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.EventScope
 import top.xjunz.tasker.engine.runtime.TaskRuntime
+import top.xjunz.tasker.engine.runtime.ValueRegistry
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskManager
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
+import top.xjunz.tasker.isAppProcess
 
 /**
  * @author xjunz 2022/08/05
@@ -23,12 +24,24 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     TaskScheduler {
 
     override var isSuppressed = false
+        set(value) {
+            if (value) {
+                // Halt all running tasks once suppressed
+                if (isAppProcess) {
+                    LocalTaskManager.getEnabledTasks()
+                } else {
+                    RemoteTaskManager.getEnabledTasks()
+                }.forEach {
+                    it.halt()
+                }
+            }
+            field = value
+        }
 
     /**
      * Destroy the scheduler. After destroyed, you should not use it any more.
      */
     override fun shutdown() {
-        isSuppressed = true
         TaskRuntime.drainPool()
     }
 
@@ -63,18 +76,18 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
 
     override suspend fun onEvents(events: Array<out Event>) {
         if (isSuppressed) return
-        val eventScope = EventScope()
+        val valueRegistry = ValueRegistry()
         for (task in taskManager.getEnabledTasks()) {
             if (!task.isExecuting || task.isSuspending) {
                 // Create a new coroutine scope, do not suspend current coroutine
                 supervisorScope {
                     launch(Dispatchers.Default) {
                         task.taskStateListener = listener
-                        task.launch(eventScope, this, events)
+                        task.launch(valueRegistry, this, events)
                     }
                 }
             } else {
-                task.requireCurrentRuntime().triggerWaitFor(events)
+                task.requireRuntime().onNewEvents(events)
             }
         }
     }

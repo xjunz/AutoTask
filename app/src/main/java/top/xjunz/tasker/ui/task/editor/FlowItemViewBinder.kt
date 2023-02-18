@@ -14,10 +14,11 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemFlowItemBinding
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.util.*
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
 /**
@@ -143,6 +144,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                 val refs = if (!ahead) emptyList() else option.findResults(vm.argumentDescriptor)
                 if (applet.isContainer && depth == 3) {
                     root.isEnabled = ahead && vm.hasCandidateReferents(applet as Flow)
+                    containerReferents.isVisible = false
                 } else {
                     root.isEnabled = refs.isNotEmpty()
                     containerReferents.isVisible = refs.isNotEmpty()

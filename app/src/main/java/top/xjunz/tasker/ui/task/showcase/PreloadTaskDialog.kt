@@ -35,11 +35,11 @@ class PreloadTaskDialog : BaseBottomSheetDialog<DialogPreloadTasksBinding>() {
         val taskLoaded = MutableLiveData<Boolean>()
 
         fun preloadTasks() {
-            if (TaskStorage.preloadTaskLoaded) {
+            if (TaskStorage.presetTaskLoaded) {
                 taskLoaded.value = true
             } else viewModelScope.async {
-                TaskStorage.preloadTasks(AppletOptionFactory)
-                TaskStorage.preloadTaskLoaded = true
+                TaskStorage.loadPresetTasks(AppletOptionFactory)
+                TaskStorage.presetTaskLoaded = true
                 taskLoaded.value = true
             }.invokeOnError {
                 toastUnexpectedError(it)

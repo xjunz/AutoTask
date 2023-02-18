@@ -46,10 +46,6 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <style name="OutlinedButtonStyle" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="strokeColor">?colorPrimary</item>
-    </style>
-
     <style name="BubbleButton">
         <item name="android:layout_width">32dp</item>
         <item name="android:layout_height">32dp</item>

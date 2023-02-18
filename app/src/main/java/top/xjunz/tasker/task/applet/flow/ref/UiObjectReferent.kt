@@ -17,7 +17,7 @@ class UiObjectReferent(private val node: AccessibilityNodeInfo) : Referent {
     private val centerCoordinate: Int by lazy {
         val bounds = Rect()
         node.getBoundsInScreen(bounds)
-        IntValueUtil.composeCoordinate(bounds.centerX(), bounds.centerY())
+        IntValueUtil.composeXY(bounds.centerX(), bounds.centerY())
     }
 
     override fun getReferredValue(which: Int): Any? {

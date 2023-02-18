@@ -16,7 +16,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
-import top.xjunz.tasker.util.Router.launchAction
+import top.xjunz.tasker.ui.main.EventCenter
 import java.util.*
 
 /**
@@ -34,11 +34,11 @@ class AppletOption(
 
     companion object {
 
-        var deliveringAction: String? = null
+        var deliveringEvent: String? = null
 
-        const val ACTION_TOGGLE_RELATION = "AO_TOGGLE_REL"
-        const val ACTION_NAVIGATE_REFERENCE = "AO_NAVI_REF"
-        const val ACTION_EDIT_VALUE = "AO_EDIT_VAL"
+        const val EVENT_TOGGLE_RELATION = "applet.option.event.TOGGLE_REL"
+        const val EVENT_NAVIGATE_REFERENCE = "applet.option.event.NAVI_REF"
+        const val EVENT_EDIT_VALUE = "applet.option.event.EDIT_VAL"
 
         /**
          * Indicate that the inverted title of an option is auto-generated.
@@ -74,10 +74,10 @@ class AppletOption(
             }
         }
 
-        fun deliverAction(view: View, action: String) {
-            deliveringAction = action
+        fun deliverEvent(view: View, action: String) {
+            deliveringEvent = action
             view.post {
-                deliveringAction = null
+                deliveringEvent = null
             }
         }
 
@@ -89,18 +89,16 @@ class AppletOption(
                 if (applet.isAnd) R.string._and.str else R.string._or.str
             }
             return relation.clickable {
-                deliverAction(it, ACTION_TOGGLE_RELATION)
-                app.launchAction(ACTION_TOGGLE_RELATION, applet.hashCode())
+                deliverEvent(it, EVENT_TOGGLE_RELATION)
+                EventCenter.sendEvent(EVENT_TOGGLE_RELATION, applet)
             }.bold().underlined() + origin
         }
 
         private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
             if (name == null) return null
             return name.clickable {
-                deliverAction(it, ACTION_NAVIGATE_REFERENCE)
-                app.launchAction(
-                    ACTION_NAVIGATE_REFERENCE, "$name" + Char(0) + applet.hashCode()
-                )
+                deliverEvent(it, EVENT_NAVIGATE_REFERENCE)
+                EventCenter.sendEvent(EVENT_NAVIGATE_REFERENCE, name to applet)
             }.foreColored().backColored().underlined()
         }
 

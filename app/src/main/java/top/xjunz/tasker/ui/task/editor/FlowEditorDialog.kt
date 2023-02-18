@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.*
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
@@ -30,6 +29,10 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.base.StaticError
+import top.xjunz.tasker.engine.applet.util.buildHierarchy
+import top.xjunz.tasker.engine.applet.util.findChild
+import top.xjunz.tasker.engine.applet.util.isContainer
+import top.xjunz.tasker.engine.applet.util.whichReference
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
@@ -37,11 +40,11 @@ import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.runtime.LocalTaskManager
-import top.xjunz.tasker.ui.ColorScheme
-import top.xjunz.tasker.ui.MainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
+import top.xjunz.tasker.ui.main.ColorScheme
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseViewModel
@@ -56,8 +59,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     private val vm by viewModels<FlowEditorViewModel>()
 
     val gvm get() = vm.global
-
-    private val mvm by activityViewModels<MainViewModel>()
 
     private val factory = AppletOptionFactory
 
@@ -275,8 +276,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     @SuppressLint("ClickableViewAccessibility")
     private fun observeLiveData() {
         observeNostalgic(vm.selectedApplet) { prev, cur ->
-            if (prev != null)
+            if (prev != null) {
                 adapter.notifyItemChanged(adapter.currentList.indexOf(prev), true)
+            }
             adapter.notifyItemChanged(adapter.currentList.indexOf(cur), true)
         }
         observe(vm.applets) {
@@ -376,38 +378,29 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             )
             adapter.notifyItemRangeChanged(0, adapter.currentList.size)
         }
-        mvm.doOnAction(this, AppletOption.ACTION_TOGGLE_RELATION) {
-            val hashcode = it.toInt()
-            // May not found in this dialog, check it
-            val applet = adapter.currentList.firstOrNull { applet ->
-                applet.hashCode() == hashcode
-            } ?: return@doOnAction
-            if (vm.isMultiSelected(applet)) {
-                vm.toggleMultiSelection(applet)
+        doOnEventReceived<Applet>(AppletOption.EVENT_TOGGLE_RELATION) {
+            if (vm.isMultiSelected(it)) {
+                vm.toggleMultiSelection(it)
             } else {
-                if (applet is Action<*> && Preferences.showToggleRelationTip) {
+                if (it is Action<*> && Preferences.showToggleRelationTip) {
                     PreferenceHelpDialog().init(
                         R.string.tip, R.string.tip_applet_relation
                     ) { noMore ->
                         Preferences.showToggleRelationTip = !noMore
                     }.show(childFragmentManager)
                 }
-                applet.toggleRelation()
-                vm.onAppletChanged.value = applet
+                it.toggleRelation()
+                vm.onAppletChanged.value = it
             }
         }
-        if (vm.isSelectingArgument) return
-        mvm.doOnAction(this, AppletOption.ACTION_NAVIGATE_REFERENCE) { data ->
-            val split = data.split(Char(0))
-            val hashcode = split[1].toInt()
-            val applet = adapter.currentList.firstOrNull {
-                it.hashCode() == hashcode
-            } ?: return@doOnAction
+        if (vm.isSelectingArgument || !vm.isBase) return
+        doOnEventReceived<Pair<String, Applet>>(AppletOption.EVENT_NAVIGATE_REFERENCE) {
+            val applet = it.second
             if (vm.isMultiSelected(applet)) {
                 vm.toggleMultiSelection(applet)
-                return@doOnAction
+                return@doOnEventReceived
             }
-            val referent = split[0]
+            val referent = it.first
             val option = factory.requireOption(applet)
             val whichArg = applet.whichReference(referent)
             val arg = option.arguments[whichArg]
@@ -416,21 +409,17 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 .doOnArgumentSelected { newReferent ->
                     gvm.referenceEditor.setReference(applet, arg, whichArg, newReferent)
                     vm.clearStaticErrorIfNeeded(applet, StaticError.PROMPT_RESET_REFERENCE)
-                    gvm.referenceEditor.getReferenceChangedApplets().forEach {
-                        vm.onAppletChanged.value = it
+                    gvm.referenceEditor.getReferenceChangedApplets().forEach { changed ->
+                        vm.onAppletChanged.value = changed
                     }
                     gvm.referenceEditor.reset()
                 }.show(childFragmentManager)
         }
-        mvm.doOnAction(this, AppletOption.ACTION_EDIT_VALUE) { data ->
-            val hashcode = data.toInt()
-            val applet = adapter.currentList.firstOrNull {
-                it.hashCode() == hashcode
-            } ?: return@doOnAction
-            if (vm.isMultiSelected(applet)) {
-                vm.toggleMultiSelection(applet)
+        doOnEventReceived<Applet>(AppletOption.EVENT_EDIT_VALUE) {
+            if (vm.isMultiSelected(it)) {
+                vm.toggleMultiSelection(it)
             } else {
-                menuHelper.triggerMenuItem(null, applet, R.id.item_edit)
+                menuHelper.triggerMenuItem(null, it, R.id.item_edit)
             }
         }
     }

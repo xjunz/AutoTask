@@ -13,7 +13,6 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.RequiresApi
 import androidx.test.uiautomator.PointerGesture
-import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.utils.unsupportedOperation
 
 /**
@@ -130,10 +129,7 @@ object GestureGenerator {
         while (iterator.hasNext()) {
             val action = iterator.next()
             // ignore actions with no duration
-            if (action.duration == 0L) {
-                logcat("ignored")
-                continue
-            }
+            if (action.duration == 0L) continue
             val end = action.end
             if (prev == null) {
                 prev = action.start

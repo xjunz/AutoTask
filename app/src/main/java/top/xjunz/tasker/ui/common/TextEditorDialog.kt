@@ -15,11 +15,11 @@ import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
-import top.xjunz.tasker.ui.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
 
@@ -175,12 +175,11 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         binding.cvContainer.setAntiMoneyClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }
-        peekMainViewModel().doOnRouted(this, FloatingInspector.ACTION_COMPONENT_SELECTED) {
-            val component = floatingInspector.viewModel.currentComp.require()
-            component.paneTitle?.let {
-                inputBox.setText(it)
+        doOnEventRouted<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
+            it.paneTitle?.run {
+                inputBox.setText(this)
                 inputBox.setSelectionToEnd()
-                toast(R.string.format_added.format(it))
+                toast(R.string.format_added.format(this))
             }
         }
     }

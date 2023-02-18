@@ -20,9 +20,9 @@ import com.google.android.material.snackbar.Snackbar
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.util.isContainer
+import top.xjunz.tasker.engine.applet.util.isDescendantOf
 import top.xjunz.tasker.ktx.observe
-import top.xjunz.tasker.task.applet.isContainer
-import top.xjunz.tasker.task.applet.isDescendantOf
 import java.util.*
 
 

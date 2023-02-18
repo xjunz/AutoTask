@@ -10,16 +10,15 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
+import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion
-import top.xjunz.tasker.task.applet.isAttached
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.ui.common.TextEditorDialog
-import top.xjunz.tasker.ui.task.editor.ArgumentsEditorDialog
-import top.xjunz.tasker.ui.task.selector.option.*
+import top.xjunz.tasker.ui.task.selector.argument.*
 
 /**
  * @author xjunz 2022/10/08

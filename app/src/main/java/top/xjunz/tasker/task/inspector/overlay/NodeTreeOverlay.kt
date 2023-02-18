@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.inspector.overlay
 import android.annotation.SuppressLint
 import android.view.WindowManager
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.*
 import top.xjunz.tasker.ktx.*
@@ -69,6 +70,34 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
         }
     }
 
+    private fun updateStableNodeInfoList(
+        prev: List<StableNodeInfo>,
+        cur: List<StableNodeInfo>
+    ) {
+        val callback = object : DiffUtil.Callback() {
+            override fun getOldListSize() = prev.size
+
+            override fun getNewListSize() = cur.size
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return prev[oldItemPosition] == cur[newItemPosition]
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                val prevItem = prev[oldItemPosition]
+                val curItem = cur[newItemPosition]
+
+                return prevItem.name == curItem.name
+                        && prevItem.source.className == curItem.source.className
+                        && prevItem.caption == curItem.caption
+                        && prevItem.children.size == curItem.children.size
+            }
+
+        }
+        DiffUtil.calculateDiff(callback).dispatchUpdatesTo(nodeAdapter)
+    }
+
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onOverlayInflated() {
         super.onOverlayInflated()
@@ -102,14 +131,8 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
                 binding.rvBreadCrumbs.adapter = breadCrumbAdapter
             } else {
                 breadCrumbAdapter.notifyDataSetChanged()
-                if (nodeBreadCrumbs.isNotEmpty()) {
-                    if (rootView.isVisible) {
-                        binding.rvBreadCrumbs.smoothScrollToPosition(nodeBreadCrumbs.lastIndex)
-                    } else {
-                        binding.rvBreadCrumbs.scrollToPosition(nodeBreadCrumbs.lastIndex)
-                    }
-                }
             }
+            val prevNodes = ArrayList(childrenNodes)
             childrenNodes.clear()
             if (nodeBreadCrumbs.isNotEmpty()) {
                 childrenNodes.addAll(nodeBreadCrumbs.last().children)
@@ -120,15 +143,10 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             if (binding.rvNodes.adapter == null) {
                 binding.rvNodes.adapter = nodeAdapter
             } else {
-                //binding.rvNodes.beginAutoTransition(MaterialFadeThrough())
                 nodeAdapter.notifyDataSetChanged()
                 if (selectedIndex >= 0) {
                     binding.rvNodes.post {
                         binding.rvNodes.scrollPositionToCenterVertically(selectedIndex)
-                    }
-                } else {
-                    if (childrenNodes.isNotEmpty()) {
-                        binding.rvNodes.smoothScrollToPosition(0)
                     }
                 }
             }

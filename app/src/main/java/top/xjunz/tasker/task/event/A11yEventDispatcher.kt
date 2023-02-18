@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.event
 
 import android.os.Looper
+import android.os.SystemClock
 import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
@@ -26,17 +27,24 @@ import kotlin.coroutines.CoroutineContext
 class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge) :
     EventDispatcher() {
 
+    companion object {
+        const val PACKAGE_SYSTEM_UI = "com.android.systemui"
+        const val CLASS_SOFT_INPUT_WINDOW = "android.inputmethodservice.SoftInputWindow"
+    }
+
     override val coroutineContext: CoroutineContext = HandlerCompat.createAsync(looper)
         .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
 
     private val activityHashCache = ArraySet<Int>()
+    private var waitingForIdleJobs = ArraySet<Job>()
+    private var previousEventTimestamp = -1L
 
     private var latestEventTime: Long = -1
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
 
-    fun startProcessing() {
+    fun start() {
         bridge.addOnAccessibilityEventListener {
             processAccessibilityEvent(it)
         }
@@ -50,18 +58,43 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
 
     private fun processAccessibilityEvent(event: AccessibilityEvent) {
         try {
+            previousEventTimestamp = SystemClock.uptimeMillis()
+            waitingForIdleJobs.forEach {
+                it.cancel()
+            }
+            waitingForIdleJobs.clear()
             val packageName = event.packageName?.toString() ?: return
             // Do not send events from the host application!
             if (packageName == BuildConfig.APPLICATION_ID) return
-            if (packageName == "com.android.systemui") return
+            if (packageName == PACKAGE_SYSTEM_UI) return
             if (event.eventTime < latestEventTime && !event.isFullScreen) return
             val className = event.className?.toString()
-            if (className == "android.inputmethodservice.SoftInputWindow") return
+            if (className == CLASS_SOFT_INPUT_WINDOW) return
             dispatchEventsFromAccessibilityEvent(event, packageName, className)
         } finally {
             @Suppress("DEPRECATION")
             event.recycle()
         }
+    }
+
+    suspend fun waitForIdle(idleMills: Long, maxWaitMills: Long): Boolean {
+        check(maxWaitMills > idleMills)
+        var elpased = SystemClock.uptimeMillis() - previousEventTimestamp
+        if (elpased >= idleMills) {
+            return true
+        }
+        while (elpased < maxWaitMills) {
+            val start = SystemClock.uptimeMillis()
+            val job = async(start = CoroutineStart.LAZY) {
+                delay(idleMills)
+            }
+            waitingForIdleJobs.add(job)
+            job.join()
+            val idle = SystemClock.uptimeMillis() - start
+            if (idle >= idleMills) return true
+            elpased += idle
+        }
+        return false
     }
 
     private fun dispatchEventsFromAccessibilityEvent(
@@ -76,8 +109,9 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
             && a11yEvent.eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             && a11yEvent.contentChangeTypes != AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
             && packageName == latestPackageName
-        )
+        ) {
             latestPaneTitle = firstText
+        }
 
         when (a11yEvent.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
@@ -133,9 +167,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                 dispatchContentChanged(packageName)
-            }
-            AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START -> {
-
             }
             else -> dispatchContentChanged(packageName)
         }

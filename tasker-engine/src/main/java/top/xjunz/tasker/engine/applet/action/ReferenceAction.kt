@@ -38,7 +38,7 @@ class LambdaReferenceAction<V>(
         value: V?,
         runtime: TaskRuntime
     ): AppletResult {
-        return if (action(args, value, runtime)) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
+        return AppletResult.emptyResult(action(args, value, runtime))
     }
 }
 

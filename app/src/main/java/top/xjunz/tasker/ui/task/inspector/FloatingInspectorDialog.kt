@@ -13,7 +13,6 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
@@ -30,8 +29,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.DialogFloatingInspectorBinding
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.service.a11yAutomatorService
+import top.xjunz.tasker.service.*
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -89,14 +87,24 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
     private val viewModel by viewModels<InnerViewModel>()
 
     private fun showInspectorAndDismissSelf() {
-        a11yAutomatorService.suppressTaskScheduler()
+        if (isFloatingInspectorShown) {
+            if (floatingInspector.mode == viewModel.mode) {
+                toast(R.string.tip_floating_inspector_enabled)
+            } else {
+                toast(R.string.format_switch_mode.format(viewModel.mode.label))
+            }
+        } else {
+            toast(R.string.tip_floating_inspector_enabled)
+        }
+        if (serviceController.isServiceRunning) {
+            currentService.suppressResidentTaskScheduler(true)
+        }
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
         if (viewModel.mode == InspectorMode.COMPONENT) {
             a11yAutomatorService.startListeningComponentChanges()
         }
         viewModel.doOnSucceeded?.run()
         dismiss()
-        toast(R.string.tip_floating_inspector_enabled, Toast.LENGTH_LONG)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

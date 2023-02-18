@@ -11,17 +11,16 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.ScopeFlow
+import top.xjunz.tasker.engine.applet.util.controlFlow
+import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.toast
-import top.xjunz.tasker.service.floatingInspector
-import top.xjunz.tasker.task.applet.addSafely
-import top.xjunz.tasker.task.applet.controlFlow
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
-import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
+import java.util.*
 
 /**
  * @author xjunz 2022/10/22
@@ -107,13 +106,12 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         return true
     }
 
-    fun acceptAppletsFromInspector() {
-        val options = floatingInspector.getSelectedApplets()
-        val flowOption = factory.requireRegistryOption(options.first().registryId)
+    fun acceptApplets(applets: List<Applet>) {
+        val flowOption = factory.requireRegistryOption(applets.first().registryId)
 
         if (!flow.addSafely(flowOption.yield() as Flow)) return
         var count = 0
-        options.forEach {
+        applets.forEach {
             if (!appendApplet(it)) return@forEach
             count++
         }
@@ -157,5 +155,18 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         }
         ret.trimToSize()
         return ret
+    }
+
+    private fun Flow.addSafely(applet: Applet): Boolean {
+        return addAllSafely(Collections.singleton(applet))
+    }
+
+    private fun Flow.addAllSafely(applets: Collection<Applet>): Boolean {
+        if (size + applets.size <= maxSize) {
+            addAll(applets)
+            return true
+        }
+        toast(R.string.error_over_max_applet_size)
+        return false
     }
 }

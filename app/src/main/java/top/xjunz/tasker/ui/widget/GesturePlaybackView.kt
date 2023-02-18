@@ -4,7 +4,6 @@
 
 package top.xjunz.tasker.ui.widget
 
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -14,7 +13,7 @@ import android.view.View
 import androidx.test.uiautomator.PointerGesture
 import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.dpFloat
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 
 /**
  * @author xjunz 2023/02/14
@@ -25,14 +24,12 @@ class GesturePlaybackView @JvmOverloads constructor(
 
     private val drawingPath = Path()
 
-    private var animator: ValueAnimator? = null
-
     private var gesture: PointerGesture? = null
 
     private val paint = Paint().apply {
         isAntiAlias = true
         color = ColorScheme.colorPrimary.alphaModified(.62F)
-        strokeWidth = 8.dpFloat
+        strokeWidth = GestureRecorderView.STROKE_WIDTH_IN_DP.dpFloat
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
         style = Paint.Style.STROKE
@@ -53,7 +50,6 @@ class GesturePlaybackView @JvmOverloads constructor(
         getLocationOnScreen(loc)
         val offsetY = loc[1]
         val offsetX = loc[0]
-        animator = ValueAnimator.ofFloat(1F)
         drawingPath.moveTo(
             gesture.start().x.toFloat() - offsetX,
             gesture.start().y.toFloat() - offsetY
@@ -63,17 +59,14 @@ class GesturePlaybackView @JvmOverloads constructor(
             animate().alpha(1F).start()
     }
 
-    fun clear() {
-        drawingPath.reset()
-        animator?.cancel()
-        gesture = null
+    fun fadeOut() {
+        clear()
         animate().alpha(0F).start()
-        // invalidate()
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        animator?.cancel()
+    fun clear() {
+        drawingPath.reset()
+        gesture = null
     }
 
     override fun onDraw(canvas: Canvas) {

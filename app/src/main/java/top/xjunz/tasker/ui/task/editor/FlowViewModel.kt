@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.util.depthInAncestor
 import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.task.applet.depthInAncestor
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 
 /**

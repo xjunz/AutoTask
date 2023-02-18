@@ -14,7 +14,7 @@ import androidx.core.view.children
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.get
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ReflectionUtil.invokeDeclaredMethod
 
 

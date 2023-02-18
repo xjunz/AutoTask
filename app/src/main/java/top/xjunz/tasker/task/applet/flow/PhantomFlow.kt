@@ -16,7 +16,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class PhantomFlow : Flow() {
 
-    override fun onPrepare(runtime: TaskRuntime) {
+    override fun onPrepareApply(runtime: TaskRuntime) {
         unsupportedOperation("PhantomFlow is not expected to be present in runtime!")
     }
 

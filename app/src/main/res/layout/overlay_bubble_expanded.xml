@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:padding="4dp">
+        android:padding="4dp"
+        android:visibility="gone">
 
         <top.xjunz.tasker.ui.widget.GamePadLayout
             android:id="@+id/game_pad"
@@ -98,6 +99,12 @@
                     android:id="@+id/ib_layers"
                     style="@style/FloatingControllerImageButton"
                     android:src="@drawable/ic_twotone_layers_24"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/ib_record_action"
+                    style="@style/FloatingControllerImageButton"
+                    android:src="@drawable/ic_delete_forever_24px"
                     android:visibility="gone" />
 
                 <androidx.appcompat.widget.AppCompatImageButton

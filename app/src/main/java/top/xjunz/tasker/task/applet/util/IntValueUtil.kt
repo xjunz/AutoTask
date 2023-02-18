@@ -23,11 +23,11 @@ object IntValueUtil {
         return hour shl 16 or (min shl 8) or sec
     }
 
-    fun parseCoordinate(coordinate: Int): Point {
+    fun parseXY(coordinate: Int): Point {
         return Point(coordinate ushr 16, coordinate and 0xFFFF)
     }
 
-    fun composeCoordinate(x: Int, y: Int): Int {
+    fun composeXY(x: Int, y: Int): Int {
         check(x in 0..0xFFFF)
         check(y in 0..0xFFFF)
         return x shl 16 or y

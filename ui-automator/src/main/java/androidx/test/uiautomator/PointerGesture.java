@@ -14,9 +14,13 @@ import java.util.Deque;
  */
 public class PointerGesture {
     // The list of actions that make up this gesture.
-    private final Deque<PointerAction> mActions = new ArrayDeque<>();
-    private final long mDelay;
+    private Deque<PointerAction> mActions = new ArrayDeque<>();
+    private long mDelay;
     private long mDuration;
+
+    private PointerGesture() {
+        super();
+    }
 
     /**
      * Constructs a PointerGesture which touches down at the given start point.
@@ -35,6 +39,14 @@ public class PointerGesture {
         }
         mActions.addFirst(new PointerPauseAction(startPoint, 0));
         mDelay = initialDelay;
+    }
+
+    public PointerGesture noDelay() {
+        PointerGesture noDelayGuy = new PointerGesture();
+        noDelayGuy.mActions = mActions;
+        noDelayGuy.mDelay = 0L;
+        noDelayGuy.mDuration = mDuration;
+        return noDelayGuy;
     }
 
     /**
@@ -92,6 +104,9 @@ public class PointerGesture {
         return mDelay;
     }
 
+    public void setDelay(long delay) {
+        mDelay = delay;
+    }
 
     public Point pointAtIgnoringDelay(long time) {
         if (time < 0) {
@@ -175,6 +190,9 @@ public class PointerGesture {
 
         @Override
         public Point interpolate(float fraction) {
+            if (start == end) {
+                return start;
+            }
             Point ret = new Point(start);
             ret.offset((int) (fraction * (end.x - start.x)), (int) (fraction * (end.y - start.y)));
             return ret;

@@ -4,10 +4,13 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import android.util.SparseArray
 import androidx.annotation.CheckResult
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.TaskRuntime
+import top.xjunz.tasker.engine.runtime.ValueRegistry
+import java.lang.ref.WeakReference
 
 /**
  * The base executable element of a [Flow].
@@ -19,6 +22,10 @@ abstract class Applet {
     companion object {
 
         const val NO_ID = -1
+
+        const val REL_AND = 0
+        const val REL_OR = 1
+        const val REL_ANYWAY = 2
 
         /**
          * The bit count used to store the applet index in a flow. We use a `LONG` to track depths
@@ -72,10 +79,6 @@ abstract class Applet {
                 else -> illegalArgument("type", clz)
             }
         }
-
-        const val REL_AND = 0
-        const val REL_OR = 1
-        const val REL_ANYWAY = 2
     }
 
     open var relation = REL_AND
@@ -157,6 +160,38 @@ abstract class Applet {
      */
     var referents: Map<Int, String> = emptyMap()
 
+    val isClone get() = source?.get() != null
+
+    internal var weakKeys: SparseArray<ValueRegistry.WeakKey>? = null
+
+    /**
+     * The source where this is cloned. Could be `null` if this is not a clone or the source is
+     * no longer in usage.
+     */
+    internal var source: WeakReference<Applet>? = null
+
+    fun requireSource(): Applet {
+        return source!!.get()!!
+    }
+
+    @Synchronized
+    fun removeWeakKey(id: Int) {
+        weakKeys?.remove(id)
+    }
+
+    @Synchronized
+    fun getWeakKey(id: Int): ValueRegistry.WeakKey {
+        if (weakKeys == null) {
+            weakKeys = SparseArray()
+        }
+        var key = weakKeys?.get(id)
+        if (key == null) {
+            key = ValueRegistry.WeakKey()
+            weakKeys?.put(id, key)
+        }
+        return key
+    }
+
     fun requireParent() = requireNotNull(parent) {
         "Parent not found!"
     }
@@ -202,7 +237,7 @@ abstract class Applet {
     val rawType: Int
         get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
 
-    protected open fun serializeToString(value: Any): String {
+    protected open fun serializeValueToString(value: Any): String {
         return value.toString()
     }
 
@@ -211,18 +246,19 @@ abstract class Applet {
         return when {
             value == null -> null
             rawType == VAL_TYPE_IRRELEVANT -> null
-            isCollectionValue -> (value as Collection<*>).joinToString(SEPARATOR) {
-                if (it == null) {
-                    SERIALIZED_NULL_VALUE_IN_COLLECTION
-                } else {
-                    serializeToString(it)
+            isCollectionValue ->
+                (value as Collection<*>).joinToString(SEPARATOR) {
+                    if (it == null) {
+                        SERIALIZED_NULL_VALUE_IN_COLLECTION
+                    } else {
+                        serializeValueToString(it)
+                    }
                 }
-            }
-            else -> serializeToString(value)
+            else -> serializeValueToString(value)
         }
     }
 
-    protected open fun deserializeFromString(src: String): Any? {
+    protected open fun deserializeValueFromString(src: String): Any? {
         return when (rawType) {
             VAL_TYPE_IRRELEVANT -> null
             VAL_TYPE_TEXT -> src
@@ -237,14 +273,26 @@ abstract class Applet {
         value = if (src == null) null else if (isCollectionValue) {
             val split = src.split(SEPARATOR)
             split.mapTo(ArrayList(split.size)) {
-                if (it == SERIALIZED_NULL_VALUE_IN_COLLECTION) null else deserializeFromString(it)
+                if (it == SERIALIZED_NULL_VALUE_IN_COLLECTION) null
+                else deserializeValueFromString(it)
             }
         } else {
-            deserializeFromString(src)
+            deserializeValueFromString(src)
         }
     }
 
     override fun toString(): String {
         return javaClass.simpleName
     }
+
+    override fun hashCode(): Int {
+        return source?.get()?.hashCode() ?: super.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Applet) return false
+        return super.equals(other)
+    }
+
 }

@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         tools:targetApi="tiramisu">
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Base">

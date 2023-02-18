@@ -49,23 +49,23 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
         updateViewLayout()
     }
 
-    protected fun animateShow() {
-        if (rootView.isVisible) return
-        rootView.isVisible = true
-        rootView.scaleX = .98F
-        rootView.scaleY = .98F
-        rootView.alpha = 0F
-        rootView.animate().alpha(1F).scaleX(1F).setDuration(150)
+    protected fun animateShow(view: View = rootView) {
+        if (view.isVisible) return
+        view.isVisible = true
+        view.scaleX = .98F
+        view.scaleY = .98F
+        view.alpha = 0F
+        view.animate().alpha(1F).scaleX(1F).setDuration(150)
             .setInterpolator(Motions.EASING_EMPHASIZED)
             .scaleY(1F)
     }
 
-    protected fun animateHide() {
-        if (!rootView.isVisible) return
-        rootView.animate().alpha(0F).scaleX(.98F).setDuration(150)
+    protected fun animateHide(view: View = rootView) {
+        if (!view.isVisible) return
+        view.animate().alpha(0F).scaleX(.98F).setDuration(150)
             .setInterpolator(Motions.EASING_EMPHASIZED)
             .scaleY(.98F).doWhenEnd {
-                rootView.isVisible = false
+                view.isVisible = false
             }
     }
 

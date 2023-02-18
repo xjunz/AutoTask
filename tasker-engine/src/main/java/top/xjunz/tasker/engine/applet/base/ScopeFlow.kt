@@ -7,7 +7,7 @@ package top.xjunz.tasker.engine.applet.base
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
- * A [ScopeFlow] initializes its target at [Flow.onPrepare]. The target will be used by all of its
+ * A [ScopeFlow] initializes its target at [Flow.onPrepareApply]. The target will be used by all of its
  * elements.
  *
  * @author xjunz 2022/12/04
@@ -26,7 +26,7 @@ abstract class ScopeFlow<Target : Any> : Flow() {
 
     /**
      * Generate the overall target. The result will be registered to the snapshot in runtime
-     * and can be accessed across tasks with a key. This is done in [onPrepare].
+     * and can be accessed across tasks with a key. This is done in [onPrepareApply].
      */
     abstract fun initializeTarget(runtime: TaskRuntime): Target
 
@@ -44,13 +44,13 @@ abstract class ScopeFlow<Target : Any> : Flow() {
         return seed.toLong() shl Int.SIZE_BITS or id.toLong()
     }
 
-    override fun onPrepare(runtime: TaskRuntime) {
-        super.onPrepare(runtime)
+    override fun onPrepareApply(runtime: TaskRuntime) {
+        super.onPrepareApply(runtime)
         if (targetKey == -1L) {
             targetKey = generateTargetKey()
         }
         runtime.setTarget(
-            runtime.getGlobal(targetKey) {
+            runtime.getGlobalValue(TaskRuntime.GLOBAL_SCOPE_EVENT, targetKey) {
                 initializeTarget(runtime)
             }
         )

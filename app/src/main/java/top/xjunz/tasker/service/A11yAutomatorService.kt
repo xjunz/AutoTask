@@ -17,6 +17,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.view.InputEvent
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -37,6 +38,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
+import top.xjunz.tasker.uiautomator.A11yGestureController
 import top.xjunz.tasker.uiautomator.A11yUiAutomatorBridge
 import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
@@ -44,6 +46,7 @@ import java.lang.ref.WeakReference
 
 /**
  * @see ShizukuAutomatorService
+ *
  * @author xjunz 2022/07/12
  */
 class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutomationConnection,
@@ -69,8 +72,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    var isInspectorMode = false
-        private set
+    val isInspectorShown get() = ::inspector.isInitialized && inspector.isShown
+
+    val gestureController: A11yGestureController by lazy {
+        uiAutomatorBridge.gestureController as A11yGestureController
+    }
+
+    private var isInspectorMode = false
 
     lateinit var inspector: FloatingInspector
         private set
@@ -112,7 +120,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
                         || event.type == Event.EVENT_ON_PACKAGE_ENTERED
             }
             if (hit != null)
-                inspectorViewModel.currentComp.postValue(
+                inspectorViewModel.currentComponent.postValue(
                     ComponentInfoWrapper.wrap(hit.componentInfo)
                 )
         }
@@ -136,7 +144,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             if (!isInspectorMode) {
                 residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
             }
-            a11yEventDispatcher.startProcessing()
+            a11yEventDispatcher.start()
             runningState.value = true
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
             startTimestamp = System.currentTimeMillis()
@@ -149,38 +157,39 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    fun suppressTaskScheduler() {
-        if (::residentTaskScheduler.isLazilyInitialized) {
-            residentTaskScheduler.isSuppressed = true
-        }
-    }
-
     fun destroyFloatingInspector() {
         inspector.dismiss()
         stopListeningComponentChanges()
         if (isInspectorMode) {
             disableSelf()
-        } else if (::residentTaskScheduler.isLazilyInitialized) {
-            residentTaskScheduler.isSuppressed = false
+        } else if (serviceController.isServiceRunning) {
+            currentService.suppressResidentTaskScheduler(false)
         }
     }
 
-    fun isInspectorShown(): Boolean {
-        return ::inspector.isInitialized && inspector.isShown
+    fun showFloatingInspector(mode: InspectorMode) {
+        if (isInspectorShown) {
+            if (inspector.mode != mode) {
+                inspector.mode = mode
+            }
+        } else {
+            inspectorViewModel = InspectorViewModel()
+            inspectorViewModel.currentMode.value = mode
+            inspector = FloatingInspector(this, inspectorViewModel)
+            inspector.show()
+        }
+        performGlobalAction(GLOBAL_ACTION_HOME)
     }
 
-    fun showFloatingInspector(mode: InspectorMode) {
-        if (isInspectorShown()) return
-        inspectorViewModel = InspectorViewModel()
-        inspectorViewModel.currentMode.value = mode
-        inspector = FloatingInspector(this, inspectorViewModel)
-        inspector.show()
-        performGlobalAction(GLOBAL_ACTION_HOME)
+    override fun suppressResidentTaskScheduler(suppress: Boolean) {
+        if (::residentTaskScheduler.isLazilyInitialized) {
+            residentTaskScheduler.isSuppressed = suppress
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        if (isInspectorShown()) {
+        if (isInspectorShown) {
             // Recreate the inspector
             inspector.dismiss()
             inspectorViewModel.onConfigurationChanged()
@@ -191,6 +200,19 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         callbacks?.onAccessibilityEvent(event)
+    }
+
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        if (isInspectorShown && event.action == KeyEvent.ACTION_UP) {
+            if (event.keyCode == KeyEvent.KEYCODE_BACK
+                || event.keyCode == KeyEvent.KEYCODE_HOME
+                || event.keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                || event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+            ) {
+                inspectorViewModel.recordKeyEvent(event.keyCode)
+            }
+        }
+        return super.onKeyEvent(event)
     }
 
     override fun onInterrupt() {
@@ -207,7 +229,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             residentTaskScheduler.shutdown()
         }
         LocalTaskManager.clearAllSnapshots()
-        if (isInspectorShown()) inspector.dismiss()
+        if (isInspectorShown) inspector.dismiss()
         if (::uiAutomationHidden.isInitialized) {
             uiAutomationHidden.disconnect()
         }

@@ -16,11 +16,11 @@ import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
-import androidx.core.view.postDelayed
 import androidx.lifecycle.lifecycleScope
 import androidx.test.uiautomator.PointerGesture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
@@ -28,14 +28,13 @@ import top.xjunz.tasker.databinding.OverlayInspectorBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.gesture.GestureRecorder
+import top.xjunz.tasker.task.gesture.SerializableInputEvent
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.task.inspector.StableNodeInfo.Companion.freeze
-import top.xjunz.tasker.uiautomator.A11yGestureController
-import top.xjunz.tasker.uiautomator.GestureRecorder
-import top.xjunz.tasker.util.Router.launchAction
-import top.xjunz.tasker.util.Router.launchRoute
+import top.xjunz.tasker.ui.main.EventCenter
 
 /**
  * @author xjunz 2022/10/16
@@ -93,8 +92,8 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                 }
             }
             inspector.observe(vm.isCollapsed) {
-                rootView.isVisible = !it
                 if (it) {
+                    rootView.isVisible = false
                     if (vm.currentMode eq InspectorMode.UI_OBJECT) {
                         screenshot?.recycle()
                         screenshot = null
@@ -104,12 +103,22 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                         inspectorView.background = null
                     } else if (vm.currentMode eq InspectorMode.GESTURE_RECORDER) {
                         gestureRecorder.deactivate()
+                        vm.isRecordingGesture.value = false
                     }
                 } else {
+                    rootView.isVisible = true
                     if (vm.currentMode eq InspectorMode.GESTURE_RECORDER) {
-                        vm.makeToast(R.string.tip_gesture_recorder)
-                        gestureRecorder.activate()
-                    } else if (vm.currentMode eq InspectorMode.UI_OBJECT) captureWindowSnapshot()
+                        if (vm.recordedEvents.require().isEmpty()) {
+                            vm.makeToast(R.string.tip_gesture_recorder)
+                            gestureRecorder.activate()
+                            vm.clearAllRecordedEvents()
+                            vm.isRecordingGesture.value = true
+                        } else {
+                            rootView.isVisible = false
+                        }
+                    } else if (vm.currentMode eq InspectorMode.UI_OBJECT) {
+                        captureWindowSnapshot()
+                    }
                 }
             }
             inspector.observe(vm.highlightNode) {
@@ -123,9 +132,9 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
             }
             inspector.observeTransient(vm.onCoordinateSelected) {
                 if (binding.inspectorView.isPointerMoved()) {
-                    context.launchAction(
-                        FloatingInspector.ACTION_COORDINATE_SELECTED,
-                        IntValueUtil.composeCoordinate(
+                    EventCenter.routeEvent(
+                        FloatingInspector.EVENT_COORDINATE_SELECTED,
+                        IntValueUtil.composeXY(
                             binding.inspectorView.getCoordinateX(),
                             binding.inspectorView.getCoordinateY()
                         )
@@ -135,10 +144,48 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                 }
             }
             inspector.observeTransient(vm.onComponentSelected) {
-                if (vm.currentComp.isNull()) {
+                if (vm.currentComponent.isNull()) {
                     toast(R.string.error_no_selection)
                 } else {
-                    context.launchRoute(FloatingInspector.ACTION_COMPONENT_SELECTED)
+                    EventCenter.routeEvent(
+                        FloatingInspector.EVENT_COMPONENT_SELECTED,
+                        vm.currentComponent.require()
+                    )
+                }
+            }
+            inspector.observeTransient(vm.requestRecordingState) {
+                rootView.isVisible = it
+                if (it) {
+                    gestureRecorder.activate()
+                } else {
+                    gestureRecorder.deactivate()
+                    vm.showGestures.value = true
+                }
+                vm.isRecordingGesture.value = it
+            }
+            inspector.observeTransient(vm.requestReplayGestures) {
+                inspector.lifecycleScope.launch {
+                    delay(300)
+                    for (event in it) {
+                        if (event.type == SerializableInputEvent.INPUT_TYPE_KEY) {
+                            event.execute()
+                        } else a11yAutomatorService.gestureController.performSinglePointerGestures(
+                            event.getGesture()
+                        ) { curDuration, finished ->
+                            if (finished) {
+                                vm.onGesturePlaybackEnded.value = true
+                            } else if (curDuration == 0L) {
+                                vm.onGesturePlaybackStarted.value = event.getGesture()
+                            } else {
+                                vm.currentGesturePlaybackDuration.value = curDuration
+                            }
+                        }
+                    }
+                    a11yAutomatorService.a11yEventDispatcher.waitForIdle(500, 5000)
+                    if (vm.showGestures.isNotTrue) {
+                        vm.makeToast(R.string.playback_finished)
+                        vm.showGestures.value = true
+                    }
                 }
             }
         }
@@ -193,26 +240,28 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
     }
 
     override fun onGestureStarted(startDelay: Long) {
-
     }
 
     override fun onGestureEnded(gesture: PointerGesture, duration: Long) {
         binding.gestureRecorderView.clearDrawingPath()
         rootView.isVisible = false
         val start = SystemClock.uptimeMillis()
-        rootView.postDelayed(DELAY_PERFORM_GESTURE.toLong()) {
-            inspector.lifecycleScope.launch {
-                vm.playbackGesture.value = gesture
-                (a11yAutomatorService.uiAutomatorBridge.gestureController as A11yGestureController)
-                    .performGesture(gesture) { curDuration, succeeded ->
-                        if (succeeded != null) {
-                            rootView.isVisible = true
-                            vm.onGesturePerformed.value = true
-                        } else {
-                            vm.currentDuration.value = curDuration
-                        }
-                        gestureRecorder.extraDelay = SystemClock.uptimeMillis() - start
+        inspector.lifecycleScope.launch {
+            delay(DELAY_PERFORM_GESTURE.toLong())
+            vm.onGesturePlaybackStarted.value = gesture
+            a11yAutomatorService.gestureController.performSinglePointerGesture(
+                true, gesture
+            ) { curDuration, succeeded ->
+                if (succeeded != null) {
+                    rootView.isVisible = true
+                    vm.onGesturePlaybackEnded.value = true
+                    if (succeeded) {
+                        vm.recordGesture(gesture)
                     }
+                } else {
+                    vm.currentGesturePlaybackDuration.value = curDuration
+                }
+                gestureRecorder.extraDelay = SystemClock.uptimeMillis() - start
             }
         }
     }

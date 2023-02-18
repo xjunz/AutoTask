@@ -11,8 +11,8 @@ import androidx.fragment.app.FragmentManager
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.isContainer
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog

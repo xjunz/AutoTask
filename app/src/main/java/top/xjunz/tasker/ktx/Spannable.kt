@@ -14,7 +14,7 @@ import android.text.style.*
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.core.text.set
-import top.xjunz.tasker.ui.ColorScheme
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ClickUtil
 
 /**

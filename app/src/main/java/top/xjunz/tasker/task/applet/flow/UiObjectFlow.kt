@@ -18,7 +18,7 @@ import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
  */
 class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
 
-    private val rootNodeKey = generateUniqueKey(1)
+    private val ROOT_NODE_KEY = generateUniqueKey(1)
 
     override val isRepetitive: Boolean = true
 
@@ -28,7 +28,7 @@ class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         val ctx = runtime.target
-        val node = runtime.getGlobal(rootNodeKey) {
+        val node = runtime.getGlobalValue(TaskRuntime.GLOBAL_SCOPE_EVENT, ROOT_NODE_KEY) {
             uiAutomation.rootInActiveWindow
         }.findFirst(false) {
             ctx.source = it

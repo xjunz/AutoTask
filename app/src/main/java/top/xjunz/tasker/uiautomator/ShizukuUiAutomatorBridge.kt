@@ -12,13 +12,14 @@ import androidx.test.uiautomator.UiDevice
 /**
  * @author xjunz 2022/09/30
  */
-class ShizukuUiAutomatorBridge(uiAutomation: UiAutomation) : ContextUiAutomatorBridge(uiAutomation) {
+class ShizukuUiAutomatorBridge(uiAutomation: UiAutomation) :
+    ContextUiAutomatorBridge(uiAutomation) {
 
     override fun getInteractionController(): InteractionController {
         return InteractionController(this)
     }
 
     override fun getGestureController(device: UiDevice): GestureController {
-        return GestureController(device)
+        return ShizukuGestureController(device)
     }
 }

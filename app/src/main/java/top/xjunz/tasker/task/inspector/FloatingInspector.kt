@@ -13,7 +13,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
-import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.task.inspector.overlay.*
@@ -25,9 +24,11 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
 
     companion object {
 
-        const val ACTION_COORDINATE_SELECTED = "inspector.action.COORDINATE_SELECTED"
-        const val ACTION_COMPONENT_SELECTED = "inspector.action.COMPONENT_SELECTED"
-        const val ACTION_NODE_INFO_SELECTED = "inspector.action.NODE_INFO_SELECTED"
+        const val EVENT_COORDINATE_SELECTED = "inspector.event.COORDINATE_SELECTED"
+        const val EVENT_COMPONENT_SELECTED = "inspector.event.COMPONENT_SELECTED"
+        const val EVENT_NODE_INFO_SELECTED = "inspector.event.NODE_INFO_SELECTED"
+        const val EVENT_GESTURES_RECORDED = "inspector.event.GESTURES_RECORDED"
+        const val EVENT_REQUEST_EDIT_GESTURES = "inspector.event.REQUEST_EDIT_GESTURES"
 
         fun isReady(): Boolean {
             return Settings.canDrawOverlays(app) && A11yAutomatorService.get() != null
@@ -53,7 +54,8 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         ExpandedBubbleOverlay(this),
         NodeTreeOverlay(this),
         nodeInfo,
-        ToastOverlay(this)
+        GestureShowcaseOverlay(this),
+        ToastOverlay(this),
     )
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -83,10 +85,6 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
             it.removeFromWindowManager()
         }
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-    }
-
-    fun getSelectedApplets(): List<Applet> {
-        return nodeInfo.getCheckedOptions()
     }
 
     /**

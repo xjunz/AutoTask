@@ -11,7 +11,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 internal class DslFlow(private val initialTarget: Any? = null) : RootFlow() {
 
-    override fun onPrepare(runtime: TaskRuntime) {
+    override fun onPrepareApply(runtime: TaskRuntime) {
         if (initialTarget != null)
             runtime.setTarget(initialTarget)
     }

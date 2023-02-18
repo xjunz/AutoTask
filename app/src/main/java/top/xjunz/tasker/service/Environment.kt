@@ -18,7 +18,7 @@ inline val serviceController get() = OperatingMode.CURRENT.serviceController
 inline val currentService: AutomatorService
     get() = if (isAppProcess) serviceController.requireService() else ShizukuAutomatorService.require()
 
-inline val isFloatingInspectorShown get() = A11yAutomatorService.get()?.isInspectorShown() == true
+inline val isFloatingInspectorShown get() = A11yAutomatorService.get()?.isInspectorShown == true
 
 inline val a11yAutomatorService get() = A11yAutomatorService.require()
 

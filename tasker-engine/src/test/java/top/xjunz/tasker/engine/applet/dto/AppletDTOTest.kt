@@ -47,7 +47,6 @@ internal class AppletDTOTest {
                     valueType = Applet.VAL_TYPE_INT
                     id = 5
                     isInverted = true
-                    isAnd = false
                 }
             }
         }
