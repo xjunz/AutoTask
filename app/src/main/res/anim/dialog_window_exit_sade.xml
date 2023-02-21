@@ -3,18 +3,19 @@
   -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/material_motion_duration_short_1"
+    android:duration="@integer/material_motion_duration_short_2"
+    android:interpolator="@android:interpolator/fast_out_linear_in"
     android:ordering="together">
 
     <alpha
         android:fromAlpha="1.0"
-        android:toAlpha="0.0" />
+        android:toAlpha="0" />
 
     <scale
         android:fromXScale="1.0"
         android:fromYScale="1.0"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:toXScale=".95"
-        android:toYScale=".95" />
+        android:toXScale="1"
+        android:toYScale="1" />
 </set>

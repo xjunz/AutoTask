@@ -29,21 +29,14 @@ class EventFilter(eventType: Int) : Applet() {
         return if (hit == null) {
             AppletResult.EMPTY_FAILURE
         } else {
-            runtime.hitEvent = hit
             val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)
             when (hit.type) {
                 Event.EVENT_ON_NOTIFICATION_RECEIVED -> {
-                    AppletResult.succeeded(
-                        NotificationReferent(
-                            wrapper,
-                            hit.getExtra(NotificationReferent.EXTRA_IS_TOAST)
-                        )
-                    )
+                    NotificationReferent(
+                        wrapper, hit.getExtra(NotificationReferent.EXTRA_IS_TOAST)
+                    ).asResult()
                 }
-                Event.EVENT_ON_PACKAGE_ENTERED, Event.EVENT_ON_PACKAGE_EXITED -> {
-                    AppletResult.succeeded(wrapper)
-                }
-                else -> AppletResult.succeeded(wrapper)
+                else -> wrapper.asResult()
             }
         }
     }

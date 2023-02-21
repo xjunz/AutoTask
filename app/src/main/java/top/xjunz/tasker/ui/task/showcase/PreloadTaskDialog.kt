@@ -23,7 +23,7 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/21
@@ -55,7 +55,7 @@ class PreloadTaskDialog : BaseBottomSheetDialog<DialogPreloadTasksBinding>() {
 
     private val adapter: Adapter<*> by lazy {
         inlineAdapter(TaskStorage.getPreloadTasks(), ItemPreloadTaskBinding::class.java, {
-            binding.btnAdd.setAntiMoneyClickListener {
+            binding.btnAdd.setNoDoubleClickListener {
                 parentViewModel.requestAddNewTask.value =
                     TaskStorage.getPreloadTasks()[adapterPosition]
             }

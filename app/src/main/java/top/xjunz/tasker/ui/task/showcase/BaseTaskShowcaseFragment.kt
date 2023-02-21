@@ -27,7 +27,7 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/16
@@ -55,18 +55,18 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 v.isChecked = !isChecked
                 viewModel.requestToggleTask.value = taskList[adapterPosition]
             }
-            binding.ibDelete.setAntiMoneyClickListener {
+            binding.ibDelete.setNoDoubleClickListener {
                 viewModel.requestDeleteTask.value = taskList[adapterPosition]
             }
-            binding.ibTrack.setAntiMoneyClickListener {
+            binding.ibTrack.setNoDoubleClickListener {
                 val task = taskList[adapterPosition]
                 if (LocalTaskManager.getSnapshotCount(task) == 0) {
                     toast(R.string.no_task_snapshots)
-                    return@setAntiMoneyClickListener
+                    return@setNoDoubleClickListener
                 }
                 viewModel.requestTrackTask.value = task
             }
-            binding.ibEdit.setAntiMoneyClickListener {
+            binding.ibEdit.setNoDoubleClickListener {
                 viewModel.requestEditTask.value = taskList[adapterPosition] to null
             }
         }
@@ -113,11 +113,6 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             } else {
                 b.msEnabled.setText(R.string.not_is_enabled)
                 b.wave.fadeOut()
-            }
-            if (viewModel.isPaused.isTrue) {
-                b.wave.pause()
-            } else {
-                b.wave.resume()
             }
         }
 
@@ -176,18 +171,6 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         observeTransient(viewModel.onTaskUpdated) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)
         }
-        observe(viewModel.isPaused) {
-            adapter.notifyItemRangeChanged(0, taskList.size, true)
-        }
-    }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.isPaused.value = true
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.isPaused.value = false
     }
 }

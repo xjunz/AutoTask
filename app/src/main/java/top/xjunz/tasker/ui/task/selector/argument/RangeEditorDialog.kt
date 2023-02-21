@@ -16,7 +16,7 @@ import top.xjunz.tasker.databinding.DialogRangeEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/10/26
@@ -120,7 +120,7 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         binding.btnNoMinLimit.setOnClickListener {
             binding.etMinimum.text.clear()
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             val min: Number? = binding.etMinimum.textString.toNumberOrNull()
             val max: Number? = binding.etMaximum.textString.toNumberOrNull()
             if (!hasError(min, max)) {

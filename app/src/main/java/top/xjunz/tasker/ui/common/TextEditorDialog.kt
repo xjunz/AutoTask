@@ -21,7 +21,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/05/10
@@ -121,10 +121,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                 tilInput.isVisible = true
             }
             viewModel.editTextConfig?.invoke(inputBox)
-            btnPositive.setAntiMoneyClickListener {
+            btnPositive.setNoDoubleClickListener {
                 if (!viewModel.allowEmptyInput && inputBox.text.isEmpty()) {
                     toastAndShake(R.string.error_empty_input)
-                    return@setAntiMoneyClickListener
+                    return@setNoDoubleClickListener
                 }
                 val error = viewModel.onConfirmed(inputBox.textString)
                 if (error == null) {
@@ -133,28 +133,34 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     toastAndShake(error)
                 }
             }
-            if (!viewModel.defText.isNullOrEmpty()) {
-                inputBox.doAfterTextChanged {
-                    if (it?.toString() != viewModel.defText) {
-                        btnNegative.setText(R.string.reset)
+            inputBox.doAfterTextChanged {
+                if (!it.isNullOrEmpty()) {
+                    btnNegative.setText(R.string.clear_all)
+                } else {
+                    if (viewModel.defText.isNullOrEmpty()) {
+                        btnNegative.setText(android.R.string.cancel)
                     } else {
-                        btnNegative.setText(R.string.clear_all)
+                        btnNegative.setText(R.string._default)
                     }
                 }
             }
-            if (savedInstanceState == null)
-                inputBox.setText(viewModel.defText)
 
+            if (savedInstanceState == null) inputBox.setText(viewModel.defText)
             inputBox.setSelectionToEnd()
             showSoftInput(inputBox)
+
             btnNegative.setOnClickListener {
-                if (viewModel.defText.isNullOrEmpty()) {
-                    dismiss()
-                } else if (inputBox.textString == viewModel.defText) {
-                    inputBox.text.clear()
-                } else {
-                    inputBox.setText(viewModel.defText)
-                    inputBox.setSelectionToEnd()
+                when (btnNegative.text.toString()) {
+                    R.string.clear_all.str -> {
+                        inputBox.text.clear()
+                    }
+                    R.string._default.str -> {
+                        inputBox.setText(viewModel.defText)
+                        inputBox.setSelectionToEnd()
+                    }
+                    android.R.string.cancel.str -> {
+                        dismiss()
+                    }
                 }
             }
             ibDismiss.setOnClickListener {
@@ -172,7 +178,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             return@l false
         }
         binding.cvContainer.isVisible = viewModel.variantType != -1
-        binding.cvContainer.setAntiMoneyClickListener {
+        binding.cvContainer.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }
         doOnEventRouted<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
@@ -183,5 +189,4 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             }
         }
     }
-
 }

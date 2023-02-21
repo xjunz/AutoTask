@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemApplicationInfoBinding
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/07/03
@@ -39,7 +39,7 @@ class PackageInfoAdapter(
         RecyclerView.ViewHolder(binding.root) {
         init {
             binding.ivMore.isVisible = viewModel.mode != ComponentSelectorDialog.MODE_PACKAGE
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 host.onPackageItemClicked(data[adapterPosition], binding)
             }
         }

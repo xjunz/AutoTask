@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             binding.tvMode.text = it.name
             binding.btnRun.isEnabled = it == OperatingMode.Accessibility
         }
-        observeImportantConfirmation(
+        observeDangerousConfirmation(
             viewModel.stopServiceConfirmation,
             R.string.prompt_stop_service,
             R.string.stop
@@ -263,8 +263,9 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        Shizuku.removeRequestPermissionResultListener(this)
         serviceController.unbindService()
+        DialogStackManager.destroyAll()
+        Shizuku.removeRequestPermissionResultListener(this)
         ColorScheme.release()
     }
 

@@ -4,7 +4,7 @@
 
 package top.xjunz.tasker.ktx
 
-import android.animation.ObjectAnimator
+import android.animation.TimeInterpolator
 import android.annotation.SuppressLint
 import android.content.res.TypedArray
 import android.graphics.Bitmap
@@ -28,8 +28,10 @@ import androidx.core.graphics.applyCanvas
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import top.xjunz.tasker.R
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.Motions
+import kotlin.math.exp
+import kotlin.math.sin
 
 /**
  * @author xjunz 2022/2/10
@@ -180,11 +182,17 @@ fun AutoCompleteTextView.setEntries(
     }
 }
 
+/**
+ * Perform a sine wave decaying shaking animation on a [View].
+ * From https://stackoverflow.com/a/66824099
+ */
 fun View.shake() {
-    ObjectAnimator.ofFloat(
-        this, View.TRANSLATION_X,
-        0F, 20F, -20F, 15F, -15F, 10F, -10F, 5F, -5F, 0F
-    ).start()
+    val freq = 4f
+    val decay = 2f
+    val interpolator = TimeInterpolator {
+        (sin(freq * it * 2 * Math.PI) * exp(-it * decay)).toFloat()
+    }
+    animate().xBy(-25f).setInterpolator(interpolator).start()
 }
 
 /**
@@ -234,7 +242,7 @@ fun View.unblockTouch() {
 
 fun View.setHelp(help: CharSequence) {
     background = android.R.attr.selectableItemBackground.resolvedId.getDrawable()
-    setAntiMoneyClickListener {
+    setNoDoubleClickListener {
         context.makeSimplePromptDialog(R.string.help.str, help).show()
     }
 }

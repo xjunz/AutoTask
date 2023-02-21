@@ -9,7 +9,7 @@ package top.xjunz.tasker.engine.runtime
  */
 class ComponentInfo {
 
-    lateinit var packageName: String
+    var packageName: String? = null
 
     var activityName: String? = null
 

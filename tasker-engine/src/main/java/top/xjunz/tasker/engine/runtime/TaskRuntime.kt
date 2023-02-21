@@ -16,6 +16,9 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.WaitFor
+import top.xjunz.tasker.engine.runtime.Event.Companion.lockAll
+import top.xjunz.tasker.engine.runtime.Event.Companion.recycleAll
+import top.xjunz.tasker.engine.runtime.Event.Companion.unlockAll
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
@@ -79,9 +82,10 @@ class TaskRuntime private constructor() {
     val events: Array<out Event> get() = _events!!
 
     /**
-     * Identify all arguments applied to the task runtime.
+     * Identify all arguments applied to the task runtime. This is helpful for judging whether
+     * runtimes are identical when hitting the same applet.
      */
-    val fingerprint: Long get() = crc.value
+    val fingerprint: Long get() = fingerprintCrc.value
 
     var isSuspending = false
 
@@ -92,13 +96,20 @@ class TaskRuntime private constructor() {
      */
     var isSuccessful = true
 
+    /**
+     * The current waiting [WaitFor], whose [WaitFor.remind] will be called when new events arrive.
+     *
+     * @see onNewEvents
+     */
     var waitingFor: WaitFor? = null
-
-    lateinit var hitEvent: Event
 
     lateinit var currentApplet: Applet
 
     lateinit var currentFlow: Flow
+
+    private val fingerprintCrc = CRC32()
+
+    private val referents = ArrayMap<String, IndexedReferent>()
 
     private val eventValueRegistry: ValueRegistry get() = _eventValueRegistry!!
 
@@ -107,8 +118,6 @@ class TaskRuntime private constructor() {
     private var _result: AppletResult? = null
 
     private var _eventValueRegistry: ValueRegistry? = null
-
-    private lateinit var task: XTask
 
     @get:Synchronized
     @set:Synchronized
@@ -119,12 +128,10 @@ class TaskRuntime private constructor() {
      */
     private var target: Any? = null
 
-    private val crc = CRC32()
-
-    private val referents = ArrayMap<String, IndexedReferent>()
+    private lateinit var task: XTask
 
     fun updateFingerprint(any: Any?) {
-        crc.update(any.hashCode())
+        fingerprintCrc.update(any.hashCode())
     }
 
     fun ensureActive() {
@@ -140,6 +147,9 @@ class TaskRuntime private constructor() {
      * within an [ValueRegistry].
      */
     fun <V : Any> getGlobalValue(scope: Int, key: Any, initializer: () -> V): V {
+        for (event in events) {
+            event.recycle()
+        }
         val registry = when (scope) {
             GLOBAL_SCOPE_EVENT -> eventValueRegistry
             GLOBAL_SCOPE_TASK -> task
@@ -199,32 +209,36 @@ class TaskRuntime private constructor() {
         return target
     }
 
-    fun <T> getTarget(): T {
-        return requireNotNull(target) {
-            "Target is not set!"
-        }.casted()
-    }
+    fun <T> getTarget() = requireNotNull(target) { "Target is not set!" }.casted<T>()
 
-    fun onNewEvents(events: Array<out Event>) {
-        waitingFor?.let {
-            _events = events
-            it.trigger()
+    /**
+     * Called when new events arrive while this runtime is still active.
+     */
+    fun onNewEvents(newEvents: Array<out Event>) {
+        if (waitingFor == null) {
+            newEvents.recycleAll()
+        } else {
+            newEvents.lockAll(this)
+            _events?.unlockAll(this)
+            _events = newEvents
+            waitingFor?.remind()
         }
     }
 
     fun recycle() {
+        _events?.unlockAll(this)
         _eventValueRegistry = null
         _events = null
+        _result = null
         runtimeScope = null
         referents.clear()
         tracker.reset()
         isSuspending = false
         observer = null
-        _result = null
         target = null
         isSuccessful = true
         waitingFor = null
-        crc.reset()
+        fingerprintCrc.reset()
         Pool.release(this)
     }
 

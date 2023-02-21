@@ -75,14 +75,12 @@ class SerializableInputEvent(
             return (x.toLong() shl 16 or y.toLong() or (duration shl 32)).toString(16)
         }
 
-        private fun PointerGesture.flattenToString(): String {
-            val sb = StringBuilder()
+        private fun PointerGesture.flattenToString() = buildString {
             var point: Point
             actions.forEach {
-                point = if (sb.isEmpty()) it.start else it.end
-                sb.append(point.flatten(it.duration)).append(MOTION_FLATTEN_SEPARATOR)
+                point = if (isEmpty()) it.start else it.end
+                append(point.flatten(it.duration)).append(MOTION_FLATTEN_SEPARATOR)
             }
-            return sb.toString()
         }
     }
 

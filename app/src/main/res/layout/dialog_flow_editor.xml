@@ -63,8 +63,7 @@
                     android:drawableTint="?colorPrimary"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:paddingHorizontal="4dp"
                     android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
                     app:layout_constrainedWidth="true"
@@ -131,7 +130,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cv_metadata"
+                android:id="@+id/cv_header"
                 style="@style/Widget.Material3.CardView.Filled"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -148,7 +147,7 @@
                     android:layout_height="wrap_content">
 
                     <TextView
-                        android:id="@+id/tv_snapshot_title"
+                        android:id="@+id/tv_header_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
@@ -157,29 +156,31 @@
                         android:maxLines="3"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?colorPrimary"
-                        app:layout_constraintEnd_toStartOf="@+id/ib_snapshot_selector"
+                        app:layout_constraintEnd_toStartOf="@+id/ib_header_action"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="@tools:sample/lorem" />
 
                     <TextView
-                        android:id="@+id/tv_snapshot_desc"
+                        android:id="@+id/tv_header_desc"
+                        app:layout_goneMarginTop="0dp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:layout_marginEnd="8dp"
                         android:ellipsize="end"
                         android:maxLines="5"
-                        app:layout_constraintEnd_toEndOf="@+id/tv_snapshot_title"
-                        app:layout_constraintStart_toStartOf="@+id/tv_snapshot_title"
-                        app:layout_constraintTop_toBottomOf="@id/tv_snapshot_title"
+                        app:layout_constraintEnd_toStartOf="@id/ib_header_action"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_header_title"
                         tools:text="@tools:sample/lorem/random" />
 
                     <ImageButton
-                        android:id="@+id/ib_snapshot_selector"
+                        android:id="@+id/ib_header_action"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:background="@drawable/bg_selectable_circle"
-                        android:contentDescription="@{@string/more}"
+                        android:contentDescription="@{@string/task_snapshots}"
                         android:src="@drawable/ic_timeline_24px"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

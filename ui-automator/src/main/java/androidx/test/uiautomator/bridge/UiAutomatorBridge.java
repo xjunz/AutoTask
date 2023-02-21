@@ -7,6 +7,7 @@ package androidx.test.uiautomator.bridge;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.UiAutomation;
 import android.graphics.Bitmap;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -20,8 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -53,7 +53,7 @@ public abstract class UiAutomatorBridge {
 
     private GestureController mGestureController;
 
-    private final List<UiAutomation.OnAccessibilityEventListener> mEventListeners = new ArrayList<>(2);
+    private final Set<UiAutomation.OnAccessibilityEventListener> mEventListeners = new ArraySet<>(2);
 
     private final UiAutomation.OnAccessibilityEventListener mEventListener = event -> {
         try {

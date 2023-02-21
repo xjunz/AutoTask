@@ -20,7 +20,7 @@ import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.TaskMetadataEditor
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/14
@@ -40,29 +40,29 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.containerResidentTasks.setAntiMoneyClickListener {
+        binding.containerResidentTasks.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str)
             TaskMetadataEditor().init(metadata) {
                 viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
         }
-        binding.containerOneshot.setAntiMoneyClickListener {
+        binding.containerOneshot.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str, XTask.TYPE_ONESHOT)
             TaskMetadataEditor().init(metadata) {
                 viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
         }
-        binding.containerImportTasks.setAntiMoneyClickListener {
+        binding.containerImportTasks.setNoDoubleClickListener {
 
         }
-        binding.tvClickMode.setAntiMoneyClickListener {
+        binding.tvClickMode.setNoDoubleClickListener {
 
         }
-        binding.tvRecordGesture.setAntiMoneyClickListener {
+        binding.tvRecordGesture.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER)
                 .show(childFragmentManager)
         }
-        binding.containerPreloadTasks.setAntiMoneyClickListener {
+        binding.containerPreloadTasks.setNoDoubleClickListener {
             PreloadTaskDialog().show(requireParentFragment().childFragmentManager)
         }
         observeTransient(viewModel.onMetadataEdited) { metadata ->

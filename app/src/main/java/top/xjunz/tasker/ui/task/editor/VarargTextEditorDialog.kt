@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView.Adapter
+import com.google.android.material.snackbar.Snackbar
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogVarargTextEditorBinding
@@ -23,7 +24,7 @@ import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2023/02/05
@@ -90,7 +91,7 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
 
     private val adapter: Adapter<*> by lazy {
         inlineAdapter(viewModel.args, ItemVarargTextBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 val position = adapterPosition
                 val arg = viewModel.args[position]
                 if (arg.isSpecified) {
@@ -105,15 +106,15 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
                     popup.menu.add(R.string.refer_to)
                     popup.setOnMenuItemClickListener { item ->
                         when (item.title?.toString()) {
-                            R.string.edit.str -> showTextInputDialog(adapterPosition)
-                            R.string.refer_to.str -> showReferenceSelectorDialog(adapterPosition)
+                            R.string.edit.str -> showTextInputDialog(position)
+                            R.string.refer_to.str -> showReferenceSelectorDialog(position)
                         }
                         return@setOnMenuItemClickListener true
                     }
                     popup.show()
                 }
             }
-            binding.ibAdd.setAntiMoneyClickListener { btn ->
+            binding.ibAdd.setNoDoubleClickListener { btn ->
                 val curArg = viewModel.args[adapterPosition]
                 if (curArg.isSpecified) {
                     val popup = PopupMenu(requireContext(), btn)
@@ -148,15 +149,42 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
                     adapter.notifyItemInserted(adapterPosition + 1)
                 }
             }
-            binding.ibRemove.setAntiMoneyClickListener {
+            binding.ibRemove.setNoDoubleClickListener {
+                var changedIndex = -1
+                var changedItem: Arg? = null
                 if (viewModel.args.size == 1) {
                     if (viewModel.args[0].isSpecified) {
+                        changedItem = viewModel.args[0]
                         viewModel.args[0] = Arg()
                         adapter.notifyItemChanged(0)
                     }
                 } else {
-                    viewModel.args.removeAt(adapterPosition)
+                    it.rootView.beginAutoTransition()
+                    changedIndex = adapterPosition
+                    changedItem = viewModel.args.removeAt(adapterPosition)
                     adapter.notifyItemRemoved(adapterPosition)
+                }
+                if (changedItem != null) {
+                    val snackBar = Snackbar.make(
+                        dialog!!.window!!.peekDecorView(),
+                        R.string.removed,
+                        Snackbar.LENGTH_SHORT
+                    )
+                        .setAnchorView(this@VarargTextEditorDialog.binding.btnPositive)
+                        .setAction(R.string.undo) {
+                            if (changedIndex == -1) {
+                                viewModel.args[0] = changedItem
+                                adapter.notifyItemChanged(0)
+                            } else if (changedIndex > viewModel.args.lastIndex) {
+                                viewModel.args.add(changedItem)
+                                adapter.notifyItemInserted(changedIndex)
+                            } else {
+                                viewModel.args.add(changedIndex, changedItem)
+                                adapter.notifyItemInserted(changedIndex)
+                            }
+                        }
+                    snackBar.isAnchorViewLayoutListenerEnabled = true
+                    snackBar.show()
                 }
             }
         }) { binding, _, arg ->
@@ -184,9 +212,7 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
         val applet = viewModel.applet
         FlowEditorDialog().init(pvm.task, gvm.root, true, gvm)
             .setArgumentToSelect(
-                applet,
-                viewModel.argDescriptor,
-                viewModel.args[whichArg].referentName
+                applet, viewModel.argDescriptor, viewModel.args[whichArg].referentName
             )
             .doOnArgumentSelected { referent ->
                 viewModel.args[whichArg].referentName = referent
@@ -207,11 +233,11 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
         super.onViewCreated(view, savedInstanceState)
         pvm = peekParentViewModel<FlowEditorDialog, FlowEditorViewModel>()
         binding.rvArguments.adapter = adapter
-        binding.btnNegative.setAntiMoneyClickListener {
+        binding.btnNegative.setNoDoubleClickListener {
             dismiss()
         }
         binding.tvTitle.text = viewModel.title
-        binding.btnPositive.setAntiMoneyClickListener {
+        binding.btnPositive.setNoDoubleClickListener {
             val unspecifiedIndex = viewModel.args.indexOfFirst { !it.isSpecified }
             if (unspecifiedIndex >= 0) {
                 binding.rvArguments.scrollPositionToCenterVertically(unspecifiedIndex, true) {

@@ -111,6 +111,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
         .withResult<ComponentInfoWrapper>(R.string.current_top_app)
         .withResult<String>(R.string.current_package_name)
+        .withResult<String>(R.string.current_package_label)
         .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
 
     @AppletOrdinal(0x0002)

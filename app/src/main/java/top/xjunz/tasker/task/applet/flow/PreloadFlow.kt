@@ -26,14 +26,15 @@ class PreloadFlow : ControlFlow(), Referent {
 
     override fun onPrepareApply(runtime: TaskRuntime) {
         super.onPrepareApply(runtime)
-        runtime.registerReferent( this)
+        runtime.registerReferent(this)
     }
 
     override fun getReferredValue(which: Int): Any? {
         return when (which) {
             0 -> currentService.a11yEventDispatcher.getCurrentComponentInfo()
             1 -> currentService.a11yEventDispatcher.getCurrentComponentInfo().packageName
-            2 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            2 -> currentService.a11yEventDispatcher.getCurrentComponentInfo().label
+            3 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
             else -> super.getReferredValue(which)
         }
     }

@@ -30,7 +30,7 @@ import top.xjunz.tasker.ui.model.ActivityInfoWrapper
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.selector.ShoppingCartIntegration
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/10/07
@@ -84,7 +84,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 binding.root.updateLayoutParams<MarginLayoutParams> {
                     updateMargins(0, 0, 0, 4.dp)
                 }
-                binding.root.setAntiMoneyClickListener {
+                binding.root.setNoDoubleClickListener {
                     viewModel.itemToRemove.value =
                         viewModel.selectedPackages.reversed()[adapterPosition]
                 }
@@ -108,7 +108,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 }
                 binding.tvActivityName.isVisible = false
                 binding.tvBadge.isVisible = false
-                binding.root.setAntiMoneyClickListener {
+                binding.root.setNoDoubleClickListener {
                     viewModel.itemToRemove.value =
                         viewModel.selectedActivities.reversed()[adapterPosition]
                 }
@@ -178,7 +178,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             viewModel.appBarHeight.value = it.height
         }
         binding.ibSortBy.setOnTouchListener(popupMenu.dragToOpenListener)
-        binding.ibSortBy.setAntiMoneyClickListener {
+        binding.ibSortBy.setNoDoubleClickListener {
             popupMenu.show()
             popupMenu.menu.findItem(R.id.item_reverse_order).isChecked = viewModel.isOrderReversed
             popupMenu.menu.findItem(R.id.item_show_system_app).isChecked = viewModel.showSystemApps
@@ -188,7 +188,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.viewPager.doOnItemSelected {
             viewModel.currentItem.value = it
         }
-        binding.shoppingCart.btnCount.setAntiMoneyClickListener {
+        binding.shoppingCart.btnCount.setNoDoubleClickListener {
             if (viewModel.selectedCount notEq 0)
                 viewModel.showClearAllDialog.value = true
         }
@@ -197,14 +197,14 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 bottomMargin = it.height + 48.dp
             }
         }
-        binding.shoppingCart.btnComplete.setAntiMoneyClickListener {
+        binding.shoppingCart.btnComplete.setNoDoubleClickListener {
             if (viewModel.complete()) {
                 dismiss()
             } else {
                 toast(R.string.nothing_selected)
             }
         }
-        binding.fabInspector.setAntiMoneyClickListener {
+        binding.fabInspector.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }
         observeLiveData()

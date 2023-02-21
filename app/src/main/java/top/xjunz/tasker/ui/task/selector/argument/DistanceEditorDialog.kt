@@ -19,7 +19,7 @@ import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.value.Distance
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/10/24
@@ -79,7 +79,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             )
         }
         binding.tvSubtitleUnit.setHelp(R.string.help_distance_unit.text)
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             val min = binding.etMinimum.textString.toFloatOrNull()
             val max = binding.etMaximum.textString.toFloatOrNull()
             if (min == null && max == null) {
@@ -89,7 +89,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         R.string.minimum.str, R.string.maximum.str
                     )
                 )
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             if (max != null && min != null && max < min) {
                 binding.root.rootView.shake()
@@ -99,7 +99,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         R.string.maximum.str
                     )
                 )
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             if (viewModel.unit in Distance.UNIT_SCREEN_WIDTH..Distance.UNIT_PARENT_HEIGHT
                 && (min != null && min !in 0F..1F || (max != null && max !in 0F..1F))
@@ -109,7 +109,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         binding.menuUnit.text, 0, 1
                     )
                 )
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             if (viewModel.unit in Distance.UNIT_PX..Distance.UNIT_DP
                 && (min != null && min !in 0F..Distance.MAX_RANGE_VALUE ||
@@ -120,7 +120,7 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
                         binding.menuUnit.text, 0, Distance.MAX_RANGE_VALUE.toInt()
                     )
                 )
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             viewModel.distance.let {
                 it.unit = viewModel.unit

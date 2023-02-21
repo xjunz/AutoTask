@@ -8,13 +8,16 @@ import android.view.WindowManager
 import androidx.core.view.isVisible
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayBubbleCollapsedBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.eq
+import top.xjunz.tasker.ktx.isNull
+import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.toggle
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.ui.widget.FloatingDraggableLayout
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.Icons
 
 /**
@@ -60,7 +63,7 @@ class CollapsedBubbleOverlay(
                 }
                 FloatingDraggableLayout.STATE_DRAG_ENDED -> {
                     if (trashBinOverlay.isInside(this)) {
-                        rootView.animate().alpha(0F).doWhenEnd {
+                        rootView.animate().alpha(0F).withEndAction {
                             a11yAutomatorService.destroyFloatingInspector()
                         }.start()
                     }
@@ -68,7 +71,7 @@ class CollapsedBubbleOverlay(
                 }
             }
         }
-        binding.ibCenter.setAntiMoneyClickListener {
+        binding.ibCenter.setNoDoubleClickListener {
             if (vm.currentMode eq InspectorMode.COMPONENT) {
                 if (vm.currentComponent.isNull()) {
                     vm.makeToast(R.string.error_no_comp_detected)

@@ -8,6 +8,8 @@ import android.annotation.SuppressLint
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import com.google.android.material.R.style.*
 import com.google.android.material.chip.Chip
 import top.xjunz.shared.utils.illegalArgument
@@ -18,8 +20,10 @@ import top.xjunz.tasker.engine.applet.util.*
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import java.util.*
 
 /**
  * @author xjunz 2022/11/07
@@ -34,7 +38,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
         const val ACTION_ADD = 4
     }
 
-    private val gvm get() = vm.global
+    private val gvm = vm.global
 
     private val errorPrompts by lazy {
         R.array.static_error_prompts.array
@@ -137,11 +141,11 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                     ibAction.setContentDescriptionAndTooltip(R.string.invert.text)
                 }
             }
-            if (vm.isSelectingArgument) {
+            if (vm.isSelectingReferent) {
                 title = title?.toString()
-                val ahead = vm.referentAnchor.parent == null || applet.isAheadOf(vm.referentAnchor)
+                val ahead = !vm.referentAnchor.isAttached || applet.isAheadOf(vm.referentAnchor)
                 // When selecting ref, only enable valid targets
-                val refs = if (!ahead) emptyList() else option.findResults(vm.argumentDescriptor)
+                val refs = if (!ahead) emptyList() else option.findResults(vm.referentDescriptor)
                 if (applet.isContainer && depth == 3) {
                     root.isEnabled = ahead && vm.hasCandidateReferents(applet as Flow)
                     containerReferents.isVisible = false
@@ -166,7 +170,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
 
             if (!applet.isEnabledInHierarchy) title = title?.strikeThrough()
 
-            ibAction.isGone = ibAction.tag == null || ((vm.isSelectingArgument || vm.isReadyOnly)
+            ibAction.isGone = ibAction.tag == null || ((vm.isSelectingReferent || vm.isReadyOnly)
                     && ibAction.tag != ACTION_COLLAPSE
                     && ibAction.tag != ACTION_ENTER)
 
@@ -269,21 +273,48 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
         applet: Applet,
         index: Int,
         which: Int,
-        referentLabel: CharSequence,
+        argName: CharSequence,
         referentName: String?
     ) {
         val chip = getReferenceChip(index)
         chip.isVisible = true
         chip.isChecked = gvm.isReferentSelected(applet, which)
-        chip.setAntiMoneyClickListener {
+        chip.setNoDoubleClickListener {
             toggleSelectReference(applet, which)
         }
-        chip.text = if (referentName == null) {
-            referentLabel
-        } else if (referentLabel == referentName) {
-            referentLabel.foreColored()
+        if (referentName == null) {
+            chip.text = argName
+            chip.setOnLongClickListener(null)
         } else {
-            referentLabel + " /*$referentName*/".foreColored()
+            vm.requestShowReferentTip.setValueIfDistinct(true)
+            chip.text = referentName.foreColored()
+            chip.setOnLongClickListener {
+                TextEditorDialog().configEditText {
+                    it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
+                }.setAllowEmptyInput().init(R.string.edit_referent_name.text) {
+                    if (it.isEmpty()) {
+                        // The referent is still referred
+                        if (vm.flow.forEachReferent { _, _, referent ->
+                                referent == referentName
+                            }) {
+                            return@init R.string.error_referent_still_in_reference.text
+                        }
+                    }
+                    gvm.renameReferentInRoot(Collections.singleton(referentName), it)
+                    gvm.referenceEditor.getReferenceChangedApplets().forEach { changed ->
+                        gvm.onAppletChanged.value = changed
+                    }
+                    gvm.referenceEditor.getReferentChangedApplets().forEach { changed ->
+                        gvm.onAppletChanged.value = changed
+                    }
+                    // Just reset, because we don't need revocations
+                    gvm.referenceEditor.reset()
+                    return@init null
+                }.setDropDownData(setOf(referentName, argName).toTypedArray())
+                    .setCaption(R.string.format_set_referent_name.formatSpans(argName.bold()))
+                    .show(chip.findFragment<Fragment>().childFragmentManager)
+                true
+            }
         }
     }
 }

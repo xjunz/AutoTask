@@ -28,27 +28,29 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem" />
 
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/ib_add"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_selectable_circle"
-            android:contentDescription="@{@string/add_after}"
-            android:src="@drawable/ic_baseline_add_24"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@{@string/add}"
+            app:icon="@drawable/ic_baseline_add_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/ib_remove"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_selectable_circle"
+            style="@style/Widget.Material3.Button.IconButton.Error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
             android:contentDescription="@{@string/delete}"
-            android:src="@drawable/ic_delete_forever_24px"
+            app:icon="@drawable/ic_delete_forever_24px"
+            app:iconTint="?colorError"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/ib_add"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+           />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

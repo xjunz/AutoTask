@@ -22,7 +22,7 @@ data class ComponentInfoWrapper(
     companion object {
 
         fun wrap(source: ComponentInfo) =
-            ComponentInfoWrapper(source.packageName, source.activityName, source.paneTitle)
+            ComponentInfoWrapper(source.packageName!!, source.activityName, source.paneTitle)
     }
 
     val packageInfo: PackageInfo by lazy {

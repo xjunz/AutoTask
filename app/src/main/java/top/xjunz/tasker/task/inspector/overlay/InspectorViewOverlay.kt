@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Looper
 import android.os.SystemClock
-import android.view.Choreographer
 import android.view.Display
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
@@ -18,10 +17,8 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.uiautomator.PointerGesture
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.awaitFrame
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayInspectorBinding
@@ -205,7 +202,8 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
         rootView.isVisible = false
         rootView.doOnPreDraw {
-            Choreographer.getInstance().postFrameCallback {
+            inspector.lifecycleScope.launch {
+                awaitFrame()
                 a11yAutomatorService.takeScreenshot(
                     Display.DEFAULT_DISPLAY, Dispatchers.Main.asExecutor(), screenshotCallback
                 )

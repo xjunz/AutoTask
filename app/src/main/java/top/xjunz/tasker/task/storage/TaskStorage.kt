@@ -129,7 +129,7 @@ object TaskStorage {
                     runCatching {
                         val task = Json.decodeFromStream<XTaskDTO>(it).apply {
                             check(verifyChecksum()) {
-                                "Checksum failure to xtsk file $file?!"
+                                "Checksum mismatch for xtsk file $file?!"
                             }
                         }.toXTask(AppletOptionFactory)
                         all.add(task)

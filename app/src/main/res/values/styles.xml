@@ -28,6 +28,7 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:background">@drawable/bg_badge</item>
         <item name="android:paddingBottom">2dp</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="BottomSheetDialogStyle" parent="ThemeOverlay.Material3.DayNight.BottomSheetDialog">
@@ -60,4 +61,8 @@
         <item name="android:background">?selectableItemBackground</item>
     </style>
 
+    <style name="Widget.Material3.Button.IconButton.Error">
+        <item name="iconTint">?colorError</item>
+        <item name="rippleColor">?colorErrorContainer</item>
+    </style>
 </resources>

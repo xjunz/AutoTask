@@ -34,6 +34,10 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         }
     }
 
+    private val onDialogShown = MutableLiveData<DialogStackManager.StackEntry>()
+
+    private val onDialogDismissed = MutableLiveData<DialogStackManager.StackEntry>()
+
     val allTaskLoaded = MutableLiveData<Boolean>()
 
     val onNewIntent = MutableLiveData<Pair<Uri?, Any?>>()
@@ -56,6 +60,30 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
             TaskStorage.loadAllTasks()
             allTaskLoaded.value = true
         }
+    }
+
+    fun notifyDialogShown(tag: String?, isFullScreen: Boolean) {
+        onDialogShown.value = DialogStackManager.push(
+            requireNotNull(tag) { "Tag is null" }, isFullScreen
+        )
+    }
+
+    fun notifyDialogDismissed() {
+        onDialogDismissed.value = DialogStackManager.pop()
+    }
+
+    fun doOnDialogShown(
+        lifecycleOwner: LifecycleOwner,
+        block: (DialogStackManager.StackEntry) -> Unit
+    ) {
+        lifecycleOwner.observeTransient(onDialogShown, block)
+    }
+
+    fun doOnDialogDismissed(
+        lifecycleOwner: LifecycleOwner,
+        block: (DialogStackManager.StackEntry) -> Unit
+    ) {
+        lifecycleOwner.observeTransient(onDialogDismissed, block)
     }
 
     fun setCurrentOperatingMode(mode: OperatingMode) {

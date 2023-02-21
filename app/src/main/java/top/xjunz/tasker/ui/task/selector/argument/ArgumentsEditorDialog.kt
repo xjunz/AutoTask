@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ui.task.selector.argument
 
 import android.content.DialogInterface
+import android.graphics.Point
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +39,7 @@ import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
 import top.xjunz.tasker.ui.task.editor.VarargTextEditorDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import java.util.*
 
 /**
@@ -108,7 +109,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 val point = applet.value?.let {
                     IntValueUtil.parseXY(it.casted())
                 }
-                CoordinateEditorDialog().init(arg.name, point) { x, y ->
+                XYEditorDialog().init(arg.name, point) { x, y ->
                     updateValue(IntValueUtil.composeXY(x, y))
                 }.show(fragmentManager)
             }
@@ -118,6 +119,18 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 ) {
                     updateValue(it)
                 }.show(fragmentManager)
+            }
+            VariantType.INT_INTERVAL_XY -> {
+                val point = applet.value?.let {
+                    IntValueUtil.parseXY(it.casted())
+                }
+                XYEditorDialog().init(arg.name, point ?: Point(500, 5000)) { x, y ->
+                    updateValue(IntValueUtil.composeXY(x, y))
+                }.setVariantType(
+                    VariantType.INT_INTERVAL_XY,
+                    R.string.idle_threshold,
+                    R.string.max_wait_for_idle_duration
+                ).setHelp(option.helpText).show(fragmentManager)
             }
             VariantType.BITS_SWIPE ->
                 BitsValueEditorDialog().init(arg.name, applet.value as? Long, Swipe.COMPOSER) {
@@ -209,7 +222,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val adapter by lazy {
         inlineAdapter(option.arguments, ItemArgumentEditorBinding::class.java, {
-            binding.btnRefer.setAntiMoneyClickListener {
+            binding.btnRefer.setNoDoubleClickListener {
                 val pos = adapterPosition
                 showReferenceSelectorDialog(
                     false, pos,
@@ -217,16 +230,16 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     applet.references[pos]
                 )
             }
-            binding.btnSpecify.setAntiMoneyClickListener {
+            binding.btnSpecify.setNoDoubleClickListener {
                 showValueInputDialog(false, adapterPosition, option.arguments[adapterPosition])
             }
-            binding.tvValue.setAntiMoneyClickListener {
+            binding.tvValue.setNoDoubleClickListener {
                 val position = adapterPosition
                 val arg = option.arguments[position]
                 val referent = applet.references.getValue(position)
                 TextEditorDialog().setCaption(R.string.prompt_set_referent.text).configEditText {
                     it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
-                }.init(R.string.edit_referent.text, referent) {
+                }.init(R.string.edit_referent_name.text, referent) {
                     if (it == referent) return@init null
                     if (!gvm.isReferentLegalForSelections(it)) {
                         return@init R.string.error_tag_exists.text
@@ -298,7 +311,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             gvm.referenceEditor.revokeAll()
             dismiss()
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             val illegal = vm.checkForUnspecifiedArgument()
             if (illegal == -1) {
                 vm.doOnCompletion()

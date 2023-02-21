@@ -34,9 +34,7 @@ class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
             ctx.source = it
             super.applyFlow(runtime).isSuccessful
         }
-        return if (node != null) {
-            AppletResult.succeeded(UiObjectReferent(node))
-        } else AppletResult.EMPTY_FAILURE
+        return if (node != null) UiObjectReferent(node).asResult() else AppletResult.EMPTY_FAILURE
     }
 
     /**

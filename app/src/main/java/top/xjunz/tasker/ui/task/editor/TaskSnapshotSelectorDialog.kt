@@ -14,7 +14,7 @@ import top.xjunz.tasker.databinding.ItemTaskSnapshotBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.formatMinSecMills
 import top.xjunz.tasker.util.formatTime
 
@@ -31,7 +31,7 @@ class TaskSnapshotSelectorDialog : BaseBottomSheetDialog<DialogSnapshotSelectorB
 
     private val adapter by lazy {
         inlineAdapter(gvm.allSnapshots.require(), ItemTaskSnapshotBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 gvm.currentSnapshotIndex.value = adapterPosition
                 dismiss()
             }

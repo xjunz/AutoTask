@@ -14,7 +14,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.StableNodeInfo
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/10/18
@@ -36,7 +36,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
 
     private val breadCrumbAdapter by lazy {
         inlineAdapter(nodeBreadCrumbs, ItemBreadCrumbsBinding::class.java, {
-            binding.cvBreadCrumb.setAntiMoneyClickListener {
+            binding.cvBreadCrumb.setNoDoubleClickListener {
                 if (nodeBreadCrumbs.isNotEmpty())
                     vm.currentNodeTree.setValueIfDistinct(nodeBreadCrumbs[adapterPosition].children[0])
             }
@@ -50,12 +50,12 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
 
     private val nodeAdapter by lazy {
         inlineAdapter(childrenNodes, ItemNodeTreeBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 vm.highlightNode.value = childrenNodes[adapterPosition]
                 vm.showNodeTree.value = false
                 vm.makeToast(R.string.navigated_to_selected_node)
             }
-            binding.btnMore.setAntiMoneyClickListener {
+            binding.btnMore.setNoDoubleClickListener {
                 vm.currentNodeTree.value = childrenNodes[adapterPosition].children[0]
             }
         }) { b, p, n ->

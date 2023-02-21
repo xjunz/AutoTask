@@ -21,7 +21,7 @@ import top.xjunz.tasker.databinding.ItemInputLayoutBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.value.BitwiseValueComposer
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import kotlin.math.ceil
 import kotlin.math.log10
 
@@ -120,10 +120,10 @@ class BitsValueEditorDialog : BaseDialogFragment<DialogBitsValueEditorBinding>()
         binding.btnNegative.setOnClickListener {
             dismiss()
         }
-        binding.btnPositive.setAntiMoneyClickListener {
+        binding.btnPositive.setNoDoubleClickListener {
             val args = arrayOfNulls<Number>(viewModel.components.size)
             viewModel.components.forEachIndexed { index, desc ->
-                val arg = desc.parseValue(index) ?: return@setAntiMoneyClickListener
+                val arg = desc.parseValue(index) ?: return@setNoDoubleClickListener
                 args[index] = if (desc.isNullable && arg as Int == -1) null else arg
             }
             viewModel.onCompletion(viewModel.composer.compose(*args))

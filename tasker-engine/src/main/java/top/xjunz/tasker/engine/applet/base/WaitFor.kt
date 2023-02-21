@@ -27,7 +27,7 @@ class WaitFor : When() {
         value?.casted<Int>() ?: defaultValue
     }
 
-    fun trigger() {
+    fun remind() {
         waitingJob?.get()?.cancel()
     }
 

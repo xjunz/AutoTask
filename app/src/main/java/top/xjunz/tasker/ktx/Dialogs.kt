@@ -16,7 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.LayoutProgressBinding
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/07/25
@@ -54,7 +54,7 @@ fun Context.showErrorDialog(stackTrace: String): AlertDialog {
         .setMessage(stackTrace).setPositiveButton(R.string.feedback, null)
         .setNegativeButton(android.R.string.cancel, null).create()
     dialog.show()
-    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setAntiMoneyClickListener {
+    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setNoDoubleClickListener {
       //  Feedbacks.showErrorFeedbackDialog(this, stackTrace)
     }
     return dialog

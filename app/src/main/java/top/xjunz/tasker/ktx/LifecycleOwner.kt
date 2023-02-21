@@ -82,7 +82,7 @@ fun LifecycleOwner.observeMultiple(
 }
 
 fun <V> LifecycleOwner.observeNotNull(
-    ld: MutableLiveData<V>,
+    ld: LiveData<V>,
     observer: (V & Any) -> Unit
 ) {
     ld.observe(this) {
@@ -133,7 +133,7 @@ fun LifecycleOwner.observeConfirmation(
     observeConfirmation(ld, promptTextRes.text, onConfirmed)
 }
 
-fun LifecycleOwner.observeImportantConfirmation(
+fun LifecycleOwner.observeDangerousConfirmation(
     ld: MutableLiveData<*>,
     @StringRes promptTextRes: Int,
     @StringRes importantText: Int,

@@ -53,9 +53,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    private val uiAutomationHidden: UiAutomationHidden by lazy {
-        UiAutomationHidden(looper, UiAutomationConnection())
-    }
+    private lateinit var uiAutomationHidden: UiAutomationHidden
 
     private val handlerThread = HandlerThread("ShizukuAutomatorThread")
 
@@ -165,6 +163,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     override fun connect() {
         Binder.clearCallingIdentity()
         try {
+            uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
                 eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
@@ -191,7 +190,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         } else try {
             a11yEventDispatcher.destroy()
             residentTaskScheduler.shutdown()
-            if (::uiAutomationHidden.isLazilyInitialized) {
+            if (::uiAutomationHidden.isInitialized) {
                 Binder.clearCallingIdentity()
                 uiAutomationHidden.disconnect()
             }

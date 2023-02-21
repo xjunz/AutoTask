@@ -16,7 +16,7 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.EventCenter
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import java.util.*
 
 /**
@@ -41,7 +41,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
 
     private val adapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(allApplets, ItemNodeInfoBinding::class.java, {
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 val option = allApplets[adapterPosition]
                 if (uncheckedApplets.contains(option)) {
                     uncheckedApplets.remove(option)
@@ -105,7 +105,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
         binding.btnCancel.setOnClickListener {
             vm.showNodeInfo.value = false
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             checkedApplets = allApplets - uncheckedApplets
             vm.isCollapsed.value = true
             vm.showNodeInfo.value = false

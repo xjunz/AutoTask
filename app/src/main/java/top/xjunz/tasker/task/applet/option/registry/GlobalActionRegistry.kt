@@ -39,12 +39,8 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
         .withValueArgument<Int>(
-            R.string.idle_threshold,
-            variantValueType = VariantType.INT_INTERVAL
-        )
-        .withValueArgument<Int>(
-            R.string.max_wait_duration,
-            variantValueType = VariantType.INT_INTERVAL
+            R.string.wait_for_idle,
+            variantValueType = VariantType.INT_INTERVAL_XY
         )
         .withHelperText(R.string.tip_wait_for_idle)
         .withValueDescriber<Int> {

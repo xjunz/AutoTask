@@ -15,7 +15,7 @@ import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 class NotificationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x00_00)
-    val isToast = appletOption(R.string.format_is_toast) {
+    val isToast = invertibleAppletOption(R.string.format_is_toast) {
         PropertyCriterion<NotificationReferent> {
             it.isToast
         }

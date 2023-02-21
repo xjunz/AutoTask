@@ -20,7 +20,7 @@ import top.xjunz.tasker.ktx.alphaModified
 import top.xjunz.tasker.ktx.notifySelfChanged
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.main.ColorScheme
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/08/14
@@ -86,7 +86,7 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.tvTitle.setAntiMoneyClickListener {
+            binding.tvTitle.setNoDoubleClickListener {
                 if (AppletOption.deliveringEvent == null) {
                     binding.root.performClick()
                 }
@@ -95,9 +95,9 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
                 ColorScheme.colorTertiaryContainer.alphaModified(.42F)
             )
             binding.root.setOnLongClickListener { true }
-            binding.root.setAntiMoneyClickListener { view ->
+            binding.root.setNoDoubleClickListener { view ->
                 val applet = currentList[adapterPosition]
-                if (viewModel.isSelectingArgument && !applet.isContainer) return@setAntiMoneyClickListener
+                if (viewModel.isSelectingReferent && !applet.isContainer) return@setNoDoubleClickListener
                 if (viewModel.isInMultiSelectionMode) {
                     viewModel.toggleMultiSelection(applet)
                 } else {
@@ -109,7 +109,7 @@ class TaskFlowAdapter(fragment: FlowEditorDialog) :
                     popup.show()
                 }
             }
-            binding.ibAction.setAntiMoneyClickListener {
+            binding.ibAction.setNoDoubleClickListener {
                 val applet = currentList[adapterPosition]
                 when (it.tag as? Int) {
                     FlowItemViewBinder.ACTION_COLLAPSE -> {

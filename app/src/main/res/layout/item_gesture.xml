@@ -57,10 +57,9 @@
             android:layout_height="wrap_content"
             android:contentDescription="@{@string/delete}"
             app:icon="@drawable/ic_delete_forever_24px"
-            app:iconTint="?colorError"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btn_playback"
             app:layout_constraintTop_toTopOf="parent"
-            app:rippleColor="?colorErrorContainer" />
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

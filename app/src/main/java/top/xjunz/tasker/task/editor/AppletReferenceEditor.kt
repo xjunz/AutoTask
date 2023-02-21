@@ -51,7 +51,7 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
     }
 
     private fun Applet.rawSetReferent(whichRet: Int, id: String?) {
-        if (id == null) {
+        if (id.isNullOrEmpty()) {
             rawRemoveReferent(whichRet)
         } else {
             if (referents === emptyMap<Int, String>()) {
@@ -62,7 +62,7 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
     }
 
     private fun Applet.rawSetReference(whichArg: Int, ref: String?) {
-        if (ref == null) {
+        if (ref.isNullOrEmpty()) {
             rawRemoveReference(whichArg)
         } else {
             if (references === emptyMap<Int, String>()) {
@@ -141,6 +141,10 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
 
     fun getReferenceChangedApplets(): Set<Applet> {
         return referenceRevocations.keys.map { it.applet }.toSet()
+    }
+
+    fun getReferentChangedApplets(): Set<Applet> {
+        return referentRevocations.keys.map { it.applet }.toSet()
     }
 
     fun reset() {

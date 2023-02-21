@@ -27,8 +27,6 @@ class TaskShowcaseViewModel : ViewModel() {
 
     val requestEditTask = MutableLiveData<Pair<XTask, Flow?>>()
 
-    val isPaused = MutableLiveData<Boolean>()
-
     val requestDeleteTask = MutableLiveData<XTask>()
 
     val onTaskDeleted = MutableLiveData<XTask>()

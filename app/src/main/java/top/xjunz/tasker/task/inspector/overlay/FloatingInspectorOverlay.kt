@@ -15,7 +15,6 @@ import androidx.core.math.MathUtils
 import androidx.core.view.isVisible
 import androidx.databinding.ViewDataBinding
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.ktx.doWhenEnd
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.util.Motions
 import top.xjunz.tasker.util.ReflectionUtil.superClassFirstParameterizedType
@@ -64,7 +63,7 @@ abstract class FloatingInspectorOverlay<B : ViewDataBinding>(val inspector: Floa
         if (!view.isVisible) return
         view.animate().alpha(0F).scaleX(.98F).setDuration(150)
             .setInterpolator(Motions.EASING_EMPHASIZED)
-            .scaleY(.98F).doWhenEnd {
+            .scaleY(.98F).withEndAction {
                 view.isVisible = false
             }
     }

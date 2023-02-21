@@ -24,7 +24,7 @@ import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/24
@@ -49,7 +49,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnStart.setAntiMoneyClickListener {
+        binding.btnStart.setNoDoubleClickListener {
             serviceController.bindService()
         }
         binding.rgModes.check(
@@ -62,7 +62,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
                 else OperatingMode.Accessibility
             )
         }
-        binding.btnGrantOverlay.setAntiMoneyClickListener {
+        binding.btnGrantOverlay.setNoDoubleClickListener {
             toast(R.string.pls_enable_overlay_manually)
             overlaySettingLauncher.launch(
                 Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)

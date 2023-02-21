@@ -8,7 +8,6 @@ import android.view.WindowManager
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import top.xjunz.tasker.databinding.OverlayTrashBinBinding
-import top.xjunz.tasker.ktx.doWhenEnd
 import top.xjunz.tasker.task.inspector.FloatingInspector
 
 /**
@@ -38,7 +37,7 @@ class TrashBinOverlay(inspector: FloatingInspector) :
     }
 
     fun fadeOut() {
-        rootView.animate().alpha(0F).doWhenEnd {
+        rootView.animate().alpha(0F).withEndAction {
             rootView.isVisible = false
         }.start()
     }

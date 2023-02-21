@@ -25,7 +25,7 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2023/02/17
@@ -53,20 +53,20 @@ class GesturesEditorDialog : BaseDialogFragment<DialogGesturesEditorBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnCancel.setAntiMoneyClickListener {
+        binding.btnCancel.setNoDoubleClickListener {
             dismiss()
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             vm.onCompleted(vm.gestures.value)
         }
-        binding.btnOpen.setAntiMoneyClickListener {
+        binding.btnOpen.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER).doOnSucceeded {
                 floatingInspector.viewModel.clearAllRecordedEvents()
                 floatingInspector.viewModel.recordedEvents.require().addAll(vm.gestures.require())
                 floatingInspector.viewModel.showGestures.value = true
             }.show(childFragmentManager)
         }
-        binding.btnRecord.setAntiMoneyClickListener {
+        binding.btnRecord.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER)
                 .show(childFragmentManager)
         }

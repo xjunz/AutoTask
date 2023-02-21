@@ -31,11 +31,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         task.metadata.copy()
     }
 
-    lateinit var global: GlobalFlowEditorViewModel
-
-    lateinit var task: XTask
-
     var flowToNavigate: Long = -1
+
+    val requestShowReferentTip = MutableLiveData<Boolean>()
 
     val factory = AppletOptionFactory
 
@@ -49,9 +47,13 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     lateinit var referentAnchor: Applet
 
-    lateinit var argumentDescriptor: ArgumentDescriptor
+    lateinit var referentDescriptor: ArgumentDescriptor
 
-    val isSelectingArgument get() = ::referentAnchor.isInitialized
+    lateinit var global: GlobalFlowEditorViewModel
+
+    lateinit var task: XTask
+
+    val isSelectingReferent get() = ::referentAnchor.isInitialized
 
     val showSplitConfirmation = MutableLiveData<Boolean>()
 
@@ -129,7 +131,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         val ret = mutableListOf<Applet>()
         flow.forEachIndexed `continue`@{ index, applet ->
 
-            if (applet is PreloadFlow && !isSelectingArgument)
+            if (applet is PreloadFlow && !isSelectingReferent)
                 return@`continue`
 
             applet.index = index
@@ -191,10 +193,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         notifyFlowChanged()
     }
 
-    fun initialize(
-        initialFlow: Flow,
-        readonly: Boolean,
-    ) {
+    fun initialize(initialFlow: Flow, readonly: Boolean) {
         isReadyOnly = readonly
         flow = if (readonly) initialFlow else initialFlow.clone(factory)
     }
@@ -222,18 +221,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         return true
     }
 
-    private fun Applet.hasResultWithDescriptor(isAttached: Boolean): Boolean {
+    private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
         if (option != null
-            && option.findResults(argumentDescriptor).isNotEmpty()
+            && option.findResults(referentDescriptor).isNotEmpty()
             // If not attached, do not check isAheadOf
-            && (!isAttached || isAheadOf(referentAnchor))
+            && (!referentAnchor.isAttached || isAheadOf(referentAnchor))
         ) {
             return true
         }
         if (this is Flow) {
             return any {
-                it.hasResultWithDescriptor(isAttached)
+                it.hasResultWithDescriptor()
             }
         }
         return false
@@ -241,7 +240,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     fun hasCandidateReferents(flow: Flow): Boolean {
         return flow.any {
-            it.hasResultWithDescriptor(referentAnchor.isAttached)
+            it.hasResultWithDescriptor()
         }
     }
 

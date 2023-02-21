@@ -25,6 +25,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
 
     override var isSuppressed = false
         set(value) {
+            field = value
             if (value) {
                 // Halt all running tasks once suppressed
                 if (isAppProcess) {
@@ -35,7 +36,6 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
                     it.halt()
                 }
             }
-            field = value
         }
 
     /**
@@ -87,7 +87,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
                     }
                 }
             } else {
-                task.requireRuntime().onNewEvents(events)
+                task.getRuntime()?.onNewEvents(events)
             }
         }
     }

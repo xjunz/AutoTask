@@ -29,33 +29,41 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:maxLines="3"
-            android:textColor="?colorPrimary"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            android:textColor="?colorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/ib_dismiss"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem" />
 
         <TextView
-            android:id="@+id/tv_caption"
+            android:id="@+id/tv_help"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:background="@drawable/bg_selectable_surface"
+            android:backgroundTint="?colorPrimary"
+            android:elevation="1dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?colorOnPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tv_title"
             app:layout_constraintTop_toBottomOf="@+id/top_barrier"
-            tools:text="@tools:sample/lorem" />
+            tools:text="@string/tip_wait_for_idle" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_x"
+            style="?textInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:hint="@string/x_coordinate"
             android:labelFor="@+id/et_x"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_caption">
+            app:layout_constraintTop_toBottomOf="@+id/tv_help">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_x"
@@ -63,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:digits="0123456789"
                 android:inputType="number"
-                android:maxLength="4" />
+                android:maxLength="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -83,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:digits="0123456789"
                 android:inputType="number"
-                android:maxLength="4" />
+                android:maxLength="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -123,7 +131,8 @@
             style="@style/Widget.Material3.CardView.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
             app:cardBackgroundColor="?colorTertiaryContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/til_y"

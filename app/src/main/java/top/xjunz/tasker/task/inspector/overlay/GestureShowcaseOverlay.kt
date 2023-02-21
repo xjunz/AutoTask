@@ -21,7 +21,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.formatMinSecMills
 import java.util.*
 
@@ -45,7 +45,7 @@ class GestureShowcaseOverlay(inspector: FloatingInspector) :
     private val adapter: Adapter<*> by lazy {
         inlineAdapter(
             events, ItemGestureBinding::class.java, {
-                binding.root.setAntiMoneyClickListener {
+                binding.root.setNoDoubleClickListener {
                     currentEdition = events[adapterPosition]
                     this@GestureShowcaseOverlay.binding.apply {
                         touchBlocker.isVisible = true
@@ -58,10 +58,10 @@ class GestureShowcaseOverlay(inspector: FloatingInspector) :
                         etGestureName.requestFocus()
                     }
                 }
-                binding.btnDelete.setAntiMoneyClickListener {
+                binding.btnDelete.setNoDoubleClickListener {
                     if (events.size == 1) {
                         binding.root.shake()
-                        return@setAntiMoneyClickListener
+                        return@setNoDoubleClickListener
                     }
                     this@GestureShowcaseOverlay.binding.container.beginAutoTransition()
                     val pos = adapterPosition
@@ -80,7 +80,7 @@ class GestureShowcaseOverlay(inspector: FloatingInspector) :
                         adapter.notifyItemInserted(pos)
                     }.show()
                 }
-                binding.btnPlayback.setAntiMoneyClickListener {
+                binding.btnPlayback.setNoDoubleClickListener {
                     vm.showGestures.value = false
                     val event = events[adapterPosition]
                     val noDelay = SerializableInputEvent.wrap(event.getGesture().noDelay())
@@ -132,25 +132,25 @@ class GestureShowcaseOverlay(inspector: FloatingInspector) :
         binding.container.background = context.createMaterialShapeDrawable()
         binding.containerEditor.background = context.createMaterialShapeDrawable()
         binding.rvGestures.adapter = adapter
-        binding.btnCancel.setAntiMoneyClickListener {
+        binding.btnCancel.setNoDoubleClickListener {
             vm.showGestures.value = false
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             EventCenter.routeEvent(
                 FloatingInspector.EVENT_GESTURES_RECORDED, ArrayList(vm.recordedEvents.require())
             )
             vm.clearAllRecordedEvents()
             vm.showGestures.value = false
         }
-        binding.btnReplay.setAntiMoneyClickListener {
+        binding.btnReplay.setNoDoubleClickListener {
             vm.showGestures.value = false
             vm.requestReplayGestures.value = vm.recordedEvents.require()
         }
-        binding.btnEditorComplete.setAntiMoneyClickListener {
+        binding.btnEditorComplete.setNoDoubleClickListener {
             if (binding.etGestureDelay.textString.isEmpty()) {
                 vm.makeToast(R.string.error_empty_input)
                 binding.etGestureDelay.shake()
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             currentEdition?.label = binding.etGestureName.textString.ifEmpty { null }
             currentEdition?.delay = binding.etGestureDelay.textString.toLong()
@@ -158,7 +158,7 @@ class GestureShowcaseOverlay(inspector: FloatingInspector) :
             currentEdition = null
             binding.btnEditorCancel.performClick()
         }
-        binding.btnEditorCancel.setAntiMoneyClickListener {
+        binding.btnEditorCancel.setNoDoubleClickListener {
             animateHide(binding.containerEditor)
             imm.hideSoftInputFromWindow(rootView.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
             binding.touchBlocker.isVisible = false

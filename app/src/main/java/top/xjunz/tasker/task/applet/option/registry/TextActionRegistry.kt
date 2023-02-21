@@ -52,10 +52,11 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
         substitution = R.string.text_message,
         isRef = false,
         isCollection = true
-    ).withDescriber<String> { applet, t ->
-        val bolds = applet.references.values.map {
-            it.foreColored()
-        }.toTypedArray()
-        t?.formatSpans(*bolds)
-    }.hasCompositeTitle()
+    ).withResult<String>(R.string.displayed_text)
+        .withDescriber<String> { applet, t ->
+            val bolds = applet.references.values.map {
+                ("\${$it}").foreColored()
+            }.toTypedArray()
+            t?.formatSpans(*bolds)
+        }.hasCompositeTitle()
 }

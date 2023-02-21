@@ -6,10 +6,11 @@ package top.xjunz.tasker.engine.applet.util
 
 import android.util.ArrayMap
 import top.xjunz.shared.ktx.casted
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.ContainerFlow
+import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
-import java.lang.ref.WeakReference
-import java.util.*
 
 /* Helper extension functions for Applet. These functions are not expected to be called in runtime.*/
 
@@ -40,13 +41,6 @@ val Applet.root: Flow
         return requireParent().root
     }
 
-val Applet.rootOrNull: Flow?
-    get() {
-        if (parent == null)
-            return if (this is Flow) this else null
-        return parent?.rootOrNull
-    }
-
 val Applet.flatSize: Int
     get() = if (this is Flow) sumOf { it.flatSize } else 1
 
@@ -61,21 +55,49 @@ fun Applet.isDescendantOf(flow: Flow): Boolean {
 }
 
 /**
- * @param block returns `true` to stop the iteration.
+ * @param shouldIntercept returns `true` to intercept the iteration.
+ *
+ * @return `true` if the iteration is intercepted halfway `false` otherwise
  */
-fun Flow.forEachApplet(block: (Applet) -> Boolean) {
+fun Flow.forEachApplet(shouldIntercept: (Applet) -> Boolean): Boolean {
     forEach {
-        if (block(it)) return
+        if (shouldIntercept(it)) return true
         if (it is Flow) {
-            it.forEachApplet(block)
+            if (it.forEachApplet(shouldIntercept)) {
+                return true
+            }
         }
+    }
+    return false
+}
+
+/**
+ * Iterate all referents in a [Flow].
+ *
+ * @param criterion returns `true` to intercept the iteration
+ * @return `true` if there is any applet meeting the [criterion], `false` otherwise
+ * @see forEachApplet
+ */
+inline fun Flow.forEachReferent(crossinline criterion: (Applet, which: Int, referent: String) -> Boolean): Boolean {
+    return forEachApplet {
+        it.referents.forEach { (t, u) ->
+            if (criterion(it, t, u)) return@forEachApplet true
+        }
+        return@forEachApplet false
     }
 }
 
-inline fun Flow.forEachReferent(crossinline block: (Applet, which: Int, referent: String) -> Boolean) {
-    forEachApplet {
-        it.referents.forEach { (t, u) ->
-            if (block(it, t, u)) return@forEachApplet true
+/**
+ * Iterate all references in a [Flow]
+ *
+ * @param criterion returns `true` to intercept the iteration
+ * @return `true` if there is any applet meeting the [criterion], `false` otherwise
+ * @see forEachApplet
+ */
+inline fun Flow.forEachReference(crossinline criterion: (Applet, which: Int, referent: String) -> Boolean): Boolean {
+    return forEachApplet {
+        it.references.forEach { (t, u) ->
+            if (criterion(it, t, u)) return@forEachApplet true
         }
         return@forEachApplet false
     }
@@ -92,6 +114,9 @@ fun Flow.buildHierarchy() {
 
 inline val Applet.hierarchy: Long get() = hierarchyInAncestor(null)
 
+/**
+ * @see findChildByHierarchy
+ */
 fun Applet.hierarchyInAncestor(ancestor: Flow?): Long {
     var hierarchy = 0L
     var p: Applet? = this
@@ -104,7 +129,10 @@ fun Applet.hierarchyInAncestor(ancestor: Flow?): Long {
     return hierarchy
 }
 
-fun Flow.findChild(hierarchy: Long): Applet {
+/**
+ * @see hierarchyInAncestor
+ */
+fun Flow.findChildByHierarchy(hierarchy: Long): Applet {
     var child: Applet = this
     for (d in 0 until Applet.MAX_FLOW_NESTED_DEPTH) {
         val index =
@@ -119,26 +147,31 @@ fun Flow.findChild(hierarchy: Long): Applet {
 }
 
 /**
- * Check whether the receiver applet is executed ahead of the argument [applet] at runtime.
+ * Check whether the receiver applet is executed ahead of the argument [another] at runtime.
  * If these applets are equal, returns `false`. Please make sure that these two applets have
- * the same [root].
+ * the same [root] and have parents.
  */
 fun Applet.isAheadOf(another: Applet): Boolean {
     if (this === another) return false
-    if (parent == null) return true
-    if (another.parent == null) return false
-    var h1 = -1
-    var h2 = -1
-    var i = 0
-    root.forEachApplet {
-        if (it === this) {
-            h1 = i++
-        } else if (it === another) {
-            h2 = i++
-        }
-        h1 != -1 && h2 != -1
+    check(this.isAttached) {
+        "This [$this] must be attached to a parent flow!"
     }
-    return h1 < h2
+    check(another.isAttached) {
+        "The other [$another] must be attached to a parent flow!"
+    }
+    var isAhead = false
+    this.root.forEachApplet {
+        if (it === this) {
+            isAhead = true
+            true
+        } else if (it === another) {
+            isAhead = false
+            true
+        } else {
+            false
+        }
+    }
+    return isAhead
 }
 
 fun Applet.whichReferent(referent: String): Int {
@@ -149,15 +182,6 @@ fun Applet.whichReference(referent: String): Int {
     return references.keys.firstOrNull {
         references[it] == referent
     } ?: -1
-}
-
-inline fun Flow.forEachReference(crossinline block: (Applet, which: Int, referent: String) -> Boolean) {
-    forEachApplet {
-        it.references.forEach { (t, u) ->
-            if (block(it, t, u)) return@forEachApplet true
-        }
-        return@forEachApplet false
-    }
 }
 
 /**
@@ -192,7 +216,7 @@ fun Applet.depthInAncestor(flow: Flow): Int {
     return depth
 }
 
-inline val Applet.isAttached: Boolean get() = rootOrNull is RootFlow
+inline val Applet.isAttached: Boolean get() = parent != null
 
 val Applet.isEnabledInHierarchy: Boolean
     get() {
@@ -210,8 +234,6 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     clone.isInverted = isInverted
     clone.isInvertible = isInvertible
     clone.comment = comment
-    clone.weakKeys = weakKeys?.clone()
-    clone.source = if (isClone) source else WeakReference(this)
     if (referents.isEmpty()) {
         clone.referents = emptyMap()
     } else {

@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,7 +32,6 @@ import top.xjunz.tasker.service.IAvailabilityCheckerCallback
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.ui.main.MainViewModel
 import java.util.*
 import kotlin.random.Random
 
@@ -43,8 +41,6 @@ import kotlin.random.Random
 class AvailabilityCheckDialog : BaseDialogFragment<DialogAvailabilityCheckBinding>() {
 
     private val viewModel by viewModels<InnerViewModel>()
-
-    private val mainViewModel by activityViewModels<MainViewModel>()
 
     override val isFullScreen = true
 

@@ -22,7 +22,7 @@ class TaskSnapshot(
     var startTimestamp: Long = -1,
     var endTimestamp: Long = -1,
     var isSuccessful: Boolean = false,
-    ) : Parcelable {
+) : Parcelable {
 
     val isRunning get() = endTimestamp == -1L
 
@@ -38,7 +38,7 @@ class TaskSnapshot(
 
     lateinit var failedApplets: Map<Applet, Failure>
 
-    var currentApplet: Applet? =null
+    var currentApplet: Applet? = null
 
     fun loadApplets(root: RootFlow) {
         succeededApplets = successes.map {

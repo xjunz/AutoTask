@@ -34,7 +34,7 @@ import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.ShizukuUtil
 
 /**
@@ -189,10 +189,10 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         binding.rgModes.setOnCheckedChangeListener { _, checkedId ->
             viewModel.checkedViewId = checkedId
         }
-        binding.btnGrant.setAntiMoneyClickListener {
+        binding.btnGrant.setNoDoubleClickListener {
             launchOverlaySettings()
         }
-        binding.btnEnable.setAntiMoneyClickListener {
+        binding.btnEnable.setNoDoubleClickListener {
             if (!Settings.canDrawOverlays(app)) {
                 launchOverlaySettings()
             } else {

@@ -18,7 +18,7 @@ import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.demo.Demonstration
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/02
@@ -61,7 +61,7 @@ class PreferenceHelpDialog : BaseDialogFragment<DialogPreferenceHelpBinding>() {
         super.onViewCreated(view, savedInstanceState)
         binding.tvTitle.text = viewModel.title
         binding.tvCaption.text = viewModel.helpText
-        binding.btnPositive.setAntiMoneyClickListener {
+        binding.btnPositive.setNoDoubleClickListener {
             viewModel.doOnConfirmed(binding.checkbox.isChecked)
             dismiss()
         }

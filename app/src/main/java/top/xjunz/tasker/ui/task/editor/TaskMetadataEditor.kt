@@ -13,7 +13,7 @@ import top.xjunz.tasker.databinding.DialogTaskMetadataEditorBinding
 import top.xjunz.tasker.engine.task.XTask.Metadata
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/15
@@ -35,7 +35,7 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
         super.onViewCreated(view, savedInstanceState)
 
         showSoftInput(binding.etTaskName)
-        binding.btnCancel.setAntiMoneyClickListener {
+        binding.btnCancel.setNoDoubleClickListener {
             dismiss()
         }
         binding.etTaskName.setText(viewModel.metadata.title)
@@ -45,11 +45,11 @@ class TaskMetadataEditor : BaseDialogFragment<DialogTaskMetadataEditorBinding>()
         } else {
             binding.etTaskName.setSelectionToEnd()
         }
-        binding.btnComplete.setAntiMoneyClickListener {
+        binding.btnComplete.setNoDoubleClickListener {
             if (binding.etTaskName.textString.isEmpty()) {
                 toast(R.string.error_empty_input)
                 binding.etTaskName.shake()
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             viewModel.metadata.title = binding.etTaskName.textString
             viewModel.metadata.description = binding.etTaskDesc.textString

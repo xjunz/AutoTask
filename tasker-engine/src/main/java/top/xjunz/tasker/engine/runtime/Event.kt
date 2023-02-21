@@ -4,19 +4,25 @@
 
 package top.xjunz.tasker.engine.runtime
 
+import android.util.ArraySet
 import android.util.SparseArray
 import androidx.annotation.IntDef
+import androidx.core.util.Pools.SynchronizedPool
 import top.xjunz.shared.ktx.casted
 
 /**
  * @author xjunz 2022/10/30
  */
-class Event(
-    val type: Int,
+class Event private constructor(
+    private var _type: Int,
     pkgName: String,
     actName: String? = null,
     paneTitle: String? = null
 ) {
+
+    private object Pool : SynchronizedPool<Event>(16)
+
+    val type get() = _type
 
     val componentInfo = ComponentInfo().also {
         it.packageName = pkgName
@@ -24,7 +30,27 @@ class Event(
         it.paneTitle = paneTitle
     }
 
+    private val locks = ArraySet<TaskRuntime>(5)
+
     private val extras = SparseArray<Any>()
+
+    /**
+     * Lock this event with a runtime preventing being recycled!
+     */
+    @Synchronized
+    fun lock(runtime: TaskRuntime) {
+        locks.add(runtime)
+    }
+
+    /**
+     * Unlock this event with a runtime and recycle this if there is no more lock.
+     */
+    @Synchronized
+    fun unlock(runtime: TaskRuntime) {
+        if (locks.remove(runtime) && locks.isEmpty()) {
+            recycle()
+        }
+    }
 
     companion object {
         /**
@@ -53,6 +79,38 @@ class Event(
         const val EVENT_ON_NOTIFICATION_RECEIVED = 4
 
         const val EVENT_ON_NEW_WINDOW = 5
+
+        fun obtain(
+            eventType: Int,
+            pkgName: String,
+            actName: String? = null,
+            paneTitle: String? = null
+        ): Event {
+            return Pool.acquire()?.apply {
+                componentInfo.activityName = actName
+                componentInfo.paneTitle = paneTitle
+                componentInfo.packageName = pkgName
+                _type = eventType
+            } ?: Event(eventType, pkgName, actName, paneTitle)
+        }
+
+        fun Array<out Event>.lockAll(runtime: TaskRuntime) {
+            forEach {
+                it.lock(runtime)
+            }
+        }
+
+        fun Array<out Event>.unlockAll(runtime: TaskRuntime) {
+            forEach {
+                it.unlock(runtime)
+            }
+        }
+
+        fun Array<out Event>.recycleAll() {
+            forEach {
+                it.recycle()
+            }
+        }
     }
 
     fun <V> getExtra(key: Int): V {
@@ -85,5 +143,12 @@ class Event(
         extras.put(key, value)
     }
 
+    fun recycle() {
+        extras.clear()
+        componentInfo.paneTitle = null
+        componentInfo.activityName = null
+        componentInfo.packageName = null
+        Pool.release(this)
+    }
 
 }

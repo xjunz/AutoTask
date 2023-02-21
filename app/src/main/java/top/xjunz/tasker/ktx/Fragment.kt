@@ -28,7 +28,10 @@ fun <T : Fragment> T.doWhenCreated(block: () -> Unit): T {
 }
 
 fun DialogFragment.show(fm: FragmentManager): Fragment {
-    show(fm, javaClass.simpleName + "#" + Integer.toHexString(System.identityHashCode(this)))
+    show(
+        fm.beginTransaction(),
+        javaClass.simpleName + "#" + Integer.toHexString(System.identityHashCode(this))
+    )
     return this
 }
 

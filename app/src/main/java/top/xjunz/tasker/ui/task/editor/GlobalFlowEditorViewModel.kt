@@ -12,6 +12,7 @@ import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.util.forEachReference
 import top.xjunz.tasker.engine.applet.util.forEachReferent
 import top.xjunz.tasker.engine.applet.util.isAheadOf
+import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.task.editor.AppletReferenceEditor
 
@@ -49,8 +50,10 @@ class GlobalFlowEditorViewModel : ViewModel() {
         root.forEachReferent { applet, which, referent ->
             if (prev.contains(referent)) {
                 referenceEditor.setReferent(applet, which, cur)
+                true
+            } else {
+                false
             }
-            false
         }
         root.forEachReference { applet, which, referent ->
             if (prev.contains(referent)) {
@@ -103,9 +106,9 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     fun selectReferentsWithName(self: Applet, name: String) {
         root.selectReferentWithName(name) { applet, index ->
-            if (applet != self && self.parent == null || applet.isAheadOf(self)) {
-                // Remove existed reference to this applet, because multiple refs to one applet
-                // is not allowed!
+            if (applet != self && !self.isAttached || applet.isAheadOf(self)) {
+                // Remove existed reference to this applet, because refer to multiple referents of
+                // one single applet is not allowed!
                 _selectedReferents.removeIf {
                     it.first === applet
                 }
@@ -140,19 +143,11 @@ class GlobalFlowEditorViewModel : ViewModel() {
     }
 
     fun isReferentLegalForSelections(referent: String): Boolean {
-        var legal = true
-        root.forEachReferent { applet, i, id ->
-            if (id == referent && !selectedReferents.any {
-                    it.first == applet && it.second == i
-                }
-            ) {
-                legal = false
-                true
-            } else {
-                false
+        return !root.forEachReferent { applet, i, name ->
+            name == referent && !selectedReferents.any {
+                it.first === applet && it.second == i
             }
         }
-        return legal
     }
 
     fun clearReferentSelections() {

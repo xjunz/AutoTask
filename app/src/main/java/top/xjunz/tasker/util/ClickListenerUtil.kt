@@ -12,12 +12,12 @@ import android.view.ViewConfiguration
 /**
  * @author xjunz 2022/11/29
  */
-object ClickUtil {
+object ClickListenerUtil {
 
-    const val THRESHOLD_INTERVAL = 350
+    inline val DOUBLE_CLICK_THRESHOLD_INTERVAL get() = ViewConfiguration.getDoubleTapTimeout()
 
-    fun View.setAntiMoneyClickListener(
-        thresholdInterval: Int = THRESHOLD_INTERVAL,
+    fun View.setNoDoubleClickListener(
+        thresholdInterval: Int = DOUBLE_CLICK_THRESHOLD_INTERVAL,
         listener: (View) -> Unit
     ) {
         setOnClickListener(object : OnClickListener {
@@ -43,12 +43,10 @@ object ClickUtil {
                 val uptime = SystemClock.uptimeMillis()
                 if (prevClickTimestamp == -1L) {
                     prevClickTimestamp = uptime
+                } else if (uptime - prevClickTimestamp <= DOUBLE_CLICK_THRESHOLD_INTERVAL) {
+                    listener(v)
                 } else {
-                    if (uptime - prevClickTimestamp <= ViewConfiguration.getDoubleTapTimeout()) {
-                        listener(v)
-                    } else {
-                        prevClickTimestamp = uptime
-                    }
+                    prevClickTimestamp = uptime
                 }
             }
         })

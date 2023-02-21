@@ -22,7 +22,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.task.editor.FlowItemTouchHelperCallback
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import java.util.*
 
 /**
@@ -42,7 +42,7 @@ class AppletCandidatesAdapter(
     inner class AppletViewHolder(val binding: ItemAppletCandidateBinding) :
         ViewHolder(binding.root) {
         init {
-            binding.root.setAntiMoneyClickListener {
+            binding.root.setNoDoubleClickListener {
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
                     if (applet.isInvertible) {
@@ -55,7 +55,7 @@ class AppletCandidatesAdapter(
                     }
                 }
             }
-            binding.ibAction.setAntiMoneyClickListener {
+            binding.ibAction.setNoDoubleClickListener {
                 val applet = currentList[adapterPosition]
                 if (applet is Flow) {
                     viewModel.toggleCollapse(applet)
@@ -66,7 +66,7 @@ class AppletCandidatesAdapter(
                     notifyItemChanged(adapterPosition, true)
                 }
             }
-            binding.tvTitle.setAntiMoneyClickListener {
+            binding.tvTitle.setNoDoubleClickListener {
                 if (AppletOption.deliveringEvent == null) {
                     binding.root.performClick()
                 }

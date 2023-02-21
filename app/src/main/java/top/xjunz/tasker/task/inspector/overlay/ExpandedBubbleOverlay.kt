@@ -16,7 +16,7 @@ import top.xjunz.tasker.databinding.OverlayBubbleExpandedBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/10/17
@@ -42,7 +42,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 vm.bubbleX = layoutParams.x
                 vm.bubbleY = layoutParams.y
             }
-            ibConfirm.setAntiMoneyClickListener {
+            ibConfirm.setNoDoubleClickListener {
                 when (vm.currentMode.require()) {
                     InspectorMode.UI_OBJECT -> vm.showNodeInfo.value = true
                     InspectorMode.COMPONENT -> vm.onComponentSelected.value = true
@@ -50,20 +50,20 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     InspectorMode.GESTURE_RECORDER -> vm.showGestures.value = true
                 }
             }
-            ibLayers.setAntiMoneyClickListener {
+            ibLayers.setNoDoubleClickListener {
                 vm.showNodeTree.value = true
             }
-            ibCenter.setAntiMoneyClickListener {
+            ibCenter.setNoDoubleClickListener {
                 vm.showGamePad.value = false
             }
-            ibCollapse.setAntiMoneyClickListener {
+            ibCollapse.setNoDoubleClickListener {
                 vm.isCollapsed.toggle()
             }
-            ibGamePad.setAntiMoneyClickListener {
+            ibGamePad.setNoDoubleClickListener {
                 vm.showGamePad.value = true
                 vm.makeToast(R.string.pointer_controller_enabled)
             }
-            ibPinScreenshot.setAntiMoneyClickListener {
+            ibPinScreenshot.setNoDoubleClickListener {
                 vm.pinScreenShot.toggle()
                 if (vm.pinScreenShot.isTrue) {
                     vm.makeToast(R.string.pin_screenshot)
@@ -71,7 +71,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     vm.makeToast(R.string.cancel_pin_screenshot)
                 }
             }
-            ibShowGrid.setAntiMoneyClickListener {
+            ibShowGrid.setNoDoubleClickListener {
                 vm.showGrids.toggle()
                 if (vm.showGrids.isTrue) {
                     vm.makeToast(R.string.show_node_bounds)
@@ -132,7 +132,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     }
                 }
             }
-            ibRecordAction.setAntiMoneyClickListener {
+            ibRecordAction.setNoDoubleClickListener {
                 if (vm.isRecordingGesture.isTrue) {
                     if (vm.recordedEvents.require().isEmpty()) {
                         vm.makeToast(R.string.error_no_gesture_recorded)

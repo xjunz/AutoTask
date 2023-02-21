@@ -4,13 +4,10 @@
 
 package top.xjunz.tasker.engine.applet.base
 
-import android.util.SparseArray
 import androidx.annotation.CheckResult
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.engine.runtime.ValueRegistry
-import java.lang.ref.WeakReference
 
 /**
  * The base executable element of a [Flow].
@@ -160,38 +157,6 @@ abstract class Applet {
      */
     var referents: Map<Int, String> = emptyMap()
 
-    val isClone get() = source?.get() != null
-
-    internal var weakKeys: SparseArray<ValueRegistry.WeakKey>? = null
-
-    /**
-     * The source where this is cloned. Could be `null` if this is not a clone or the source is
-     * no longer in usage.
-     */
-    internal var source: WeakReference<Applet>? = null
-
-    fun requireSource(): Applet {
-        return source!!.get()!!
-    }
-
-    @Synchronized
-    fun removeWeakKey(id: Int) {
-        weakKeys?.remove(id)
-    }
-
-    @Synchronized
-    fun getWeakKey(id: Int): ValueRegistry.WeakKey {
-        if (weakKeys == null) {
-            weakKeys = SparseArray()
-        }
-        var key = weakKeys?.get(id)
-        if (key == null) {
-            key = ValueRegistry.WeakKey()
-            weakKeys?.put(id, key)
-        }
-        return key
-    }
-
     fun requireParent() = requireNotNull(parent) {
         "Parent not found!"
     }
@@ -283,16 +248,6 @@ abstract class Applet {
 
     override fun toString(): String {
         return javaClass.simpleName
-    }
-
-    override fun hashCode(): Int {
-        return source?.get()?.hashCode() ?: super.hashCode()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Applet) return false
-        return super.equals(other)
     }
 
 }

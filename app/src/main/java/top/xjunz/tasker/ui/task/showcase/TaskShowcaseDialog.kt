@@ -4,14 +4,12 @@
 
 package top.xjunz.tasker.ui.task.showcase
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -26,11 +24,10 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
-import top.xjunz.tasker.util.ClickUtil.setOnDoubleClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setOnDoubleClickListener
 
 /**
  * @author xjunz 2022/07/30
@@ -38,6 +35,8 @@ import top.xjunz.tasker.util.ClickUtil.setOnDoubleClickListener
 class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
 
     override val isFullScreen = true
+
+    override val windowAnimationStyle: Int = R.style.DialogAnimationSlide
 
     private val viewModel by viewModels<TaskShowcaseViewModel>()
 
@@ -67,7 +66,6 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             Preferences.showToggleRelationTip = true
             Preferences.showSwipeToRemoveTip = true
             Preferences.showLongClickToSelectTip = true
-            toast("Preferences reset!")
         }
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
@@ -86,15 +84,14 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             it.elevation = 4.dpFloat
             it.alpha = (.88 * 0xFF).toInt()
         }
-        val mvm = peekMainViewModel()
-        binding.btnServiceControl.setAntiMoneyClickListener {
+        binding.btnServiceControl.setNoDoubleClickListener {
             if (it.isActivated) {
-                mvm.stopServiceConfirmation.value = true
+                mainViewModel.stopServiceConfirmation.value = true
             } else {
                 ServiceStarterDialog().show(childFragmentManager)
             }
         }
-        binding.fabAction.setAntiMoneyClickListener {
+        binding.fabAction.setNoDoubleClickListener {
             TaskCreatorDialog().show(childFragmentManager)
         }
         binding.viewPager.adapter = viewPagerAdapter
@@ -102,7 +99,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             binding.viewPager.currentItem = binding.bottomBar.menu.indexOf(it)
             return@setOnItemSelectedListener true
         }
-        binding.ibDismiss.setAntiMoneyClickListener {
+        binding.ibDismiss.setNoDoubleClickListener {
             dismiss()
         }
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -119,14 +116,12 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeTransient(viewModel.requestEditTask) {
             val task = it.first
             val prevChecksum = task.checksum
-            spyOnFragment(FlowEditorDialog().initBase(task, false).doOnTaskEdited {
+            FlowEditorDialog().initBase(task, false).doOnTaskEdited {
                 viewModel.updateTask(prevChecksum, task)
-            }.setFlowToNavigate(it.second?.hierarchy).show(childFragmentManager))
+            }.setFlowToNavigate(it.second?.hierarchy).show(childFragmentManager)
         }
         observeTransient(viewModel.requestTrackTask) {
-            spyOnFragment(
-                FlowEditorDialog().initBase(it, true).setTrackMode().show(childFragmentManager)
-            )
+            FlowEditorDialog().initBase(it, true).setTrackMode().show(childFragmentManager)
         }
         observeDialog(viewModel.requestToggleTask) {
             val title = if (it.isEnabled) R.string.prompt_disable_task.text
@@ -135,7 +130,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 viewModel.toggleRequestedTask()
             }.show()
         }
-        observeImportantConfirmation(
+        observeDangerousConfirmation(
             viewModel.requestDeleteTask,
             R.string.prompt_delete_task,
             R.string.delete
@@ -151,7 +146,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeTransient(viewModel.requestAddNewTask) {
             viewModel.addRequestedTask()
         }
-        observe(mvm.isServiceRunning) {
+        observe(mainViewModel.isServiceRunning) {
             binding.btnServiceControl.isActivated = it
             if (it) {
                 binding.btnServiceControl.setText(R.string.stop_service)
@@ -162,31 +157,4 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
             }
         }
     }
-
-    private fun spyOnFragment(fragment: Fragment) {
-        val tag = fragment.tag
-        childFragmentManager.registerFragmentLifecycleCallbacks(
-            object : FragmentManager.FragmentLifecycleCallbacks() {
-                override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
-                    super.onFragmentDestroyed(fm, f)
-                    if (f.tag === tag) {
-                        viewModel.isPaused.value = false
-                        childFragmentManager.unregisterFragmentLifecycleCallbacks(this)
-                        binding.appBar.setLiftOnScrollTargetView(fragments[binding.viewPager.currentItem]?.getScrollTarget())
-                    }
-                }
-
-                override fun onFragmentAttached(
-                    fm: FragmentManager,
-                    f: Fragment,
-                    context: Context
-                ) {
-                    if (f.tag === tag) {
-                        viewModel.isPaused.value = true
-                    }
-                }
-            }, false
-        )
-    }
-
 }

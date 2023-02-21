@@ -14,7 +14,7 @@ import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/22
@@ -51,8 +51,10 @@ class TimeIntervalEditorDialog : BaseDialogFragment<DialogTimeIntervalEditorBind
                     binding.etSecond
                 } else if (mill != 0) {
                     binding.etMills
-                } else {
+                } else if (min != 0) {
                     binding.etMin
+                } else {
+                    binding.etMills
                 }
             )
         }
@@ -63,13 +65,13 @@ class TimeIntervalEditorDialog : BaseDialogFragment<DialogTimeIntervalEditorBind
         binding.etMin.setMaxLength(2)
         binding.etMills.setMaxLength(3)
         binding.etSecond.setMaxLength(2)
-        binding.btnPositive.setAntiMoneyClickListener {
+        binding.btnPositive.setNoDoubleClickListener {
             val min = binding.etMin.textString.toIntOrNull() ?: 0
             val sec = binding.etSecond.textString.toIntOrNull() ?: 0
             val mill = binding.etMills.textString.toIntOrNull() ?: 0
             if (min == 0 && sec == 0 && mill == 0) {
                 toastAndShake(R.string.error_require_positive_num)
-                return@setAntiMoneyClickListener
+                return@setNoDoubleClickListener
             }
             viewModel.doOnCompletion(min * 60 * 1000 + sec * 1000 + mill)
             dismiss()

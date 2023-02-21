@@ -10,7 +10,7 @@
     <string name="_or">或者</string>
 
     <string name="current_app">所处的应用</string>
-    <string name="current_top_app">当前应用</string>
+    <string name="current_top_app">当前所处应用</string>
     <string name="current_notification">当前通知</string>
     <string name="ui_object_exists">存在控件</string>
     <string name="current_time">当前时间</string>

@@ -7,6 +7,8 @@ package top.xjunz.tasker.ui.task.selector.argument
 import android.graphics.Point
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StringRes
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -17,25 +19,36 @@ import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.DialogCoordinateEditorBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2023/01/13
  */
-class CoordinateEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
+class XYEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
 
     override val isFullScreen: Boolean = false
 
     private class InnerViewModel : ViewModel() {
 
+        var type: Int = VariantType.INT_COORDINATE
+
         var title: CharSequence? = null
 
+        var help: CharSequence? = null
+
         lateinit var onCompletion: (Int, Int) -> Unit
+
+        @StringRes
+        var hintX: Int = -1
+
+        @StringRes
+        var hintY: Int = -1
     }
 
     private val viewModel by viewModels<InnerViewModel>()
@@ -61,14 +74,34 @@ class CoordinateEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>
             lifecycle.withStarted {
                 binding.etX.setText(initial?.x?.toString())
                 binding.etY.setText(initial?.y?.toString())
+                showSoftInput(binding.etX)
+                binding.etX.setSelectionToEnd()
             }
         }
     }
 
+    fun setHelp(helpRes: CharSequence?) = doWhenCreated {
+        viewModel.help = helpRes
+    }
+
+    fun setVariantType(variantType: Int, @StringRes hintX: Int, @StringRes hintY: Int) =
+        doWhenCreated {
+            viewModel.type = variantType
+            viewModel.hintX = hintX
+            viewModel.hintY = hintY
+        }
+
     private fun initViews() {
         binding.tvTitle.text = viewModel.title
-        val size = DisplayManagerBridge.size
-        binding.tvCaption.text = R.string.format_screen_width_height.format(size.x, size.y)
+        if (viewModel.type == VariantType.INT_COORDINATE) {
+            val size = DisplayManagerBridge.size
+            binding.tvHelp.text = R.string.format_screen_width_height.format(size.x, size.y)
+            binding.cvContainer.isVisible = true
+        } else {
+            binding.tilX.setHint(viewModel.hintX)
+            binding.tilY.setHint(viewModel.hintY)
+            binding.tvHelp.text = viewModel.help
+        }
         binding.btnNegative.setOnClickListener {
             dismiss()
         }
@@ -88,17 +121,17 @@ class CoordinateEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>
             if (x == null) {
                 binding.tilX.shake()
                 binding.tilX.requestFocus()
-                toast(R.string.error_unspecified.format(R.string.x_coordinate.str))
+                toast(R.string.error_unspecified)
             } else if (y == null) {
                 binding.tilY.shake()
                 binding.tilY.requestFocus()
-                toast(R.string.error_unspecified.format(R.string.y_coordinate.str))
+                toast(R.string.error_unspecified)
             } else {
                 viewModel.onCompletion(x, y)
                 dismiss()
             }
         }
-        binding.cvContainer.setAntiMoneyClickListener {
+        binding.cvContainer.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COORDS).show(childFragmentManager)
         }
     }

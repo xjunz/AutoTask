@@ -12,6 +12,7 @@ import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.util.isContainer
+import top.xjunz.tasker.engine.applet.util.isDescendantOf
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
@@ -220,13 +221,16 @@ class AppletOperationMenuHelper(
                         viewModel.onAppletChanged.value = applet
                     }
                     viewModel.notifyFlowChanged()
-                }.setStaticError(viewModel.staticError).doSplit {
+                }.doSplit {
                     viewModel.splitContainerFlow(applet)
                 }
-                if (viewModel.isSelectingArgument) {
+                if (viewModel.staticError?.victim?.isDescendantOf(applet) == true) {
+                    dialog.setStaticError(viewModel.staticError)
+                }
+                if (viewModel.isSelectingReferent) {
                     dialog.doOnArgumentSelected(viewModel.doOnArgSelected)
                     dialog.setArgumentToSelect(
-                        viewModel.referentAnchor, viewModel.argumentDescriptor, null
+                        viewModel.referentAnchor, viewModel.referentDescriptor, null
                     )
                 }
                 if (viewModel.isInTrackMode) {

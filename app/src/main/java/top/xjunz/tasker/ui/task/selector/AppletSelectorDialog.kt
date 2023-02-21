@@ -46,7 +46,7 @@ import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
-import top.xjunz.tasker.util.ClickUtil.setAntiMoneyClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/09/26
@@ -62,7 +62,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     private val leftAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(
             viewModel.registryOptions, ItemAppletFactoryBinding::class.java, {
-                itemView.setAntiMoneyClickListener {
+                itemView.setNoDoubleClickListener {
                     viewModel.selectFlowRegistry(adapterPosition)
                 }
             }) { binding, index, data ->
@@ -81,7 +81,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
 
     private val rightAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(viewModel.options, ItemAppletOptionBinding::class.java, {
-            itemView.setAntiMoneyClickListener {
+            itemView.setNoDoubleClickListener {
                 // if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
                 val position = adapterPosition
                 val option = viewModel.options[position]
@@ -93,7 +93,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     }
                 }
             }
-            binding.ibInvert.setAntiMoneyClickListener {
+            binding.ibInvert.setNoDoubleClickListener {
                 viewModel.options[adapterPosition].toggleInversion()
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
@@ -154,15 +154,15 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         binding.shoppingCart.circularRevealContainer.doOnPreDraw {
             binding.rvRight.updatePadding()
         }
-        binding.shoppingCart.btnCount.setAntiMoneyClickListener {
+        binding.shoppingCart.btnCount.setNoDoubleClickListener {
             if (viewModel.flow.isNotEmpty())
                 viewModel.showClearDialog.value = true
         }
-        binding.shoppingCart.btnComplete.setAntiMoneyClickListener {
+        binding.shoppingCart.btnComplete.setNoDoubleClickListener {
             viewModel.complete()
             dismiss()
         }
-        binding.cvHeader.setAntiMoneyClickListener { v ->
+        binding.cvHeader.setNoDoubleClickListener { v ->
             FloatingInspectorDialog().setMode(v.tag.casted()).show(parentFragmentManager)
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
@@ -218,7 +218,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             val vh = binding.rvRight.findViewHolderForAdapterPosition(it)
             if (vh != null) shopCartIntegration.animateIntoShopCart(vh.itemView)
         }
-        observeImportantConfirmation(
+        observeDangerousConfirmation(
             viewModel.showClearDialog, R.string.prompt_clear_all_options, R.string.clear_all
         ) {
             viewModel.clearAllCandidates()
