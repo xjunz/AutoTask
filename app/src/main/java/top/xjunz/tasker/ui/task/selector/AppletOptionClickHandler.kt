@@ -13,7 +13,6 @@ import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
-import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.util.IntValueUtil
@@ -36,7 +35,8 @@ open class AppletOptionClickHandler(private val fragmentManager: FragmentManager
     open fun onClick(applet: Applet, option: AppletOption, onCompleted: () -> Unit) {
         val title = option.loadTitle(applet)!!
         when {
-            option.arguments.isNotEmpty() -> ArgumentsEditorDialog().setAppletOption(applet, option)
+            option.arguments.isNotEmpty() -> ArgumentsEditorDialog()
+                .setAppletOption(applet, option)
                 .doOnCompletion(onCompleted).show(fragmentManager)
 
             option.isValueInnate -> onCompleted()
@@ -93,16 +93,6 @@ open class AppletOptionClickHandler(private val fragmentManager: FragmentManager
             applet is PropertyCriterion<*> -> {
                 if (applet.isAttached) applet.toggleInversion()
                 onCompleted()
-            }
-
-            applet is NumberRangeCriterion<*, *> -> {
-                val value = applet.value?.casted<Collection<Number>>()
-                RangeEditorDialog().doOnCompletion { start, end ->
-                    applet.value = listOf(start, end)
-                    onCompleted()
-                }.setType(applet.rawType).setRange(
-                    value?.firstOrNull(), value?.lastOrNull()
-                ).setTitle(title).show(fragmentManager)
             }
 
             applet is BoundsCriterion<*> -> {

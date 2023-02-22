@@ -122,18 +122,16 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_desc"
             tools:text="说明: 请勿删除此规则" />
 
-        <com.google.android.material.imageview.ShapeableImageView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/ib_action"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_selectable_circle"
-            android:scaleType="centerInside"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:iconTint="?colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
-            app:tint="?colorPrimary"
-            tools:src="@drawable/ic_baseline_switch_24" />
+            tools:icon="@drawable/ic_baseline_switch_24" />
 
         <HorizontalScrollView
             android:id="@+id/container_referents"

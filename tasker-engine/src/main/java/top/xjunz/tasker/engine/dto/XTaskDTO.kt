@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.requireParcelable
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.engine.dto.AppletChecksum.calculateChecksum
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
-import top.xjunz.tasker.engine.dto.ChecksumUtil.calculateChecksum
 import top.xjunz.tasker.engine.task.XTask
 
 /**

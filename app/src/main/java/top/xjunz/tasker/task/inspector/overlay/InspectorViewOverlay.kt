@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Looper
 import android.os.SystemClock
 import android.view.Display
+import android.view.HapticFeedbackConstants
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.core.view.doOnPreDraw
@@ -113,6 +114,8 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                         } else {
                             rootView.isVisible = false
                         }
+                    } else if (vm.currentMode eq InspectorMode.TASK_ASSISTANT) {
+                        rootView.isVisible = false
                     } else if (vm.currentMode eq InspectorMode.UI_OBJECT) {
                         captureWindowSnapshot()
                     }
@@ -235,6 +238,10 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                 rootView.isVisible = true
             }
         }
+    }
+
+    override fun onLongClickDetected() {
+        binding.gestureRecorderView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
     override fun onGestureStarted(startDelay: Long) {

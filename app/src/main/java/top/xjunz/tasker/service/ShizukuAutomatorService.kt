@@ -23,14 +23,15 @@ import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.bridge.OverlayToastBridge
+import top.xjunz.tasker.engine.dto.XTaskDTO
+import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.isAlive
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
-import top.xjunz.tasker.task.runtime.IRemoteTaskManager
-import top.xjunz.tasker.task.runtime.RemoteTaskManager
-import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
+import top.xjunz.tasker.task.runtime.*
 import top.xjunz.tasker.uiautomator.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import java.lang.ref.WeakReference
@@ -63,14 +64,18 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         uiAutomationHidden.casted()
     }
 
+    private val residentTaskScheduler by lazy {
+        ResidentTaskScheduler(PrivilegedTaskManager)
+    }
+
+    private val oneshotTaskScheduler by lazy {
+        OneshotTaskScheduler()
+    }
+
     private var startTimestamp: Long = -1
 
     @Local
     private lateinit var delegate: IRemoteAutomatorService
-
-    override val residentTaskScheduler by lazy {
-        ResidentTaskScheduler(RemoteTaskManager)
-    }
 
     override val a11yEventDispatcher by lazy {
         A11yEventDispatcher(looper, uiAutomatorBridge)
@@ -132,7 +137,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     override fun getTaskManager(): IRemoteTaskManager {
-        return RemoteTaskManager.Delegate
+        return PrivilegedTaskManager.Delegate
     }
 
     /**
@@ -156,6 +161,20 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
+    @Privileged
+    override fun scheduleTask(dto: XTaskDTO, callback: ITaskCompletionCallback) {
+        oneshotTaskScheduler.scheduleTask(dto.toXTask(AppletOptionFactory), callback)
+    }
+
+    @Anywhere
+    override fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback) {
+        if (isAppProcess) {
+            delegate.scheduleTask(task.toDTO(), onCompletion)
+        } else {
+            oneshotTaskScheduler.scheduleTask(task, onCompletion)
+        }
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
@@ -175,8 +194,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
-            residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
-            a11yEventDispatcher.start()
+            a11yEventDispatcher.addCallback(residentTaskScheduler)
+            a11yEventDispatcher.activate()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()

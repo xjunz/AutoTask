@@ -101,7 +101,7 @@
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="16dp"
                     android:textColor="?colorTertiary"
-                    app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24"
+                    app:drawableEndCompat="@drawable/ic_chevron_right_24px"
                     app:drawableStartCompat="@drawable/ic_twotone_layers_24"
                     app:drawableTint="?colorTertiary"
                     tools:text="@string/format_enable_floating_inspector" />

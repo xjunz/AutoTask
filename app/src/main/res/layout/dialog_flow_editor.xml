@@ -59,13 +59,12 @@
                     android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_selectable_surface"
+                    android:background="?selectableItemBackground"
                     android:drawableTint="?colorPrimary"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="2"
-                    android:paddingHorizontal="4dp"
-                    android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ib_menu"
@@ -74,58 +73,56 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="@tools:sample/lorem/random" />
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/ib_check"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/complete}"
-                    android:src="@drawable/ic_baseline_check_24"
+                    app:icon="@drawable/ic_done_24px"
+                    app:iconSize="24dp"
+                    app:iconTint="?colorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="?colorPrimary" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/ib_dismiss"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_selectable_circle"
                     android:contentDescription="@{@string/dismiss}"
-                    android:src="@drawable/ic_arrow_back_24px"
+                    app:icon="@drawable/ic_arrow_back_24px"
+                    app:iconSize="24dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_goneMarginEnd="12dp"
-                    app:tint="?colorOnPrimaryContainer" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/ib_menu"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_selectable_circle"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:contentDescription="@{@string/more}"
-                    android:src="@drawable/ic_baseline_menu_24"
                     android:visibility="gone"
+                    app:icon="@drawable/ic_menu_24px"
+                    app:iconSize="24dp"
                     app:layout_constraintEnd_toStartOf="@+id/ib_split"
-                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss"
-                    app:tint="?colorOnPrimaryContainer" />
+                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss" />
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/ib_split"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_selectable_circle"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:contentDescription="@{@string/split_merged_rules}"
-                    android:src="@drawable/ic_baseline_call_split_24"
                     android:visibility="gone"
+                    app:icon="@drawable/ic_call_split_24px"
+                    app:iconSize="24dp"
                     app:layout_constraintEnd_toStartOf="@+id/ib_check"
-                    app:layout_constraintTop_toTopOf="@+id/ib_menu"
-                    app:tint="?colorOnPrimaryContainer" />
+                    app:layout_constraintTop_toTopOf="@+id/ib_menu" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -163,7 +160,6 @@
 
                     <TextView
                         android:id="@+id/tv_header_desc"
-                        app:layout_goneMarginTop="0dp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -173,19 +169,20 @@
                         app:layout_constraintEnd_toStartOf="@id/ib_header_action"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tv_header_title"
+                        app:layout_goneMarginTop="0dp"
                         tools:text="@tools:sample/lorem/random" />
 
-                    <ImageButton
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/ib_header_action"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_selectable_circle"
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:contentDescription="@{@string/task_snapshots}"
-                        android:src="@drawable/ic_timeline_24px"
+                        app:icon="@drawable/ic_timeline_24px"
+                        app:iconTint="?colorPrimary"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?colorPrimary" />
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -229,6 +226,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="16dp"
+            android:text="@string/add_rules"
+            app:icon="@drawable/ic_playlist_add_24px"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
             app:layout_dodgeInsetEdges="bottom" />
 

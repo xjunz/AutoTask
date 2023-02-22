@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 class EnabledTaskFragment : BaseTaskShowcaseFragment() {
 
     override fun initTaskList(): List<XTask> {
-        return LocalTaskManager.getEnabledTasks()
+        return LocalTaskManager.getEnabledResidentTasks()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

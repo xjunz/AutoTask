@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ui.task.editor
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,7 @@ import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
+import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
 import top.xjunz.tasker.ui.task.showcase.TaskShowcaseViewModel
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -119,10 +121,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         vm.isFabVisible.value =
             vm.isInEditionMode || (vm.isSelectingReferent && gvm.selectedReferents.isNotEmpty())
-        if (vm.isInEditionMode) {
-            binding.fabAction.text = R.string.add_rules.text
-            binding.fabAction.setIconResource(R.drawable.ic_baseline_add_24)
-        } else if (vm.isSelectingReferent) {
+        if (vm.isSelectingReferent) {
             binding.fabAction.text = R.string.confirm_reference.text
             binding.fabAction.setIconResource(R.drawable.ic_baseline_add_link_24)
         }
@@ -191,7 +190,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 TaskSnapshotSelectorDialog().show(childFragmentManager)
             }
             binding.ibCheck.isVisible = true
-            binding.ibCheck.setImageResource(R.drawable.ic_edit_24dp)
+            binding.ibCheck.setIconResource(R.drawable.ic_edit_24dp)
             val pvm = peekParentViewModel<TaskShowcaseDialog, TaskShowcaseViewModel>()
             binding.ibCheck.setNoDoubleClickListener {
                 if (vm.isBase) {
@@ -221,6 +220,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 }.show(childFragmentManager)
             }
             navigateToDestFlow()
+        }
+        when (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR) {
+            TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
+                menuHelper.triggerMenuItem(null, (vm.flow[1] as Flow)[0], R.id.item_add_before)
+            }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
+                binding.fabAction.performClick()
+            }
         }
     }
 
@@ -309,6 +316,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     )
                 }
                 binding.containerPlaceholder.isVisible = it.isEmpty()
+                vm.isFabVisible.value = it.isEmpty()
             }
         }
         observeTransient(vm.onAppletChanged) {
@@ -324,7 +332,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             } else if (it.isEmpty()) {
                 if (vm.isBase) {
                     if (!vm.isReadyOnly) {
-                        binding.tvTitle.setDrawableEnd(R.drawable.ic_baseline_chevron_right_24)
+                        binding.tvTitle.setDrawableEnd(R.drawable.ic_chevron_right_24px)
                     }
                     binding.tvTitle.text = vm.metadata.title
                 } else {
@@ -346,6 +354,18 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             }
         }
         observePrompt(vm.showTaskRepeatedPrompt, R.string.prompt_repeated_task)
+        observeDialog(vm.showTitleRepeatedPrompt) { title ->
+            requireContext().makeSimplePromptDialog(
+                msg = R.string.prompt_task_title_repeated.formatSpans(title.bold())
+            ).setPositiveButton(R.string.ignore_and_continue) { _, _ ->
+                vm.ignoreRepeatedTitle = true
+                binding.ibCheck.performClick()
+            }.setNegativeButton(R.string.rename) { _, _ ->
+                binding.tvTitle.performClick()
+            }.show().also {
+                it.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ColorScheme.colorError)
+            }
+        }
         observeConfirmation(vm.showSplitConfirmation, R.string.prompt_split_container_flow) {
             vm.doSplit()
             dismiss()
@@ -508,12 +528,12 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     }
 
     fun initBase(task: XTask, readonly: Boolean) = doWhenCreated {
+        vm.global = viewModels<GlobalFlowEditorViewModel>().value
         if (task.flow == null) {
             task.flow = vm.generateDefaultFlow(task.metadata.taskType)
         }
         vm.task = task
         vm.initialize(task.requireFlow(), readonly)
-        vm.global = viewModels<GlobalFlowEditorViewModel>().value
         gvm.root = vm.flow as RootFlow
     }
 

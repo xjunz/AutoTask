@@ -13,7 +13,6 @@ import androidx.core.os.HandlerCompat
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
@@ -47,7 +46,7 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
 
-    fun start() {
+    fun activate() {
         bridge.addOnAccessibilityEventListener {
             processAccessibilityEvent(it)
         }
@@ -159,7 +158,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
                 // logcat(a11yEvent)
             }
         }
-        logcat("title: ${latestPaneTitle}, pkgName: $latestActivityName, act: $latestActivityName")
     }
 
     private fun newEvent(

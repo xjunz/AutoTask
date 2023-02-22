@@ -15,6 +15,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogRangeEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
@@ -29,7 +30,9 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
         var type: Int = Applet.VAL_TYPE_INT
 
-        lateinit var title: CharSequence
+        var variantType: Int = -1
+
+        var title: CharSequence? = null
 
         var rangeStart: Number? = null
 
@@ -72,6 +75,9 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
                 et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             }
             else -> illegalArgument("number type", viewModel.type)
+        }
+        if (viewModel.variantType == VariantType.INT_PERCENT_RANGE) {
+            et.setMaxLength(3)
         }
     }
 
@@ -141,12 +147,13 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         viewModel.onCompletion = block
     }
 
-    fun setTitle(title: CharSequence) = doWhenCreated {
+    fun setTitle(title: CharSequence?) = doWhenCreated {
         viewModel.title = title
     }
 
-    fun setType(t: Int): RangeEditorDialog = doWhenCreated {
-        viewModel.type = t
+    fun setType(type: Int, variantType: Int = -1): RangeEditorDialog = doWhenCreated {
+        viewModel.type = type
+        viewModel.variantType = variantType
     }
 
     fun setRange(start: Number?, end: Number?, defStart: Number? = null, defEnd: Number? = null) =

@@ -67,7 +67,7 @@
             android:insetTop="6dp"
             android:insetBottom="6dp"
             android:text="@string/record_gesture"
-            app:icon="@drawable/ic_baseline_chevron_right_24"
+            app:icon="@drawable/ic_chevron_right_24px"
             app:iconGravity="textEnd"
             app:layout_constraintBottom_toBottomOf="@+id/tv_title"
             app:layout_constraintEnd_toEndOf="parent"

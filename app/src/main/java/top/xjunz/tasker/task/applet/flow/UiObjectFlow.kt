@@ -28,7 +28,7 @@ class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         val ctx = runtime.target
-        val node = runtime.getGlobalValue(TaskRuntime.GLOBAL_SCOPE_EVENT, ROOT_NODE_KEY) {
+        val node = runtime.getScopedValue(TaskRuntime.GLOBAL_SCOPE_EVENT, ROOT_NODE_KEY) {
             uiAutomation.rootInActiveWindow
         }.findFirst(false) {
             ctx.source = it

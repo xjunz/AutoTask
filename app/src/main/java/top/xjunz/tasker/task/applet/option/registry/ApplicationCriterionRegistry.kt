@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import android.content.ComponentName
+import android.content.pm.ApplicationInfo
 import androidx.annotation.StringRes
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PackageManagerBridge
@@ -15,7 +16,6 @@ import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.newCri
 import top.xjunz.tasker.ktx.bold
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
-import top.xjunz.tasker.ktx.isSystemApp
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
@@ -104,7 +104,8 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x01_00)
     private val isSystem = invertibleApplicationOption(R.string.is_system_app) {
         PropertyCriterion<ComponentInfoWrapper> {
-            it.packageInfo.applicationInfo.isSystemApp
+            it.packageInfo.applicationInfo.flags and
+                    (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         }
     }
 

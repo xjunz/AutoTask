@@ -55,6 +55,7 @@
         </top.xjunz.tasker.ui.widget.GamePadLayout>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_toolbar"
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -111,7 +112,7 @@
                     android:id="@+id/ib_confirm"
                     style="@style/FloatingControllerImageButton"
                     android:paddingHorizontal="4dp"
-                    android:src="@drawable/ic_baseline_check_24" />
+                    android:src="@drawable/ic_done_24px" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

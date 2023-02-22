@@ -175,7 +175,7 @@
                 android:insetBottom="6dp"
                 android:paddingHorizontal="16dp"
                 android:text="@string/goto_grant"
-                app:icon="@drawable/ic_baseline_chevron_right_24"
+                app:icon="@drawable/ic_chevron_right_24px"
                 app:iconGravity="textEnd" />
         </LinearLayout>
 

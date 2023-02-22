@@ -48,6 +48,9 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     InspectorMode.COMPONENT -> vm.onComponentSelected.value = true
                     InspectorMode.COORDS -> vm.onCoordinateSelected.value = true
                     InspectorMode.GESTURE_RECORDER -> vm.showGestures.value = true
+                    InspectorMode.TASK_ASSISTANT -> {
+                        /* no-op */
+                    }
                 }
             }
             ibLayers.setNoDoubleClickListener {
@@ -114,6 +117,7 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                 ibGamePad.isVisible = false
                 ibShowGrid.isVisible = false
                 ibRecordAction.isVisible = false
+                cvToolbar.isVisible = true
                 when (it) {
                     InspectorMode.UI_OBJECT -> {
                         ibPinScreenshot.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
@@ -124,12 +128,9 @@ class ExpandedBubbleOverlay(inspector: FloatingInspector) :
                     InspectorMode.COMPONENT -> {
                         /* no-op */
                     }
-                    InspectorMode.COORDS -> {
-                        ibGamePad.isVisible = true
-                    }
-                    InspectorMode.GESTURE_RECORDER -> {
-                        ibRecordAction.isVisible = true
-                    }
+                    InspectorMode.COORDS -> ibGamePad.isVisible = true
+                    InspectorMode.GESTURE_RECORDER -> ibRecordAction.isVisible = true
+                    InspectorMode.TASK_ASSISTANT -> cvToolbar.isVisible = false
                 }
             }
             ibRecordAction.setNoDoubleClickListener {

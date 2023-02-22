@@ -12,17 +12,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
 import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.Event.Companion.lockAll
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainRuntime
 import top.xjunz.tasker.engine.runtime.ValueRegistry
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
- * The abstraction of an automator task.
+ * The abstraction of an automation task.
  *
  * **XTask** is the abbr. of "XJUNZ-TASK", rather cool isn't it? :)
  *
@@ -51,20 +49,24 @@ class XTask : ValueRegistry() {
 
     inline val isPreload get() = metadata.isPreload
 
-    var flow: RootFlow? = null
+    internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
 
-    var taskStateListener: TaskStateListener? = null
+    var flow: RootFlow? = null
 
     lateinit var metadata: Metadata
 
     internal var registry = SparseArray<Any>()
 
-    internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
+    private var listener: TaskStateListener? = null
 
     private var currentRuntime: TaskRuntime? = null
 
     fun requireFlow(): RootFlow = requireNotNull(flow) {
         "RootFlow is not initialized!"
+    }
+
+    fun setListener(listener: TaskStateListener?) {
+        this.listener = listener
     }
 
     /**
@@ -139,40 +141,40 @@ class XTask : ValueRegistry() {
      *
      * @return `true` if the task starts executed and `false` otherwise
      */
-    suspend fun launch(registry: ValueRegistry, scope: CoroutineScope, events: Array<out Event>) {
+    suspend fun launch(runtime: TaskRuntime) {
         val snapshot = TaskSnapshot(checksum, System.currentTimeMillis())
-        val runtime = obtainRuntime(registry, scope, events)
         runtime.observer = SnapshotObserver(snapshot)
         try {
             currentRuntime = runtime
-            events.lockAll(runtime)
-            taskStateListener?.onStarted(runtime)
+            listener?.onTaskStarted(runtime)
             runtime.isSuccessful = requireFlow().apply(runtime).isSuccessful
             if (runtime.isSuccessful) {
-                taskStateListener?.onSuccess(runtime)
+                listener?.onTaskSuccess(runtime)
             } else {
-                taskStateListener?.onFailure(runtime)
+                listener?.onTaskFailure(runtime)
             }
         } catch (t: Throwable) {
             runtime.isSuccessful = false
             when (t) {
-                is FlowFailureException -> taskStateListener?.onFailure(runtime)
+                is FlowFailureException -> listener?.onTaskFailure(runtime)
                 is CancellationException -> {
-                    taskStateListener?.onCancelled(runtime)
+                    listener?.onTaskCancelled(runtime)
                     snapshots.remove(snapshot)
                 }
-                else -> taskStateListener?.onError(runtime, t)
+                else -> listener?.onTaskError(runtime, t)
             }
+            t.logcatStackTrace()
         } finally {
             snapshot.endTimestamp = System.currentTimeMillis()
             snapshot.isSuccessful = runtime.isSuccessful
             snapshots.removeIf {
-                it.isRedundantTo(snapshot)
+                it.contentEquals(snapshot)
             }
             if (snapshots.size > 10) {
                 snapshots.pollLast()
             }
             currentRuntime = null
+            listener = null
             runtime.recycle()
         }
     }
@@ -200,33 +202,46 @@ class XTask : ValueRegistry() {
 
     interface TaskStateListener {
 
-        fun onStarted(runtime: TaskRuntime) {}
+        fun onTaskStarted(runtime: TaskRuntime) {}
 
         /**
          * When the task completes due to an unexpected error.
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onError(runtime: TaskRuntime, t: Throwable) {}
+        fun onTaskError(runtime: TaskRuntime, t: Throwable) {
+            onTaskFinished(runtime)
+        }
 
         /**
          * When the flow completes failed.
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onFailure(runtime: TaskRuntime) {}
+        fun onTaskFailure(runtime: TaskRuntime) {
+            onTaskFinished(runtime)
+        }
 
         /**
          * When the task completes successful.
          *
          * **Note**: It's the caller's duty to recycle the [runtime].
          */
-        fun onSuccess(runtime: TaskRuntime) {}
+        fun onTaskSuccess(runtime: TaskRuntime) {
+            onTaskFinished(runtime)
+        }
 
         /**
          * When the task is cancelled.
          */
-        fun onCancelled(runtime: TaskRuntime) {}
+        fun onTaskCancelled(runtime: TaskRuntime) {
+            onTaskFinished(runtime)
+        }
+
+        /**
+         * When the task is finished, for no matter what.
+         */
+        fun onTaskFinished(runtime: TaskRuntime) {}
     }
 
     @Serializable

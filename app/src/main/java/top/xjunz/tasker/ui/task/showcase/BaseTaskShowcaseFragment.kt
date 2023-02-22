@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
@@ -58,7 +59,10 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             binding.ibDelete.setNoDoubleClickListener {
                 viewModel.requestDeleteTask.value = taskList[adapterPosition]
             }
-            binding.ibTrack.setNoDoubleClickListener {
+            binding.ibRun.setNoDoubleClickListener {
+                viewModel.requestToggleTask.value = taskList[adapterPosition]
+            }
+            binding.ibSnapshot.setNoDoubleClickListener {
                 val task = taskList[adapterPosition]
                 if (LocalTaskManager.getSnapshotCount(task) == 0) {
                     toast(R.string.no_task_snapshots)
@@ -97,14 +101,19 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.tvTaskDesc.text = metadata.description
                 b.tvTaskDesc.isEnabled = true
             }
+            if (metadata.taskType == XTask.TYPE_ONESHOT) {
+                b.msEnabled.isInvisible = true
+            } else if (metadata.taskType == XTask.TYPE_RESIDENT) {
+                b.ibRun.isInvisible = true
+            }
             b.tvBadge.isVisible = task.isPreload
-            b.ibTrack.isVisible = false
+            b.ibSnapshot.isVisible = false
             b.container.strokeColor = com.google.android.material.R.attr.colorOutline.attrColor
             if (task.isEnabled) {
                 b.msEnabled.setText(R.string.is_enabled)
                 if (serviceController.isServiceRunning) {
                     b.wave.fadeIn()
-                    b.ibTrack.isVisible = true
+                    b.ibSnapshot.isVisible = true
                     b.container.strokeColor = ColorScheme.colorPrimary
                     b.container.cardElevation = 1.dpFloat
                 } else {

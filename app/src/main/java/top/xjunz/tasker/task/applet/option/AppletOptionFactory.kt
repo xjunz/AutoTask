@@ -44,7 +44,7 @@ object AppletOptionFactory : AppletFactory {
     private val uiObjectActionRegistry =
         UiObjectActionRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
-    private val gestureActionRegistry =
+    val gestureActionRegistry =
         GestureActionRegistry(BootstrapOptionRegistry.ID_GESTURE_ACTION_REGISTRY)
 
     private val textActionRegistry = TextActionRegistry(BootstrapOptionRegistry.ID_TEXT_ACTION_REGISTRY)
@@ -52,7 +52,7 @@ object AppletOptionFactory : AppletFactory {
     private val appActionRegistry =
         ApplicationActionRegistry(BootstrapOptionRegistry.ID_APP_ACTION_REGISTRY)
 
-    private val controlActionRegistry =
+    val controlActionRegistry =
         ControlActionRegistry(BootstrapOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
     private val allRegistries = arrayOf(

@@ -4,23 +4,22 @@
 
 package top.xjunz.tasker.engine.task
 
+import androidx.collection.ArraySet
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.runtime.Event
-import java.util.*
 
 /**
  * @author xjunz 2022/12/04
  */
 abstract class EventDispatcher : CoroutineScope {
 
-    private val callbacks = LinkedList<Callback>()
+    private val callbacks = ArraySet<Callback>()
 
     abstract fun destroy()
 
     fun addCallback(callback: Callback) {
-        if (callbacks.contains(callback)) return
-        callbacks.offer(callback)
+        callbacks.add(callback)
     }
 
     fun removeCallback(callback: Callback) {
@@ -28,15 +27,15 @@ abstract class EventDispatcher : CoroutineScope {
     }
 
     fun dispatchEvents(vararg events: Event) {
-        launch {
-            callbacks.forEach {
-                it.onEvents(events)
-            }
+        callbacks.forEach {
+            it.onEvents(events.casted())
         }
     }
 
     fun interface Callback {
-        suspend fun onEvents(events: Array<out Event>)
+
+        fun onEvents(events: Array<Event>)
+
     }
 
 }

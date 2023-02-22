@@ -50,7 +50,7 @@ abstract class ScopeFlow<Target : Any> : Flow() {
             targetKey = generateTargetKey()
         }
         runtime.setTarget(
-            runtime.getGlobalValue(TaskRuntime.GLOBAL_SCOPE_EVENT, targetKey) {
+            runtime.getScopedValue(TaskRuntime.GLOBAL_SCOPE_EVENT, targetKey) {
                 initializeTarget(runtime)
             }
         )

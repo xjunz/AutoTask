@@ -10,7 +10,7 @@ import java.util.zip.CRC32
 /**
  * @author xjunz 2022/12/22
  */
-object ChecksumUtil {
+object AppletChecksum {
 
     fun calculateChecksum(appletDto: AppletDTO, metadata: XTask.Metadata): Long {
         val crc32 = CRC32()

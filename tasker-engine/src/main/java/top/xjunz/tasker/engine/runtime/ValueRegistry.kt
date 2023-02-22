@@ -15,34 +15,34 @@ open class ValueRegistry {
 
     class WeakKey
 
-    private var weakRegistry: WeakHashMap<WeakKey, Any>? = null
+    private var weakRegistry: MutableMap<WeakKey, Any>? = null
 
     private var registry: MutableMap<Any, Any>? = null
 
     @Synchronized
-    private fun initializeOrRequireRegistry(): MutableMap<Any, Any> {
+    fun requireRegistry(): MutableMap<Any, Any> {
         if (registry == null) {
-            registry = ArrayMap()
+            registry = Collections.synchronizedMap(ArrayMap())
         }
         return registry!!
     }
 
     @Synchronized
-    private fun initializeOrRequireWeakRegistry(): MutableMap<WeakKey, Any> {
+    fun requireWeakRegistry(): MutableMap<WeakKey, Any> {
         if (weakRegistry == null) {
-            weakRegistry = WeakHashMap()
+            weakRegistry = Collections.synchronizedMap(WeakHashMap<WeakKey, Any>())
         }
         return weakRegistry!!
     }
 
     @Synchronized
     fun <V : Any> getWeakValue(key: WeakKey, initializer: () -> V): V {
-        return initializeOrRequireWeakRegistry().getOrPut(key, initializer).casted()
+        return requireWeakRegistry().getOrPut(key, initializer).casted()
     }
 
     @Synchronized
     fun <V : Any> getValue(key: Any, initializer: () -> V): V {
-        return initializeOrRequireRegistry().getOrPut(key, initializer).casted()
+        return requireRegistry().getOrPut(key, initializer).casted()
     }
 
     fun clear() {

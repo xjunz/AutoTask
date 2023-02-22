@@ -103,10 +103,10 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
         binding.btnGrantOverlay.let {
             it.isEnabled = !Settings.canDrawOverlays(app)
             if (it.isEnabled) {
-                it.setIconResource(R.drawable.ic_baseline_chevron_right_24)
+                it.setIconResource(R.drawable.ic_chevron_right_24px)
                 it.text = R.string.goto_grant.text
             } else {
-                it.setIconResource(R.drawable.ic_baseline_check_24)
+                it.setIconResource(R.drawable.ic_done_24px)
                 it.text = R.string.granted.text
             }
         }

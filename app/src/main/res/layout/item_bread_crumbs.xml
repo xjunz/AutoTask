@@ -29,7 +29,7 @@
             android:id="@+id/iv_chevron_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_chevron_right_24"
+            android:src="@drawable/ic_chevron_right_24px"
             app:tint="?colorPrimary"
             tools:ignore="ContentDescription" />
     </LinearLayout>

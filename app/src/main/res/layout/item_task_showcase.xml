@@ -101,6 +101,19 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/wave" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ib_run"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="4dp"
+                android:contentDescription="@{@string/run}"
+                app:icon="@drawable/ic_baseline_play_arrow_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/wave" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,7 +140,7 @@
                     app:iconTint="@color/color_text_control_normal" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/ib_track"
+                    android:id="@+id/ib_snapshot"
                     style="@style/Widget.Material3.Button.IconButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

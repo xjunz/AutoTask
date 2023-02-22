@@ -26,31 +26,32 @@ class TaskSnapshot(
 
     val isRunning get() = endTimestamp == -1L
 
+    val duration: Int get() = (endTimestamp - startTimestamp).toInt()
+
     var successes: MutableSet<Long> = mutableSetOf()
 
     var failures: MutableSet<Failure> = mutableSetOf()
 
     var current: Long = -1
 
-    val duration: Int get() = (endTimestamp - startTimestamp).toInt()
+    var currentApplet: Applet? = null
 
     lateinit var succeededApplets: List<Applet>
 
     lateinit var failedApplets: Map<Applet, Failure>
-
-    var currentApplet: Applet? = null
 
     fun loadApplets(root: RootFlow) {
         succeededApplets = successes.map {
             getAppletWithHierarchy(root, it)
         }
         val failed = ArrayMap<Applet, Failure>()
-        failures.forEach {
-            failed[getAppletWithHierarchy(root, it.hierarchy)] = it
+        for (failure in failures) {
+            failed[getAppletWithHierarchy(root, failure.hierarchy)] = failure
         }
         failedApplets = failed
-        if (current != -1L)
+        if (current != -1L) {
             currentApplet = getAppletWithHierarchy(root, current)
+        }
     }
 
     private fun getAppletWithHierarchy(root: RootFlow, hierarchy: Long): Applet {
@@ -92,7 +93,7 @@ class TaskSnapshot(
         return 0
     }
 
-    fun isRedundantTo(other: TaskSnapshot): Boolean {
+    fun contentEquals(other: TaskSnapshot): Boolean {
         if (this === other) return false
         if (checksum != other.checksum) return false
         if (isSuccessful != other.isSuccessful) return false

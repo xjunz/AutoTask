@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.inspector
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
 import androidx.test.uiautomator.PointerGesture
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.gesture.SerializableInputEvent
@@ -66,6 +67,8 @@ class InspectorViewModel {
 
     val onGesturePlaybackEnded = MutableLiveData<Boolean>()
 
+    val requestLaunchOneshotTask = MutableLiveData<XTask>()
+
     var windowWidth: Int = -1
 
     var windowHeight: Int = -1
@@ -77,11 +80,15 @@ class InspectorViewModel {
     private var previousRecordTimestamp = -1L
 
     fun makeToast(any: Any?, post: Boolean = false) {
-        when (any) {
-            is Int -> toastText.value = any.text
-            is CharSequence -> toastText.value = any
-            else -> if (post) toastText.postValue(any.toString())
-            else toastText.value = any.toString()
+        val text = when (any) {
+            is Int -> any.text
+            is CharSequence -> any
+            else -> any.toString()
+        }
+        if (post) {
+            toastText.postValue(text)
+        } else {
+            toastText.value = text
         }
     }
 

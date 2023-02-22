@@ -31,6 +31,8 @@ val Applet.controlFlow: ControlFlow?
         return controlFlow as? ControlFlow
     }
 
+val Applet.previous: Applet? get() = parent?.getOrNull(index - 1)
+
 /**
  * Find the root flow, or throw an exception when not found.
  */

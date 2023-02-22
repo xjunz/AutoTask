@@ -33,8 +33,6 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ContainerFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.floatingInspector
-import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -46,6 +44,7 @@ import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
+import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
@@ -71,7 +70,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
     }
 
-    private val onOptionClickListener by lazy {
+    private val optionClickListener by lazy {
         AppletOptionClickHandler(childFragmentManager)
     }
 
@@ -82,15 +81,10 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     private val rightAdapter: RecyclerView.Adapter<*> by lazy {
         inlineAdapter(viewModel.options, ItemAppletOptionBinding::class.java, {
             itemView.setNoDoubleClickListener {
-                // if (shopCartIntegration.isAnimatorRunning) return@setOnClickListener
                 val position = adapterPosition
                 val option = viewModel.options[position]
                 if (option.isValid) {
-                    val applet = option.yield()
-                    onOptionClickListener.onClick(applet, option) {
-                        if (viewModel.appendApplet(applet))
-                            viewModel.onAppletAdded.value = position
-                    }
+                    viewModel.requestAppendOption.value = option to position
                 }
             }
             binding.ibInvert.setNoDoubleClickListener {
@@ -98,7 +92,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, position, option ->
-            var title = option.dummyTitle
+            var title = option.loadDummyTitle(null)
             val m = option.titleModifier
             if (m != null) title = title?.plus(
                 " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
@@ -113,12 +107,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 binding.tvLabel.setTextColor(ColorScheme.colorOnSurface)
             }
             if (viewModel.animateItems) {
-                val staggerAnimOffsetMills = 30L
-                val easeIn = AnimationUtils.loadAnimation(context, R.anim.mtrl_item_ease_enter)
-                easeIn.startOffset = (staggerAnimOffsetMills + position) * position
-                binding.root.startAnimation(easeIn)
+                val offset = 30L
+                val anim = AnimationUtils.loadAnimation(context, R.anim.mtrl_item_ease_enter)
+                anim.startOffset = (offset + position) * position
+                binding.root.startAnimation(anim)
                 if (position == 0) viewModel.viewModelScope.launch {
-                    delay(staggerAnimOffsetMills)
+                    delay(offset)
                     viewModel.animateItems = false
                 }
             }
@@ -126,7 +120,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
     }
 
     private val bottomAdapter by lazy {
-        AppletCandidatesAdapter(viewModel, onOptionClickListener)
+        AppletCandidatesAdapter(viewModel, optionClickListener)
     }
 
     fun init(origin: Flow, doOnCompletion: (List<Applet>) -> Unit) = doWhenCreated {
@@ -167,13 +161,27 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         binding.shoppingCart.rvBottom.adapter = bottomAdapter
         observeLiveData()
-        if (viewModel.isScoped) binding.cvHeader.doOnPreDraw {
-            if (isFloatingInspectorShown) {
-                val mode = it.tag?.casted<InspectorMode>() ?: return@doOnPreDraw
-                if (floatingInspector.mode != mode) {
-                    floatingInspector.mode = mode
-                    toast(R.string.format_switch_mode.format(mode.label))
-                }
+
+        when (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR) {
+            TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
+                // Navigate to gesture actions
+                viewModel.selectFlowRegistry(
+                    viewModel.registryOptions.indexOf(AppletOptionFactory.flowRegistry.gestureActions)
+                )
+                // Request append custom gesture option
+                val gestureOption = AppletOptionFactory.gestureActionRegistry.performCustomGestures
+                viewModel.requestAppendOption.value =
+                    gestureOption to AppletOptionFactory.gestureActionRegistry
+                        .categorizedOptions.indexOf(gestureOption)
+            }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
+                viewModel.selectFlowRegistry(
+                    viewModel.registryOptions.indexOf(AppletOptionFactory.flowRegistry.gestureActions)
+                )
+                val gestureOption = AppletOptionFactory.gestureActionRegistry.click
+                viewModel.requestAppendOption.value =
+                    gestureOption to AppletOptionFactory.gestureActionRegistry
+                        .categorizedOptions.indexOf(gestureOption)
             }
         }
     }
@@ -217,6 +225,14 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         observeTransient(viewModel.onAppletAdded) {
             val vh = binding.rvRight.findViewHolderForAdapterPosition(it)
             if (vh != null) shopCartIntegration.animateIntoShopCart(vh.itemView)
+        }
+        observeTransient(viewModel.requestAppendOption) {
+            val applet = it.first.yield()
+            optionClickListener.onClick(applet, it.first) {
+                if (viewModel.appendApplet(applet)) {
+                    viewModel.onAppletAdded.value = it.second
+                }
+            }
         }
         observeDangerousConfirmation(
             viewModel.showClearDialog, R.string.prompt_clear_all_options, R.string.clear_all

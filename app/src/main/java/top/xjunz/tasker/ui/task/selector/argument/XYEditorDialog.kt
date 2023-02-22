@@ -60,6 +60,7 @@ class XYEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
             val point = IntValueUtil.parseXY(it)
             binding.etX.setText(point.x.toString())
             binding.etY.setText(point.y.toString())
+            toast(R.string.coordinate_updated)
         }
     }
 

@@ -39,6 +39,7 @@ import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
 import top.xjunz.tasker.ui.task.editor.VarargTextEditorDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
+import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import java.util.*
 
@@ -176,6 +177,14 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                         updateValue(it)
                     }
                 }.show(childFragmentManager)
+            }
+            VariantType.INT_PERCENT_RANGE -> {
+                val value = applet.value?.casted<Collection<Number>>()
+                RangeEditorDialog().doOnCompletion { start, end ->
+                    updateValue(listOf(start, end))
+                }.setType(applet.rawType, arg.variantValueType).setRange(
+                    value?.firstOrNull(), value?.lastOrNull()
+                ).setTitle(option.loadDummyTitle(applet)).show(fragmentManager)
             }
             else -> if (arg.isCollection) {
                 VarargTextEditorDialog().init(arg.name, applet, arg) { value, referents ->
@@ -342,6 +351,16 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             } else {
                 vm.updateGesture?.invoke(it)
                 toast(R.string.gestures_updated)
+            }
+        }
+        when (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR) {
+            TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
+                showValueInputDialog(false, 0, option.arguments[0])
+                TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR = -1
+            }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
+                showValueInputDialog(false, 0, option.arguments[0])
+                TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR = -1
             }
         }
     }

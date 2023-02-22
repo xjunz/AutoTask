@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 xjunz. All rights reserved.
+ * Copyright (c) 2023 xjunz. All rights reserved.
  */
 
 package top.xjunz.tasker.ui.task.showcase
@@ -9,26 +9,30 @@ import android.view.View
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.ui.main.EventCenter
 
 /**
- * @author xjunz 2022/12/20
+ * @author xjunz 2023/02/22
  */
-class ResidentTaskFragment : BaseTaskShowcaseFragment() {
+class OneshotTaskFragment : BaseTaskShowcaseFragment() {
+
+    companion object {
+        const val EVENT_ONESHOT_TASK_ADDED = "xjunz.event.ONESHOT_TASK_ADDED"
+    }
 
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.getAllTasks().filter { it.metadata.taskType == XTask.TYPE_RESIDENT }
+        return TaskStorage.getAllTasks().filter { it.metadata.taskType == XTask.TYPE_ONESHOT }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTransient(viewModel.onNewTaskAdded) {
-            // This may happen when the page is not yet enter its stage while
-            // a new task is added.
             if (taskList.contains(it)) return@observeTransient
-            if (it.metadata.taskType != XTask.TYPE_RESIDENT) return@observeTransient
+            if (it.metadata.taskType != XTask.TYPE_ONESHOT) return@observeTransient
             taskList.add(it)
             if (taskList.size == 1) togglePlaceholder(false)
             adapter.notifyItemInserted(taskList.lastIndex)
+            EventCenter.sendEvent(EVENT_ONESHOT_TASK_ADDED, taskList.lastIndex)
         }
     }
 }

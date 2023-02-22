@@ -255,11 +255,6 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         viewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)

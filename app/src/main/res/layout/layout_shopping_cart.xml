@@ -82,7 +82,7 @@
                     android:insetBottom="6dp"
                     android:paddingHorizontal="8dp"
                     android:text="@string/complete"
-                    app:icon="@drawable/ic_baseline_chevron_right_24"
+                    app:icon="@drawable/ic_chevron_right_24px"
                     app:iconGravity="textEnd" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>

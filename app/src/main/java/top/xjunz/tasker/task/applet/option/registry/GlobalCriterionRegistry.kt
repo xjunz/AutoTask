@@ -11,6 +11,7 @@ import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.simpleNumberRangeCriterion
+import top.xjunz.tasker.task.applet.value.VariantType
 
 /**
  * @author xjunz 2022/11/10
@@ -37,7 +38,10 @@ class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         simpleNumberRangeCriterion {
             BatteryManagerBridge.capacity
         }
-    }.withValueDescriber<Collection<Int?>> {
+    }.withValueArgument<Int>(
+        R.string.in_battery_capacity_range,
+        VariantType.INT_PERCENT_RANGE
+    ).withValueDescriber<Collection<Int?>> {
         val first = it.firstOrNull()
         val last = it.lastOrNull()
         if (first == null && last != null) {

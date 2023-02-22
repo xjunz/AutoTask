@@ -13,6 +13,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
@@ -204,13 +205,13 @@ class AppletOption(
     private val invertedTitle: CharSequence?
         get() = if (invertedTitleResource == TITLE_NONE) null else invertedTitleResource.text
 
-    val dummyTitle get() = loadTitle(null, isInverted)
-
     /**
      * Non-spanned title considering inversion status of the [applet].
      */
-    fun loadDummyTitle(applet: Applet): CharSequence? {
-        return loadTitle(null, applet.isInverted)
+    fun loadDummyTitle(applet: Applet?): CharSequence? {
+        return loadTitle(
+            null, if (applet == null || !applet.isAttached) isInverted else applet.isInverted
+        )
     }
 
     fun findResults(argument: ArgumentDescriptor): List<ValueDescriptor> {

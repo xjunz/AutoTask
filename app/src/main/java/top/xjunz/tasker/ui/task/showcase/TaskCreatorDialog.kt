@@ -15,17 +15,21 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.str
-import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.TaskMetadataEditor
-import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
  * @author xjunz 2022/12/14
  */
 class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
+
+    companion object {
+        var REQUESTED_QUICK_TASK_CREATOR = -1
+        const val QUICK_TASK_CREATOR_CLICK_AUTOMATION = 1
+        const val QUICK_TASK_CREATOR_GESTURE_RECORDER = 2
+    }
 
     private class InnerViewModel : ViewModel() {
 
@@ -56,11 +60,14 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
 
         }
         binding.tvClickMode.setNoDoubleClickListener {
-
+            REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_CLICK_AUTOMATION
+            viewModel.onMetadataEdited.value =
+                XTask.Metadata(R.string.click_automation.str, XTask.TYPE_ONESHOT)
         }
         binding.tvRecordGesture.setNoDoubleClickListener {
-            FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER)
-                .show(childFragmentManager)
+            REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_GESTURE_RECORDER
+            viewModel.onMetadataEdited.value =
+                XTask.Metadata(R.string.perform_custom_gestures.str, XTask.TYPE_ONESHOT)
         }
         binding.containerPreloadTasks.setNoDoubleClickListener {
             PreloadTaskDialog().show(requireParentFragment().childFragmentManager)

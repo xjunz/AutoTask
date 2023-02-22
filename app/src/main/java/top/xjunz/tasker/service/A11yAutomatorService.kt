@@ -19,10 +19,7 @@ import android.os.ParcelFileDescriptor
 import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcatStackTrace
@@ -30,13 +27,16 @@ import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
+import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
 import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.OneshotTaskScheduler
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.uiautomator.A11yGestureController
 import top.xjunz.tasker.uiautomator.A11yUiAutomatorBridge
@@ -50,18 +50,18 @@ import java.lang.ref.WeakReference
  * @author xjunz 2022/07/12
  */
 class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutomationConnection,
-    LifecycleOwner {
+    LifecycleOwner, LifecycleEventObserver {
 
     companion object {
+
+        val LAUNCH_ERROR = MutableLiveData<Throwable>()
+
+        val RUNNING_STATE = MutableLiveData<Boolean>()
 
         /**
          * Indicate that the service is served as [FloatingInspector].
          */
         var FLAG_REQUEST_INSPECTOR_MODE: Boolean = false
-
-        val launchError = MutableLiveData<Throwable>()
-
-        val runningState = MutableLiveData<Boolean>()
 
         private var instance: WeakReference<A11yAutomatorService>? = null
 
@@ -78,28 +78,32 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         uiAutomatorBridge.gestureController as A11yGestureController
     }
 
-    private var isInspectorMode = false
-
-    lateinit var inspector: FloatingInspector
-        private set
-
     private val lifecycleRegistry = LifecycleRegistry(this)
 
     private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
 
-    private var startTimestamp: Long = -1
-
-    private var callbacks: AccessibilityServiceHidden.Callbacks? = null
-
-    private lateinit var uiAutomationHidden: UiAutomationHidden
-
-    private lateinit var inspectorViewModel: InspectorViewModel
-
-    override val residentTaskScheduler: ResidentTaskScheduler by lazy {
+    private val residentTaskScheduler by lazy {
         ResidentTaskScheduler(LocalTaskManager)
     }
 
-    override val isRunning get() = runningState.isTrue
+    private val oneshotTaskScheduler by lazy {
+        OneshotTaskScheduler()
+    }
+
+    private val componentChangeCallbackForInspector by lazy {
+        EventDispatcher.Callback {
+            val hit = it.find { event ->
+                event.type == Event.EVENT_ON_CONTENT_CHANGED || event.type == Event.EVENT_ON_PACKAGE_ENTERED
+            }
+            if (hit != null) {
+                inspectorViewModel.currentComponent.postValue(
+                    ComponentInfoWrapper.wrap(hit.componentInfo)
+                )
+            }
+        }
+    }
+
+    override val isRunning get() = RUNNING_STATE.isTrue
 
     override val uiAutomatorBridge: UiAutomatorBridge by lazy {
         A11yUiAutomatorBridge(uiAutomation)
@@ -113,18 +117,18 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         OverlayToastBridge(Looper.getMainLooper())
     }
 
-    private val componentChangeCallbackForInspector by lazy {
-        EventDispatcher.Callback {
-            val hit = it.find { event ->
-                event.type == Event.EVENT_ON_CONTENT_CHANGED
-                        || event.type == Event.EVENT_ON_PACKAGE_ENTERED
-            }
-            if (hit != null)
-                inspectorViewModel.currentComponent.postValue(
-                    ComponentInfoWrapper.wrap(hit.componentInfo)
-                )
-        }
-    }
+    private var isInspectorMode = false
+
+    private var startTimestamp: Long = -1
+
+    private var callbacks: AccessibilityServiceHidden.Callbacks? = null
+
+    lateinit var inspector: FloatingInspector
+        private set
+
+    private lateinit var uiAutomationHidden: UiAutomationHidden
+
+    private lateinit var inspectorViewModel: InspectorViewModel
 
     fun startListeningComponentChanges() {
         a11yEventDispatcher.addCallback(componentChangeCallbackForInspector)
@@ -139,18 +143,22 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         try {
             isInspectorMode = FLAG_REQUEST_INSPECTOR_MODE
             instance = WeakReference(this)
+
             uiAutomationHidden = UiAutomationHidden(mainLooper, this)
             uiAutomationHidden.connect()
+
             if (!isInspectorMode) {
-                residentTaskScheduler.scheduleTasks(a11yEventDispatcher)
+                a11yEventDispatcher.addCallback(residentTaskScheduler)
             }
-            a11yEventDispatcher.start()
-            runningState.value = true
+            a11yEventDispatcher.activate()
+
+            lifecycleRegistry.addObserver(this)
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
+
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.logcatStackTrace()
-            launchError.value = t
+            LAUNCH_ERROR.value = t
             destroy()
         } finally {
             FLAG_REQUEST_INSPECTOR_MODE = false
@@ -215,6 +223,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         return super.onKeyEvent(event)
     }
 
+    override fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback) {
+        oneshotTaskScheduler.scheduleTask(task, onCompletion)
+    }
+
     override fun onInterrupt() {
 
     }
@@ -228,13 +240,15 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         if (::residentTaskScheduler.isLazilyInitialized) {
             residentTaskScheduler.shutdown()
         }
+        if (::oneshotTaskScheduler.isLazilyInitialized) {
+            oneshotTaskScheduler.shutdown()
+        }
         LocalTaskManager.clearAllSnapshots()
         if (isInspectorShown) inspector.dismiss()
         if (::uiAutomationHidden.isInitialized) {
             uiAutomationHidden.disconnect()
         }
         instance?.clear()
-        runningState.value = false
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
@@ -300,5 +314,14 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun getLifecycle(): Lifecycle {
         return lifecycleRegistry
+    }
+
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        if (event == Lifecycle.Event.ON_START) {
+            RUNNING_STATE.value = true
+        } else if (event == Lifecycle.Event.ON_DESTROY) {
+            RUNNING_STATE.value = false
+            lifecycleRegistry.removeObserver(this)
+        }
     }
 }

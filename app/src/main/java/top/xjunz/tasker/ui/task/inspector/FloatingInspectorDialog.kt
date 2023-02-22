@@ -97,7 +97,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
             toast(R.string.tip_floating_inspector_enabled)
         }
         if (serviceController.isServiceRunning) {
-            currentService.suppressResidentTaskScheduler(true)
+            // currentService.suppressResidentTaskScheduler(true)
         }
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
         if (viewModel.mode == InspectorMode.COMPONENT) {
@@ -162,7 +162,7 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         } else {
             binding.btnGrant.isEnabled = true
             binding.btnGrant.text = R.string.goto_grant.text
-            binding.btnGrant.icon = R.drawable.ic_baseline_chevron_right_24.getDrawable()
+            binding.btnGrant.icon = R.drawable.ic_chevron_right_24px.getDrawable()
         }
     }
 

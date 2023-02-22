@@ -11,7 +11,7 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.test.uiautomator.PointerGesture
-import top.xjunz.tasker.app
+import top.xjunz.tasker.bridge.ContextBridge
 import kotlin.math.hypot
 
 /**
@@ -56,10 +56,12 @@ class GestureRecorder(
 
     private var isActive = true
 
+    private var longClickVibrated = false
+
     private lateinit var currentGesture: PointerGesture
 
     private val touchSlop by lazy {
-        ViewConfiguration.get(app).scaledTouchSlop
+        ViewConfiguration.get(ContextBridge.getContext()).scaledTouchSlop
     }
 
     private val samplingTask: Runnable = object : Runnable {
@@ -74,6 +76,10 @@ class GestureRecorder(
                 ) <= touchSlop
             ) {
                 holdingDuration += SAMPLE_INTERVAL_MILLS
+                if (holdingDuration > ViewConfiguration.getLongPressTimeout() && !longClickVibrated) {
+                    callback?.onLongClickDetected()
+                    longClickVibrated = true
+                }
             } else {
                 if (holdingDuration > 0L) {
                     currentGesture.pause(holdingDuration)
@@ -94,6 +100,7 @@ class GestureRecorder(
     private fun onTouchDown() {
         isPaused = false
         holdingDuration = 0
+        longClickVibrated = false
         previousX = -1
         previousY = -1
         currentGesture = PointerGesture(
@@ -172,6 +179,8 @@ class GestureRecorder(
 
 
     interface Callback {
+
+        fun onLongClickDetected()
 
         fun onGestureStarted(startDelay: Long)
 

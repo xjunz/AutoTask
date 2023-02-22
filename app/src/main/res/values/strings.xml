@@ -491,4 +491,14 @@
     <string name="tip_selecting_referents">使用强调色标注的引用项代表它已被您设置标识，<b>长按</b>它可修改其标识。</string>
     <string name="format_set_referent_name">为\"%s\"设置标识</string>
     <string name="error_referent_still_in_reference">不能清空当前标识，因为它正在被其他规则引用</string>
+    <string name="prompt_task_title_repeated">已经存在另一个名为\"%s\"的任务，是否重命名当前任务？</string>
+    <string name="ignore_and_continue">忽略并继续</string>
+    <string name="rename">重命名</string>
+    <string name="comment_click_automation_edit_repeat_times">可修改重复次数</string>
+    <string name="comment_click_automation_edit_delay_mills">可修改每次点击的间隔时间</string>
+    <string name="click_automation">自动点击</string>
+    <string name="coordinate_updated">已更新坐标</string>
+    <string name="task_assistant">任务助手</string>
+    <string name="format_launch_oneshot_task">开始运行任务：%s</string>
+    <string name="format_task_finished">任务运行结束：%s</string>
 </resources>

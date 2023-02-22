@@ -7,7 +7,7 @@ package top.xjunz.tasker.ui.main
 import java.util.*
 
 /**
- * Helper class for managing dialog stacks.
+ * Helper class for simple dialog stack management.
  *
  * @author xjunz 2023/02/21
  */
@@ -40,7 +40,7 @@ object DialogStackManager {
     }
 
     /**
-     * Check whether the target is visible.
+     * Whether the target is visible.
      */
     fun isVisible(target: String?): Boolean {
         requireNotNull(target) {

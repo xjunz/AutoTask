@@ -22,10 +22,12 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.applet.util.hierarchy
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
+import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.ClickListenerUtil.setOnDoubleClickListener
 
@@ -50,7 +52,7 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                 val f = when (position) {
                     0 -> EnabledTaskFragment()
                     1 -> ResidentTaskFragment()
-                    2 -> EnabledTaskFragment()
+                    2 -> OneshotTaskFragment()
                     else -> illegalArgument()
                 }
                 fragments[position] = f
@@ -123,12 +125,20 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeTransient(viewModel.requestTrackTask) {
             FlowEditorDialog().initBase(it, true).setTrackMode().show(childFragmentManager)
         }
-        observeDialog(viewModel.requestToggleTask) {
-            val title = if (it.isEnabled) R.string.prompt_disable_task.text
-            else R.string.prompt_enable_task.text
-            requireContext().makeSimplePromptDialog(msg = title) {
-                viewModel.toggleRequestedTask()
-            }.show()
+        observeTransient(viewModel.requestToggleTask) {
+            when (it.metadata.taskType) {
+                XTask.TYPE_RESIDENT -> {
+                    val title = if (it.isEnabled) R.string.prompt_disable_task.text
+                    else R.string.prompt_enable_task.text
+                    requireContext().makeSimplePromptDialog(msg = title) {
+                        viewModel.toggleTask(it)
+                    }.show()
+                }
+                XTask.TYPE_ONESHOT -> {
+                    FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT)
+                        .show(childFragmentManager)
+                }
+            }
         }
         observeDangerousConfirmation(
             viewModel.requestDeleteTask,

@@ -304,7 +304,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/enter"
-                        android:src="@drawable/ic_baseline_chevron_right_24" />
+                        android:src="@drawable/ic_chevron_right_24px" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -342,7 +342,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/enter"
-                        android:src="@drawable/ic_baseline_chevron_right_24" />
+                        android:src="@drawable/ic_chevron_right_24px" />
                 </RelativeLayout>
 
             </LinearLayout>

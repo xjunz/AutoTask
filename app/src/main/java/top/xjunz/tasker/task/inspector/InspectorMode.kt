@@ -14,7 +14,8 @@ import top.xjunz.tasker.ktx.str
 enum class InspectorMode(@StringRes labelRes: Int) {
 
     COMPONENT(R.string.component_info), UI_OBJECT(R.string.ui_object),
-    COORDS(R.string.coords), GESTURE_RECORDER(R.string.record_gesture);
+    COORDS(R.string.coords), GESTURE_RECORDER(R.string.record_gesture),
+    TASK_ASSISTANT(R.string.task_assistant);
 
     val label: String = labelRes.str
 }

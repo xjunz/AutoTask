@@ -16,9 +16,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.WaitFor
-import top.xjunz.tasker.engine.runtime.Event.Companion.lockAll
 import top.xjunz.tasker.engine.runtime.Event.Companion.recycleAll
-import top.xjunz.tasker.engine.runtime.Event.Companion.unlockAll
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
@@ -49,20 +47,27 @@ class TaskRuntime private constructor() {
 
     companion object {
 
+        val EVENT_LOCK_KEY = ValueRegistry.WeakKey()
+
         const val GLOBAL_SCOPE_TASK = 1
         const val GLOBAL_SCOPE_EVENT = 2
 
-        fun XTask.obtainRuntime(
-            eventValueRegistry: ValueRegistry,
-            coroutineScope: CoroutineScope,
-            events: Array<out Event>
-        ): TaskRuntime {
+        fun CoroutineScope.obtainTaskRuntime(task: XTask): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
-            instance.task = this
-            instance.runtimeScope = coroutineScope
+            instance.task = task
+            instance.runtimeScope = this
+            return instance
+        }
+
+        fun CoroutineScope.obtainTaskRuntime(
+            task: XTask, registry: ValueRegistry, events: Array<Event>
+        ): TaskRuntime {
+            val instance = obtainTaskRuntime(task)
             instance.target = events
             instance._events = events
-            instance._eventValueRegistry = eventValueRegistry
+            instance.eventValueRegistry = registry
+            registry.requireWeakRegistry()[EVENT_LOCK_KEY] =
+                ((registry.requireWeakRegistry()[EVENT_LOCK_KEY] as? Int) ?: 0) + 1
             return instance
         }
 
@@ -111,13 +116,11 @@ class TaskRuntime private constructor() {
 
     private val referents = ArrayMap<String, IndexedReferent>()
 
-    private val eventValueRegistry: ValueRegistry get() = _eventValueRegistry!!
-
-    private var _events: Array<out Event>? = null
+    private var _events: Array<Event>? = null
 
     private var _result: AppletResult? = null
 
-    private var _eventValueRegistry: ValueRegistry? = null
+    private var eventValueRegistry: ValueRegistry? = null
 
     @get:Synchronized
     @set:Synchronized
@@ -146,7 +149,7 @@ class TaskRuntime private constructor() {
      * Get or put a global variable if absent. The variable is stored as per the [scope]. More specific,
      * within an [ValueRegistry].
      */
-    fun <V : Any> getGlobalValue(scope: Int, key: Any, initializer: () -> V): V {
+    fun <V : Any> getScopedValue(scope: Int, key: Any, initializer: () -> V): V {
         for (event in events) {
             event.recycle()
         }
@@ -154,7 +157,8 @@ class TaskRuntime private constructor() {
             GLOBAL_SCOPE_EVENT -> eventValueRegistry
             GLOBAL_SCOPE_TASK -> task
             else -> illegalArgument("scope", scope)
-        }
+        } // fallback to task registry if there is no event value registry
+            ?: task
         return if (key is ValueRegistry.WeakKey) {
             registry.getWeakValue(key, initializer)
         } else {
@@ -214,20 +218,16 @@ class TaskRuntime private constructor() {
     /**
      * Called when new events arrive while this runtime is still active.
      */
-    fun onNewEvents(newEvents: Array<out Event>) {
-        if (waitingFor == null) {
-            newEvents.recycleAll()
-        } else {
-            newEvents.lockAll(this)
-            _events?.unlockAll(this)
+    fun onNewEvents(newEvents: Array<Event>) {
+        if (waitingFor != null) {
             _events = newEvents
             waitingFor?.remind()
         }
     }
 
     fun recycle() {
-        _events?.unlockAll(this)
-        _eventValueRegistry = null
+        tryRecycleEvents()
+        eventValueRegistry = null
         _events = null
         _result = null
         runtimeScope = null
@@ -240,6 +240,19 @@ class TaskRuntime private constructor() {
         waitingFor = null
         fingerprintCrc.reset()
         Pool.release(this)
+    }
+
+    private fun tryRecycleEvents() {
+        eventValueRegistry?.let {
+            val lock = it.requireWeakRegistry()[EVENT_LOCK_KEY] as? Int
+            if (lock != null) {
+                if (lock == 1) {
+                    events.recycleAll()
+                } else {
+                    it.requireWeakRegistry()[EVENT_LOCK_KEY] = lock - 1
+                }
+            }
+        }
     }
 
     override fun toString(): String {

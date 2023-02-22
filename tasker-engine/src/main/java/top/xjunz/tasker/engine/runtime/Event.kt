@@ -94,21 +94,15 @@ class Event private constructor(
             } ?: Event(eventType, pkgName, actName, paneTitle)
         }
 
-        fun Array<out Event>.lockAll(runtime: TaskRuntime) {
-            forEach {
-                it.lock(runtime)
-            }
-        }
-
-        fun Array<out Event>.unlockAll(runtime: TaskRuntime) {
-            forEach {
-                it.unlock(runtime)
-            }
-        }
-
         fun Array<out Event>.recycleAll() {
             forEach {
                 it.recycle()
+            }
+        }
+
+        fun drainPool() {
+            while (Pool.acquire() != null) {
+                /* no-op */
             }
         }
     }

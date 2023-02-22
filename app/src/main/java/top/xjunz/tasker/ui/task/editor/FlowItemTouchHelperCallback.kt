@@ -280,6 +280,7 @@ open class FlowItemTouchHelperCallback(
         val fab = coordinatorLayout.findViewById<View>(R.id.fab_action)
         if (fab != null && fab.isVisible) {
             snackBar.anchorView = fab
+            snackBar.isAnchorViewLayoutListenerEnabled = true
         }
         snackBar.show()
         if (from is Flow) {

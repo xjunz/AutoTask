@@ -6,21 +6,20 @@ package top.xjunz.tasker.ui.task.editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.action.Repeat
+import top.xjunz.tasker.engine.applet.action.Suspension
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.util.*
+import top.xjunz.tasker.engine.dto.AppletChecksum
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
-import top.xjunz.tasker.engine.dto.ChecksumUtil
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.eq
-import top.xjunz.tasker.ktx.notifySelfChanged
-import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 
 /**
  * @author xjunz 2022/09/10
@@ -69,6 +68,8 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showTaskRepeatedPrompt = MutableLiveData<Boolean>()
 
+    val showTitleRepeatedPrompt = MutableLiveData<String>()
+
     lateinit var onFlowCompleted: (Flow) -> Unit
 
     lateinit var onTaskCompleted: () -> Unit
@@ -80,6 +81,8 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     var staticError: StaticError? = null
 
     var isInTrackMode: Boolean = false
+
+    var ignoreRepeatedTitle = false
 
     private fun multiSelect(applet: Applet) {
         if (selections.isNotEmpty() && selections.first().parent != applet.parent) {
@@ -129,17 +132,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     private fun flatmapFlow(flow: Flow, depth: Int = 0): List<Applet> {
         val ret = mutableListOf<Applet>()
-        flow.forEachIndexed `continue`@{ index, applet ->
-
-            if (applet is PreloadFlow && !isSelectingReferent)
-                return@`continue`
+        for ((index, applet) in flow.withIndex()) {
+            if (applet is PreloadFlow && !isSelectingReferent) {
+                continue
+            }
 
             applet.index = index
             applet.parent = flow
             ret.add(applet)
 
-            if (applet is Flow && collapsedFlows.contains(applet))
-                return@`continue`
+            if (applet is Flow && collapsedFlows.contains(applet)) {
+                continue
+            }
 
             if (applet is Flow && depth < 2) {
                 ret.addAll(flatmapFlow(applet, depth + 1))
@@ -201,9 +205,18 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     fun complete(): Boolean {
         if (isBase) {
             val checksum = calculateChecksum()
+            // Task modified
             if (checksum != task.checksum) {
+                // But there is another identical task
                 if (TaskStorage.getAllTasks().any { it.checksum == checksum }) {
                     showTaskRepeatedPrompt.value = true
+                    return false
+                }
+                // But there is another task with an identical title
+                if (!ignoreRepeatedTitle && TaskStorage.getAllTasks()
+                        .any { it !== task && it.title == metadata.title }
+                ) {
+                    showTitleRepeatedPrompt.value = metadata.title
                     return false
                 }
                 metadata.modificationTimestamp = System.currentTimeMillis()
@@ -212,7 +225,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 }
                 metadata.checksum = checksum
                 task.metadata = metadata
-                task.flow = flow.casted()
+                task.flow = flow as RootFlow
                 onTaskCompleted.invoke()
             }
         } else {
@@ -300,19 +313,34 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     }
 
     fun calculateChecksum(): Long {
-        return ChecksumUtil.calculateChecksum(flow.toDTO(), metadata)
+        return AppletChecksum.calculateChecksum(flow.toDTO(), metadata)
     }
 
     fun generateDefaultFlow(taskType: Int): RootFlow {
         val root = factory.flowRegistry.rootFlow.yield() as RootFlow
         root.add(factory.flowRegistry.preloadFlow.yield())
-        if (taskType == XTask.TYPE_RESIDENT) {
-            val whenFlow = factory.flowRegistry.whenFlow.yield() as When
-            whenFlow.add(factory.eventRegistry.contentChanged.yield())
-            root.add(whenFlow)
+        when (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR) {
+            TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
+                /* no-op */
+            }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
+                val repeat = factory.controlActionRegistry.repeatFlow.yield(10) as Repeat
+                repeat.comment = R.string.comment_click_automation_edit_repeat_times.str
+                val delay = factory.controlActionRegistry.suspension.yield(200) as Suspension
+                delay.comment = R.string.comment_click_automation_edit_delay_mills.str
+                repeat.add(delay)
+                root.add(repeat)
+            }
+            else -> {
+                if (taskType == XTask.TYPE_RESIDENT) {
+                    val whenFlow = factory.flowRegistry.whenFlow.yield() as When
+                    whenFlow.add(factory.eventRegistry.contentChanged.yield())
+                    root.add(whenFlow)
+                }
+                root.add(factory.flowRegistry.ifFlow.yield())
+                root.add(factory.flowRegistry.doFlow.yield())
+            }
         }
-        root.add(factory.flowRegistry.ifFlow.yield())
-        root.add(factory.flowRegistry.doFlow.yield())
         return root
     }
 }

@@ -15,7 +15,7 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
  * @author xjunz 2022/12/25
  */
 @Privileged
-object RemoteTaskManager : TaskManager<Long, XTaskDTO>() {
+object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
 
     object Delegate : IRemoteTaskManager.Stub() {
 
@@ -33,23 +33,23 @@ object RemoteTaskManager : TaskManager<Long, XTaskDTO>() {
         }
 
         override fun updateResidentTask(previous: Long, updated: XTaskDTO) {
-            RemoteTaskManager.updateResidentTask(previous, updated)
+            PrivilegedTaskManager.updateResidentTask(previous, updated)
         }
 
         override fun disableResidentTask(identifier: Long) {
-            RemoteTaskManager.disableResidentTask(identifier)
+            PrivilegedTaskManager.disableResidentTask(identifier)
         }
 
         override fun enableResidentTask(carrier: XTaskDTO) {
-            RemoteTaskManager.enableResidentTask(carrier)
+            PrivilegedTaskManager.enableResidentTask(carrier)
         }
 
         override fun getSnapshotCount(identifier: Long): Int {
-            return RemoteTaskManager.getSnapshotCount(identifier)
+            return PrivilegedTaskManager.getSnapshotCount(identifier)
         }
 
         override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
-            return RemoteTaskManager.getAllSnapshots(identifier)
+            return PrivilegedTaskManager.getAllSnapshots(identifier)
         }
 
     }

@@ -57,7 +57,7 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
             val rtm = remote.taskManager
             LocalTaskManager.setRemotePeer(rtm)
             if (!rtm.isInitialized) {
-                rtm.initialize(LocalTaskManager.getEnabledTasks().map { it.toDTO() })
+                rtm.initialize(LocalTaskManager.getEnabledResidentTasks().map { it.toDTO() })
             }
         }.onFailure {
             remote.destroy()

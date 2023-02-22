@@ -17,7 +17,7 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
 
     protected abstract fun List<XTask>.indexOfTask(identifier: TaskIdentifier): Int
 
-    fun getEnabledTasks(): List<XTask> {
+    fun getEnabledResidentTasks(): List<XTask> {
         return enabled
     }
 

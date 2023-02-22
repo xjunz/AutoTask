@@ -12,8 +12,8 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.launchIntentSafely
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.A11yAutomatorService
-import top.xjunz.tasker.service.A11yAutomatorService.Companion.launchError
-import top.xjunz.tasker.service.A11yAutomatorService.Companion.runningState
+import top.xjunz.tasker.service.A11yAutomatorService.Companion.LAUNCH_ERROR
+import top.xjunz.tasker.service.A11yAutomatorService.Companion.RUNNING_STATE
 
 /**
  * @author xjunz 2022/07/23
@@ -33,7 +33,7 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
     private val errorObserver = Observer<Throwable?> {
         if (it != null) {
             listener?.onError(it)
-            launchError.value = null
+            LAUNCH_ERROR.value = null
         }
     }
 
@@ -56,18 +56,18 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
 
     override fun setStateListener(listener: ServiceStateListener) {
         super.setStateListener(listener)
-        runningState.observeForever(statusObserver)
-        launchError.observeForever(errorObserver)
+        RUNNING_STATE.observeForever(statusObserver)
+        LAUNCH_ERROR.observeForever(errorObserver)
     }
 
     override fun removeStateListener() {
         super.removeStateListener()
-        runningState.removeObserver(statusObserver)
-        launchError.removeObserver(errorObserver)
+        RUNNING_STATE.removeObserver(statusObserver)
+        LAUNCH_ERROR.removeObserver(errorObserver)
     }
 
     override fun syncStatus() {
-        runningState.value = service != null
+        RUNNING_STATE.value = service != null
     }
 
     override val isServiceRunning: Boolean get() = service?.isRunning == true

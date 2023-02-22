@@ -19,6 +19,7 @@ import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.applet.util.*
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.*
+import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
@@ -74,7 +75,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                 title = if (applet.controlFlow is If) R.string.matches_rule_set.text
                 else R.string.execute_rule_set.text
             }
-            if (title != null && applet.index != 0 && applet !is ControlFlow) {
+            if (title != null && applet.index != 0 && applet.previous !is PreloadFlow && applet !is ControlFlow) {
                 title = AppletOption.makeRelationSpan(title, applet)
             }
 
@@ -113,31 +114,31 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             if (applet is Flow) {
                 if (depth > 2) {
                     ibAction.tag = ACTION_ENTER
-                    ibAction.setImageResource(R.drawable.ic_baseline_chevron_right_24)
+                    ibAction.setIconResource(R.drawable.ic_chevron_right_24px)
                     ibAction.setContentDescriptionAndTooltip(R.string.enter.text)
                     tvDesc.isVisible = true
                 } else if (applet.isEmpty()) {
                     ibAction.tag = ACTION_ADD
                     ibAction.setContentDescriptionAndTooltip(R.string.add_inside.text)
-                    ibAction.setImageResource(R.drawable.ic_baseline_add_24)
+                    ibAction.setIconResource(R.drawable.ic_baseline_add_24)
                 } else {
                     ibAction.tag = ACTION_COLLAPSE
                     if (vm.isCollapsed(applet)) {
                         ibAction.setContentDescriptionAndTooltip(R.string.expand_more.text)
-                        ibAction.setImageResource(R.drawable.ic_baseline_expand_more_24)
+                        ibAction.setIconResource(R.drawable.ic_baseline_expand_more_24)
                     } else {
                         ibAction.setContentDescriptionAndTooltip(R.string.unfold_less.text)
-                        ibAction.setImageResource(R.drawable.ic_baseline_expand_less_24)
+                        ibAction.setIconResource(R.drawable.ic_baseline_expand_less_24)
                     }
                 }
             } else {
                 if (option.arguments.isNotEmpty() || (applet.value != null && !option.isValueInnate)) {
                     ibAction.tag = ACTION_EDIT
-                    ibAction.setImageResource(R.drawable.ic_edit_24dp)
+                    ibAction.setIconResource(R.drawable.ic_edit_24dp)
                     ibAction.setContentDescriptionAndTooltip(R.string.edit.text)
                 } else if (applet.isInvertible) {
                     ibAction.tag = ACTION_INVERT
-                    ibAction.setImageResource(R.drawable.ic_baseline_switch_24)
+                    ibAction.setIconResource(R.drawable.ic_baseline_switch_24)
                     ibAction.setContentDescriptionAndTooltip(R.string.invert.text)
                 }
             }
@@ -264,8 +265,9 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             } else {
                 gvm.selectReferentsWithName(vm.referentAnchor, referent)
             }
-            if (gvm.selectedReferents.isNotEmpty())
+            if (gvm.selectedReferents.isNotEmpty()) {
                 vm.isFabVisible.value = true
+            }
         }
     }
 

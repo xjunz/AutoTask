@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.task.selector
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
@@ -31,7 +32,15 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     var animateItems = true
 
-    val selectedFlowRegistry = MutableLiveData<Int>()
+    var title: CharSequence? = null
+
+    var isScoped = false
+
+    lateinit var onCompletion: (List<Applet>) -> Unit
+
+    lateinit var registryOptions: Array<AppletOption>
+
+    val selectedFlowRegistry: LiveData<Int> = MutableLiveData()
 
     val showClearDialog = MutableLiveData<Boolean>()
 
@@ -39,13 +48,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     val onAppletAdded = MutableLiveData<Int>()
 
-    lateinit var registryOptions: Array<AppletOption>
-
-    var isScoped = false
-
-    lateinit var onCompletion: (List<Applet>) -> Unit
-
-    var title: CharSequence? = null
+    val requestAppendOption = MutableLiveData<Pair<AppletOption, Int>>()
 
     /**
      * The nearest non-container parent of this applet, may be itself.
@@ -79,11 +82,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         options.addAll(
             factory.requireRegistryById(registryOptions[index].appletId).categorizedOptions
         )
-        selectedFlowRegistry.value = index
-    }
-
-    private fun appendOption(option: AppletOption): Boolean {
-        return appendApplet(option.yield())
+        (selectedFlowRegistry as MutableLiveData).value = index
     }
 
     fun appendApplet(applet: Applet): Boolean {

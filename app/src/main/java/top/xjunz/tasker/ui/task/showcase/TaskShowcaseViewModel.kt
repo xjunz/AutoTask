@@ -107,14 +107,13 @@ class TaskShowcaseViewModel : ViewModel() {
         }
     }
 
-    fun toggleRequestedTask() {
-        val it = requestToggleTask.require()
-        if (it.isEnabled) {
-            LocalTaskManager.disableResidentTask(it)
+    fun toggleTask(task: XTask) {
+        if (task.isEnabled) {
+            LocalTaskManager.disableResidentTask(task)
         } else {
-            LocalTaskManager.enableResidentTask(it)
+            LocalTaskManager.enableResidentTask(task)
         }
-        TaskStorage.toggleTaskFilename(it)
-        onTaskToggled.value = it
+        TaskStorage.toggleTaskFilename(task)
+        onTaskToggled.value = task
     }
 }

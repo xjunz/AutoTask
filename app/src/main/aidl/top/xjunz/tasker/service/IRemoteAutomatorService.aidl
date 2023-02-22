@@ -3,11 +3,14 @@ package top.xjunz.tasker.service;
 
 import top.xjunz.tasker.service.IAvailabilityChecker;
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager;
+import top.xjunz.tasker.task.runtime.IRemoteTaskScheduler;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
 import java.util.List;
+import top.xjunz.tasker.engine.dto.XTaskDTO;
+import top.xjunz.tasker.task.runtime.ITaskCompletionCallback;
 
 interface IRemoteAutomatorService {
 
@@ -26,6 +29,8 @@ interface IRemoteAutomatorService {
     void setSystemTypefaceSharedMemory(in SharedMemory mem) = 9;
 
     void suppressResidentTaskScheduler(boolean suppress) = 10;
+
+    void scheduleTask(in XTaskDTO dto, in ITaskCompletionCallback callback) = 11;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server
 

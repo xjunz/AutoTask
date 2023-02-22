@@ -52,6 +52,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         ComponentOverlay(this),
         CollapsedBubbleOverlay(this, trashBin),
         ExpandedBubbleOverlay(this),
+        TaskAssistantOverlay(this),
         NodeTreeOverlay(this),
         nodeInfo,
         GestureShowcaseOverlay(this),

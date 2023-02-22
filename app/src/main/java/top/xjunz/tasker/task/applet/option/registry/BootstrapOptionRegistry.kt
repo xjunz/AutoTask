@@ -96,7 +96,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         return when (flow) {
             is If -> criterionFlowOptions
 
-            is Do -> actionFlowOptions
+            is Do, is RootFlow -> actionFlowOptions
 
             is When -> arrayOf(eventCriteria)
 
@@ -105,7 +105,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     }
 
     @AppletOrdinal(0x0000)
-    val rootFlow = flowOption<RootFlow>(AppletOption.TITLE_NONE)
+    val rootFlow = flowOption<RootFlow>(R.string.add_rules)
 
     @AppletOrdinal(0x0001)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)

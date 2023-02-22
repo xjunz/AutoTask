@@ -147,7 +147,7 @@
                 android:paddingVertical="16dp"
                 android:text="@string/tip_select_coordinate_with_inspector"
                 android:textColor="?colorTertiary"
-                app:drawableEndCompat="@drawable/ic_baseline_chevron_right_24"
+                app:drawableEndCompat="@drawable/ic_chevron_right_24px"
                 app:drawableStartCompat="@drawable/ic_twotone_layers_24"
                 app:drawableTint="?colorTertiary" />
         </com.google.android.material.card.MaterialCardView>

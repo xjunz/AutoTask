@@ -3,16 +3,17 @@
   -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/material_motion_duration_short_2"
-    android:interpolator="@android:interpolator/fast_out_slow_in"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:duration="@integer/material_motion_duration_medium_1"
+    android:interpolator="@interpolator/m3_sys_motion_easing_emphasized"
     android:ordering="together"
-    android:shareInterpolator="true">
+    tools:ignore="PrivateResource">
 
     <alpha
         android:fromAlpha="0"
         android:toAlpha="1" />
 
     <translate
-        android:fromXDelta="-15%"
+        android:fromXDelta="-25%"
         android:toXDelta="0" />
 </set>

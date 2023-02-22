@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ui.base
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,10 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
     protected lateinit var binding: T
 
     protected open val bindingRequiredSuperClassDepth = 1
+
+    private val mixin by lazy {
+        DialogStackMixin(this, false)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -61,6 +66,22 @@ abstract class BaseBottomSheetDialog<T : ViewBinding> : BottomSheetDialogFragmen
         }
         // always expand the dialog the first time being shown
         behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+        mixin.doOnViewCreated()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mixin.doOnStart()
+    }
+
+    override fun dismiss() {
+        mixin.doOnDismissOrCancel()
+        super.dismiss()
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        mixin.doOnDismissOrCancel()
+        super.onCancel(dialog)
     }
 
     override val defaultViewModelProviderFactory = InnerViewModelFactory
