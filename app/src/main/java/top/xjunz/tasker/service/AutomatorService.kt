@@ -4,11 +4,11 @@
 
 package top.xjunz.tasker.service
 
-import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
+import top.xjunz.tasker.uiautomator.CoroutineUiAutomatorBridge
 
 /**
  * A service defines the common abstractions of [A11yAutomatorService] and [ShizukuAutomatorService].
@@ -19,7 +19,7 @@ interface AutomatorService {
 
     val isRunning: Boolean
 
-    val uiAutomatorBridge: UiAutomatorBridge
+    val uiAutomatorBridge: CoroutineUiAutomatorBridge
 
     val a11yEventDispatcher: A11yEventDispatcher
 

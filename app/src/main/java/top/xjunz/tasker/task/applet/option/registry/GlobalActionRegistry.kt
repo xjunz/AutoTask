@@ -10,8 +10,8 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
-import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiAutomation
+import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
@@ -35,7 +35,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val waitForIdle = appletOption(R.string.wait_for_idle) {
         singleValueAction<Int> {
             val xy = IntValueUtil.parseXY(it)
-            currentService.a11yEventDispatcher.waitForIdle(xy.x.toLong(), xy.y.toLong())
+            uiAutomatorBridge.waitForIdle(xy.x.toLong(), xy.y.toLong())
         }
     }
         .withValueArgument<Int>(

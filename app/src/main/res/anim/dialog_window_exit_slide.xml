@@ -2,7 +2,7 @@
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/material_motion_duration_short_1"
+    android:duration="@integer/material_motion_duration_short_2"
     android:ordering="together">
 
     <alpha

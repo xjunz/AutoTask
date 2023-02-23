@@ -19,9 +19,9 @@ import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
  */
 object EventCenter {
 
-    private val EVENT = MutableLiveData<Pair<String, Any>>()
-
     private const val SCHEME = "xtsk"
+
+    private val EVENT = MutableLiveData<Pair<String, Any>>()
 
     private var transient: Any? = null
 

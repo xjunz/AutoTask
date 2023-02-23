@@ -181,7 +181,7 @@ class InspectorViewOverlay(inspector: FloatingInspector) :
                             }
                         }
                     }
-                    a11yAutomatorService.a11yEventDispatcher.waitForIdle(500, 5000)
+                    a11yAutomatorService.uiAutomatorBridge.waitForIdle(300, 3000)
                     if (vm.showGestures.isNotTrue) {
                         vm.makeToast(R.string.playback_finished)
                         vm.showGestures.value = true

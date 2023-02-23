@@ -18,7 +18,6 @@ import top.xjunz.tasker.bridge.ContextBridge
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.service.uiAutomatorBridge
-import top.xjunz.tasker.uiautomator.CoroutineGestureController
 
 /**
  * @author xjunz 2023/02/17
@@ -113,7 +112,7 @@ class SerializableInputEvent(
 
     suspend fun execute(): Boolean {
         val successful = if (type == INPUT_TYPE_MOTIONS) {
-            (uiAutomatorBridge.gestureController as CoroutineGestureController)
+            (uiAutomatorBridge.gestureController as top.xjunz.tasker.uiautomator.CoroutineGestureController)
                 .performSinglePointerGesture(getGesture())
         } else {
             delay(delay)

@@ -58,6 +58,8 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showMergeConfirmation = MutableLiveData<Boolean>()
 
+    val showClearSnapshotsConfirmation = MutableLiveData<Boolean>()
+
     val isBase: Boolean get() = flow is RootFlow
 
     val selectedApplet = MutableLiveData<Applet>()
@@ -325,9 +327,9 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
             }
             TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
                 val repeat = factory.controlActionRegistry.repeatFlow.yield(10) as Repeat
-                repeat.comment = R.string.comment_click_automation_edit_repeat_times.str
+                repeat.comment = R.string.comment_click_automation_repeat_count.str
                 val delay = factory.controlActionRegistry.suspension.yield(200) as Suspension
-                delay.comment = R.string.comment_click_automation_edit_delay_mills.str
+                delay.comment = R.string.comment_click_automation_delay_mills.str
                 repeat.add(delay)
                 root.add(repeat)
             }

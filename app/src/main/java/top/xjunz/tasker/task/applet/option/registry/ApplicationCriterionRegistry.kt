@@ -10,9 +10,10 @@ import androidx.annotation.StringRes
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.criterion.*
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.collectionCriterion
-import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.newCriterion
+import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.equalCriterion
 import top.xjunz.tasker.ktx.bold
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
@@ -46,7 +47,9 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     val isCertainApp = invertibleApplicationOption(R.string.is_certain_app) {
         ArgumentCriterion<ComponentInfoWrapper, String, ComponentInfoWrapper>(Applet.VAL_TYPE_TEXT,
             { it.packageName }) { info, pkgName ->
-            info.packageName == pkgName
+            AppletResult.resultOf(info.packageName) {
+                it == pkgName
+            }
         }
     }.withBinaryArgument<String, ComponentInfoWrapper>(
         name = R.string.is_which_app,
@@ -96,8 +99,8 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x00_03)
     val paneTitle = applicationOption(R.string.with_pane_title) {
-        newCriterion<ComponentInfoWrapper, String> { t, v ->
-            t.paneTitle == v
+        equalCriterion<ComponentInfoWrapper, String> {
+            it.paneTitle
         }
     }.withValueArgument<String>(R.string.pane_title, VariantType.TEXT_PANE_TITLE)
 

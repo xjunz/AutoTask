@@ -33,7 +33,7 @@ class AutoStarter : BroadcastReceiver() {
             || intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED
         ) {
             // only available when it is Shizuku mode
-            if (Preferences.operatingMode != OperatingMode.Shizuku.VALUE) return
+            if (Preferences.operatingMode != OperatingMode.Privilege.VALUE) return
             Shizuku.addBinderReceivedListenerSticky(oneShotBinderReceivedListener)
         }
     }

@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.applet.criterion
 
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.criterion.Criterion
 import top.xjunz.tasker.task.applet.util.NumberRangeUtil
 import top.xjunz.tasker.task.applet.value.Distance
@@ -18,9 +19,9 @@ class BoundsCriterion<T : Any>(
 
     override val valueType: Int = VAL_TYPE_LONG
 
-    override fun matchTarget(target: T, value: Distance): Boolean {
-        return NumberRangeUtil.contains(value.rangeStart, value.rangeEnd) {
-            bounds(target, value.scope, value.unit)
+    override fun matchTarget(target: T, value: Distance): AppletResult {
+        return AppletResult.resultOf(bounds(target, value.scope, value.unit)) {
+            NumberRangeUtil.contains(value.rangeStart, value.rangeEnd, it)
         }
     }
 

@@ -11,7 +11,7 @@ import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.criterion.numberRangeCriterion
+import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.numberRangeCriterion
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.util.formatTime
 import java.util.*

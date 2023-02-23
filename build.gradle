@@ -2,16 +2,17 @@
 buildscript {
 
     ext {
-        compile_sdk_version =33
-        min_sdk_version =24
-        target_sdk_version =33
+        compile_sdk_version = 33
+        min_sdk_version = 24
+        target_sdk_version = 33
         kotlin_version = "1.8.0"
         refine_version = "3.1.1"
         shizuku_version = '12.1.0'
         ktor_version = '2.1.1'
-        appcompat_version= "1.6.0"
+        appcompat_version = "1.6.0"
         coroutine_version = "1.6.4"
         serialization_version = '1.6.21'
+        ktx_version = "1.9.0"
     }
 
     repositories {

@@ -13,6 +13,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.transition.platform.MaterialFadeThrough
@@ -29,6 +30,7 @@ import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import java.util.*
 
 /**
  * @author xjunz 2022/12/16
@@ -75,6 +77,28 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             }
         }
     }
+
+    private val itemTouchHelperCallback =
+        object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.DOWN or ItemTouchHelper.UP, 0) {
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: ViewHolder,
+                target: ViewHolder
+            ): Boolean {
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+                if (from < 0 || to < 0) return false
+                Collections.swap(taskList, from, to)
+                adapter.notifyItemMoved(from, to)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
+                /* no-op */
+            }
+
+        }
 
 
     protected inner class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
@@ -140,7 +164,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvTaskList)
         observe(viewModel.appbarHeight) {
             binding.rvTaskList.updatePadding(top = it)
         }

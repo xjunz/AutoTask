@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
-<layout xmlns:tools="http://schemas.android.com/tools">
+<layout>
 
     <top.xjunz.tasker.ui.widget.FloatingDraggableLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/bubble_wrapper"
@@ -18,7 +17,6 @@
             style="@style/BubbleButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_baseline_my_location_24"
-            tools:ignore="ContentDescription" />
+            android:src="@drawable/ic_baseline_my_location_24" />
     </top.xjunz.tasker.ui.widget.FloatingDraggableLayout>
 </layout>

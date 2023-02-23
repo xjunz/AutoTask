@@ -11,12 +11,14 @@ import androidx.annotation.GravityInt
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.criterion.*
+import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.equalCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
-import top.xjunz.tasker.task.applet.criterion.numberRangeCriterion
+import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.numberRangeCriterion
 import top.xjunz.tasker.task.applet.flow.UiObjectFlow.UiObjectTarget
 import top.xjunz.tasker.task.applet.value.Distance
 
@@ -25,11 +27,20 @@ import top.xjunz.tasker.task.applet.value.Distance
  */
 class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
-    private inline fun <reified V : Any> nodeCriterion(
-        crossinline matcher: (AccessibilityNodeInfo, V) -> Boolean
+
+    private inline fun <reified V : Any> nodeEqualCriterion(
+        crossinline mapper: (AccessibilityNodeInfo) -> V?
     ): Criterion<UiObjectTarget, V> {
-        return LambdaCriterion(Applet.judgeValueType<V>()) { ctx, v ->
-            matcher(ctx.source, v)
+        return equalCriterion {
+            mapper(it.source)
+        }
+    }
+
+    private inline fun nodeTextCriterion(crossinline matcher: (String?, String) -> Boolean?): Criterion<UiObjectTarget, String> {
+        return LambdaCriterion(Applet.judgeValueType<String>()) { t, v ->
+            AppletResult.resultOf(t.source.text?.toString()) {
+                matcher(it, v) == true
+            }
         }
     }
 
@@ -134,38 +145,38 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     // Type
     @AppletOrdinal(0x00_00)
     val isType = appletOption(R.string.with_type) {
-        nodeCriterion<String> { t, v ->
-            t.className?.toString() == v
+        nodeEqualCriterion {
+            it.className?.toString()
         }
     }.withPresetArray(R.array.a11y_class_names, R.array.a11y_class_full_names)
 
     // ID
     @AppletOrdinal(0x00_01)
     val withId = appletOption(R.string.with_id) {
-        nodeCriterion<String> { t, v ->
-            t.viewIdResourceName == v
+        nodeEqualCriterion {
+            it.viewIdResourceName
         }
     }
 
     // Text
     @AppletOrdinal(0x01_00)
     val textEquals = invertibleAppletOption(R.string.with_text) {
-        nodeCriterion<String> { t, v ->
-            t.text?.toString() == v
+        nodeEqualCriterion {
+            it.text?.toString()
         }
     }
 
     @AppletOrdinal(0x01_01)
     val textStartsWith = invertibleAppletOption(R.string.text_starts_with) {
-        nodeCriterion<String> { t, v ->
-            t.text?.toString()?.startsWith(v) == true
+        nodeTextCriterion { t, v ->
+            t?.startsWith(v)
         }
     }
 
     @AppletOrdinal(0x01_02)
     val textEndsWith = invertibleAppletOption(R.string.text_ends_with) {
-        nodeCriterion<String> { t, v ->
-            t.text?.toString()?.endsWith(v) == true
+        nodeTextCriterion { t, v ->
+            t?.endsWith(v)
         }
     }
 
@@ -178,22 +189,22 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x01_04)
     val textContains = appletOption(R.string.contains_text) {
-        nodeCriterion<String> { t, v ->
-            t.text?.toString()?.contains(v) == true
+        nodeTextCriterion { t, v ->
+            t?.contains(v)
         }
     }
 
     @AppletOrdinal(0x01_05)
     val textPattern = invertibleAppletOption(R.string.text_matches_pattern) {
-        nodeCriterion<String> { t, v ->
-            t.text?.toString()?.matches(Regex(v)) == true
+        nodeTextCriterion { t, v ->
+            t?.matches(Regex(v))
         }
     }
 
     @AppletOrdinal(0x01_06)
     val contentDesc = appletOption(R.string.content_desc) {
-        nodeCriterion<String> { t, v ->
-            t.contentDescription?.toString() == v
+        nodeEqualCriterion {
+            it.contentDescription?.toString()
         }
     }.withTitleModifier("Content Description")
 

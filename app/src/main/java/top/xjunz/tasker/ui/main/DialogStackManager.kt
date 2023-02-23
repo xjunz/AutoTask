@@ -49,14 +49,15 @@ object DialogStackManager {
         var cur = if (requireStack().isEmpty()) null else requireStack().peek()
         var occlusion: String? = null
         while (cur != null) {
-            if (cur.isFullScreen && occlusion == null) {
+            if (occlusion == null && cur.isFullScreen) {
                 occlusion = cur.tag
             }
             if (cur.tag == target) {
-                return occlusion == target || occlusion == null
+                return occlusion == null || occlusion == target
             }
             cur = cur.previous
         }
+        // Not even present in the stack
         return false
     }
 

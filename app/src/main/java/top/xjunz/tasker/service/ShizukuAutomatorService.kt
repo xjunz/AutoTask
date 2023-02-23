@@ -14,7 +14,6 @@ import android.os.*
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.Keep
-import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.trace.logcatStackTrace
@@ -23,6 +22,7 @@ import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.bridge.OverlayToastBridge
+import top.xjunz.tasker.bridge.PrivilegedUiAutomatorBridge
 import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
@@ -32,7 +32,6 @@ import top.xjunz.tasker.ktx.isAlive
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.*
-import top.xjunz.tasker.uiautomator.ShizukuUiAutomatorBridge
 import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
@@ -51,6 +50,10 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             return requireNotNull(instance?.get()) {
                 "The ShizukuAutomatorService is not yet started or has dead!"
             }
+        }
+
+        fun isRunning(): Boolean {
+            return instance?.get() != null
         }
     }
 
@@ -113,9 +116,9 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     override val isRunning: Boolean get() = delegate.asBinder().isAlive
 
     @Privileged
-    override val uiAutomatorBridge: UiAutomatorBridge by lazy {
+    override val uiAutomatorBridge by lazy {
         ensurePrivilegedProcess()
-        ShizukuUiAutomatorBridge(uiAutomation)
+        PrivilegedUiAutomatorBridge(uiAutomation)
     }
 
     @Anywhere

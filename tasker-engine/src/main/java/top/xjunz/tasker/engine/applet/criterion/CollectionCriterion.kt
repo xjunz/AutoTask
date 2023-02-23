@@ -4,6 +4,8 @@
 
 package top.xjunz.tasker.engine.applet.criterion
 
+import top.xjunz.tasker.engine.applet.base.AppletResult
+
 /**
  * @author xjunz 2022/08/14
  */
@@ -22,11 +24,9 @@ class CollectionCriterion<T : Any, V : Any>(
 
     override val valueType: Int = collectionTypeOf(rawType)
 
-    override fun T.getActualValue(): Any? {
-        return mapper()
-    }
-
-    override fun matchTarget(target: T, value: List<V>): Boolean {
-        return value.contains(target.mapper())
+    override fun matchTarget(target: T, value: List<V>): AppletResult {
+        return AppletResult.resultOf(target.mapper()) {
+            value.contains(it)
+        }
     }
 }

@@ -78,13 +78,13 @@ abstract class Applet {
         }
     }
 
-    open var relation = REL_AND
-
     val isAnd: Boolean get() = relation == REL_AND
 
     val isOr: Boolean get() = relation == REL_OR
 
     val isAnyway: Boolean get() = relation == REL_ANYWAY
+
+    open val requiredIndex = -1
 
     /**
      * If an applet is not enabled, the applet will not be executed as if it is removed from its parent.
@@ -104,48 +104,11 @@ abstract class Applet {
      */
     var comment: String? = null
 
-    /**
-     * If an applet is invertible, its execution result can be inverted to the contrary side.
-     */
-    open var isInvertible = true
-
-    open val requiredIndex = -1
-
-    /**
-     * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
-     */
-    var isInverted = false
-        set(value) {
-            if (value && !isInvertible) unsupportedOperation("This applet is not invertible!")
-            field = value
-        }
-
-    /**
-     * The masked type of value for `serialization`, which is composed as following:
-     *
-     * |0|│|0000 0000|
-     * |  :----: |:----: | :----:  |
-     * |is collection|│|raw type|
-     */
-    abstract val valueType: Int
-
-    /**
-     * Get the id of the registry where the applet is created.
-     */
-    inline val registryId get() = id ushr 16 and 0xFF
-
-    /**
-     * Get the type id of this applet.
-     */
-    inline val appletId get() = id and 0xFFFF
-
     var parent: Flow? = null
 
     var index: Int = -1
 
     var value: Any? = null
-
-    open val defaultValue: Any? = null
 
     /**
      * References to other [Applet]s as input.
@@ -157,9 +120,57 @@ abstract class Applet {
      */
     var referents: Map<Int, String> = emptyMap()
 
-    fun requireParent() = requireNotNull(parent) {
-        "Parent not found!"
-    }
+    /**
+     * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
+     */
+    var isInverted = false
+        set(value) {
+            if (value && !isInvertible) unsupportedOperation("This applet is not invertible!")
+            field = value
+        }
+
+    /**
+     * If an applet is invertible, its execution result can be inverted to the contrary side.
+     */
+    open var isInvertible = true
+
+    open var relation = REL_AND
+
+    /**
+     * Unmasked raw type.
+     *
+     * @see MASK_VAL_TYPE_COLLECTION
+     * @see Applet.valueType
+     */
+    val rawType: Int
+        get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
+
+    /**
+     * Get the id of the registry where the applet is created.
+     */
+    inline val registryId get() = id ushr 16 and 0xFF
+
+    /**
+     * Get the type id of this applet.
+     */
+    inline val appletId get() = id and 0xFFFF
+
+    open val defaultValue: Any? = null
+
+    /**
+     * Whether its value is a [Collection].
+     */
+    private val isCollectionValue: Boolean
+        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
+
+    /**
+     * The masked type of value for `serialization`, which is composed as following:
+     *
+     * |0|│|0000 0000|
+     * |  :----: |:----: | :----:  |
+     * |is collection|│|raw type|
+     */
+    abstract val valueType: Int
 
     /**
      * Execute the applet.
@@ -170,6 +181,10 @@ abstract class Applet {
      */
     @CheckResult
     abstract suspend fun apply(runtime: TaskRuntime): AppletResult
+
+    fun requireParent() = requireNotNull(parent) {
+        "Parent not found!"
+    }
 
     fun isSuccess(any: Any?): Boolean {
         return any != null
@@ -186,21 +201,6 @@ abstract class Applet {
     fun toggleAbility() {
         isEnabled = !isEnabled
     }
-
-    /**
-     * Whether its value is a [Collection].
-     */
-    private val isCollectionValue: Boolean
-        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
-
-    /**
-     * Unmasked raw type.
-     *
-     * @see MASK_VAL_TYPE_COLLECTION
-     * @see Applet.valueType
-     */
-    val rawType: Int
-        get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
 
     protected open fun serializeValueToString(value: Any): String {
         return value.toString()

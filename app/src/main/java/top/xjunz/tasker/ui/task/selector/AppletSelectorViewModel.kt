@@ -42,7 +42,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     val selectedFlowRegistry: LiveData<Int> = MutableLiveData()
 
-    val showClearDialog = MutableLiveData<Boolean>()
+    val showClearConfirmation = MutableLiveData<Boolean>()
 
     val options = mutableListOf<AppletOption>()
 

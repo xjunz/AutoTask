@@ -26,6 +26,20 @@ object PackageManagerBridge {
         return packageManager.getLaunchIntentForPackage(pkgName)
     }
 
+    fun getLauncherPackageName(): String? {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.resolveActivity(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        }
+        return resolveInfo?.activityInfo?.packageName
+    }
+
     fun loadPackageInfo(pkgName: String, orFlags: Int = 0): PackageInfo? {
         val flags = PackageManager.MATCH_UNINSTALLED_PACKAGES or orFlags
         return runCatching {

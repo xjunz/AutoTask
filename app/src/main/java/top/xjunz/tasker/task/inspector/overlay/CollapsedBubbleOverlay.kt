@@ -6,11 +6,12 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.view.WindowManager
 import androidx.core.view.isVisible
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayBubbleCollapsedBinding
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.isNull
-import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.observeNostalgic
 import top.xjunz.tasker.ktx.toggle
 import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -84,16 +85,21 @@ class CollapsedBubbleOverlay(
         }
         binding.ibCenter.setOnLongClickListener {
             EventCenter.launchHost()
+            Preferences.showLongClickToHost = false
             return@setOnLongClickListener true
         }
-        inspector.observe(vm.isCollapsed) {
-            if (it) {
+        inspector.observeNostalgic(vm.isCollapsed) { prev, isCollapsed ->
+            if (Preferences.showLongClickToHost && prev == false && isCollapsed) {
+                vm.makeToast(R.string.tip_long_click_to_route_host)
+            }
+            if (isCollapsed) {
                 layoutParams.x = vm.bubbleX
                 layoutParams.y = vm.bubbleY
-                if (rootView.isAttachedToWindow)
+                if (rootView.isAttachedToWindow) {
                     windowManager.updateViewLayout(rootView, layoutParams)
+                }
             }
-            rootView.isVisible = it
+            rootView.isVisible = isCollapsed
         }
     }
 

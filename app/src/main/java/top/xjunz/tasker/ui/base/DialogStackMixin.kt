@@ -18,7 +18,8 @@ class DialogStackMixin(
     private val isFullScreen: Boolean
 ) {
 
-    private var isStopped = true
+    var isStopped = false
+        private set
 
     private var isExiting = false
 
@@ -37,7 +38,7 @@ class DialogStackMixin(
         mainViewModel.doOnDialogShown(dialogFragment) {
             if (it.tag != tag && dialog.isShowing && it.isFullScreen) {
                 isExiting = true
-                isStopped = false
+                isStopped = true
                 animateExit()
             }
         }
@@ -46,7 +47,7 @@ class DialogStackMixin(
                 && DialogStackManager.isVisible(tag)
             ) {
                 isExiting = false
-                isStopped = true
+                isStopped = false
                 animateReturn()
             }
         }
@@ -54,7 +55,7 @@ class DialogStackMixin(
 
     fun doOnStart() {
         // Override system behaviour
-        if (!isStopped) {
+        if (isStopped) {
             dialogFragment.onStop()
         }
     }

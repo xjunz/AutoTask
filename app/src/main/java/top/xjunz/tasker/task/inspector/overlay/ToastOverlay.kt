@@ -34,6 +34,9 @@ class ToastOverlay(inspector: FloatingInspector) :
     override fun onOverlayInflated() {
         super.onOverlayInflated()
         inspector.observeTransient(vm.toastText) {
+            if (it == binding.tvToast.text && dismissJob?.isActive == true) {
+                return@observeTransient
+            }
             if (binding.tvToast.isVisible) {
                 binding.tvToast.isVisible = false
                 dismissJob?.cancel()

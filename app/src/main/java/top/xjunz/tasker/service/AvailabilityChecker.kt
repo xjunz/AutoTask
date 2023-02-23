@@ -6,11 +6,6 @@ package top.xjunz.tasker.service
 
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
-import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.R
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -27,9 +22,7 @@ class AvailabilityChecker(
 
     private val bridge get() = service.uiAutomatorBridge
 
-    private val uiDevice by lazy {
-        UiDevice.getInstance(bridge)
-    }
+    private val uiDevice get() = bridge.uiDevice
 
     private val handler by lazy {
         Handler(looper!!)
@@ -56,38 +49,38 @@ class AvailabilityChecker(
 
 
     private fun doCheck(caseName: Int, listener: IAvailabilityCheckerCallback) {
-        when (caseName) {
-            R.string.case_widget_recognition -> {
-                listener.onCompleted(
-                    uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, buttonId)).text
-                )
-            }
-            R.string.case_global_action -> {
-                uiDevice.pressRecentApps()
-                SystemClock.sleep(1000)
-                uiDevice.pressBack()
-                SystemClock.sleep(1000)
-                uiDevice.openNotification()
-                SystemClock.sleep(1000)
-                uiDevice.pressBack()
-                listener.onCompleted(null)
-            }
-            R.string.case_drag_and_drop -> {
-                val dropTarget = checkNotNull(
-                    uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, dropTargetId))
-                ) {
-                    "Cannot find the drop target!"
-                }
-                val dropCenter = dropTarget.visibleCenter
-                val dragTarget = checkNotNull(
-                    uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, buttonId))
-                ) {
-                    "Cannot find the drag target!"
-                }
-                dragTarget.drag(dropCenter, 1000)
-                listener.onCompleted(null)
-            }
-        }
+        /*   when (caseName) {
+               R.string.case_widget_recognition -> {
+                   listener.onCompleted(
+                       uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, buttonId)).text
+                   )
+               }
+               R.string.case_global_action -> {
+                   uiDevice.pressRecentApps()
+                   SystemClock.sleep(1000)
+                   uiDevice.pressBack()
+                   SystemClock.sleep(1000)
+                   uiDevice.openNotification()
+                   SystemClock.sleep(1000)
+                   uiDevice.pressBack()
+                   listener.onCompleted(null)
+               }
+               R.string.case_drag_and_drop -> {
+                   val dropTarget = checkNotNull(
+                       uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, dropTargetId))
+                   ) {
+                       "Cannot find the drop target!"
+                   }
+                   val dropCenter = dropTarget.visibleCenter
+                   val dragTarget = checkNotNull(
+                       uiDevice.findObject(By.res(BuildConfig.APPLICATION_ID, buttonId))
+                   ) {
+                       "Cannot find the drag target!"
+                   }
+                   dragTarget.drag(dropCenter, 1000)
+                   listener.onCompleted(null)
+               }
+           }*/
     }
 
 }

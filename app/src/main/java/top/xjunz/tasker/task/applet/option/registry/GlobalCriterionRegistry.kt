@@ -10,7 +10,7 @@ import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.criterion.simpleNumberRangeCriterion
+import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.simpleNumberRangeCriterion
 import top.xjunz.tasker.task.applet.value.VariantType
 
 /**

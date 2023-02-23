@@ -5,6 +5,7 @@
 package top.xjunz.tasker.engine.applet.criterion
 
 import top.xjunz.shared.ktx.casted
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -15,7 +16,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 class ArgumentCriterion<T : Any, V : Any, Arg : Any>(
     override val valueType: Int,
     private inline val mapper: (Arg) -> V,
-    private inline val matcher: (T, V) -> Boolean
+    private inline val matcher: (T, V) -> AppletResult
 ) : Criterion<T, V>() {
 
     override fun getDefaultValue(runtime: TaskRuntime): V {
@@ -24,7 +25,7 @@ class ArgumentCriterion<T : Any, V : Any, Arg : Any>(
         return value
     }
 
-    override fun matchTarget(target: T, value: V): Boolean {
+    override fun matchTarget(target: T, value: V): AppletResult {
         return matcher(target, value)
     }
 

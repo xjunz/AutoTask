@@ -21,10 +21,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class Criterion<T : Any, V : Any> : Applet() {
 
-    protected open fun T.getActualValue(): Any? {
-        return this
-    }
-
     protected val isScoped by lazy {
         var p = parent
         while (p is ContainerFlow) {
@@ -33,7 +29,7 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         p is ScopeFlow<*>
     }
 
-    private fun getTarget(runtime: TaskRuntime): T {
+    private fun getMatchTarget(runtime: TaskRuntime): T {
         if (isScoped) {
             return runtime.getTarget()
         }
@@ -54,18 +50,12 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val expected = value?.casted() ?: getDefaultValue(runtime)
-        val actual = getTarget(runtime)
-        return if (isInverted != matchTarget(actual, expected)) {
-            AppletResult.EMPTY_SUCCESS
-        } else if (actual === Unit) {
-            AppletResult.EMPTY_FAILURE
-        } else {
-            AppletResult.failed(actual.getActualValue())
-        }
+        val target = getMatchTarget(runtime)
+        return matchTarget(target, expected)
     }
 
     /**
      * Check whether the [target] and [value] are matched.
      */
-    protected abstract fun matchTarget(target: T, value: V): Boolean
+    protected abstract fun matchTarget(target: T, value: V): AppletResult
 }

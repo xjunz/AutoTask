@@ -20,12 +20,13 @@ object Preferences {
         app.sharedPrefsOf("global")
     }
 
-    var operatingMode by global.primitive("operating_mode", OperatingMode.Shizuku.VALUE)
+    var operatingMode by global.primitive("operating_mode", OperatingMode.Privilege.VALUE)
 
     var showLongClickToSelectTip by global.primitive("tip_long_click_to_select", true)
     var showSwipeToRemoveTip by global.primitive("tip_swipe_to_remove", true)
     var showDragToMoveTip by global.primitive("tip_drag_to_move", true)
     var showToggleRelationTip by global.primitive("tip_toggle_relation", true)
+    var showLongClickToHost by global.primitive("tip_long_click_to_host", true)
 
     private fun <T> SharedPreferences.nullable(
         name: String,

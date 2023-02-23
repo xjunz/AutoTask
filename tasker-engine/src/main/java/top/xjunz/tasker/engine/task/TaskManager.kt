@@ -48,6 +48,10 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         }
     }
 
+    open fun clearSnapshots(id: TaskIdentifier) {
+        findTask(id).snapshots.clear()
+    }
+
     private fun findTask(id: TaskIdentifier): XTask {
         return enabled[enabled.indexOfTask(id)]
     }

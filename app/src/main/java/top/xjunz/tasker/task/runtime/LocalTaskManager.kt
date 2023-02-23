@@ -72,6 +72,13 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         return super.getAllSnapshots(id)
     }
 
+    override fun clearSnapshots(id: XTask) {
+        super.clearSnapshots(id)
+        peer?.whenAlive {
+            it.clearSnapshots(id.checksum)
+        }
+    }
+
     override fun asTask(carrier: XTask): XTask {
         return carrier
     }

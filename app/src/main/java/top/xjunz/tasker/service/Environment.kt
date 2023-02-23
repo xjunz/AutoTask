@@ -5,16 +5,19 @@
 package top.xjunz.tasker.service
 
 import android.app.UiAutomation
-import androidx.test.uiautomator.UiDevice
-import top.xjunz.tasker.annotation.Anywhere
+import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.isAppProcess
+import top.xjunz.tasker.uiautomator.CoroutineUiDevice
 
 /**
  * @author xjunz 2022/10/10
  */
 inline val serviceController get() = OperatingMode.CURRENT.serviceController
 
-@Anywhere
+/**
+ * Service in each process, may be a remote delegate if in the app process.
+ */
+@Local
 inline val currentService: AutomatorService
     get() = if (isAppProcess) serviceController.requireService() else ShizukuAutomatorService.require()
 
@@ -28,4 +31,4 @@ inline val uiAutomatorBridge get() = currentService.uiAutomatorBridge
 
 inline val uiAutomation: UiAutomation get() = uiAutomatorBridge.uiAutomation
 
-inline val uiDevice: UiDevice get() = uiAutomatorBridge.uiDevice
+inline val uiDevice: CoroutineUiDevice get() = uiAutomatorBridge.uiDevice

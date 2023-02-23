@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.engine.applet.criterion
 
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
@@ -18,7 +19,9 @@ class PropertyCriterion<T : Any>(private inline val matcher: (target: T) -> Bool
         return true
     }
 
-    override fun matchTarget(target: T, value: Boolean): Boolean {
-        return matcher(target) == value
+    override fun matchTarget(target: T, value: Boolean): AppletResult {
+        return AppletResult.resultOf(matcher(target)) {
+            it == value
+        }
     }
 }

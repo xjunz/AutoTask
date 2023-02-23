@@ -22,6 +22,7 @@ import top.xjunz.tasker.databinding.DialogTaskShowcaseBinding
 import top.xjunz.tasker.engine.applet.util.hierarchy
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -135,8 +136,9 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
                     }.show()
                 }
                 XTask.TYPE_ONESHOT -> {
-                    FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT)
-                        .show(childFragmentManager)
+                    FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT).doOnSucceeded {
+                        floatingInspector.viewModel.isCollapsed.value = false
+                    }.show(childFragmentManager)
                 }
             }
         }

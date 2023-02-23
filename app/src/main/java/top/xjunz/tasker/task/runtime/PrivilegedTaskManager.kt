@@ -48,6 +48,10 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
             return PrivilegedTaskManager.getSnapshotCount(identifier)
         }
 
+        override fun clearSnapshots(identifier: Long) {
+            PrivilegedTaskManager.clearSnapshots(identifier)
+        }
+
         override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
             return PrivilegedTaskManager.getAllSnapshots(identifier)
         }

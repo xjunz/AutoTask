@@ -53,12 +53,12 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
             serviceController.bindService()
         }
         binding.rgModes.check(
-            if (OperatingMode.CURRENT == OperatingMode.Shizuku)
+            if (OperatingMode.CURRENT == OperatingMode.Privilege)
                 R.id.rb_mode_shizuku else R.id.rb_mode_a11y
         )
         binding.rgModes.setOnCheckedChangeListener { _, checkedId ->
             mvm.setCurrentOperatingMode(
-                if (checkedId == R.id.rb_mode_shizuku) OperatingMode.Shizuku
+                if (checkedId == R.id.rb_mode_shizuku) OperatingMode.Privilege
                 else OperatingMode.Accessibility
             )
         }
@@ -72,7 +72,7 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
         observe(mvm.operatingMode) {
             binding.root.rootView.beginAutoTransition()
             binding.containerOverlayPermission.isVisible = it == OperatingMode.Accessibility
-            if (it == OperatingMode.Shizuku) {
+            if (it == OperatingMode.Privilege) {
                 binding.tvMode.text = R.string.shizuku.text
                 binding.tvModeIntro.text = R.string.desc_shizuku_mode.text
             } else {

@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
             menuInflater.inflate(R.menu.operating_modes, menu)
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.item_shizuku_mode) {
-                    viewModel.setCurrentOperatingMode(OperatingMode.Shizuku)
+                    viewModel.setCurrentOperatingMode(OperatingMode.Privilege)
                 } else if (it.itemId == R.id.item_a11y_mode) {
                     viewModel.setCurrentOperatingMode(OperatingMode.Accessibility)
                 }
@@ -152,12 +152,12 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         }
         observe(viewModel.operatingMode) {
             binding.root.beginAutoTransition()
-            if (it == OperatingMode.Shizuku) {
+            if (it == OperatingMode.Privilege) {
                 operatingModeMenu.menu.findItem(R.id.item_shizuku_mode).isChecked = true
             } else {
                 operatingModeMenu.menu.findItem(R.id.item_a11y_mode).isChecked = true
             }
-            binding.containerShizukuIntro.isVisible = it == OperatingMode.Shizuku
+            binding.containerShizukuIntro.isVisible = it == OperatingMode.Privilege
             binding.tvDescMode.text = it.description
             binding.tvMode.text = it.name
             binding.btnRun.isEnabled = it == OperatingMode.Accessibility
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 toast(R.string.prompt_unable_to_switch_mode)
                 return@setOnClickListener
             }
-            if (viewModel.operatingMode eq OperatingMode.Shizuku) {
+            if (viewModel.operatingMode eq OperatingMode.Privilege) {
                 operatingModeMenu.menu.findItem(R.id.item_shizuku_mode).isChecked = true
             } else if (viewModel.operatingMode eq OperatingMode.Accessibility) {
                 operatingModeMenu.menu.findItem(R.id.item_a11y_mode).isChecked = true

@@ -28,7 +28,7 @@ sealed class OperatingMode(
 
     abstract val serviceController: ServiceController<out AutomatorService>
 
-    object Shizuku : OperatingMode(0, R.string.shizuku, R.string.desc_shizuku_mode) {
+    object Privilege : OperatingMode(0, R.string.shizuku, R.string.desc_shizuku_mode) {
         override val serviceController = ShizukuAutomatorServiceController
     }
 
@@ -41,7 +41,7 @@ sealed class OperatingMode(
         val CURRENT get() = fromValue(Preferences.operatingMode)
 
         private fun fromValue(value: Int): OperatingMode {
-            if (value == Shizuku.VALUE) return Shizuku
+            if (value == Privilege.VALUE) return Privilege
             if (value == Accessibility.VALUE) return Accessibility
             runtimeException("Unknown operating mode: $value")
         }

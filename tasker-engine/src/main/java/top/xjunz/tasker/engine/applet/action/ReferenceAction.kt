@@ -43,7 +43,7 @@ class LambdaReferenceAction<V>(
 }
 
 inline fun <Arg, reified V> singleArgValueAction(
-    crossinline action: (Arg?, V?) -> Boolean
+    crossinline action: suspend (Arg?, V?) -> Boolean
 ): ReferenceAction<V> {
     return LambdaReferenceAction(Applet.judgeValueType<V>()) { args, v, _ ->
         action(args.single()?.casted(), v)
@@ -57,7 +57,7 @@ inline fun <Arg> singleArgAction(crossinline action: (Arg?) -> Boolean): Referen
 }
 
 inline fun <reified ArgOrValue> unaryArgValueAction(
-    crossinline action: (ArgOrValue) -> Boolean
+    crossinline action: suspend (ArgOrValue) -> Boolean
 ): ReferenceAction<ArgOrValue> {
     return LambdaReferenceAction(Applet.judgeValueType<ArgOrValue>()) { args, v, _ ->
         action(requireNotNull(args.singleOrNull()?.casted() ?: v) {

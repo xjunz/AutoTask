@@ -4,7 +4,7 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:duration="@integer/material_motion_duration_medium_1"
+    android:duration="@integer/material_motion_duration_long_1"
     android:interpolator="@interpolator/m3_sys_motion_easing_emphasized"
     android:ordering="together"
     tools:ignore="PrivateResource">
@@ -14,6 +14,6 @@
         android:toAlpha="1" />
 
     <translate
-        android:fromXDelta="-25%"
+        android:fromXDelta="-10%"
         android:toXDelta="0" />
 </set>

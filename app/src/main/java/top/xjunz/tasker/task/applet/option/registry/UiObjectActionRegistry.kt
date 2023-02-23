@@ -27,7 +27,7 @@ import top.xjunz.tasker.task.applet.value.VariantType
 class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private inline fun simpleUiObjectActionOption(
-        title: Int, crossinline block: (AccessibilityNodeInfo) -> Boolean
+        title: Int, crossinline block: suspend (AccessibilityNodeInfo) -> Boolean
     ): AppletOption {
         return uiObjectActionOption<Unit>(title) { node, _ ->
             block(node)
@@ -35,7 +35,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     private inline fun <reified V> uiObjectActionOption(
-        title: Int, crossinline block: (AccessibilityNodeInfo, V?) -> Boolean
+        title: Int, crossinline block: suspend (AccessibilityNodeInfo, V?) -> Boolean
     ) = appletOption(title) {
         singleArgValueAction<AccessibilityNodeInfo, V> { node, value ->
             requireNotNull(node) {
@@ -51,10 +51,10 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             it.performAction(AccessibilityNodeInfo.ACTION_CLICK)
         } else {
             if (isPrivilegedProcess) {
-                uiDevice.wrapUiObject2(it).click()
+                uiDevice.wrapUiObject(it).click()
             } else {
                 // StrokeDescription must have a positive duration in a11y mode.
-                uiDevice.wrapUiObject2(it).click(5)
+                uiDevice.wrapUiObject(it).click(5)
             }
             true
         }
@@ -65,7 +65,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         if (it.isLongClickable) {
             it.performAction(AccessibilityNodeInfo.ACTION_LONG_CLICK)
         } else {
-            uiDevice.wrapUiObject2(it).longClick()
+            uiDevice.wrapUiObject(it).longClick()
             true
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
@@ -73,7 +73,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x00_03)
     val drag = uiObjectActionOption<Int>(R.string.format_drag) { node, v ->
         check(v != null)
-        uiDevice.wrapUiObject2(node).drag(IntValueUtil.parseXY(v))
+        uiDevice.wrapUiObject(node).drag(IntValueUtil.parseXY(v))
         true
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
         .withUnaryArgument<Int>(
@@ -90,7 +90,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val swipe = uiObjectActionOption<Long>(R.string.format_swipe_ui_object) { node, v ->
         check(v != null)
         val swipe = Swipe.parse(v)
-        uiDevice.wrapUiObject2(node).swipe(swipe.direction, swipe.percent, swipe.speed)
+        uiDevice.wrapUiObject(node).swipe(swipe.direction, swipe.percent, swipe.speed)
         true
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
         .withValueArgument<Long>(R.string.swipe_args, VariantType.BITS_SWIPE)
@@ -107,7 +107,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         LambdaReferenceAction<String>(Applet.VAL_TYPE_TEXT) { args, value, _ ->
             val node = args[0] as AccessibilityNodeInfo
             if (!node.isEditable) false else {
-                uiDevice.wrapUiObject2(node).text = args[1]?.casted() ?: value
+                uiDevice.wrapUiObject(node).setText(args[1]?.casted() ?: value)
                 true
             }
         }

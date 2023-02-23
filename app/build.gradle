@@ -62,14 +62,14 @@ android {
 dependencies {
     compileOnly project(":hidden-apis")
     implementation project(':tasker-engine')
-    implementation project(':ui-automator')
+    implementation project(':coroutine-ui-automator')
     implementation project(':shared-library')
 
     // shizuku
     implementation "dev.rikka.shizuku:api:$shizuku_version"
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     // ktx
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation "androidx.core:core-ktx:$ktx_version"
     implementation 'androidx.activity:activity-ktx:1.6.1'
     implementation 'androidx.fragment:fragment-ktx:1.5.5'
     // kt reflection

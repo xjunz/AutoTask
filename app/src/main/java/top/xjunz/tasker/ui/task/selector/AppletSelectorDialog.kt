@@ -150,7 +150,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         binding.shoppingCart.btnCount.setNoDoubleClickListener {
             if (viewModel.flow.isNotEmpty())
-                viewModel.showClearDialog.value = true
+                viewModel.showClearConfirmation.value = true
         }
         binding.shoppingCart.btnComplete.setNoDoubleClickListener {
             viewModel.complete()
@@ -235,7 +235,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             }
         }
         observeDangerousConfirmation(
-            viewModel.showClearDialog, R.string.prompt_clear_all_options, R.string.clear_all
+            viewModel.showClearConfirmation, R.string.prompt_clear_all_options, R.string.clear_all
         ) {
             viewModel.clearAllCandidates()
         }

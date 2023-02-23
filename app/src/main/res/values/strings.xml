@@ -184,7 +184,7 @@
     <string name="ui_object">控件</string>
     <string name="child_node">子节点</string>
     <string name="seekbar">拖动条</string>
-    <string name="tip_floating_inspector_enabled">悬浮助手已启用，请点击悬浮图标。</string>
+    <string name="tip_floating_inspector_enabled">悬浮助手已启用</string>
     <string name="options_from_inspector_added">已添加%d条规则</string>
     <string name="prompt_clear_all_options">确定要清空所有规则吗？</string>
     <string name="format_applet_is_removed">已移除%d条规则</string>
@@ -494,11 +494,13 @@
     <string name="prompt_task_title_repeated">已经存在另一个名为\"%s\"的任务，是否重命名当前任务？</string>
     <string name="ignore_and_continue">忽略并继续</string>
     <string name="rename">重命名</string>
-    <string name="comment_click_automation_edit_repeat_times">可修改重复次数</string>
-    <string name="comment_click_automation_edit_delay_mills">可修改每次点击的间隔时间</string>
+    <string name="comment_click_automation_repeat_count">重复点击次数</string>
+    <string name="comment_click_automation_delay_mills">每次点击之间的时间间隔</string>
     <string name="click_automation">自动点击</string>
     <string name="coordinate_updated">已更新坐标</string>
     <string name="task_assistant">任务助手</string>
     <string name="format_launch_oneshot_task">开始运行任务：%s</string>
     <string name="format_task_finished">任务运行结束：%s</string>
+    <string name="tip_long_click_to_route_host">长按悬浮按钮可回到\"自动任务\"哦！</string>
+    <string name="prompt_clear_snapshots">确定要清空所有运行记录吗？</string>
 </resources>

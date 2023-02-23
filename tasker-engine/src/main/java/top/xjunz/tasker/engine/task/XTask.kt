@@ -6,6 +6,7 @@ package top.xjunz.tasker.engine.task
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.os.SystemClock
 import android.util.SparseArray
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
@@ -31,6 +32,7 @@ class XTask : ValueRegistry() {
     companion object {
         const val TYPE_RESIDENT = 0
         const val TYPE_ONESHOT = 1
+        const val RATE_LIMIT = 100
     }
 
     /**
@@ -52,6 +54,10 @@ class XTask : ValueRegistry() {
     internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
 
     var flow: RootFlow? = null
+
+    var previousLaunchTime = -1L
+
+    var previousArgumentHash = -1
 
     lateinit var metadata: Metadata
 
@@ -143,8 +149,9 @@ class XTask : ValueRegistry() {
      */
     suspend fun launch(runtime: TaskRuntime) {
         val snapshot = TaskSnapshot(checksum, System.currentTimeMillis())
-        runtime.observer = SnapshotObserver(snapshot)
         try {
+            previousLaunchTime = SystemClock.uptimeMillis()
+            runtime.observer = SnapshotObserver(snapshot)
             currentRuntime = runtime
             listener?.onTaskStarted(runtime)
             runtime.isSuccessful = requireFlow().apply(runtime).isSuccessful
@@ -156,7 +163,6 @@ class XTask : ValueRegistry() {
         } catch (t: Throwable) {
             runtime.isSuccessful = false
             when (t) {
-                is FlowFailureException -> listener?.onTaskFailure(runtime)
                 is CancellationException -> {
                     listener?.onTaskCancelled(runtime)
                     snapshots.remove(snapshot)
@@ -198,7 +204,10 @@ class XTask : ValueRegistry() {
         return checksum.hashCode()
     }
 
-    class FlowFailureException(reason: String) : RuntimeException(reason)
+    fun isOverheat(argumentHash: Int): Boolean {
+        return argumentHash == previousArgumentHash && previousLaunchTime != -1L
+                && SystemClock.uptimeMillis() - previousLaunchTime <= RATE_LIMIT
+    }
 
     interface TaskStateListener {
 

@@ -22,7 +22,7 @@ class AppletResult private constructor(private var successful: Boolean) {
     var throwable: Throwable? = null
         private set
 
-    private object Pool : SynchronizedPool<AppletResult>(20)
+    private object Pool : SynchronizedPool<AppletResult>(16)
 
     companion object {
 
@@ -49,19 +49,28 @@ class AppletResult private constructor(private var successful: Boolean) {
         }
 
         fun succeeded(returned: Any?): AppletResult {
-            return if (returned != null) obtain(true, returned) else EMPTY_SUCCESS
+            return if (returned == null) EMPTY_SUCCESS else obtain(true, returned)
         }
 
         fun failed(actual: Any?): AppletResult {
-            return obtain(false, actual = actual)
+            return if (actual == null) EMPTY_FAILURE else obtain(false, actual = actual)
         }
 
         fun error(throwable: Throwable): AppletResult {
             return obtain(false, throwable = throwable)
         }
+
+        inline fun <T> resultOf(actualValue: T, isSuccessful: (T) -> Boolean): AppletResult {
+            return if (isSuccessful(actualValue)) {
+                EMPTY_SUCCESS
+            } else {
+                failed(actualValue)
+            }
+        }
     }
 
     fun recycle() {
+        if (this === EMPTY_SUCCESS || this === EMPTY_FAILURE) return
         returned = null
         actual = null
         throwable = null

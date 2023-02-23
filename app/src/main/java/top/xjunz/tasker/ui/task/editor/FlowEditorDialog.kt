@@ -48,8 +48,6 @@ import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
-import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
-import top.xjunz.tasker.ui.task.showcase.TaskShowcaseViewModel
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.formatTime
 
@@ -190,17 +188,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 TaskSnapshotSelectorDialog().show(childFragmentManager)
             }
             binding.ibCheck.isVisible = true
-            binding.ibCheck.setIconResource(R.drawable.ic_edit_24dp)
-            val pvm = peekParentViewModel<TaskShowcaseDialog, TaskShowcaseViewModel>()
+            binding.ibCheck.setIconResource(R.drawable.ic_clear_all_24px)
             binding.ibCheck.setNoDoubleClickListener {
-                if (vm.isBase) {
-                    pvm.requestEditTask.value = vm.task to null
-                } else {
-                    pvm.requestEditTask.value = vm.task to vm.flow
-                }
-            }
-            observeTransient(pvm.requestEditTask) {
-                dismiss()
+                vm.showClearSnapshotsConfirmation.value = true
             }
         } else if (vm.isSelectingReferent) {
             observeOnce(vm.requestShowReferentTip) {
@@ -380,6 +370,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         ) {
             dismiss()
         }
+        observeDangerousConfirmation(
+            vm.showClearSnapshotsConfirmation,
+            R.string.prompt_clear_snapshots,
+            R.string.clear_all
+        ) {
+            LocalTaskManager.clearSnapshots(vm.task)
+            dismiss()
+        }
         observeTransient(gvm.onReferentSelected) {
             if (vm.isSelectingReferent) dismiss()
         }
@@ -415,6 +413,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             adapter.notifyItemRangeChanged(0, adapter.currentList.size)
         }
         doOnEventReceived<Applet>(AppletOption.EVENT_TOGGLE_RELATION) {
+            if (!adapter.currentList.contains(it)) return@doOnEventReceived
             if (vm.isMultiSelected(it)) {
                 vm.toggleMultiSelection(it)
             } else {

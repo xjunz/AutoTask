@@ -4,10 +4,10 @@
 
 package top.xjunz.tasker.engine.runtime
 
-import android.util.ArraySet
 import android.util.SparseArray
 import androidx.annotation.IntDef
 import androidx.core.util.Pools.SynchronizedPool
+import androidx.core.util.forEach
 import top.xjunz.shared.ktx.casted
 
 /**
@@ -30,27 +30,7 @@ class Event private constructor(
         it.paneTitle = paneTitle
     }
 
-    private val locks = ArraySet<TaskRuntime>(5)
-
     private val extras = SparseArray<Any>()
-
-    /**
-     * Lock this event with a runtime preventing being recycled!
-     */
-    @Synchronized
-    fun lock(runtime: TaskRuntime) {
-        locks.add(runtime)
-    }
-
-    /**
-     * Unlock this event with a runtime and recycle this if there is no more lock.
-     */
-    @Synchronized
-    fun unlock(runtime: TaskRuntime) {
-        if (locks.remove(runtime) && locks.isEmpty()) {
-            recycle()
-        }
-    }
 
     companion object {
         /**
@@ -144,5 +124,32 @@ class Event private constructor(
         componentInfo.packageName = null
         Pool.release(this)
     }
+
+    private fun extrasHashcode(): Int {
+        var hash = 0
+        extras.forEach { key, value ->
+            hash += 31 * hash + key + value.hashCode()
+        }
+        return hash
+    }
+
+    override fun hashCode(): Int {
+        var result = _type
+        result = 31 * result + componentInfo.hashCode()
+        result = 31 * result + extrasHashcode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Event) return false
+
+        if (_type != other._type) return false
+        if (componentInfo != other.componentInfo) return false
+        if (extrasHashcode() != other.extrasHashcode()) return false
+
+        return true
+    }
+
 
 }

@@ -47,7 +47,7 @@ class TaskRuntime private constructor() {
 
     companion object {
 
-        val EVENT_LOCK_KEY = ValueRegistry.WeakKey()
+        val EVENT_LOCK_KEY = Any()
 
         const val GLOBAL_SCOPE_TASK = 1
         const val GLOBAL_SCOPE_EVENT = 2
@@ -66,8 +66,8 @@ class TaskRuntime private constructor() {
             instance.target = events
             instance._events = events
             instance.eventValueRegistry = registry
-            registry.requireWeakRegistry()[EVENT_LOCK_KEY] =
-                ((registry.requireWeakRegistry()[EVENT_LOCK_KEY] as? Int) ?: 0) + 1
+            registry.requireRegistry()[EVENT_LOCK_KEY] =
+                ((registry.requireRegistry()[EVENT_LOCK_KEY] as? Int) ?: 0) + 1
             return instance
         }
 
@@ -150,9 +150,6 @@ class TaskRuntime private constructor() {
      * within an [ValueRegistry].
      */
     fun <V : Any> getScopedValue(scope: Int, key: Any, initializer: () -> V): V {
-        for (event in events) {
-            event.recycle()
-        }
         val registry = when (scope) {
             GLOBAL_SCOPE_EVENT -> eventValueRegistry
             GLOBAL_SCOPE_TASK -> task
@@ -243,14 +240,14 @@ class TaskRuntime private constructor() {
     }
 
     private fun tryRecycleEvents() {
+        if (_events == null) return
         eventValueRegistry?.let {
-            val lock = it.requireWeakRegistry()[EVENT_LOCK_KEY] as? Int
+            val lock = it.requireRegistry()[EVENT_LOCK_KEY] as? Int
             if (lock != null) {
                 if (lock == 1) {
                     events.recycleAll()
-                } else {
-                    it.requireWeakRegistry()[EVENT_LOCK_KEY] = lock - 1
                 }
+                it.requireRegistry()[EVENT_LOCK_KEY] = lock - 1
             }
         }
     }

@@ -5,12 +5,10 @@
 package top.xjunz.tasker.task.event
 
 import android.os.Looper
-import android.os.SystemClock
 import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
 import androidx.core.os.HandlerCompat
-import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import top.xjunz.tasker.BuildConfig
@@ -19,12 +17,13 @@ import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
+import top.xjunz.tasker.uiautomator.CoroutineUiAutomatorBridge
 import kotlin.coroutines.CoroutineContext
 
 /**
  * @author xjunz 2022/10/29
  */
-class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge) :
+class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomatorBridge) :
     EventDispatcher() {
 
     companion object {
@@ -36,10 +35,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
         .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
 
     private val activityRecords = ArraySet<Int>()
-
-    private val suspendingJobs = ArrayDeque<Job>()
-
-    private var previousEventTimestamp = -1L
 
     private var latestFilteredEventTimestamp = -1L
     private var latestPackageName: String? = null
@@ -58,33 +53,8 @@ class A11yEventDispatcher(looper: Looper, private val bridge: UiAutomatorBridge)
         bridge.stopReceivingEvents()
     }
 
-    suspend fun waitForIdle(idleMills: Long, maxWaitMills: Long): Boolean {
-        check(maxWaitMills >= idleMills)
-        var elpased = SystemClock.uptimeMillis() - previousEventTimestamp
-        if (elpased >= idleMills) {
-            return true
-        }
-        while (elpased < maxWaitMills) {
-            val start = SystemClock.uptimeMillis()
-            val job = async(start = CoroutineStart.LAZY) {
-                delay(idleMills)
-            }
-            suspendingJobs.addLast(job)
-            job.join()
-            val idle = SystemClock.uptimeMillis() - start
-            if (idle >= idleMills) return true
-            elpased += idle
-        }
-        return false
-    }
-
     private fun processAccessibilityEvent(event: AccessibilityEvent) {
         try {
-            previousEventTimestamp = SystemClock.uptimeMillis()
-            for (job in suspendingJobs) {
-                job.cancel()
-            }
-            suspendingJobs.clear()
             val packageName = event.packageName?.toString() ?: return
             // Do not send events from the host application!
             if (packageName == BuildConfig.APPLICATION_ID) return

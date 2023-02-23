@@ -68,6 +68,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
                 runtime.registerResult(applet, result)
                 runtime.observer?.onAppletTerminated(applet, runtime)
             }
+            result.recycle()
         }
         return AppletResult.emptyResult(runtime.isSuccessful)
     }

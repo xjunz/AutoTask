@@ -20,10 +20,10 @@ import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.*
-import androidx.test.uiautomator.bridge.UiAutomatorBridge
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.unsupportedOperation
+import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
@@ -39,7 +39,6 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.OneshotTaskScheduler
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.uiautomator.A11yGestureController
-import top.xjunz.tasker.uiautomator.A11yUiAutomatorBridge
 import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import java.lang.ref.WeakReference
@@ -74,7 +73,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     val isInspectorShown get() = ::inspector.isInitialized && inspector.isShown
 
-    val gestureController: A11yGestureController by lazy {
+    val gestureController by lazy {
         uiAutomatorBridge.gestureController as A11yGestureController
     }
 
@@ -105,7 +104,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override val isRunning get() = RUNNING_STATE.isTrue
 
-    override val uiAutomatorBridge: UiAutomatorBridge by lazy {
+    override val uiAutomatorBridge by lazy {
         A11yUiAutomatorBridge(uiAutomation)
     }
 

@@ -29,8 +29,11 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.DialogFloatingInspectorBinding
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.*
+import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.service.controller.A11yAutomatorServiceController
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
@@ -95,9 +98,6 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
             }
         } else {
             toast(R.string.tip_floating_inspector_enabled)
-        }
-        if (serviceController.isServiceRunning) {
-            // currentService.suppressResidentTaskScheduler(true)
         }
         a11yAutomatorService.showFloatingInspector(viewModel.mode)
         if (viewModel.mode == InspectorMode.COMPONENT) {

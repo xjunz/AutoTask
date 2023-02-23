@@ -36,11 +36,7 @@ class LambdaAction<V>(
     private inline val action: suspend (V?, TaskRuntime) -> Boolean
 ) : Action<V>(valueType) {
     override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        return if (action(
-                value,
-                runtime
-            )
-        ) AppletResult.EMPTY_SUCCESS else AppletResult.EMPTY_FAILURE
+        return AppletResult.emptyResult(action(value, runtime))
     }
 }
 

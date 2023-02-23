@@ -13,7 +13,6 @@ import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.*
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
-import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.util.formatMinSecMills
@@ -158,7 +157,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x0012)
     val uiObjectCriteria =
         flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_CRITERION_REGISTRY, R.string.ui_object_exists)
-            .withResult<UiObjectReferent>(R.string.ui_object)
+            .withResult<AccessibilityNodeInfo>(R.string.ui_object)
             .withResult<String>(R.string.matched_ui_object_text)
             .withResult<Int>(R.string.center_coordinate, VariantType.INT_COORDINATE)
 

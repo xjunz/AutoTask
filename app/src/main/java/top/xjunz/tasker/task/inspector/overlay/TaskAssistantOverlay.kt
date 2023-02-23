@@ -6,7 +6,6 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
 import android.view.WindowManager
-import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemTaskAssistantBinding
@@ -54,9 +53,6 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
             binding.ibRun.setNoDoubleClickListener {
                 vm.isCollapsed.value = true
                 vm.requestLaunchOneshotTask.value = tasks[adapterPosition]
-            }
-            binding.ibRun.doOnPreDraw {
-                vm.makeToast(it.width.toString() + " : " + 420.dpFloat)
             }
         }) { binding, pos, task ->
             binding.tvTaskName.text = (pos + 1).toString().bold()

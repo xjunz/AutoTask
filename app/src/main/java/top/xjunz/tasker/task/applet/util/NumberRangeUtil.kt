@@ -11,9 +11,8 @@ import top.xjunz.shared.utils.unsupportedOperation
  */
 internal object NumberRangeUtil {
 
-    inline fun <T : Number> contains(start: T?, stop: T?, element: () -> T): Boolean {
+    fun <T : Number> contains(start: T?, stop: T?, e: T): Boolean {
         if (start == null && stop == null) return true
-        val e = element()
         return (start == null || compare(e, start) >= 0)
                 && (stop == null || compare(e, stop) <= 0)
     }
