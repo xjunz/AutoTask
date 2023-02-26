@@ -376,6 +376,9 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             R.string.clear_all
         ) {
             LocalTaskManager.clearSnapshots(vm.task)
+            gvm.onSnapshotsCleared.value = true
+        }
+        observeTransient(gvm.onSnapshotsCleared) {
             dismiss()
         }
         observeTransient(gvm.onReferentSelected) {

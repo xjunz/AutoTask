@@ -14,13 +14,10 @@ class AppletResult private constructor(private var successful: Boolean) {
     val isSuccessful get() = successful
 
     var returned: Any? = null
-        private set
 
     var actual: Any? = null
-        private set
 
     var throwable: Throwable? = null
-        private set
 
     private object Pool : SynchronizedPool<AppletResult>(16)
 
@@ -30,11 +27,7 @@ class AppletResult private constructor(private var successful: Boolean) {
 
         val EMPTY_FAILURE = AppletResult(false)
 
-        fun emptyResult(success: Boolean): AppletResult {
-            return if (success) EMPTY_SUCCESS else EMPTY_FAILURE
-        }
-
-        private fun obtain(
+        fun obtain(
             isSuccessful: Boolean,
             returned: Any? = null,
             actual: Any? = null,
@@ -60,11 +53,26 @@ class AppletResult private constructor(private var successful: Boolean) {
             return obtain(false, throwable = throwable)
         }
 
+        fun emptyResult(success: Boolean): AppletResult {
+            return if (success) EMPTY_SUCCESS else EMPTY_FAILURE
+        }
+
+        /**
+         * Make a result as per a criterion.
+         */
         inline fun <T> resultOf(actualValue: T, isSuccessful: (T) -> Boolean): AppletResult {
             return if (isSuccessful(actualValue)) {
-                EMPTY_SUCCESS
+                // Also store actual value for successful result, because the result
+                // may be inverted to failure, where we need the actual value.
+                obtain(true, null, actualValue, null)
             } else {
                 failed(actualValue)
+            }
+        }
+
+        fun drainPool() {
+            while (Pool.acquire() != null) {
+                /* no-op */
             }
         }
     }

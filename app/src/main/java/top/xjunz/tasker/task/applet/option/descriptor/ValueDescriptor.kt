@@ -11,7 +11,8 @@ import top.xjunz.tasker.ktx.text
  * @author xjunz 2022/11/20
  */
 open class ValueDescriptor(
-    @StringRes private val nameRes: Int,
+    @StringRes
+    private val nameRes: Int,
     val valueClass: Class<*>,
     val variantValueType: Int,
     val isCollection: Boolean,
@@ -34,5 +35,4 @@ open class ValueDescriptor(
 
         return null
     }
-
 }

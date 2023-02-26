@@ -14,6 +14,9 @@ class ArgumentDescriptor(
     nameRes: Int,
     private val substitutionRes: Int,
     valueClass: Class<*>,
+    /**
+     * Reference class may not be the same as value class
+     */
     val referenceClass: Class<*>?,
     variantValueType: Int,
     private val isReference: Boolean?,

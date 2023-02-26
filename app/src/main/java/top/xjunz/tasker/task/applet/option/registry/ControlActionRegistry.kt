@@ -17,7 +17,6 @@ import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
-import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.util.formatMinSecMills
 
 /**
@@ -52,8 +51,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withValueArgument<Int>(R.string.delay_interval, VariantType.INT_INTERVAL)
         .withDescriber<Int> { applet, t ->
             R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
-                AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE)
-                EventCenter.sendEvent(AppletOption.EVENT_EDIT_VALUE, applet)
+                AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE,applet)
             })
         }.descAsTitle()
 
@@ -62,11 +60,12 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
         Repeat()
     }.withDescriber<Int> { applet, t ->
         R.string.format_repeat.formatSpans(t.toString().foreColored().clickable {
-            AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE)
-            EventCenter.sendEvent(AppletOption.EVENT_EDIT_VALUE, applet)
+            AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE,applet)
         })
     }.descAsTitle().withHelperText(R.string.input_repeat_count)
         .withResult<Repeat>(R.string.loop)
+        .withResult<Int>(R.string.repeated_count)
+        .withResult<String>(R.string.repeated_count)
 
     @AppletOrdinal(0x00_05)
     val breakAction = appletOption(R.string.break_loop) {

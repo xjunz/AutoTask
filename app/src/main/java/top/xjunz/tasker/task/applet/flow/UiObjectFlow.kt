@@ -5,7 +5,6 @@
 package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.ScopeFlow
@@ -48,7 +47,6 @@ class UiObjectFlow : ScopeFlow<UiObjectFlow.UiObjectTarget>() {
         if (checkSelf) {
             if (!isVisibleToUser) return null
             if (condition(this)) {
-                logcat("found self")
                 return this
             }
         }

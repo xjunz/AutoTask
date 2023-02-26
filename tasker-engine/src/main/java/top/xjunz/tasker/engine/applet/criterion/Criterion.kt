@@ -35,7 +35,6 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         }
         val arg = runtime.getReferentOf(this, 0)?.casted<T>()
         if (arg != null) {
-            runtime.updateFingerprint(arg)
             return arg
         }
         return Unit.casted()
@@ -51,7 +50,24 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val expected = value?.casted() ?: getDefaultValue(runtime)
         val target = getMatchTarget(runtime)
-        return matchTarget(target, expected)
+        val raw = matchTarget(target, expected)
+        runtime.updateFingerprint(raw.actual)
+        val result: AppletResult
+        if (isInverted) {
+            result = if (raw.isSuccessful) {
+                AppletResult.failed(raw.actual)
+            } else {
+                AppletResult.EMPTY_SUCCESS
+            }
+            raw.recycle()
+        } else {
+            // Clear unnecessary actual value
+            if (raw.isSuccessful) {
+                raw.actual = null
+            }
+            result = raw
+        }
+        return result
     }
 
     /**

@@ -33,6 +33,7 @@ class XTask : ValueRegistry() {
         const val TYPE_RESIDENT = 0
         const val TYPE_ONESHOT = 1
         const val RATE_LIMIT = 100
+        const val MAX_SNAPSHOT_COUNT = 10
     }
 
     /**
@@ -176,7 +177,7 @@ class XTask : ValueRegistry() {
             snapshots.removeIf {
                 it.contentEquals(snapshot)
             }
-            if (snapshots.size > 10) {
+            if (snapshots.size > MAX_SNAPSHOT_COUNT) {
                 snapshots.pollLast()
             }
             currentRuntime = null

@@ -46,7 +46,7 @@ abstract class ServiceController<S : Any> : CoroutineScope {
     /**
      * The service state listener.
      *
-     * **Note**: the callbacks are not guaranteed to called in the main thread.
+     * **Note**: the callbacks are not guaranteed to be called in the main thread.
      */
     interface ServiceStateListener {
         fun onStartBinding()

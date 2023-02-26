@@ -70,21 +70,21 @@ open class AppletOptionClickHandler(private val fragmentManager: FragmentManager
                 val days = Array<CharSequence>(31) { i ->
                     (i + 1).toString()
                 }
-                EnumSelectorDialog().setArguments(title, days) {
+                EnumSelectorDialog().init(title, days) {
                     applet.value = it
                     onCompleted()
                 }.setSpanCount(4).setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
             option == factory.timeRegistry.dayOfWeek -> {
-                EnumSelectorDialog().setArguments(title, R.array.days_in_week) {
+                EnumSelectorDialog().init(title, R.array.days_in_week) {
                     applet.value = it
                     onCompleted()
                 }.setInitialSelections(applet.value?.casted()).show(fragmentManager)
             }
 
             option == factory.timeRegistry.month -> {
-                EnumSelectorDialog().setArguments(title, R.array.months) {
+                EnumSelectorDialog().init(title, R.array.months) {
                     applet.value = it
                     onCompleted()
                 }.setInitialSelections(applet.value?.casted()).show(fragmentManager)

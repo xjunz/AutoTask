@@ -5,7 +5,7 @@
 <resources>
     <string name="app_name">自动任务</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
-    <string name="grant_by_shizuku"><b>Shizuku </b>权限</string>
+    <string name="grant_by_shizuku"><b>Shizuku</b>权限</string>
     <string name="intro_to_shizuku">我们需要Shizuku权限才能启动服务，请放心，Shizuku权限用于且仅用于使应用正常工作。
     \n\n该模式下，所有功能可用，推荐使用该模式。</string>
     <string name="m_restriction">在<b> Android 6.0 </b>上的限制</string>
@@ -503,4 +503,12 @@
     <string name="format_task_finished">任务运行结束：%s</string>
     <string name="tip_long_click_to_route_host">长按悬浮按钮可回到\"自动任务\"哦！</string>
     <string name="prompt_clear_snapshots">确定要清空所有运行记录吗？</string>
+    <string name="launch_host">回到\"自动任务\"</string>
+    <string name="enable_all_tasks">启用全部任务</string>
+    <string name="disable_all_tasks">停用全部任务</string>
+    <string name="repeated_count">已循环的次数</string>
+    <string name="format_api_level">API %d+</string>
+    <string name="rotate_screen">旋转屏幕</string>
+    <string name="rotation_direction">旋转角度</string>
+    <string name="format_desc_rotation_screen">旋转屏幕到%s</string>
 </resources>

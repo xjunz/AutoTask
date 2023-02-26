@@ -6,7 +6,6 @@ package top.xjunz.tasker.engine.task
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/12/04
@@ -32,8 +31,7 @@ abstract class TaskScheduler<Arg> : CoroutineScope {
     /**
      * After shutdown, do not use this object anymore.
      */
-    fun shutdown() {
+    open fun shutdown() {
         cancel()
-        TaskRuntime.drainPool()
     }
 }

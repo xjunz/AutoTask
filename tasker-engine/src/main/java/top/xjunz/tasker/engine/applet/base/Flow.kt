@@ -36,10 +36,11 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     protected open suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         for ((index: Int, applet: Applet) in withIndex()) {
             runtime.ensureActive()
-            if (!applet.isEnabled) continue
+            applet.onPreApply(runtime)
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
-            if (index != 0 && (!applet.isAnyway && applet.isAnd != runtime.isSuccessful)) {
+            if (applet.shouldSkip(runtime) || index != 0 && (!applet.isAnyway && applet.isAnd != runtime.isSuccessful)) {
+                applet.onSkipped(runtime)
                 if (!isRepetitive) {
                     runtime.observer?.onAppletSkipped(applet, runtime)
                 }
@@ -49,6 +50,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             applet.index = index
             runtime.currentApplet = applet
             runtime.tracker.moveTo(index)
+            applet.onPrepareApply(runtime)
             if (!isRepetitive) {
                 runtime.observer?.onAppletStarted(applet, runtime)
             }
@@ -64,10 +66,14 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
                 }
             }
             runtime.isSuccessful = result.isSuccessful
+            // For repetitive applets, they may be executed multiple times and we cannot
+            // tell which result is the more important one, so just ignore the result.
+            // TODO: register result if there is any repetitive applet being executed only once
             if (!isRepetitive) {
                 runtime.registerResult(applet, result)
                 runtime.observer?.onAppletTerminated(applet, runtime)
             }
+            applet.onPostApply(runtime)
             result.recycle()
         }
         return AppletResult.emptyResult(runtime.isSuccessful)
@@ -103,38 +109,15 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     }
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
-        onPreApply(runtime)
         runtime.currentFlow = this
         runtime.tracker.jumpIn()
-        onPrepareApply(runtime)
         // Backup the target, because sub-flows may change the target,
         // we don't want the changed target to fall through.
         val backup = runtime.getRawTarget()
         val succeeded = applyFlow(runtime)
-        onPostApply(runtime)
         // Restore the target
         runtime.setTarget(backup)
         runtime.tracker.jumpOut()
         return succeeded
-    }
-
-    /**
-     * Just before the flow executing its elements.
-     */
-    protected open fun onPrepareApply(runtime: TaskRuntime) {
-        /* no-op */
-    }
-
-    /**
-     * Do something before the flow is started. At this time, [TaskRuntime.currentFlow] is
-     * not yet assigned to this flow.
-     */
-    protected open fun onPreApply(runtime: TaskRuntime) {}
-
-    /**
-     * Do something after all [elements] are completed.
-     */
-    protected open fun onPostApply(runtime: TaskRuntime) {
-        /* no-op */
     }
 }

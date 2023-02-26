@@ -5,6 +5,7 @@
 package top.xjunz.tasker.engine.applet.base
 
 import top.xjunz.shared.utils.unsupportedOperation
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/11/03
@@ -22,5 +23,12 @@ class ElseIf : If() {
             return StaticError.ERR_ELSEIF_NOT_FOLLOWING_DO
         }
         return super.staticCheckMyself()
+    }
+
+    /**
+     * If its previous peer is skipped, do not execute it self.
+     */
+    override fun shouldSkip(runtime: TaskRuntime): Boolean {
+        return runtime.ifSuccessful != false
     }
 }

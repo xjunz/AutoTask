@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.task.showcase
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -25,7 +26,9 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
+import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.BaseDialogFragment
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
@@ -126,14 +129,26 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         observeTransient(viewModel.requestTrackTask) {
             FlowEditorDialog().initBase(it, true).setTrackMode().show(childFragmentManager)
         }
-        observeTransient(viewModel.requestToggleTask) {
-            when (it.metadata.taskType) {
+        observeTransient(viewModel.requestToggleTask) { task ->
+            when (task.metadata.taskType) {
                 XTask.TYPE_RESIDENT -> {
-                    val title = if (it.isEnabled) R.string.prompt_disable_task.text
+                    val title = if (task.isEnabled) R.string.prompt_disable_task.text
                     else R.string.prompt_enable_task.text
                     requireContext().makeSimplePromptDialog(msg = title) {
-                        viewModel.toggleTask(it)
-                    }.show()
+                        viewModel.toggleTask(task)
+                    }.setNeutralButton(
+                        if (task.isEnabled) R.string.disable_all_tasks
+                        else R.string.enable_all_tasks
+                    ) { _, _ ->
+                        TaskStorage.getAllTasks().filter {
+                            it.metadata.taskType == XTask.TYPE_RESIDENT && it.isEnabled == task.isEnabled
+                        }.forEach {
+                            viewModel.toggleTask(it)
+                        }
+                    }.show().also {
+                        it.getButton(DialogInterface.BUTTON_NEUTRAL)
+                            .setTextColor(ColorScheme.colorError)
+                    }
                 }
                 XTask.TYPE_ONESHOT -> {
                     FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT).doOnSucceeded {

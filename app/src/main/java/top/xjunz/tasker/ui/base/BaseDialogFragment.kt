@@ -47,7 +47,7 @@ open class BaseDialogFragment<T : ViewBinding> : AppCompatDialogFragment(),
 
     protected open val windowAnimationStyle get() = R.style.DialogAnimationSade
 
-    protected val mixin by lazy {
+    private val mixin by lazy {
         DialogStackMixin(this, isFullScreen)
     }
 

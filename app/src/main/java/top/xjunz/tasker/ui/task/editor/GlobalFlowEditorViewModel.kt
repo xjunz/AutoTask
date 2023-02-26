@@ -46,6 +46,8 @@ class GlobalFlowEditorViewModel : ViewModel() {
             field = value
         }
 
+    val onSnapshotsCleared = MutableLiveData<Boolean>()
+
     fun renameReferentInRoot(prev: Set<String>, cur: String?) {
         root.forEachReferent { applet, which, referent ->
             if (prev.contains(referent)) {

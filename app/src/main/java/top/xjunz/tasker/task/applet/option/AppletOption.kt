@@ -75,11 +75,12 @@ class AppletOption(
             }
         }
 
-        fun deliverEvent(view: View, action: String) {
+        fun deliverEvent(view: View, action: String, value: Any) {
             deliveringEvent = action
             view.post {
                 deliveringEvent = null
             }
+            EventCenter.sendEvent(action, value)
         }
 
         fun makeRelationSpan(origin: CharSequence, applet: Applet): CharSequence {
@@ -90,16 +91,14 @@ class AppletOption(
                 if (applet.isAnd) R.string._and.str else R.string._or.str
             }
             return relation.clickable {
-                deliverEvent(it, EVENT_TOGGLE_RELATION)
-                EventCenter.sendEvent(EVENT_TOGGLE_RELATION, applet)
+                deliverEvent(it, EVENT_TOGGLE_RELATION, applet)
             }.bold().underlined() + origin
         }
 
         private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
             if (name == null) return null
             return name.clickable {
-                deliverEvent(it, EVENT_NAVIGATE_REFERENCE)
-                EventCenter.sendEvent(EVENT_NAVIGATE_REFERENCE, name to applet)
+                deliverEvent(it, EVENT_NAVIGATE_REFERENCE,name to applet)
             }.foreColored().backColored().underlined()
         }
 
@@ -164,9 +163,6 @@ class AppletOption(
         private set
 
     var isShizukuOnly = false
-        private set
-
-    var isA11yOnly = false
         private set
 
     var arguments: List<ArgumentDescriptor> = emptyList()
@@ -345,15 +341,17 @@ class AppletOption(
         return this
     }
 
+    fun requireResults(): MutableList<ValueDescriptor> {
+        if (results == Collections.EMPTY_LIST) results = mutableListOf()
+        return (results as MutableList<ValueDescriptor>)
+    }
+
     inline fun <reified T> withResult(
         @StringRes name: Int,
         variantType: Int = -1,
         isCollection: Boolean = false
     ): AppletOption {
-        if (results == Collections.EMPTY_LIST) results = mutableListOf()
-        (results as MutableList<ValueDescriptor>).add(
-            ValueDescriptor(name, T::class.java, variantType, isCollection)
-        )
+        requireResults().add(ValueDescriptor(name, T::class.java, variantType, isCollection))
         return this
     }
 

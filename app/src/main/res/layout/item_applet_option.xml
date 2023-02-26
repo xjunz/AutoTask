@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -16,16 +15,36 @@
 
         <TextView
             android:id="@+id/tv_label"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+            app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ib_invert"
+            app:layout_constraintEnd_toStartOf="@+id/tv_badge"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_badge"
+            style="@style/BadgeText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="8dp"
+            android:alpha=".8"
+            android:enabled="false"
+            android:text="@string/shizuku"
+            android:textColor="?colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_label"
+            app:layout_constraintEnd_toStartOf="@+id/ib_invert"
+            app:layout_constraintStart_toEndOf="@+id/tv_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_label"
+            tools:visibility="visible" />
 
         <ImageButton
             android:id="@+id/ib_invert"

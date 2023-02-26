@@ -21,11 +21,7 @@ abstract class ReferenceAction<V>(valueType: Int) : Action<V>(valueType) {
     ): AppletResult
 
     final override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        val args = runtime.getAllReferentOf(this)
-        args.forEach {
-            runtime.updateFingerprint(it)
-        }
-        return doWithArgs(args, value?.casted(), runtime)
+        return doWithArgs(runtime.getAllReferentOf(this), value?.casted(), runtime)
     }
 }
 

@@ -32,6 +32,22 @@ class Event private constructor(
 
     private val extras = SparseArray<Any>()
 
+    private var locks: Int = 0
+
+    fun lock() {
+        synchronized(this) {
+            locks++
+        }
+    }
+
+    fun unlock() {
+        synchronized(this) {
+            if (locks == 0 || --locks == 0) {
+                recycle()
+            }
+        }
+    }
+
     companion object {
         /**
          * The undefined event. Does not match any event even itself.
@@ -66,18 +82,13 @@ class Event private constructor(
             actName: String? = null,
             paneTitle: String? = null
         ): Event {
-            return Pool.acquire()?.apply {
+            val event = Pool.acquire()?.apply {
                 componentInfo.activityName = actName
                 componentInfo.paneTitle = paneTitle
                 componentInfo.packageName = pkgName
                 _type = eventType
             } ?: Event(eventType, pkgName, actName, paneTitle)
-        }
-
-        fun Array<out Event>.recycleAll() {
-            forEach {
-                it.recycle()
-            }
+            return event
         }
 
         fun drainPool() {

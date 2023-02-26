@@ -133,6 +133,22 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     R.string.max_wait_for_idle_duration
                 ).setHelp(option.helpText).show(fragmentManager)
             }
+            VariantType.INT_PERCENT_RANGE -> {
+                val value = applet.value?.casted<Collection<Number>>()
+                RangeEditorDialog().doOnCompletion { start, end ->
+                    updateValue(listOf(start, end))
+                }.setType(applet.rawType, arg.variantValueType).setRange(
+                    value?.firstOrNull(), value?.lastOrNull()
+                ).setTitle(option.loadDummyTitle(applet)).show(fragmentManager)
+            }
+            VariantType.INT_ROTATION -> {
+                EnumSelectorDialog().setSingleSelectionMode()
+                    .setSpanCount(2)
+                    .setInitialSelections(Collections.singleton((applet.value ?: 0) as Int))
+                    .init(arg.name, R.array.rotations) {
+                        updateValue(it.single())
+                    }.show(fragmentManager)
+            }
             VariantType.BITS_SWIPE ->
                 BitsValueEditorDialog().init(arg.name, applet.value as? Long, Swipe.COMPOSER) {
                     updateValue(it)
@@ -177,14 +193,6 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                         updateValue(it)
                     }
                 }.show(childFragmentManager)
-            }
-            VariantType.INT_PERCENT_RANGE -> {
-                val value = applet.value?.casted<Collection<Number>>()
-                RangeEditorDialog().doOnCompletion { start, end ->
-                    updateValue(listOf(start, end))
-                }.setType(applet.rawType, arg.variantValueType).setRange(
-                    value?.firstOrNull(), value?.lastOrNull()
-                ).setTitle(option.loadDummyTitle(applet)).show(fragmentManager)
             }
             else -> if (arg.isCollection) {
                 VarargTextEditorDialog().init(arg.name, applet, arg) { value, referents ->

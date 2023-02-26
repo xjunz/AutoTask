@@ -6,6 +6,7 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
 import android.view.WindowManager
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemTaskAssistantBinding
@@ -19,7 +20,6 @@ import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.task.showcase.OneshotTaskFragment
@@ -56,7 +56,7 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
             }
         }) { binding, pos, task ->
             binding.tvTaskName.text = (pos + 1).toString().bold()
-                .foreColored(ColorScheme.colorPrimaryContainer) + "  " + task.title
+                .foreColored(R.color.md_theme_dark_primary.color) + "  " + task.title
         }
     }
 
@@ -83,6 +83,12 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
             offsetViewInWindow(offsetX.toInt(), offsetY.toInt())
             vm.bubbleX = layoutParams.x
             vm.bubbleY = layoutParams.y
+        }
+        binding.ibCollapse.doOnPreDraw {
+            binding.ibRoute.translationX = -it.width.toFloat() - 8.dp
+        }
+        binding.ibRoute.setNoDoubleClickListener {
+            EventCenter.launchHost()
         }
         observeLivedata()
     }

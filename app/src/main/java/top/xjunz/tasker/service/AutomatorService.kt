@@ -5,6 +5,8 @@
 package top.xjunz.tasker.service
 
 import top.xjunz.tasker.bridge.OverlayToastBridge
+import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
@@ -29,7 +31,10 @@ interface AutomatorService {
 
     fun suppressResidentTaskScheduler(suppress: Boolean)
 
-    fun destroy()
+    fun destroy() {
+        AppletResult.drainPool()
+        TaskRuntime.drainPool()
+    }
 
     fun getStartTimestamp(): Long
 

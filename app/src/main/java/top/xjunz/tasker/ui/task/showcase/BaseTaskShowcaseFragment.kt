@@ -198,9 +198,6 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 if (taskList.isEmpty()) togglePlaceholder(true)
             }
         }
-        observeTransient(viewModel.onTaskToggled) {
-            adapter.notifyItemChanged(taskList.indexOf(it), true)
-        }
         observeTransient(viewModel.onTaskUpdated) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)
         }

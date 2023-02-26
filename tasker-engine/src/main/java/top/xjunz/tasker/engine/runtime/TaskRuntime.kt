@@ -11,12 +11,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
+import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.WaitFor
-import top.xjunz.tasker.engine.runtime.Event.Companion.recycleAll
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
@@ -47,8 +47,6 @@ class TaskRuntime private constructor() {
 
     companion object {
 
-        val EVENT_LOCK_KEY = Any()
-
         const val GLOBAL_SCOPE_TASK = 1
         const val GLOBAL_SCOPE_EVENT = 2
 
@@ -66,8 +64,6 @@ class TaskRuntime private constructor() {
             instance.target = events
             instance._events = events
             instance.eventValueRegistry = registry
-            registry.requireRegistry()[EVENT_LOCK_KEY] =
-                ((registry.requireRegistry()[EVENT_LOCK_KEY] as? Int) ?: 0) + 1
             return instance
         }
 
@@ -102,6 +98,11 @@ class TaskRuntime private constructor() {
     var isSuccessful = true
 
     /**
+     * Whether the applying of current condition [If] successful, can be null if no [If] is ever hit.
+     */
+    var ifSuccessful: Boolean? = null
+
+    /**
      * The current waiting [WaitFor], whose [WaitFor.remind] will be called when new events arrive.
      *
      * @see onNewEvents
@@ -134,6 +135,7 @@ class TaskRuntime private constructor() {
     private lateinit var task: XTask
 
     fun updateFingerprint(any: Any?) {
+        logcat("update fingerprint: $any")
         fingerprintCrc.update(any.hashCode())
     }
 
@@ -217,13 +219,18 @@ class TaskRuntime private constructor() {
      */
     fun onNewEvents(newEvents: Array<Event>) {
         if (waitingFor != null) {
+            newEvents.forEach {
+                it.lock()
+            }
+            _events?.forEach {
+                it.unlock()
+            }
             _events = newEvents
             waitingFor?.remind()
         }
     }
 
     fun recycle() {
-        tryRecycleEvents()
         eventValueRegistry = null
         _events = null
         _result = null
@@ -234,22 +241,10 @@ class TaskRuntime private constructor() {
         observer = null
         target = null
         isSuccessful = true
+        ifSuccessful = null
         waitingFor = null
         fingerprintCrc.reset()
         Pool.release(this)
-    }
-
-    private fun tryRecycleEvents() {
-        if (_events == null) return
-        eventValueRegistry?.let {
-            val lock = it.requireRegistry()[EVENT_LOCK_KEY] as? Int
-            if (lock != null) {
-                if (lock == 1) {
-                    events.recycleAll()
-                }
-                it.requireRegistry()[EVENT_LOCK_KEY] = lock - 1
-            }
-        }
     }
 
     override fun toString(): String {

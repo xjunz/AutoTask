@@ -5,6 +5,7 @@
 package top.xjunz.tasker.ui.task.selector
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.transition.ChangeBounds
 import android.transition.TransitionSet
@@ -105,6 +106,20 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             } else {
                 binding.tvLabel.setTextAppearance(TextAppearance_Material3_LabelLarge)
                 binding.tvLabel.setTextColor(ColorScheme.colorOnSurface)
+            }
+            binding.tvBadge.isVisible = false
+            binding.tvBadge.text = null
+            if (option.isShizukuOnly) {
+                binding.tvBadge.isVisible = true
+                binding.tvBadge.text = R.string.shizuku.text
+            }
+            if (option.minApiLevel != -1 && Build.VERSION.SDK_INT < option.minApiLevel) {
+                binding.tvBadge.isVisible = true
+                if (binding.tvBadge.text.isNullOrEmpty()) {
+                    binding.tvBadge.text = R.string.format_api_level.format(option.minApiLevel)
+                } else {
+                    binding.tvBadge.text += " | " + R.string.format_api_level.format(option.minApiLevel)
+                }
             }
             if (viewModel.animateItems) {
                 val offset = 30L

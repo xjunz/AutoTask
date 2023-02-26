@@ -30,5 +30,8 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
             if (taskList.size == 1) togglePlaceholder(false)
             adapter.notifyItemInserted(taskList.lastIndex)
         }
+        observeTransient(viewModel.onTaskToggled) {
+            adapter.notifyItemChanged(taskList.indexOf(it), true)
+        }
     }
 }

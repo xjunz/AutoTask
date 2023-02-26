@@ -234,6 +234,34 @@ abstract class Applet {
         }
     }
 
+    internal open fun shouldSkip(runtime: TaskRuntime): Boolean {
+        return !isEnabled
+    }
+
+    open fun onSkipped(runtime: TaskRuntime) {
+        /* no-op */
+    }
+
+    /**
+     * Just before the flow executing its elements.
+     */
+    open fun onPrepareApply(runtime: TaskRuntime) {
+        /* no-op */
+    }
+
+    /**
+     * Do something before the flow is started. At this time, [TaskRuntime.currentFlow] is
+     * not yet assigned to this flow. This is guaranteed to be called even if this is skipped.
+     */
+    open fun onPreApply(runtime: TaskRuntime) {}
+
+    /**
+     * Do something after the applying is completed.
+     */
+    open fun onPostApply(runtime: TaskRuntime) {
+        /* no-op */
+    }
+
     internal fun deserializeValue(src: String?) {
         value = if (src == null) null else if (isCollectionValue) {
             val split = src.split(SEPARATOR)

@@ -27,7 +27,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     @AppletOrdinal(0x00_00)
-    val timeRange = appletOption(R.string.in_time_range) {
+    val timeRange = invertibleAppletOption(R.string.in_time_range) {
         numberRangeCriterion<Calendar, Long> {
             it.timeInMillis
         }
