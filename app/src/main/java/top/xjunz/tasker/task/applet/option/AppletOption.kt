@@ -11,7 +11,6 @@ import androidx.annotation.StringRes
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
-import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.ktx.*
@@ -84,8 +83,9 @@ class AppletOption(
         }
 
         fun makeRelationSpan(origin: CharSequence, applet: Applet): CharSequence {
-            val relation = if (applet is Action<*>) {
-                if (applet.isAnd) R.string.then.str else if (applet.isOr) R.string._else.str
+            val relation = if (applet.supportsAnywayRelation) {
+                if (applet.isAnd) R.string.then.str
+                else if (applet.isOr) R.string._else.str
                 else R.string.anyway.str
             } else {
                 if (applet.isAnd) R.string._and.str else R.string._or.str
@@ -98,7 +98,7 @@ class AppletOption(
         private fun makeReferenceText(applet: Applet, name: CharSequence?): CharSequence? {
             if (name == null) return null
             return name.clickable {
-                deliverEvent(it, EVENT_NAVIGATE_REFERENCE,name to applet)
+                deliverEvent(it, EVENT_NAVIGATE_REFERENCE, name to applet)
             }.foreColored().backColored().underlined()
         }
 

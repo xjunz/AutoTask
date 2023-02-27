@@ -93,7 +93,9 @@ class EnumSelectorDialog : BaseDialogFragment<DialogEnumSelectorBinding>() {
         }
         observeNostalgic(viewModel.changedIndex) { prev, cur ->
             if (prev != null && prev != cur) {
-                adapter.notifyItemChanged(prev)
+                if (viewModel.isSingleSelection) {
+                    adapter.notifyItemChanged(prev)
+                }
             }
             adapter.notifyItemChanged(cur)
         }

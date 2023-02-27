@@ -326,7 +326,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     }
                     binding.tvTitle.text = vm.metadata.title
                 } else {
-                    binding.tvTitle.text = R.string.edit_rules.text
+                    if (vm.isInTrackMode) {
+                        binding.tvTitle.text = vm.metadata.title
+                    } else {
+                        binding.tvTitle.text = R.string.edit_rules.text
+                    }
                 }
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.dismiss.text)
             } else {

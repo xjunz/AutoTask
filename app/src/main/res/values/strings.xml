@@ -274,7 +274,7 @@
     <string name="edit_referent_name">编辑标识</string>
     <string name="prompt_set_referent">为所选引用设置标识，该标识可方便您辨识，并且用于和其他同类型引用相区分。</string>
     <string name="error_tag_exists">该标识已经存在，请重新编辑。</string>
-    <string name="format_no_candidate_referent">没有可引用的%s</string>
+    <string name="format_no_candidate_referent">没有可引用的⌈%s⌋</string>
     <string name="which_to_refer">引用哪个？</string>
     <string name="format_not_specified">未指定\"%s\"！</string>
     <string name="prompt_merge_applets">确定要合并所选规则吗？</string>
@@ -511,4 +511,5 @@
     <string name="rotate_screen">旋转屏幕</string>
     <string name="rotation_direction">旋转角度</string>
     <string name="format_desc_rotation_screen">旋转屏幕到%s</string>
+    <string name="tip_api_too_low">很抱歉，由于当前Android版本过低，不支持该功能！</string>
 </resources>

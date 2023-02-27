@@ -88,7 +88,6 @@ class SerializableInputEvent(
 
     fun getGesture(): PointerGesture {
         if (gesture == null) {
-            check(type == INPUT_TYPE_MOTIONS)
             serial.splitToSequence(MOTION_FLATTEN_SEPARATOR).filter { it.isNotEmpty() }.forEach {
                 val composed = it.toLong(16)
                 val x = composed ushr 16 and 0xFFFF

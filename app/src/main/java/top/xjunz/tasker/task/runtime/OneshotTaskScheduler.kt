@@ -8,8 +8,10 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainTaskRuntime
+import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
 import java.util.*
@@ -18,9 +20,11 @@ import kotlin.coroutines.CoroutineContext
 /**
  * @author xjunz 2023/02/22
  */
-class OneshotTaskScheduler : TaskScheduler<Unit>() {
+class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
 
     override val taskType: Int = XTask.TYPE_ONESHOT
+
+    private var currentActiveTask: XTask? = null
 
     override fun haltAll() {
         /* no-op */
@@ -41,12 +45,15 @@ class OneshotTaskScheduler : TaskScheduler<Unit>() {
             }
             launch {
                 task.setListener(listener)
+                currentActiveTask = task
                 task.launch(obtainTaskRuntime(task))
+                currentActiveTask = null
             }
         }
     }
 
     fun scheduleTask(task: XTask, onCompletion: ITaskCompletionCallback) {
+        if (currentActiveTask != null) return
         scheduleTasks(
             Collections.singleton(task).iterator(), Unit,
             object : XTask.TaskStateListener {
@@ -56,6 +63,10 @@ class OneshotTaskScheduler : TaskScheduler<Unit>() {
                 }
             }
         )
+    }
+
+    override fun onEvents(events: Array<Event>) {
+        currentActiveTask?.getRuntime()?.onNewEvents(events)
     }
 
 }

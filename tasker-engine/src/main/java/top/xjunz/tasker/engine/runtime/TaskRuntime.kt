@@ -11,7 +11,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
-import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
@@ -135,7 +134,6 @@ class TaskRuntime private constructor() {
     private lateinit var task: XTask
 
     fun updateFingerprint(any: Any?) {
-        logcat("update fingerprint: $any")
         fingerprintCrc.update(any.hashCode())
     }
 
@@ -219,12 +217,6 @@ class TaskRuntime private constructor() {
      */
     fun onNewEvents(newEvents: Array<Event>) {
         if (waitingFor != null) {
-            newEvents.forEach {
-                it.lock()
-            }
-            _events?.forEach {
-                it.unlock()
-            }
             _events = newEvents
             waitingFor?.remind()
         }

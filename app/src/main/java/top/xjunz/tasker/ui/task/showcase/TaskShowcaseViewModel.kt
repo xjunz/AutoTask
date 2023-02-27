@@ -97,7 +97,7 @@ class TaskShowcaseViewModel : ViewModel() {
             if (!removed) return@launch
             try {
                 TaskStorage.persistTask(task)
-                LocalTaskManager.updateResidentTask(prevChecksum, task)
+                LocalTaskManager.updateTask(prevChecksum, task)
                 toast(R.string.task_updated)
                 onTaskUpdated.value = task
             } catch (t: Throwable) {

@@ -12,4 +12,19 @@ class ContainerFlow : Flow() {
     override var maxSize: Int = MAX_FLOW_CHILD_COUNT
 
     override var minSize: Int = 1
+
+    override val supportsAnywayRelation: Boolean
+        get() {
+            var p = parent
+            while (parent != null) {
+                if (parent is Do) {
+                    return true
+                } else if (parent is If) {
+                    return false
+                }
+                p = p?.parent
+            }
+            return false
+        }
+
 }

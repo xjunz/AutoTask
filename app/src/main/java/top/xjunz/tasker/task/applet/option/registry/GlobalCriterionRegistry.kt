@@ -40,7 +40,7 @@ class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withValueArgument<Int>(
         R.string.in_battery_capacity_range,
-        VariantType.INT_PERCENT_RANGE
+        VariantType.INT_RANGE
     ).withValueDescriber<Collection<Int?>> {
         val first = it.firstOrNull()
         val last = it.lastOrNull()

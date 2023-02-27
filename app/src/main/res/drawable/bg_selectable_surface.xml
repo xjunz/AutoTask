@@ -2,21 +2,18 @@
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/color_control_highlight">
+    <item android:id="@android:id/mask">
+        <shape>
+            <corners android:radius="16dp" />
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
     <item>
         <shape>
             <corners android:radius="16dp" />
             <solid android:color="?colorSurface" />
         </shape>
     </item>
-    <item>
-        <ripple android:color="@color/color_control_highlight">
-            <item android:id="@android:id/mask">
-                <shape>
-                    <corners android:radius="16dp" />
-                    <solid android:color="@android:color/white" />
-                </shape>
-            </item>
-        </ripple>
-    </item>
-</layer-list>
+</ripple>

@@ -69,11 +69,8 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         return lifecycleRegistry
     }
 
-    var mode: InspectorMode
+    val mode: InspectorMode
         get() = viewModel.currentMode.require()
-        set(value) {
-            viewModel.currentMode.value = value
-        }
 
     /**
      * Remove overlays to window manger.

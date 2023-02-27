@@ -76,7 +76,7 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
             }
             else -> illegalArgument("number type", viewModel.type)
         }
-        if (viewModel.variantType == VariantType.INT_PERCENT_RANGE) {
+        if (viewModel.variantType == VariantType.INT_RANGE) {
             et.setMaxLength(3)
         }
     }

@@ -50,61 +50,76 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
-    private fun Applet.rawSetReferent(whichRet: Int, id: String?) {
-        if (id.isNullOrEmpty()) {
+    private fun Map<Int, String>.putIfDistinct(key: Int, value: String): Boolean {
+        if (this[key] == value) return false
+        (this as MutableMap<Int, String>)[key] = value
+        return true
+    }
+
+    private fun Applet.rawSetReferent(whichRet: Int, id: String?): Boolean {
+        return if (id.isNullOrEmpty()) {
             rawRemoveReferent(whichRet)
         } else {
             if (referents === emptyMap<Int, String>()) {
                 referents = ArrayMap()
             }
-            (referents as MutableMap)[whichRet] = id
+            referents.putIfDistinct(whichRet, id)
         }
     }
 
-    private fun Applet.rawSetReference(whichArg: Int, ref: String?) {
-        if (ref.isNullOrEmpty()) {
+    private fun Applet.rawSetReference(whichArg: Int, ref: String?): Boolean {
+        return if (ref.isNullOrEmpty()) {
             rawRemoveReference(whichArg)
         } else {
             if (references === emptyMap<Int, String>()) {
                 references = ArrayMap()
             }
-            (references as MutableMap)[whichArg] = ref
+            references.putIfDistinct(whichArg, ref)
         }
     }
 
-    private fun Applet.rawRemoveReference(which: Int) {
-        if (references === emptyMap<Int, String>()) return
+    private fun Applet.rawRemoveReference(which: Int): Boolean {
+        if (references.isEmpty()) return false
         (references as MutableMap).remove(which)
         if (references.isEmpty()) references = emptyMap()
+        return true
     }
 
-    private fun Applet.rawRemoveReferent(which: Int) {
-        if (referents === emptyMap<Int, String>()) return
+    private fun Applet.rawRemoveReferent(which: Int): Boolean {
+        if (referents.isEmpty()) return false
         (referents as MutableMap).remove(which)
         if (referents.isEmpty()) referents = emptyMap()
+        return true
     }
 
     fun setValue(applet: Applet, whichArg: Int, value: Any?) {
         val prevValue = applet.value
         val prevReferent = applet.references[whichArg]
         applet.value = value
-        applet.rawRemoveReference(whichArg)
-        referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevReferent)
-            applet.value = prevValue
+        if (applet.rawRemoveReference(whichArg)) {
+            referenceRevocations.putIfNeeded(applet, whichArg) {
+                applet.rawSetReference(whichArg, prevReferent)
+                applet.value = prevValue
+            }
         }
     }
 
     fun setVarargReferences(applet: Applet, referentNames: List<String>) {
         val prevReferences = applet.references
         val map = ArrayMap<Int, String>()
+        var changed = false
         referentNames.forEachIndexed { index, s ->
-            map[index] = s
+            if (map[index] != s) {
+                map[index] = s
+                changed = true
+            }
         }
-        applet.references = map
-        if (revocable) {
-            varargReferentsRevocations.putIfAbsent(applet) {
-                applet.references = prevReferences
+        if (changed) {
+            applet.references = map
+            if (revocable) {
+                varargReferentsRevocations.putIfAbsent(applet) {
+                    applet.references = prevReferences
+                }
             }
         }
     }
@@ -112,30 +127,33 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
     fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, referent: String?) {
         val prevReferent = applet.references[whichArg]
         val prevValue = applet.value
-        applet.rawSetReference(whichArg, referent)
-        // Clear its value once the arg is set to a reference
-        if (!arg.isReferenceOnly) {
-            applet.value = null
-        }
-        referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevReferent)
-            applet.value = prevValue
+        if (applet.rawSetReference(whichArg, referent)) {
+            // Clear its value once the arg is set to a reference
+            if (!arg.isReferenceOnly) {
+                applet.value = null
+            }
+            referenceRevocations.putIfNeeded(applet, whichArg) {
+                applet.rawSetReference(whichArg, prevReferent)
+                applet.value = prevValue
+            }
         }
     }
 
     fun renameReference(applet: Applet, whichArg: Int, newReferent: String?) {
         val prevReferent = applet.references[whichArg]
-        applet.rawSetReference(whichArg, newReferent)
-        referenceRevocations.putIfNeeded(applet, whichArg) {
-            applet.rawSetReference(whichArg, prevReferent)
+        if (applet.rawSetReference(whichArg, newReferent)) {
+            referenceRevocations.putIfNeeded(applet, whichArg) {
+                applet.rawSetReference(whichArg, prevReferent)
+            }
         }
     }
 
     fun setReferent(applet: Applet, whichResult: Int, referent: String?) {
         val prevReferent = applet.referents[whichResult]
-        applet.rawSetReferent(whichResult, referent)
-        referentRevocations.putIfNeeded(applet, whichResult) {
-            applet.rawSetReferent(whichResult, prevReferent)
+        if (applet.rawSetReferent(whichResult, referent)) {
+            referentRevocations.putIfNeeded(applet, whichResult) {
+                applet.rawSetReferent(whichResult, prevReferent)
+            }
         }
     }
 

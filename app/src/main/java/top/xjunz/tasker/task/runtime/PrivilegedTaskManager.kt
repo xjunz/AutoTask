@@ -32,8 +32,12 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
             return initialized
         }
 
-        override fun updateResidentTask(previous: Long, updated: XTaskDTO) {
-            PrivilegedTaskManager.updateResidentTask(previous, updated)
+        override fun updateTask(previous: Long, updated: XTaskDTO) {
+            PrivilegedTaskManager.updateTask(previous, updated)
+        }
+
+        override fun isTaskExistent(identifier: Long): Boolean {
+            return PrivilegedTaskManager.isTaskExistent(identifier)
         }
 
         override fun disableResidentTask(identifier: Long) {
@@ -42,6 +46,10 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
 
         override fun enableResidentTask(carrier: XTaskDTO) {
             PrivilegedTaskManager.enableResidentTask(carrier)
+        }
+
+        override fun addNewOneshotTask(carrier: XTaskDTO) {
+            PrivilegedTaskManager.addNewOneshotTask(carrier)
         }
 
         override fun getSnapshotCount(identifier: Long): Int {

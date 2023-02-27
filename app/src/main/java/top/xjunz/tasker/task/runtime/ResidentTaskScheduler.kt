@@ -4,7 +4,10 @@
 
 package top.xjunz.tasker.task.runtime
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -35,44 +38,28 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
         }
     }
 
-    override fun shutdown() {
-        super.shutdown()
-        Event.drainPool()
-    }
-
     override fun scheduleTasks(
         tasks: Iterator<XTask>,
         arg: Array<Event>,
         listener: XTask.TaskStateListener?
     ) {
         if (isSuppressed) return
-        launch {
-            val registry = ValueRegistry()
-            val jobs = mutableListOf<Job>()
-            for (task in tasks) {
-                check(task.metadata.taskType == taskType) {
-                    "Unsupported task type!"
-                }
-                if (!task.isExecuting || task.isSuspending) {
-                    val eventsHash = arg.contentHashCode()
-                    // Too hot, do not touch it now!
-                    if (task.isOverheat(eventsHash)) continue
-                    arg.forEach {
-                        it.lock()
-                    }
-                    val job = launch {
-                        task.previousArgumentHash = eventsHash
-                        task.setListener(listener)
-                        task.launch(obtainTaskRuntime(task, registry, arg))
-                    }
-                    jobs.add(job)
-                } else {
-                    task.getRuntime()?.onNewEvents(arg)
-                }
+        val registry = ValueRegistry()
+        for (task in tasks) {
+            check(task.metadata.taskType == taskType) {
+                "Unsupported task type!"
             }
-            jobs.joinAll()
-            arg.forEach {
-                it.unlock()
+            if (!task.isExecuting || task.isSuspending) {
+                val eventsHash = arg.contentHashCode()
+                // Too hot, do not touch it now!
+                if (task.isOverheat(eventsHash)) continue
+                launch {
+                    task.previousArgumentHash = eventsHash
+                    task.setListener(listener)
+                    task.launch(obtainTaskRuntime(task, registry, arg))
+                }
+            } else {
+                task.getRuntime()?.onNewEvents(arg)
             }
         }
     }

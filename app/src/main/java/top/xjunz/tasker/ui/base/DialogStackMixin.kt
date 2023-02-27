@@ -43,7 +43,7 @@ class DialogStackMixin(
             }
         }
         mainViewModel.doOnDialogDismissed(dialogFragment) {
-            if (it.tag != tag && (isExiting || !dialog.isShowing)
+            if (it.tag != tag && (isExiting || isStopped)
                 && DialogStackManager.isVisible(tag)
             ) {
                 isExiting = false

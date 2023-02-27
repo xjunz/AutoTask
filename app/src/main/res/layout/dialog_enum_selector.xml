@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -29,14 +28,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            tools:listitem="@layout/item_enum_selector"
-            android:background="@drawable/bg_selectable_surface"
+            android:background="@drawable/bg_surface"
+            android:clickable="false"
+            android:focusable="false"
+            android:overScrollMode="ifContentScrolls"
             android:padding="12dp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_title"
-            app:spanCount="3" />
+            app:spanCount="3"
+            tools:listitem="@layout/item_enum_selector" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancel"

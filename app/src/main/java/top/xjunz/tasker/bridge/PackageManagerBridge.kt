@@ -10,7 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
-import top.xjunz.tasker.app
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
@@ -49,8 +49,10 @@ object PackageManagerBridge {
                 )
             } else {
                 @Suppress("DEPRECATION")
-                app.packageManager.getPackageInfo(pkgName, flags)
+                packageManager.getPackageInfo(pkgName, flags)
             }
+        }.onFailure {
+            it.logcatStackTrace()
         }.getOrNull()
     }
 

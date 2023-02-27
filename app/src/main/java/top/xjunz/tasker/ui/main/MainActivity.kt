@@ -17,6 +17,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withStarted
+import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.FEEDBACK_GROUP_URL
 import top.xjunz.tasker.R
@@ -252,7 +255,17 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        viewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
+        // On old devices, onStart() may be called after onNewIntent(), hence there
+        // will be no active observers.
+        lifecycleScope.launch {
+            lifecycle.withStarted {
+                viewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
     }
 
     override fun onDestroy() {

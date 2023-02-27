@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_selectable_surface"
+            android:background="@drawable/bg_surface"
             android:backgroundTint="?colorPrimary"
             android:elevation="1dp"
             android:paddingHorizontal="16dp"

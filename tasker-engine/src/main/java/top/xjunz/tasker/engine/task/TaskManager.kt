@@ -11,39 +11,45 @@ import java.util.*
  */
 abstract class TaskManager<TaskIdentifier, TaskCarrier> {
 
-    protected val enabled: MutableList<XTask> = mutableListOf()
+    protected val tasks: MutableList<XTask> = mutableListOf()
 
     protected abstract fun asTask(carrier: TaskCarrier): XTask
 
     protected abstract fun List<XTask>.indexOfTask(identifier: TaskIdentifier): Int
 
     fun getEnabledResidentTasks(): List<XTask> {
-        return enabled
+        return tasks.filter {
+            it.metadata.taskType == XTask.TYPE_RESIDENT
+        }
     }
 
     open fun disableResidentTask(identifier: TaskIdentifier) {
-        val index = enabled.indexOfTask(identifier)
+        val index = tasks.indexOfTask(identifier)
         if (index >= 0) {
-            enabled[index].halt()
-            enabled.removeAt(index)
+            tasks[index].halt()
+            tasks.removeAt(index)
         }
     }
 
     open fun enableResidentTask(carrier: TaskCarrier) {
         val task = asTask(carrier)
-        check(!enabled.contains(task)) {
+        check(!tasks.contains(task)) {
             "Task [${task.title}] already enabled!"
         }
-        enabled.add(task)
+        tasks.add(task)
     }
 
-    open fun updateResidentTask(previousChecksum: Long, updated: TaskCarrier) {
-        val task = enabled.find {
+    open fun addNewOneshotTask(carrier: TaskCarrier) {
+        tasks.add(asTask(carrier))
+    }
+
+    open fun updateTask(previousChecksum: Long, updated: TaskCarrier) {
+        val task = tasks.find {
             it.checksum == previousChecksum
         }
         if (task != null) {
             task.halt()
-            Collections.replaceAll(enabled, task, asTask(updated))
+            Collections.replaceAll(tasks, task, asTask(updated))
             task.snapshots.clear()
         }
     }
@@ -52,8 +58,8 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         findTask(id).snapshots.clear()
     }
 
-    private fun findTask(id: TaskIdentifier): XTask {
-        return enabled[enabled.indexOfTask(id)]
+    fun findTask(id: TaskIdentifier): XTask {
+        return tasks[tasks.indexOfTask(id)]
     }
 
     open fun getSnapshotCount(id: TaskIdentifier): Int {
@@ -64,8 +70,12 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         return findTask(id).snapshots.toTypedArray()
     }
 
+    open fun isTaskExistent(id: TaskIdentifier): Boolean {
+        return tasks.indexOfTask(id) >= 0
+    }
+
     fun clearAllSnapshots() {
-        enabled.forEach {
+        tasks.forEach {
             it.snapshots.clear()
         }
     }

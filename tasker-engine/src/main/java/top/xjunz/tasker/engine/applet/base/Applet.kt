@@ -136,6 +136,8 @@ abstract class Applet {
 
     open var relation = REL_AND
 
+    open val supportsAnywayRelation: Boolean = false
+
     /**
      * Unmasked raw type.
      *
@@ -191,7 +193,17 @@ abstract class Applet {
     }
 
     open fun toggleRelation() {
-        relation = if (relation == REL_AND) REL_OR else REL_AND
+        relation = if (supportsAnywayRelation) {
+            if (isAnd) {
+                REL_OR
+            } else if (isOr) {
+                REL_ANYWAY
+            } else {
+                REL_AND
+            }
+        } else {
+            if (relation == REL_AND) REL_OR else REL_AND
+        }
     }
 
     fun toggleInversion() {

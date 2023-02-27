@@ -19,7 +19,7 @@ object VariantType {
 
     const val INT_INTERVAL_XY = 3 shl 16 or Applet.VAL_TYPE_INT
 
-    const val INT_PERCENT_RANGE = 4 shl 16 or Applet.VAL_TYPE_INT
+    const val INT_RANGE = 4 shl 16 or Applet.VAL_TYPE_INT
 
     const val INT_ROTATION = 5 shl 16 or Applet.VAL_TYPE_INT
 

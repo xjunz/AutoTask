@@ -27,7 +27,7 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
-    val XTask.isEnabled: Boolean get() = enabled.contains(this)
+    val XTask.isEnabled: Boolean get() = tasks.contains(this)
 
     fun setRemotePeer(peer: IRemoteTaskManager) {
         this.peer?.asBinder()?.linkToDeath(peerDeathRecipient, 0)
@@ -49,10 +49,19 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
-    override fun updateResidentTask(previousChecksum: Long, updated: XTask) {
-        super.updateResidentTask(previousChecksum, updated)
+    override fun addNewOneshotTask(carrier: XTask) {
+        // No [super.addNewOneshotTask(carrier)]
         peer?.whenAlive {
-            it.updateResidentTask(previousChecksum, updated.toDTO())
+            if (!it.isTaskExistent(carrier.checksum)) {
+                it.addNewOneshotTask(carrier.toDTO())
+            }
+        }
+    }
+
+    override fun updateTask(previousChecksum: Long, updated: XTask) {
+        super.updateTask(previousChecksum, updated)
+        peer?.whenAlive {
+            it.updateTask(previousChecksum, updated.toDTO())
         }
     }
 
@@ -77,6 +86,10 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         peer?.whenAlive {
             it.clearSnapshots(id.checksum)
         }
+    }
+
+    fun isTaskExistentInRemote(identifier: Long): Boolean {
+        return peer?.isTaskExistent(identifier) == true
     }
 
     override fun asTask(carrier: XTask): XTask {

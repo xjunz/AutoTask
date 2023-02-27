@@ -3,7 +3,6 @@ package top.xjunz.tasker.service;
 
 import top.xjunz.tasker.service.IAvailabilityChecker;
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager;
-import top.xjunz.tasker.task.runtime.IRemoteTaskScheduler;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -30,7 +29,7 @@ interface IRemoteAutomatorService {
 
     void suppressResidentTaskScheduler(boolean suppress) = 10;
 
-    void scheduleTask(in XTaskDTO dto, in ITaskCompletionCallback callback) = 11;
+    void scheduleOneshotTask(long id, in ITaskCompletionCallback callback) = 11;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server
 

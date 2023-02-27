@@ -62,6 +62,8 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
         var doOnSucceeded: Runnable? = null
 
         fun enableA11yServiceRemoteExecCmd() {
+            // TODO: not working on low api devices ->
+            // TODO: SystemServiceHelper.getSystemService("settings") returns null
             val className = "${BuildConfig.APPLICATION_ID}/${A11yAutomatorService::class.java.name}"
             ShizukuBinderWrapper(SystemServiceHelper.getSystemService("settings"))
                 .execShellCmd("put", "secure", "enabled_accessibility_services", className)

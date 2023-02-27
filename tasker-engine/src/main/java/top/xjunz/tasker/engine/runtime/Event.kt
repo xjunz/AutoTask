@@ -6,7 +6,6 @@ package top.xjunz.tasker.engine.runtime
 
 import android.util.SparseArray
 import androidx.annotation.IntDef
-import androidx.core.util.Pools.SynchronizedPool
 import androidx.core.util.forEach
 import top.xjunz.shared.ktx.casted
 
@@ -20,8 +19,6 @@ class Event private constructor(
     paneTitle: String? = null
 ) {
 
-    private object Pool : SynchronizedPool<Event>(16)
-
     val type get() = _type
 
     val componentInfo = ComponentInfo().also {
@@ -31,22 +28,6 @@ class Event private constructor(
     }
 
     private val extras = SparseArray<Any>()
-
-    private var locks: Int = 0
-
-    fun lock() {
-        synchronized(this) {
-            locks++
-        }
-    }
-
-    fun unlock() {
-        synchronized(this) {
-            if (locks == 0 || --locks == 0) {
-                recycle()
-            }
-        }
-    }
 
     companion object {
         /**
@@ -82,19 +63,7 @@ class Event private constructor(
             actName: String? = null,
             paneTitle: String? = null
         ): Event {
-            val event = Pool.acquire()?.apply {
-                componentInfo.activityName = actName
-                componentInfo.paneTitle = paneTitle
-                componentInfo.packageName = pkgName
-                _type = eventType
-            } ?: Event(eventType, pkgName, actName, paneTitle)
-            return event
-        }
-
-        fun drainPool() {
-            while (Pool.acquire() != null) {
-                /* no-op */
-            }
+            return Event(eventType, pkgName, actName, paneTitle)
         }
     }
 
@@ -126,14 +95,6 @@ class Event private constructor(
 
     fun putExtra(key: Int, value: Any) {
         extras.put(key, value)
-    }
-
-    fun recycle() {
-        extras.clear()
-        componentInfo.paneTitle = null
-        componentInfo.activityName = null
-        componentInfo.packageName = null
-        Pool.release(this)
     }
 
     private fun extrasHashcode(): Int {

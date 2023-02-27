@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.task.showcase
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -15,6 +16,7 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.TaskMetadataEditor
@@ -65,6 +67,10 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>() {
                 XTask.Metadata(R.string.click_automation.str, XTask.TYPE_ONESHOT)
         }
         binding.tvRecordGesture.setNoDoubleClickListener {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                toast(R.string.tip_api_too_low)
+                return@setNoDoubleClickListener
+            }
             REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_GESTURE_RECORDER
             viewModel.onMetadataEdited.value =
                 XTask.Metadata(R.string.perform_custom_gestures.str, XTask.TYPE_ONESHOT)

@@ -133,7 +133,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     R.string.max_wait_for_idle_duration
                 ).setHelp(option.helpText).show(fragmentManager)
             }
-            VariantType.INT_PERCENT_RANGE -> {
+            VariantType.INT_RANGE -> {
                 val value = applet.value?.casted<Collection<Number>>()
                 RangeEditorDialog().doOnCompletion { start, end ->
                     updateValue(listOf(start, end))

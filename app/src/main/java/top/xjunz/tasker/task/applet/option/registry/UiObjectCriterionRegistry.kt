@@ -21,6 +21,7 @@ import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.numberRangeCriterion
 import top.xjunz.tasker.task.applet.flow.UiObjectFlow.UiObjectTarget
 import top.xjunz.tasker.task.applet.value.Distance
+import top.xjunz.tasker.task.applet.value.VariantType
 
 /**
  * @author xjunz 2022/09/27
@@ -185,7 +186,8 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         numberRangeCriterion<UiObjectTarget, Int> {
             it.source.text?.length ?: -1
         }
-    }.withDefaultRangeDescriber()
+    }.withValueArgument<Int>(R.string.in_length_range, VariantType.INT_RANGE)
+        .withDefaultRangeDescriber()
 
     @AppletOrdinal(0x01_04)
     val textContains = appletOption(R.string.contains_text) {

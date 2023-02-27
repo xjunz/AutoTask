@@ -147,6 +147,9 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.msEnabled.setText(R.string.not_is_enabled)
                 b.wave.fadeOut()
             }
+            if (task.metadata.taskType == XTask.TYPE_ONESHOT) {
+                b.ibSnapshot.isVisible = true
+            }
         }
 
         override fun getItemCount() = taskList.size

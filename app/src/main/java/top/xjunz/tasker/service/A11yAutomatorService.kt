@@ -148,6 +148,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
             if (!isInspectorMode) {
                 a11yEventDispatcher.addCallback(residentTaskScheduler)
+                a11yEventDispatcher.addCallback(oneshotTaskScheduler)
             }
             a11yEventDispatcher.activate()
 
@@ -177,7 +178,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     fun showFloatingInspector(mode: InspectorMode) {
         if (isInspectorShown) {
             if (inspector.mode != mode) {
-                inspector.mode = mode
+                // Collapse first to dodge complex conditions
+                inspectorViewModel.isCollapsed.value = true
+                inspectorViewModel.currentMode.value = mode
             }
         } else {
             inspectorViewModel = InspectorViewModel()

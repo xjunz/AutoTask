@@ -9,8 +9,9 @@ import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
 import androidx.core.os.HandlerCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
@@ -54,19 +55,14 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
     }
 
     private fun processAccessibilityEvent(event: AccessibilityEvent) {
-        try {
-            val packageName = event.packageName?.toString() ?: return
-            // Do not send events from the host application!
-            if (packageName == BuildConfig.APPLICATION_ID) return
-            if (packageName == PACKAGE_SYSTEM_UI) return
-            if (event.eventTime < latestFilteredEventTimestamp) return
-            val className = event.className?.toString()
-            if (className == CLASS_SOFT_INPUT_WINDOW) return
-            dispatchEventsFromAccessibilityEvent(event, packageName, className)
-        } finally {
-            @Suppress("DEPRECATION")
-            event.recycle()
-        }
+        val packageName = event.packageName?.toString() ?: return
+        // Do not send events from the host application!
+        if (packageName == BuildConfig.APPLICATION_ID) return
+        if (packageName == PACKAGE_SYSTEM_UI) return
+        if (event.eventTime < latestFilteredEventTimestamp) return
+        val className = event.className?.toString()
+        if (className == CLASS_SOFT_INPUT_WINDOW) return
+        dispatchEventsFromAccessibilityEvent(event, packageName, className)
     }
 
     private fun dispatchEventsFromAccessibilityEvent(

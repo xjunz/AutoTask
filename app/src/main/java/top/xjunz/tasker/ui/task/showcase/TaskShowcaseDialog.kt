@@ -108,14 +108,16 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         binding.ibDismiss.setNoDoubleClickListener {
             dismiss()
         }
+        val fabBehaviour =
+            ((binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
+                    as HideBottomViewOnScrollBehavior<View>)
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 binding.bottomBar.selectedItemId = binding.bottomBar.menu.getItem(position).itemId
                 ((binding.bottomBar.layoutParams as CoordinatorLayout.LayoutParams).behavior
                         as HideBottomViewOnScrollBehavior<View>).slideUp(binding.bottomBar, true)
-                ((binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
-                        as HideBottomViewOnScrollBehavior<View>).slideUp(binding.fabAction, true)
+                fabBehaviour.slideUp(binding.fabAction, true)
                 binding.appBar.setLiftOnScrollTargetView(fragments[position]?.getScrollTarget())
             }
         })
@@ -172,6 +174,9 @@ class TaskShowcaseDialog : BaseDialogFragment<DialogTaskShowcaseBinding>() {
         }
         observeTransient(viewModel.requestAddNewTask) {
             viewModel.addRequestedTask()
+        }
+        observeTransient(viewModel.onTaskDeleted) {
+            fabBehaviour.slideUp(binding.fabAction)
         }
         observe(mainViewModel.isServiceRunning) {
             binding.btnServiceControl.isActivated = it

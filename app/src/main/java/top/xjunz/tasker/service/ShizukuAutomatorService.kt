@@ -23,8 +23,6 @@ import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.bridge.PrivilegedUiAutomatorBridge
-import top.xjunz.tasker.engine.dto.XTaskDTO
-import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
@@ -50,10 +48,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             return requireNotNull(instance?.get()) {
                 "The ShizukuAutomatorService is not yet started or has dead!"
             }
-        }
-
-        fun isRunning(): Boolean {
-            return instance?.get() != null
         }
     }
 
@@ -165,17 +159,17 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     }
 
     @Privileged
-    override fun scheduleTask(dto: XTaskDTO, callback: ITaskCompletionCallback) {
-        oneshotTaskScheduler.scheduleTask(dto.toXTask(AppletOptionFactory), callback)
+    override fun scheduleOneshotTask(id: Long, callback: ITaskCompletionCallback) {
+        oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.findTask(id), callback)
     }
 
-    @Anywhere
+    @Local
     override fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback) {
-        if (isAppProcess) {
-            delegate.scheduleTask(task.toDTO(), onCompletion)
-        } else {
-            oneshotTaskScheduler.scheduleTask(task, onCompletion)
+        // If not present in task manager, add it first
+        if (!LocalTaskManager.isTaskExistentInRemote(task.checksum)) {
+            LocalTaskManager.addNewOneshotTask(task)
         }
+        delegate.scheduleOneshotTask(task.checksum, onCompletion)
     }
 
     override fun isConnected(): Boolean {
@@ -198,6 +192,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             }
             AppletOptionFactory.preloadIfNeeded()
             a11yEventDispatcher.addCallback(residentTaskScheduler)
+            a11yEventDispatcher.addCallback(oneshotTaskScheduler)
             a11yEventDispatcher.activate()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
