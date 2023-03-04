@@ -35,7 +35,6 @@ class StaticError(val victim: Applet, val code: Int, val arg: String? = null) {
 
         const val PROMPT_ADD_INSIDE = 0
 
-        @Deprecated("No longer used but preserved.")
         const val PROMPT_ADD_BEFORE = 1
         const val PROMPT_ADD_AFTER = 2
         const val PROMPT_RESET_REFERENCE = 3

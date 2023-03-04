@@ -82,6 +82,7 @@ fun Context.sendMailTo(log: Uri?) {
         .putExtra(Intent.EXTRA_EMAIL, arrayOf(EMAIL_ADDRESS))
     if (log != null) {
         intent.putExtra(Intent.EXTRA_STREAM, log)
+        @Suppress("DEPRECATION")
         val resInfoList = packageManager.queryIntentActivities(
             intent, PackageManager.MATCH_DEFAULT_ONLY
         )

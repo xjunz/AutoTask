@@ -13,9 +13,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.Preferences
+import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.peekActivity
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
@@ -52,7 +54,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val operatingMode = MutableLiveData(OperatingMode.CURRENT)
 
-    fun init() {
+    init {
         AppletOptionFactory.preloadIfNeeded()
         if (TaskStorage.storageTaskLoaded) {
             allTaskLoaded.value = true
@@ -91,6 +93,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         Preferences.operatingMode = mode.VALUE
         serviceController.setStateListener(this)
         operatingMode.value = mode
+        isServiceRunning.value = serviceController.isServiceRunning
     }
 
     fun toggleService() {
@@ -129,6 +132,18 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
             if (it.first?.host == host) {
                 block(it.second!!.casted())
             }
+        }
+    }
+
+    fun toggleOperatingMode() {
+        if (serviceController.isServiceRunning) {
+            toast(R.string.error_unable_to_switch_mode)
+            return
+        }
+        if (OperatingMode.CURRENT == OperatingMode.Privilege) {
+            setCurrentOperatingMode(OperatingMode.Accessibility)
+        } else {
+            setCurrentOperatingMode(OperatingMode.Privilege)
         }
     }
 }

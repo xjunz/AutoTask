@@ -38,5 +38,4 @@ interface AutomatorService {
 
     fun getStartTimestamp(): Long
 
-    fun createAvailabilityChecker(): IAvailabilityChecker
 }

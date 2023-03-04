@@ -65,10 +65,6 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
         "FloatingInspectorWindow@" + hashCode()
     }
 
-    override fun getLifecycle(): Lifecycle {
-        return lifecycleRegistry
-    }
-
     val mode: InspectorMode
         get() = viewModel.currentMode.require()
 
@@ -105,4 +101,7 @@ class FloatingInspector(baseContext: Context, val viewModel: InspectorViewModel)
     }
 
     val isShown: Boolean get() = lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.STARTED)
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 }

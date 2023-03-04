@@ -165,6 +165,9 @@ class AppletOption(
     var isShizukuOnly = false
         private set
 
+    var isPremiumOnly = false
+        private set
+
     var arguments: List<ArgumentDescriptor> = emptyList()
 
     var results: List<ValueDescriptor> = emptyList()
@@ -233,6 +236,11 @@ class AppletOption(
 
     fun shizukuOnly(): AppletOption {
         isShizukuOnly = true
+        return this
+    }
+
+    fun premiumOnly(): AppletOption {
+        isPremiumOnly = true
         return this
     }
 

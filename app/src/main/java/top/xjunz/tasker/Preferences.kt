@@ -27,6 +27,7 @@ object Preferences {
     var showDragToMoveTip by global.primitive("tip_drag_to_move", true)
     var showToggleRelationTip by global.primitive("tip_toggle_relation", true)
     var showLongClickToHost by global.primitive("tip_long_click_to_host", true)
+    var recordedOrderId: String? by global.nullable("recorded_order_id", null)
 
     private fun <T> SharedPreferences.nullable(
         name: String,

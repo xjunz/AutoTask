@@ -11,14 +11,14 @@ import android.os.Build
 import android.os.IBinder
 import android.os.IInterface
 import android.os.SharedMemory
-import androidx.lifecycle.MutableLiveData
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.toDTO
+import top.xjunz.tasker.ktx.whenAlive
+import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.IRemoteAutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.task.runtime.LocalTaskManager
-import top.xjunz.tasker.util.ShizukuUtil
 
 
 /**
@@ -32,21 +32,22 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
 
     override var service: ShizukuAutomatorService? = null
 
+    var remoteService: IRemoteAutomatorService? = null
+
     override val userServiceStandaloneProcessArgs: Shizuku.UserServiceArgs =
         Shizuku.UserServiceArgs(
-            ComponentName(
-                BuildConfig.APPLICATION_ID, ShizukuAutomatorService::class.java.name
-            )
+            ComponentName(BuildConfig.APPLICATION_ID, ShizukuAutomatorService::class.java.name)
         ).processNameSuffix(SERVICE_NAME_SUFFIX).debuggable(BuildConfig.DEBUG)
             .version(BuildConfig.VERSION_CODE)
 
     @SuppressLint("BlockedPrivateApi", "PrivateApi")
     override fun onServiceConnected(remote: IInterface) {
         remote as IRemoteAutomatorService
-        service = ShizukuAutomatorService(remote)
         runCatching {
             if (!remote.isConnected) {
                 remote.connect()
+                remote.setPremiumContextStoragePath(PremiumMixin.premiumContextStoragePath)
+                remote.loadPremiumContext()
                 if (Build.VERSION.SDK_INT >= 31) {
                     val field = Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
                     field.isAccessible = true
@@ -59,29 +60,27 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
             if (!rtm.isInitialized) {
                 rtm.initialize(LocalTaskManager.getEnabledResidentTasks().map { it.toDTO() })
             }
+            remoteService = remote
+            service = ShizukuAutomatorService(remote)
         }.onFailure {
             remote.destroy()
             throw it
         }
     }
 
-    val isShizukuInstalled = MutableLiveData<Boolean>()
-
-    val isShizukuGranted = MutableLiveData<Boolean>()
-
     override fun stopService() {
         super.stopService()
         service = null
-    }
-
-    override fun syncStatus() {
-        isShizukuInstalled.value = ShizukuUtil.isShizukuInstalled
-        isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
     }
 
     override fun asInterface(binder: IBinder): IRemoteAutomatorService {
         return IRemoteAutomatorService.Stub.asInterface(binder)
     }
 
-    override val startTimestamp: Long = doWhenRunning { it.startTimestamp } ?: -1L
+    override val startTimestamp: Long
+        get() {
+            return service?.whenAlive {
+                it.startTimestamp
+            } ?: -1L
+        }
 }

@@ -90,11 +90,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val gvm get() = pvm.global
 
-    private fun showValueInputDialog(
-        standalone: Boolean,
-        which: Int,
-        arg: ArgumentDescriptor
-    ) {
+    private fun showValueInputDialog(standalone: Boolean, which: Int, arg: ArgumentDescriptor) {
         val fragmentManager = if (standalone) parentFragmentManager else childFragmentManager
 
         fun updateValue(newValue: Any?) {
@@ -144,7 +140,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             VariantType.INT_ROTATION -> {
                 EnumSelectorDialog().setSingleSelectionMode()
                     .setSpanCount(2)
-                    .setInitialSelections(Collections.singleton((applet.value ?: 0) as Int))
+                    .setInitialSelections(applet.value?.let { Collections.singleton(it as Int) })
                     .init(arg.name, R.array.rotations) {
                         updateValue(it.single())
                     }.show(fragmentManager)

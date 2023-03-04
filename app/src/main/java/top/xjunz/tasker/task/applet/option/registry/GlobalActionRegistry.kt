@@ -9,6 +9,7 @@ import android.os.Build
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.*
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -71,11 +72,15 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     ).restrictApiLevel(Build.VERSION_CODES.P)
 
     @AppletOrdinal(0x0006)
-    val takeScreenshot = globalActionOption(
-        R.string.take_screenshot,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
-        else -1
-    ).restrictApiLevel(Build.VERSION_CODES.P)
+    val takeScreenshot = appletOption(R.string.take_screenshot) {
+        simpleAction {
+            uiAutomation.performGlobalAction(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) premiumContext.screenShotAction.toInt()
+                else -1
+            )
+        }
+    }.restrictApiLevel(Build.VERSION_CODES.P)
+        .premiumOnly()
 
     @AppletOrdinal(0x0007)
     val setRotation = appletOption(R.string.rotate_screen) {

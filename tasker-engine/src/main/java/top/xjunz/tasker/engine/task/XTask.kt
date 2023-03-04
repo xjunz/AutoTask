@@ -30,10 +30,12 @@ import java.util.concurrent.ConcurrentLinkedDeque
 class XTask : ValueRegistry() {
 
     companion object {
+
         const val TYPE_RESIDENT = 0
         const val TYPE_ONESHOT = 1
         const val RATE_LIMIT = 100
         const val MAX_SNAPSHOT_COUNT = 10
+
     }
 
     /**
@@ -49,8 +51,6 @@ class XTask : ValueRegistry() {
     inline val title get() = metadata.title
 
     inline val checksum get() = metadata.checksum
-
-    inline val isPreload get() = metadata.isPreload
 
     internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
 

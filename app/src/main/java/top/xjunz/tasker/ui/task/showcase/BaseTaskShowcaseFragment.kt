@@ -12,7 +12,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -39,9 +39,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
 
     override val bindingRequiredSuperClassDepth: Int = 2
 
-    protected val viewModel by lazy {
-        requireParentFragment().viewModels<TaskShowcaseViewModel>().value
-    }
+    protected val viewModel by activityViewModels<TaskShowcaseViewModel>()
 
     protected val taskList = mutableListOf<XTask>()
 
@@ -130,7 +128,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             } else if (metadata.taskType == XTask.TYPE_RESIDENT) {
                 b.ibRun.isInvisible = true
             }
-            b.tvBadge.isVisible = task.isPreload
+            // b.tvBadge.isVisible = task.isPreload
             b.ibSnapshot.isVisible = false
             b.container.strokeColor = com.google.android.material.R.attr.colorOutline.attrColor
             if (task.isEnabled) {
@@ -157,7 +155,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
     }
 
     protected fun togglePlaceholder(visible: Boolean) {
-        binding.root.beginAutoTransition(MaterialFadeThrough())
+        binding.root.beginAutoTransition(binding.groupPlaceholder, MaterialFadeThrough())
         binding.groupPlaceholder.isVisible = visible
     }
 

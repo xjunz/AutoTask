@@ -27,6 +27,7 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.isAlive
+import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.runtime.*
@@ -120,19 +121,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         return if (isPrivilegedProcess) startTimestamp else delegate.startTimestamp
     }
 
-    @Anywhere
-    override fun createAvailabilityChecker(): IAvailabilityChecker {
-        return if (isPrivilegedProcess) {
-            AvailabilityChecker(this, looper)
-        } else {
-            delegate.createAvailabilityChecker()
-        }
-    }
-
-    override fun executeShellCmd(cmd: String) {
-
-    }
-
+    @Privileged
     override fun getTaskManager(): IRemoteTaskManager {
         return PrivilegedTaskManager.Delegate
     }
@@ -161,6 +150,14 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     @Privileged
     override fun scheduleOneshotTask(id: Long, callback: ITaskCompletionCallback) {
         oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.findTask(id), callback)
+    }
+
+    override fun setPremiumContextStoragePath(path: String) {
+        PremiumMixin.premiumContextStoragePath = path
+    }
+
+    override fun loadPremiumContext() {
+        PremiumMixin.loadPremiumFromFileSafely()
     }
 
     @Local

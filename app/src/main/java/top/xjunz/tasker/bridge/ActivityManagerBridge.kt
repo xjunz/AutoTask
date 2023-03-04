@@ -11,6 +11,7 @@ import rikka.shizuku.SystemServiceHelper
 import top.xjunz.tasker.app
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.ktx.execShellCmd
+import top.xjunz.tasker.premium.PremiumMixin
 
 /**
  * @author xjunz 2022/11/15
@@ -34,6 +35,7 @@ object ActivityManagerBridge {
     }
 
     fun startComponent(componentName: String) {
+        PremiumMixin.ensurePremium()
         if (isAppProcess) {
             app.startActivity(
                 Intent().setComponent(ComponentName.unflattenFromString(componentName))
@@ -41,7 +43,7 @@ object ActivityManagerBridge {
             )
         } else {
             SystemServiceHelper.getSystemService(Context.ACTIVITY_SERVICE)
-                .execShellCmd("start -n $componentName")
+                .execShellCmd("start", "-n", componentName)
         }
     }
 }

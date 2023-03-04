@@ -4,10 +4,7 @@
 
 package top.xjunz.tasker.task.runtime
 
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -17,13 +14,23 @@ import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskManager
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
+import top.xjunz.tasker.service.currentService
+import top.xjunz.tasker.service.isPremium
+import top.xjunz.tasker.service.serviceController
 import kotlin.coroutines.CoroutineContext
+import kotlin.system.exitProcess
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * @author xjunz 2022/08/05
  */
 class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventDispatcher.Callback,
     TaskScheduler<Array<Event>>() {
+
+    companion object {
+        const val MAX_ENABLED_RESIDENT_TASKS_FOR_NON_PREMIUM_USER = 3
+    }
 
     override val taskType: Int = XTask.TYPE_RESIDENT
 
@@ -39,7 +46,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     }
 
     override fun scheduleTasks(
-        tasks: Iterator<XTask>,
+        tasks: List<XTask>,
         arg: Array<Event>,
         listener: XTask.TaskStateListener?
     ) {
@@ -64,16 +71,17 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
         }
     }
 
-    private fun getResidentTaskSequence(): Sequence<XTask> {
-        return taskManager.getEnabledResidentTasks().asSequence().filter {
-            it.metadata.taskType == XTask.TYPE_RESIDENT
+    private fun getResidentTasks(): List<XTask> {
+        val tasks = taskManager.getEnabledResidentTasks()
+        if (!isPremium && tasks.size > MAX_ENABLED_RESIDENT_TASKS_FOR_NON_PREMIUM_USER) {
+            exitProcess(-1)
         }
+        return tasks
     }
 
     override fun onEvents(events: Array<Event>) {
-        scheduleTasks(getResidentTaskSequence().iterator(), events, listener)
+        scheduleTasks(getResidentTasks(), events, listener)
     }
-
 
     private val listener = object : XTask.TaskStateListener {
         override fun onTaskStarted(runtime: TaskRuntime) {
@@ -104,4 +112,14 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
         }
     }
 
+    init {
+        if (!isPremium) {
+            launch {
+                delay(2.toDuration(DurationUnit.HOURS))
+                if (serviceController.isServiceRunning) {
+                    currentService.destroy()
+                }
+            }
+        }
+    }
 }

@@ -5,11 +5,11 @@
 package top.xjunz.tasker.service
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceHidden
 import android.accessibilityservice.IAccessibilityServiceClient
 import android.app.IUiAutomationConnection
 import android.app.UiAutomation
 import android.app.UiAutomationHidden
-import android.app.accessibilityservice.AccessibilityServiceHidden
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -53,7 +53,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     companion object {
 
-        val LAUNCH_ERROR = MutableLiveData<Throwable>()
+        val LAUNCH_ERROR = MutableLiveData<Throwable?>()
 
         val RUNNING_STATE = MutableLiveData<Boolean>()
 
@@ -280,10 +280,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         return startTimestamp
     }
 
-    override fun createAvailabilityChecker(): IAvailabilityChecker {
-        return AvailabilityChecker(this)
-    }
-
     override fun setRotation(rotation: Int): Boolean {
         unsupportedOperation()
     }
@@ -314,10 +310,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         unsupportedOperation()
     }
 
-    override fun getLifecycle(): Lifecycle {
-        return lifecycleRegistry
-    }
-
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         if (event == Lifecycle.Event.ON_START) {
             RUNNING_STATE.value = true
@@ -326,4 +318,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             lifecycleRegistry.removeObserver(this)
         }
     }
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 }

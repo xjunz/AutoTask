@@ -15,7 +15,7 @@ import top.xjunz.shared.utils.runtimeException
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
 import top.xjunz.tasker.engine.dto.XTaskDTO
-import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.toDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.runtime.LocalTaskManager
@@ -29,7 +29,8 @@ import java.util.zip.ZipInputStream
  */
 object TaskStorage {
 
-    private const val X_TASK_FILE_SUFFIX = ".xtsk"
+    const val X_TASK_FILE_SUFFIX = ".xtsk"
+    const val X_TASK_FILE_ARCHIVE_SUFFIX = ".xtsks"
 
     var storageTaskLoaded = false
 

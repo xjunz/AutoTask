@@ -27,13 +27,6 @@ class XTaskDTO(
     @SerialName("m") val metadata: XTask.Metadata
 ) : Parcelable {
 
-    object Serializer {
-
-        fun XTask.toDTO(): XTaskDTO {
-            return XTaskDTO(requireFlow().toDTO(), metadata)
-        }
-    }
-
     constructor(parcel: Parcel) : this(parcel.requireParcelable(), parcel.requireParcelable())
 
     fun verifyChecksum(): Boolean {
@@ -66,4 +59,8 @@ class XTaskDTO(
         }
     }
 
+}
+
+fun XTask.toDTO(): XTaskDTO {
+    return XTaskDTO(requireFlow().toDTO(), metadata)
 }

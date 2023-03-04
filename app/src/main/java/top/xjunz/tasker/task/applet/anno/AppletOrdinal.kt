@@ -4,8 +4,6 @@
 
 package top.xjunz.tasker.task.applet.anno
 
-import androidx.annotation.Keep
-
 /**
  * |0000 0000|│|0000 0000|
  * |  :----: |:----: | :----:  |
@@ -18,5 +16,4 @@ import androidx.annotation.Keep
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD)
-@Keep
 annotation class AppletOrdinal(val ordinal: Int)

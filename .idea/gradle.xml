@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/coroutine-ui-automator" />
             <option value="$PROJECT_DIR$/hidden-apis" />
             <option value="$PROJECT_DIR$/shared-library" />
+            <option value="$PROJECT_DIR$/ssl" />
             <option value="$PROJECT_DIR$/tasker-engine" />
             <option value="$PROJECT_DIR$/ui-automator" />
           </set>

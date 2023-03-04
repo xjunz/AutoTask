@@ -7,6 +7,7 @@ package top.xjunz.tasker.service
 import android.app.UiAutomation
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.isAppProcess
+import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.uiautomator.CoroutineUiDevice
 
 /**
@@ -32,3 +33,11 @@ inline val uiAutomatorBridge get() = currentService.uiAutomatorBridge
 inline val uiAutomation: UiAutomation get() = uiAutomatorBridge.uiAutomation
 
 inline val uiDevice: CoroutineUiDevice get() = uiAutomatorBridge.uiDevice
+
+inline val premiumContext get() = PremiumMixin.premiumContext
+
+inline val isPremium get() = PremiumMixin.isPremium
+
+fun ensurePremium() {
+    PremiumMixin.ensurePremium()
+}

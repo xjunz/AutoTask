@@ -1,7 +1,6 @@
 // IRemoteAutomatorService.aidl
 package top.xjunz.tasker.service;
 
-import top.xjunz.tasker.service.IAvailabilityChecker;
 import top.xjunz.tasker.task.runtime.IRemoteTaskManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.os.IBinder;
@@ -19,10 +18,6 @@ interface IRemoteAutomatorService {
 
     boolean isConnected() = 4;
 
-    IAvailabilityChecker createAvailabilityChecker() = 6;
-
-    void executeShellCmd(String cmd) = 7;
-
     IRemoteTaskManager getTaskManager() = 8;
 
     void setSystemTypefaceSharedMemory(in SharedMemory mem) = 9;
@@ -30,6 +25,10 @@ interface IRemoteAutomatorService {
     void suppressResidentTaskScheduler(boolean suppress) = 10;
 
     void scheduleOneshotTask(long id, in ITaskCompletionCallback callback) = 11;
+
+    void setPremiumContextStoragePath(in String path) = 12;
+
+    void loadPremiumContext() = 13;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server
 

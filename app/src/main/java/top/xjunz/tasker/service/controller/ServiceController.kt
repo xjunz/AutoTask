@@ -76,13 +76,6 @@ abstract class ServiceController<S : Any> : CoroutineScope {
         listenerRef = null
     }
 
-    protected inline fun <R> doWhenRunning(block: (S) -> R): R? {
-        if (isServiceRunning) {
-            return block(service!!)
-        }
-        return null
-    }
-
     override val coroutineContext = SupervisorJob() + CoroutineName("ServiceControllerScope")
 
 }

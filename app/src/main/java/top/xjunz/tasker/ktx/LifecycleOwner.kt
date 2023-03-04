@@ -9,6 +9,7 @@ import android.app.Dialog
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,8 +25,8 @@ fun LifecycleOwner.peekContext(): Context {
     error("This LifecycleOwner is not an Activity or a Fragment!")
 }
 
-fun LifecycleOwner.peekActivity(): Activity {
-    if (this is Activity) return this
+fun LifecycleOwner.peekActivity(): FragmentActivity {
+    if (this is FragmentActivity) return this
     if (this is Fragment) return requireActivity()
     error("This LifecycleOwner is not an Activity or a Fragment!")
 }

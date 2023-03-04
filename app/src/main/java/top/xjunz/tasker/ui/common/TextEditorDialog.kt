@@ -52,6 +52,8 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         lateinit var onConfirmed: (String) -> CharSequence?
 
         var editTextConfig: ((EditText) -> Unit)? = null
+
+        var hint: CharSequence? = null
     }
 
     private val viewModel by viewModels<InnerViewModel>()
@@ -62,6 +64,10 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         viewModel.title = title
         viewModel.defText = defText
         viewModel.onConfirmed = onConfirmed
+    }
+
+    fun setHint(hint: CharSequence?) = doWhenCreated {
+        viewModel.hint = hint
     }
 
     fun configEditText(config: (EditText) -> Unit) = doWhenCreated {
@@ -144,6 +150,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     }
                 }
             }
+            tilInput.hint = viewModel.hint
 
             if (savedInstanceState == null) inputBox.setText(viewModel.defText)
             inputBox.setSelectionToEnd()

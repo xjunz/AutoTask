@@ -33,11 +33,7 @@ class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
     override val coroutineContext: CoroutineContext =
         Dispatchers.Default + CoroutineName("OneshotTaskScope") + SupervisorJob()
 
-    override fun scheduleTasks(
-        tasks: Iterator<XTask>,
-        arg: Unit,
-        listener: XTask.TaskStateListener?
-    ) {
+    override fun scheduleTasks(tasks: List<XTask>, arg: Unit, listener: XTask.TaskStateListener?) {
         if (isSuppressed) return
         for (task in tasks) {
             check(task.metadata.taskType == taskType) {
@@ -55,7 +51,7 @@ class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
     fun scheduleTask(task: XTask, onCompletion: ITaskCompletionCallback) {
         if (currentActiveTask != null) return
         scheduleTasks(
-            Collections.singleton(task).iterator(), Unit,
+            Collections.singletonList(task), Unit,
             object : XTask.TaskStateListener {
                 override fun onTaskFinished(runtime: TaskRuntime) {
                     super.onTaskFinished(runtime)

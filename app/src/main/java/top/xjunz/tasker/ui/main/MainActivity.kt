@@ -5,49 +5,82 @@
 package top.xjunz.tasker.ui.main
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.WindowCompat
-import androidx.core.view.doOnPreDraw
-import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.*
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.coroutines.launch
-import rikka.shizuku.Shizuku
-import top.xjunz.tasker.FEEDBACK_GROUP_URL
+import top.xjunz.shared.utils.illegalArgument
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
-import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.databinding.ActivityMainBinding
+import top.xjunz.tasker.engine.applet.util.hierarchy
+import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.OperatingMode
-import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
+import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.service.serviceController
-import top.xjunz.tasker.ui.AboutFragment
-import top.xjunz.tasker.ui.check.AvailabilityCheckDialog
-import top.xjunz.tasker.ui.task.showcase.TaskShowcaseDialog
+import top.xjunz.tasker.task.inspector.InspectorMode
+import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
+import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
+import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.ui.base.DialogStackMixin
+import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
+import top.xjunz.tasker.ui.service.ServiceStarterDialog
+import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
+import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
+import top.xjunz.tasker.ui.task.showcase.*
+import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import top.xjunz.tasker.util.ClickListenerUtil.setOnDoubleClickListener
 import top.xjunz.tasker.util.ShizukuUtil
+import java.util.*
 import java.util.concurrent.TimeoutException
 
 /**
  * @author xjunz 2021/6/20 21:05
  */
-class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListener {
+class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
 
-    private val viewModel by viewModels<MainViewModel>()
-
-    private val handler by lazy {
-        Handler(mainLooper)
-    }
+    private val mainViewModel by viewModels<MainViewModel>()
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
+    }
+
+    private val viewModel by viewModels<TaskShowcaseViewModel>()
+
+    private val fragments = arrayOfNulls<BaseTaskShowcaseFragment>(3)
+
+    private lateinit var fabBehaviour: HideBottomViewOnScrollBehavior<View>
+
+    private val viewPagerAdapter by lazy {
+        object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 3
+
+            override fun createFragment(position: Int): Fragment {
+                val f = when (position) {
+                    0 -> EnabledTaskFragment()
+                    1 -> ResidentTaskFragment()
+                    2 -> OneshotTaskFragment()
+                    else -> illegalArgument()
+                }
+                fragments[position] = f
+                return f
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,42 +90,32 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         initViews()
         observeData()
         initServiceController()
-        viewModel.init()
+        DialogStackManager.setCallback(this)
+        binding.tvTitle.setOnDoubleClickListener {
+            PremiumMixin.clearPremium()
+            toast("Premium cleared!")
+        }
+    }
+
+    private var isExited = false
+
+    override fun onDialogPush(stack: Stack<DialogStackManager.StackEntry>) {
+        if (!DialogStackManager.isVisible(null) && !isExited) {
+            DialogStackMixin.animateExit(window)
+            isExited = true
+        }
+    }
+
+    override fun onDialogPop(stack: Stack<DialogStackManager.StackEntry>) {
+        if (DialogStackManager.isVisible(null) && isExited) {
+            DialogStackMixin.animateReturn(window)
+            isExited = false
+        }
     }
 
     private fun initServiceController() {
-        serviceController.setStateListener(viewModel)
+        serviceController.setStateListener(mainViewModel)
         serviceController.bindExistingServiceIfExists()
-    }
-
-    private val popupMenu by lazy {
-        PopupMenu(this, binding.ibMenu).apply {
-            menuInflater.inflate(R.menu.main, menu)
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.item_feedback_group -> viewUrlSafely(FEEDBACK_GROUP_URL)
-                    R.id.item_feedback_issues -> viewUrlSafely("https://github.com/xjunz/AutoSkip/issues")
-                    R.id.item_about -> AboutFragment().show(supportFragmentManager, "about")
-                }
-                return@setOnMenuItemClickListener true
-            }
-        }
-    }
-
-    private val operatingModeMenu by lazy {
-        PopupMenu(this, binding.containerOperatingMode, Gravity.END).apply {
-            menuInflater.inflate(R.menu.operating_modes, menu)
-            setOnMenuItemClickListener {
-                if (it.itemId == R.id.item_shizuku_mode) {
-                    viewModel.setCurrentOperatingMode(OperatingMode.Privilege)
-                } else if (it.itemId == R.id.item_a11y_mode) {
-                    viewModel.setCurrentOperatingMode(OperatingMode.Accessibility)
-                }
-                // Some status may have changed(such as shizuku-related status), sync now
-                serviceController.syncStatus()
-                return@setOnMenuItemClickListener true
-            }
-        }
     }
 
     override fun onResume() {
@@ -101,49 +124,87 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
     }
 
     private fun observeData() {
-        observe(viewModel.isServiceBinding) {
-            binding.btnRun.isEnabled = !it
-            if (it) binding.tvServiceStatus.setText(R.string.service_connecting)
+        observeTransient(viewModel.requestEditTask) {
+            val task = it.first
+            val prevChecksum = task.checksum
+            FlowEditorDialog().initBase(task, false).doOnTaskEdited {
+                viewModel.updateTask(prevChecksum, task)
+            }.setFlowToNavigate(it.second?.hierarchy).show(supportFragmentManager)
         }
-        observe(viewModel.isServiceRunning) {
-            binding.btnRun.isActivated = it
-            if (it) {
-                handler.post(updateDurationTask)
-                binding.tvServiceStatus.setText(R.string.service_is_running)
-                binding.btnRun.setText(R.string.stop)
-            } else {
-                handler.removeCallbacks(updateDurationTask)
-                binding.tvServiceStatus.setText(R.string.service_not_started)
-                binding.btnRun.setText(R.string.run)
-                binding.tvPrompt.setText(R.string.prompt_start_service)
-            }
+        observeTransient(viewModel.requestTrackTask) {
+            FlowEditorDialog().initBase(it, true).setTrackMode().show(supportFragmentManager)
         }
-        observe(ShizukuAutomatorServiceController.isShizukuInstalled) {
-            binding.btnShizukuAction.isActivated = it
-            if (it) {
-                binding.btnShizukuAction.setText(R.string.launch_shizuku_manager)
-            } else {
-                binding.btnShizukuAction.setText(R.string.install_shizuku)
-            }
-        }
-        observe(ShizukuAutomatorServiceController.isShizukuGranted) {
-            binding.btnGrant.isEnabled = Shizuku.pingBinder() && !it
-            binding.btnRun.isEnabled = it
-            if (it) {
-                // [isRunning] has a higher priority
-                if (viewModel.isServiceRunning.isNotTrue) {
-                    binding.tvPrompt.setText(R.string.prompt_start_service)
+        observeTransient(viewModel.requestToggleTask) { task ->
+            when (task.metadata.taskType) {
+                XTask.TYPE_RESIDENT -> {
+                    val title = if (task.isEnabled) R.string.prompt_disable_task.text
+                    else R.string.prompt_enable_task.text
+                    makeSimplePromptDialog(msg = title) {
+                        if (!task.isEnabled && !isPremium && LocalTaskManager.getEnabledResidentTasks().size ==
+                            ResidentTaskScheduler.MAX_ENABLED_RESIDENT_TASKS_FOR_NON_PREMIUM_USER
+                        ) {
+                            showPurchaseDialog(R.string.tip_purchase_premium_max_resident_tasks)
+                        } else {
+                            viewModel.toggleTask(task)
+                        }
+                    }.setNeutralButton(
+                        if (task.isEnabled) R.string.disable_all_tasks
+                        else R.string.enable_all_tasks
+                    ) { _, _ ->
+                        val tasks = TaskStorage.getAllTasks().filter {
+                            it.metadata.taskType == XTask.TYPE_RESIDENT && it.isEnabled == task.isEnabled
+                        }.toList()
+                        if (!task.isEnabled && !isPremium && tasks.size + LocalTaskManager.getEnabledResidentTasks().size >
+                            ResidentTaskScheduler.MAX_ENABLED_RESIDENT_TASKS_FOR_NON_PREMIUM_USER
+                        ) {
+                            showPurchaseDialog(R.string.tip_purchase_premium_max_resident_tasks)
+                        } else {
+                            tasks.forEach {
+                                viewModel.toggleTask(it)
+                            }
+                        }
+                    }.show().also {
+                        it.getButton(DialogInterface.BUTTON_NEUTRAL)
+                            .setTextColor(ColorScheme.colorError)
+                    }
                 }
-                binding.btnGrant.setText(R.string.granted)
-            } else {
-                binding.tvPrompt.setText(R.string.prompt_request_permission)
-                binding.btnGrant.setText(R.string.grant)
+                XTask.TYPE_ONESHOT -> {
+                    FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT).doOnSucceeded {
+                        floatingInspector.viewModel.isCollapsed.value = false
+                    }.show(supportFragmentManager)
+                }
             }
         }
-        observeDialog(viewModel.serviceBindingError) {
+        observeDangerousConfirmation(
+            viewModel.requestDeleteTask, R.string.prompt_delete_task, R.string.delete
+        ) {
+            viewModel.deleteRequestedTask()
+        }
+        observeTransient(viewModel.onNewTaskAdded) {
+            when (it.metadata.taskType) {
+                XTask.TYPE_ONESHOT -> binding.viewPager.currentItem = 2
+                XTask.TYPE_RESIDENT -> binding.viewPager.currentItem = 1
+            }
+        }
+        observeTransient(viewModel.requestAddNewTask) {
+            viewModel.addRequestedTask()
+        }
+        observeTransient(viewModel.onTaskDeleted) {
+            fabBehaviour.slideUp(binding.fabAction)
+        }
+        observe(mainViewModel.isServiceRunning) {
+            binding.btnServiceControl.isActivated = it
+            if (it) {
+                binding.btnServiceControl.setText(R.string.stop_service)
+                binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_stop_24)
+            } else {
+                binding.btnServiceControl.setText(R.string.start_service)
+                binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_play_arrow_24)
+            }
+        }
+        observeDialog(mainViewModel.serviceBindingError) {
             if (it is TimeoutException) {
-                makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out)
-                    .setTitle(R.string.error_occurred)
+                makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out).setTitle(R.string.error_occurred)
                     .setNegativeButton(R.string.launch_shizuku_manager) { _, _ ->
                         ShizukuUtil.launchShizukuManager()
                     }.setPositiveButton(R.string.retry) { _, _ ->
@@ -153,103 +214,68 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
                 showErrorDialog(it)
             }
         }
-        observe(viewModel.operatingMode) {
-            binding.root.beginAutoTransition()
-            if (it == OperatingMode.Privilege) {
-                operatingModeMenu.menu.findItem(R.id.item_shizuku_mode).isChecked = true
-            } else {
-                operatingModeMenu.menu.findItem(R.id.item_a11y_mode).isChecked = true
-            }
-            binding.containerShizukuIntro.isVisible = it == OperatingMode.Privilege
-            binding.tvDescMode.text = it.description
-            binding.tvMode.text = it.name
-            binding.btnRun.isEnabled = it == OperatingMode.Accessibility
-        }
+
         observeDangerousConfirmation(
-            viewModel.stopServiceConfirmation,
-            R.string.prompt_stop_service,
-            R.string.stop
+            mainViewModel.stopServiceConfirmation, R.string.prompt_stop_service, R.string.stop
         ) {
-            viewModel.toggleService()
+            mainViewModel.toggleService()
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
-        binding.ibMenu.setOnTouchListener(popupMenu.dragToOpenListener)
-        binding.ibMenu.setOnClickListener {
-            popupMenu.menu.findItem(R.id.item_auto_start).isChecked =
-                AutoStartUtil.isAutoStartEnabled
-            popupMenu.show()
+        binding.tvTitle.setOnDoubleClickListener {
+            Preferences.showDragToMoveTip = true
+            Preferences.showToggleRelationTip = true
+            Preferences.showSwipeToRemoveTip = true
+            Preferences.showLongClickToSelectTip = true
         }
-        binding.topBar.oneShotApplySystemInsets { v, insets ->
+        binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
             v.doOnPreDraw {
-                binding.scrollView.updatePadding(top = v.height)
+                viewModel.appbarHeight.value = it.height
             }
         }
-        binding.btnShizukuAction.setOnClickListener {
-            if (ShizukuAutomatorServiceController.isShizukuInstalled.isTrue) {
-                ShizukuUtil.launchShizukuManager()
+        binding.bottomBar.applySystemInsets { v, insets ->
+            v.updatePadding(bottom = insets.bottom)
+        }
+        binding.fabAction.doOnPreDraw {
+            viewModel.paddingBottom.value = it.height + binding.bottomBar.height
+        }
+        binding.bottomBar.background.let {
+            it as MaterialShapeDrawable
+            it.elevation = 4.dpFloat
+            it.alpha = (.88 * 0xFF).toInt()
+        }
+        binding.btnServiceControl.setNoDoubleClickListener {
+            if (it.isActivated) {
+                mainViewModel.stopServiceConfirmation.value = true
             } else {
-                viewUrlSafely("https://www.coolapk.com/apk/moe.shizuku.privileged.api")
+                ServiceStarterDialog().show(supportFragmentManager)
             }
         }
-        binding.btnGrant.setOnClickListener {
-            if (Shizuku.shouldShowRequestPermissionRationale()) {
-                toast(getString(R.string.pls_grant_manually))
-                ShizukuUtil.launchShizukuManager()
-            } else {
-                if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                    Shizuku.addRequestPermissionResultListener(this)
-                    Shizuku.requestPermission(1)
-                } else {
-                    ShizukuAutomatorServiceController.isShizukuGranted.value = true
-                }
-            }
+        binding.fabAction.setNoDoubleClickListener {
+            TaskCreatorDialog().show(supportFragmentManager)
         }
-        binding.containerOperatingMode.setOnClickListener {
-            if (viewModel.isServiceBinding.isTrue || viewModel.isServiceRunning.isTrue) {
-                toast(R.string.prompt_unable_to_switch_mode)
-                return@setOnClickListener
-            }
-            if (viewModel.operatingMode eq OperatingMode.Privilege) {
-                operatingModeMenu.menu.findItem(R.id.item_shizuku_mode).isChecked = true
-            } else if (viewModel.operatingMode eq OperatingMode.Accessibility) {
-                operatingModeMenu.menu.findItem(R.id.item_a11y_mode).isChecked = true
-            }
-            operatingModeMenu.show()
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.bottomBar.setOnItemSelectedListener {
+            binding.viewPager.currentItem = binding.bottomBar.menu.indexOf(it)
+            return@setOnItemSelectedListener true
         }
-        binding.btnRun.setOnClickListener {
-            if (viewModel.isServiceRunning.isTrue) {
-                viewModel.stopServiceConfirmation.toggle()
-            } else {
-                viewModel.toggleService()
-            }
-        }
-        binding.containerCheck.setOnClickListener {
-            if (viewModel.isServiceRunning.isNotTrue) {
-                toast(R.string.pls_start_service)
-                return@setOnClickListener
-            }
-            AvailabilityCheckDialog().show(supportFragmentManager)
-        }
-        binding.containerCustom.setOnClickListener {
-            TaskShowcaseDialog().show(supportFragmentManager)
-        }
-    }
-
-    private val updateDurationTask = object : Runnable {
-        override fun run() {
-            val timestamp = serviceController.startTimestamp
-            if (timestamp > 0) {
-                val duration = System.currentTimeMillis() - timestamp
-                binding.tvPrompt.text = R.string.format_running_duration.format(
-                    duration / 3_600_000, duration / 60_000 % 60, duration / 1000 % 60
+        fabBehaviour =
+            ((binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior<View>)
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                binding.bottomBar.selectedItemId = binding.bottomBar.menu.getItem(position).itemId
+                ((binding.bottomBar.layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior<View>).slideUp(
+                    binding.bottomBar,
+                    true
                 )
+                fabBehaviour.slideUp(binding.fabAction, true)
+                binding.appBar.setLiftOnScrollTargetView(fragments[position]?.getScrollTarget())
             }
-            handler.postDelayed(this, 1000)
-        }
+        })
     }
 
     @SuppressLint("MissingSuperCall")
@@ -259,25 +285,16 @@ class MainActivity : AppCompatActivity(), Shizuku.OnRequestPermissionResultListe
         // will be no active observers.
         lifecycleScope.launch {
             lifecycle.withStarted {
-                viewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
+                mainViewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
             }
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
         serviceController.unbindService()
         DialogStackManager.destroyAll()
-        Shizuku.removeRequestPermissionResultListener(this)
         ColorScheme.release()
     }
 
-    override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-        ShizukuAutomatorServiceController.isShizukuGranted.value = ShizukuUtil.isShizukuAvailable
-    }
 }

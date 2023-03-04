@@ -62,7 +62,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val isBase: Boolean get() = flow is RootFlow
 
-    val selectedApplet = MutableLiveData<Applet>()
+    val selectedApplet = MutableLiveData<Applet?>()
 
     val isFabVisible = MutableLiveData<Boolean>()
 

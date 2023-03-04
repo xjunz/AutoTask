@@ -5,7 +5,7 @@
 package top.xjunz.tasker.task.runtime
 
 import android.os.IBinder.DeathRecipient
-import top.xjunz.tasker.engine.dto.XTaskDTO.Serializer.toDTO
+import top.xjunz.tasker.engine.dto.toDTO
 import top.xjunz.tasker.engine.task.TaskManager
 import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask

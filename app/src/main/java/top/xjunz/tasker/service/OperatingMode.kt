@@ -24,8 +24,6 @@ sealed class OperatingMode(
 
     val name get() = nameRes.str
 
-    val description get() = descRes.str
-
     abstract val serviceController: ServiceController<out AutomatorService>
 
     object Privilege : OperatingMode(0, R.string.shizuku, R.string.desc_shizuku_mode) {

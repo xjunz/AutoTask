@@ -1,23 +1,17 @@
 <!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
-
 <resources>
     <string name="app_name">自动任务</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
     <string name="grant_by_shizuku"><b>Shizuku</b>权限</string>
     <string name="intro_to_shizuku">我们需要Shizuku权限才能启动服务，请放心，Shizuku权限用于且仅用于使应用正常工作。
     \n\n该模式下，所有功能可用，推荐使用该模式。</string>
-    <string name="m_restriction">在<b> Android 6.0 </b>上的限制</string>
-    <string name="intro_m_restriction">由于系统限制，在Android 6.0中，本应用与无障碍服务冲突。
-        在服务启动之后，无障碍服务将会结束运行；并且在停止服务之后，无障碍服务才会重新启动。</string>
-    <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
-        相比于其他同类产应用，本应用有以下优点：\n\n
-        • 不需要您手动开启辅助功能\n
-        • 支持开机自启\n
-        • 不需要在通知栏显示通知以保持后台运行\n
-        • 无需保活，后台常驻\n
-        • 省电且占用系统资源少\n\n除此之外，本应用是<a href='xtsk://about'>开源</a>应用，您不必担心此应用在后台“做坏事”。
+    <string name="more_to_say">本应用专注于帮助您执行自动任务。\n\n
+        我们的优势在于：\n\n
+        • 可自定义任务\n
+        • 使用简单，功能丰富\n
+        • 省电且占用系统资源较少\n
     </string>
     <string name="more">更多</string>
     <string name="service_is_running">服务正在运行…</string>
@@ -25,12 +19,7 @@
     <string name="stop">停止</string>
     <string name="about">关于</string>
     <string name="settings">设置</string>
-    <string name="statistics">统计数据</string>
-    <string name="format_total_count">累计已跳过 %d 次</string>
-    <string name="caption_test">测试服务是否激活并且能否正常工作</string>
-    <string name="usability_test">可用性测试</string>
     <string name="install_shizuku">安装Shizuku</string>
-    <string name="shizuku_not_installed">未安装Shizuku</string>
     <string name="grant">授权</string>
     <string name="granted">已授权</string>
     <string name="enter">进入</string>
@@ -45,61 +34,34 @@
     <string name="error_occurred">发生错误</string>
     <string name="dump_log">导出日志</string>
     <string name="dump_log_failed">导出日志失败</string>
-    <string name="skip">跳过</string>
-    <string name="hint_drag_target">拖动「跳过」按钮可移动其位置</string>
-    <string name="test_ok">测试成功</string>
-    <string name="test_not_ok">测试失败</string>
-    <string name="illegal_location">非法位置</string>
-    <string name="illegal_size">非法大小</string>
-    <string name="cannot_find">未找到元素</string>
-    <string name="unknown_problem">未知问题</string>
-    <string name="icon">图标</string>
-    <string name="format_count">%d次</string>
-    <string name="format_count_per_day">平均 %.1f 次每天</string>
     <string name="format_duration">共%d天%d时%d分</string>
-    <string name="format_first_time">首次: %s</string>
-    <string name="format_latest_time">最近: %s</string>
-    <string name="records">记录</string>
-    <string name="unknown_app">未知应用</string>
     <string name="location_demonstration">位置演示</string>
     <string name="auto_start_after_boot">开机自启</string>
     <string name="caption_auto_start">开启Shizuku</string>
     <string name="tip_enable_shizuku_auto_start">请先启用Shizuku的「开机启动」功能</string>
-    <string name="test">测试</string>
-    <string name="height">高度</string>
-    <string name="width">宽度</string>
     <string name="auto_started_for_u">已为您开机自启</string>
     <string name="auto_starting_for_u">正在为您开机自启…</string>
     <string name="ascending">升序</string>
     <string name="app_label">应用名称</string>
-    <string name="first_timestamp">首次跳过时间</string>
-    <string name="latest_timestamp">最近跳过时间</string>
-    <string name="ave_skipping_count_per_day">每日跳过次数</string>
-    <string name="total_skipping_count">总跳过次数</string>
     <string name="sort_by">排序方式</string>
     <string name="feedback">反馈</string>
-    <string name="donate">捐赠</string>
-    <string name="source_code">源代码</string>
-    <string name="update">下载最新版</string>
+    <string name="check_for_updates">检查更新</string>
     <string name="mail_subject">「自动跳过」反馈 %s</string>
     <string name="mail_body">%s\n*使用Gmail等邮箱软件可自动添加附件。如当前邮箱软件无法添加附件，烦请导出日志后手动添加该日志为附件。*\n问题描述:\n</string>
-    <string name="license">此应用以Apache-2.0 License协议<a href='https://github.com/xjunz/AutoSkip'>开源</a>。
-        如果您喜欢此应用，可以点击下方「捐赠」按钮以支持我的工作。</string>
-    <string name="cr">Copyright © XJUNZ 2021</string>
+    <string name="cr">Copyright © XJUNZ %d</string>
     <string name="no_log">无日志</string>
     <string name="feedback_group">加群</string>
     <string name="feedback_email">邮件</string>
-    <string name="feedback_issues">Issues</string>
     <string name="night_mode">夜间模式</string>
     <string name="text">文本</string>
     <string name="app_not_found">找不到打开方式</string>
-    <string name="select_operating_mode">选择工作模式</string>
+    <string name="operating_mode">工作模式</string>
     <string name="accessibility_service_summary">允许应用获取屏幕信息以及执行自定义任务,\n该功能用于且仅用于使应用正常工作。</string>
     <string name="shizuku"><b>Shizuku</b></string>
     <string name="a11y_service">辅助功能</string>
     <string name="desc_shizuku_mode">Shizuku模式下，可使用全部功能，推荐使用该模式</string>
     <string name="desc_a11y_mode">辅助功能模式下，部分功能将受限</string>
-    <string name="prompt_unable_to_switch_mode">当前服务正在启动或运行中，无法切换工作模式</string>
+    <string name="error_unable_to_switch_mode">当前服务正在启动或运行中，无法切换工作模式</string>
     <string name="tip">提示</string>
     <string name="prompt_shizuku_time_out">启动超时，请尝试重试。若重试后仍然超时，可尝试重新授权Shizuku权限。</string>
     <string name="pls_start_a11y_service_manually">请在设置中手动启用【自动任务】的辅助功能服务</string>
@@ -312,7 +274,7 @@
     <string name="desc_long_running_task">创建长期在后台运行的轻量级任务，常驻任务由事件驱动</string>
     <string name="desc_oneshot_task">创建单次运行的(耗时)任务，执行完成后即停止，用户可随时重新启动</string>
     <string name="oneshot_task">单次任务</string>
-    <string name="quick_click_mode">连点器</string>
+    <string name="click_automator">连点器</string>
     <string name="record_gesture">录制手势</string>
     <string name="tip_edit_task_metadata">* 您稍后仍然可以修改以上信息</string>
     <string name="task_name">任务名称</string>
@@ -321,11 +283,12 @@
     <string name="no_desc_provided">未提供该任务的描述</string>
     <string name="enabled">已启用</string>
     <string name="start_task">启动任务</string>
-    <string name="preload_task">预置任务</string>
+    <string name="preload_tasks">预置任务</string>
     <string name="format_error_code">发生错误(%d)</string>
     <string name="format_error_occurred">发生错误: %s</string>
     <string name="import_tasks">导入任务</string>
-    <string name="desc_import_tasks">从本地文件中导入任务</string>
+    <string name="_import">导入</string>
+    <string name="desc_import_tasks">从本地文件中导入任务，支持多选</string>
     <string name="prompt_disable_task">你确定要停用该任务吗？</string>
     <string name="prompt_enable_task">你确定要启用该任务吗？</string>
     <string name="nothing_here">空空如也</string>
@@ -512,4 +475,65 @@
     <string name="rotation_direction">旋转角度</string>
     <string name="format_desc_rotation_screen">旋转屏幕到%s</string>
     <string name="tip_api_too_low">很抱歉，由于当前Android版本过低，不支持该功能！</string>
+    <string name="version_info">版本信息</string>
+    <string name="snapshots">记录</string>
+    <string name="width">宽度</string>
+    <string name="height">高度</string>
+    <string name="shizuku_not_installed">未安装Shizuku</string>
+    <string name="activate_premium">激活专业版</string>
+    <string name="premium_edition">Premium Edition</string>
+    <string name="premium_edition_price">永久专业版价格</string>
+    <string name="current_order">当前订单</string>
+    <string name="order_id">订单号</string>
+    <string name="create_time">创建于</string>
+    <string name="payment_amount">金额</string>
+    <string name="i_have_paid">我已付款</string>
+    <string name="has_updates">检测到新版本！</string>
+    <string name="html_updates_info">
+        <![CDATA[<b>版本名: </b>%s<br/><br/>
+        <b>文件大小: </b>%s<br/><br/>
+        <b>更新内容: </b><br>%s]]>
+    </string>
+    <string name="purchase_prompt"><b>1.</b> 订单创建后，若您在有效期限内未付款，订单将会自动失效，<b>失效后请勿付款</b>。
+\n<b>2.</b> 目前仅支持<b>支付宝</b>付款，如需其他渠道付款请联系我们。
+\n<b>3.</b> 若付款成功后长时间(如订单失效后)仍未获得专业版，请<a href='webackup://payment-feedback'><b>点击此处</b></a>向我们反馈，我们会尽快处理。</string>
+    <string name="format_yuan">%s元</string>
+    <string name="format_price">需支付金额为：%s，已复制到剪切板</string>
+    <string name="format_expired_countdown">%s后失效</string>
+    <string name="request_failed">请求失败</string>
+    <string name="fetching_order">正在获取订单信息…</string>
+    <string name="format_discounted">（已折扣%s）</string>
+    <string name="go_to_pay">前往付款</string>
+    <string name="expired">已失效</string>
+    <string name="restore_purchase">恢复购买</string>
+    <string name="create_order">创建订单</string>
+    <string name="premium_edition_desc"><b>专业版优势:</b>
+\n• 无6小时自动停止的限制
+\n• 无最多同时启用3个常驻任务的限制
+\n• 自定义任务可使用专享规则
+\n• 未来添加的更多专业版功能</string>
+    <string name="redeem">礼品码</string>
+    <string name="format_retry_in">%d秒后重试</string>
+    <string name="input_redeem">请输入礼品码</string>
+    <string name="invalid_redeem">无效的礼品码</string>
+    <string name="redeem_expired">该礼品码已过期</string>
+    <string name="checking_redeem">正在检查礼品码…</string>
+    <string name="premium_activated">专业版已激活</string>
+    <string name="thanks_for_supporting">感谢您的支持</string>
+    <string name="paid">已付款</string>
+    <string name="too_many_requests">服务器繁忙，请稍后重试</string>
+    <string name="order_id_copied">订单号已复制到剪切板</string>
+    <string name="tip_order_id_copied">订单号已复制到剪切板，请注意保管</string>
+    <string name="redeem_already_consumed">次礼品码已被使用</string>
+    <string name="format_request_failed">请求失败（%s）</string>
+    <string name="order_not_found">未找到此订单信息</string>
+    <string name="order_not_paid">此订单未完成付款</string>
+    <string name="format_unknown_error">未知错误（%s）</string>
+    <string name="premium_user_device_list_full">很抱歉，此订单号的激活次数已耗尽</string>
+    <string name="invalid_order">无效的订单号</string>
+    <string name="warning_order_id_after_paid">请注意保管您的<b>订单号</b>，它是您未来用于恢复购买的凭证。</string>
+    <string name="tip_purchase_premium_max_resident_tasks">很抱歉，非专业版最多只能同时启用3个常驻任务</string>
+    <string name="cancelled">已取消</string>
+    <string name="error_unsupported_file">不支持的文件类型</string>
+    <string name="imported">已导入</string>
 </resources>

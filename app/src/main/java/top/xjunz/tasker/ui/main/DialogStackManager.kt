@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.main
 
+import java.lang.ref.WeakReference
 import java.util.*
 
 /**
@@ -13,7 +14,13 @@ import java.util.*
  */
 object DialogStackManager {
 
+    private var callback: WeakReference<Callback>? = null
+
     private var stack: Stack<StackEntry>? = null
+
+    fun setCallback(callback: Callback) {
+        this.callback = WeakReference(callback)
+    }
 
     private fun requireStack(): Stack<StackEntry> {
         if (stack == null) {
@@ -27,11 +34,19 @@ object DialogStackManager {
             requireStack().push(StackEntry(tag, isFullScreen, null))
         } else {
             requireStack().push(StackEntry(tag, isFullScreen, requireStack().peek()))
+        }.also {
+            callback?.get()?.onDialogPush(requireStack())
         }
     }
 
     fun pop(): StackEntry? {
-        return if (requireStack().isEmpty()) null else requireStack().pop()
+        return if (requireStack().isEmpty()) {
+            null
+        } else {
+            requireStack().pop().also {
+                callback?.get()?.onDialogPop(requireStack())
+            }
+        }
     }
 
     fun destroyAll() {
@@ -39,13 +54,8 @@ object DialogStackManager {
         stack = null
     }
 
-    /**
-     * Whether the target is visible.
-     */
+    /** Whether the target is visible. */
     fun isVisible(target: String?): Boolean {
-        requireNotNull(target) {
-            "Tag is null"
-        }
         var cur = if (requireStack().isEmpty()) null else requireStack().peek()
         var occlusion: String? = null
         while (cur != null) {
@@ -57,8 +67,14 @@ object DialogStackManager {
             }
             cur = cur.previous
         }
-        // Not even present in the stack
-        return false
+        return occlusion == null
+    }
+
+    interface Callback {
+
+        fun onDialogPush(stack: Stack<StackEntry>)
+
+        fun onDialogPop(stack: Stack<StackEntry>)
     }
 
     class StackEntry(val tag: String, val isFullScreen: Boolean, val previous: StackEntry? = null)

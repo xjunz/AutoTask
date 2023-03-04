@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.gesture
 
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
 import android.graphics.Point
 import android.media.AudioManager
 import android.view.KeyEvent
@@ -111,7 +112,7 @@ class SerializableInputEvent(
 
     suspend fun execute(): Boolean {
         val successful = if (type == INPUT_TYPE_MOTIONS) {
-            (uiAutomatorBridge.gestureController as top.xjunz.tasker.uiautomator.CoroutineGestureController)
+            uiAutomatorBridge.gestureController
                 .performSinglePointerGesture(getGesture())
         } else {
             delay(delay)
@@ -121,6 +122,7 @@ class SerializableInputEvent(
         return true
     }
 
+    @SuppressLint("GestureBackNavigation")
     private fun executeKeyCode(keyCode: Int): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_BACK -> uiAutomation.performGlobalAction(

@@ -85,7 +85,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     val hourMinSec = invertibleAppletOption(R.string.in_hour_min_sec_range) {
         numberRangeCriterion<Calendar, Int> {
             IntValueUtil.composeTime(
-                it.get(Calendar.HOUR),
+                it.get(Calendar.HOUR_OF_DAY),
                 it.get(Calendar.MINUTE),
                 it.get(Calendar.SECOND)
             )

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -12,8 +11,4 @@
     <dimen name="corner_closeup">16dp</dimen>
     <dimen name="fab_normal">48dp</dimen>
     <dimen name="fab_small">40dp</dimen>
-    <dimen name="spacing_small">4dp</dimen>
-    <dimen name="spacing_unit">8dp</dimen>
-    <dimen name="spacing_normal">16dp</dimen>
-    <dimen name="spacing_large">32dp</dimen>
 </resources>

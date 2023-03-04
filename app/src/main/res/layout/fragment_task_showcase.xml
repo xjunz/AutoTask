@@ -10,19 +10,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_placeholder"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:background="@drawable/bg_solid_circle"
+            android:background="?colorPrimaryContainer"
             android:contentDescription="@string/nothing_here"
-            android:padding="16dp"
-            android:src="@drawable/ic_playlist_add_24px"
+            android:src="@drawable/ic_gesture_24px"
+            app:contentPadding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.40"
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
             app:tint="?colorPrimary" />
 
         <TextView

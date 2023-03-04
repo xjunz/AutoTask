@@ -23,7 +23,6 @@ class AccessibilityNodeInfo {
         println(uiAutomation.serviceInfo)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             uiAutomation.waitForIdle(100, 500)
-            val window = uiAutomation.rootInActiveWindow
         }
         uiAutomation.setOnAccessibilityEventListener {
             println(it)

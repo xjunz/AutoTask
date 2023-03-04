@@ -34,3 +34,11 @@ fun formatMinSecMills(mills: Number) = buildString {
     if (sec != 0) append(sec).append(R.string.second.str)
     if (mill != 0) append(mill).append(R.string.millisecond.str)
 }
+
+fun formatMinSec(mills: Number) = buildString {
+    val milliseconds = mills.toInt()
+    val min = milliseconds / (60 * 1000)
+    val sec = milliseconds % (60 * 1000) / 1000
+    if (min != 0) append(min).append(R.string.minute.str)
+    if (sec != 0) append(sec).append(R.string.second.str)
+}

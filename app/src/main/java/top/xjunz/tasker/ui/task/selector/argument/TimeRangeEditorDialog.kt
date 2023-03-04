@@ -30,7 +30,7 @@ class TimeRangeEditorDialog : RangeEditorDialog() {
         if (hour !in 0..23) return null
         if (min !in 0..59) return null
         if (sec !in 0..59) return null
-        return hour shl 16 or (min shl 8) or sec
+        return IntValueUtil.composeTime(hour, min, sec)
     }
 
     override fun Number.toStringOrNull(): String {

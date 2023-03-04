@@ -23,7 +23,7 @@ abstract class TaskScheduler<Arg> : CoroutineScope {
         }
 
     protected abstract fun scheduleTasks(
-        tasks: Iterator<XTask>, arg: Arg, listener: XTask.TaskStateListener? = null
+        tasks: List<XTask>, arg: Arg, listener: XTask.TaskStateListener? = null
     )
 
     abstract fun haltAll()

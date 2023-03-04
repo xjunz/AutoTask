@@ -9,21 +9,29 @@ buildscript {
         refine_version = "3.1.1"
         shizuku_version = '12.1.0'
         ktor_version = '2.1.1'
-        appcompat_version = "1.6.0"
+        appcompat_version = "1.6.1"
         coroutine_version = "1.6.4"
         serialization_version = '1.6.21'
         ktx_version = "1.9.0"
     }
-
+    def localProperties = new Properties()
+    localProperties.load(new FileInputStream(rootProject.file("local.properties")))
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/open-obfuscator/dProtect")
+            credentials {
+                username = localProperties.getProperty("gpr.user")
+                password = localProperties.getProperty("gpr.token")
+            }
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "dev.rikka.tools.refine:gradle-plugin:$refine_version"
-
+        classpath 're.obfuscator:dprotect-gradle:1.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

@@ -132,7 +132,6 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             } else {
                 breadCrumbAdapter.notifyDataSetChanged()
             }
-            val prevNodes = ArrayList(childrenNodes)
             childrenNodes.clear()
             if (nodeBreadCrumbs.isNotEmpty()) {
                 childrenNodes.addAll(nodeBreadCrumbs.last().children)

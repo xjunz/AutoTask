@@ -33,7 +33,8 @@ object AppletOptionFactory : AppletFactory {
     private val globalInfoRegistry =
         GlobalCriterionRegistry(BootstrapOptionRegistry.ID_GLOBAL_CRITERION_REGISTRY)
 
-    private val textRegistry = TextCriterionRegistry(BootstrapOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
+    private val textRegistry =
+        TextCriterionRegistry(BootstrapOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
 
     private val notificationRegistry =
         NotificationCriterionRegistry(BootstrapOptionRegistry.ID_NOTIFICATION_CRITERION_REGISTRY)
@@ -47,7 +48,8 @@ object AppletOptionFactory : AppletFactory {
     val gestureActionRegistry =
         GestureActionRegistry(BootstrapOptionRegistry.ID_GESTURE_ACTION_REGISTRY)
 
-    private val textActionRegistry = TextActionRegistry(BootstrapOptionRegistry.ID_TEXT_ACTION_REGISTRY)
+    private val textActionRegistry =
+        TextActionRegistry(BootstrapOptionRegistry.ID_TEXT_ACTION_REGISTRY)
 
     private val appActionRegistry =
         ApplicationActionRegistry(BootstrapOptionRegistry.ID_APP_ACTION_REGISTRY)
@@ -67,12 +69,12 @@ object AppletOptionFactory : AppletFactory {
         textRegistry,
         notificationRegistry,
         // action
+        controlActionRegistry,
         globalActionRegistry,
         uiObjectActionRegistry,
         gestureActionRegistry,
         textActionRegistry,
-        appActionRegistry,
-        controlActionRegistry
+        appActionRegistry
     )
 
     fun requireOption(applet: Applet): AppletOption {

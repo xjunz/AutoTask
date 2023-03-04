@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -21,13 +20,10 @@
             <item
                 android:id="@+id/item_feedback_email"
                 android:title="@string/feedback_email" />
-            <item
-                android:id="@+id/item_feedback_issues"
-                android:title="@string/feedback_issues" />
         </menu>
     </item>
     <item
-        android:id="@+id/item_about"
-        android:title="@string/about" />
+        android:id="@+id/item_version_info"
+        android:title="@string/version_info" />
 
 </menu>

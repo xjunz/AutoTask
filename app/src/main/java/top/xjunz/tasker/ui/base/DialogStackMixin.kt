@@ -4,19 +4,43 @@
 
 package top.xjunz.tasker.ui.base
 
+import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import top.xjunz.tasker.ui.main.DialogStackManager
 import top.xjunz.tasker.ui.main.MainViewModel
 import top.xjunz.tasker.util.Motions
 
-/**
- * @author xjunz 2023/02/21
- */
+/** @author xjunz 2023/02/21 */
 class DialogStackMixin(
     private val dialogFragment: DialogFragment,
     private val isFullScreen: Boolean
 ) {
+
+    companion object {
+
+        fun animateExit(window: Window, onEnd: () -> Unit = {}) {
+            window.peekDecorView().animate()
+                .scaleX(1.05f)
+                .scaleY(1.05f)
+                .withEndAction(onEnd)
+                .setDuration(500)
+                .setInterpolator(Motions.EASING_EMPHASIZED)
+                .start()
+        }
+
+        fun animateReturn(window: Window, onEnd: () -> Unit = {}) {
+            // Remove the decor view animation temporarily
+            window.setWindowAnimations(0)
+            window.peekDecorView().animate()
+                .setDuration(200)
+                .scaleX(1f)
+                .scaleY(1f)
+                .withEndAction(onEnd)
+                .setInterpolator(Motions.EASING_EMPHASIZED)
+                .start()
+        }
+    }
 
     var isStopped = false
         private set
@@ -67,31 +91,19 @@ class DialogStackMixin(
     }
 
     private fun animateExit() {
-        window.peekDecorView().animate()
-            .scaleX(1.05f)
-            .scaleY(1.05f)
-            .withEndAction {
-                isExiting = false
-                dialogFragment.onStop()
-            }.setDuration(500)
-            .setInterpolator(Motions.EASING_EMPHASIZED)
-            .start()
+        animateExit(window) {
+            isExiting = false
+            dialogFragment.onStop()
+        }
     }
 
     private fun animateReturn() {
         dialogFragment.onStart()
         // Remove the decor view animation temporarily
-        window.setWindowAnimations(0)
-        window.peekDecorView().animate()
-            .setDuration(200)
-            .scaleX(1f)
-            .scaleY(1f)
-            .withEndAction {
-                // The dialog may be dismissed at the moment
-                dialogFragment.dialog?.window?.setWindowAnimations(windowAnimationStyle)
-            }
-            .setInterpolator(Motions.EASING_EMPHASIZED)
-            .start()
+        animateReturn(window) {
+            // The dialog may be dismissed at the moment
+            dialogFragment.dialog?.window?.setWindowAnimations(windowAnimationStyle)
+        }
     }
 
 }

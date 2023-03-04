@@ -12,10 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.zhanghai.android.appiconloader.AppIconLoader
 import top.xjunz.tasker.R
-import top.xjunz.tasker.app
-import top.xjunz.tasker.ktx.dp
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
 
 /**
@@ -23,15 +20,13 @@ import top.xjunz.tasker.ui.model.PackageInfoWrapper
  */
 class ApplicationIconLoader {
 
-    private val loader = AppIconLoader(48.dp, true, app)
-
     private val cache = lruCache<String, Bitmap>(50)
 
     private fun loadIcon(info: PackageInfoWrapper): Bitmap? {
         val cached = cache.get(info.packageName)
         if (cached == null) {
             val icon = runCatching {
-                loader.loadIcon(info.source.applicationInfo)
+                Icons.loadIcon(info.source.applicationInfo)
             }.getOrNull() ?: return null
             cache.put(info.packageName, icon)
             return icon

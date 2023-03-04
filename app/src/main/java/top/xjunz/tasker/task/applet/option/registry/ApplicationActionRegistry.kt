@@ -9,6 +9,9 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.*
+import top.xjunz.tasker.isPrivilegedProcess
+import top.xjunz.tasker.service.ensurePremium
+import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.value.VariantType
@@ -22,8 +25,12 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val forceStopApp = appletOption(R.string.format_force_stop) {
         singleArgAction<ComponentInfoWrapper> {
             checkNotNull(it)
-            ActivityManagerBridge.forceStopPackage(it.packageName)
-            true
+            if (isPrivilegedProcess) {
+                ActivityManagerBridge.forceStopPackage(it.packageName)
+                true
+            } else {
+                false
+            }
         }
     }.withRefArgument<ComponentInfoWrapper>(R.string.specified_app)
         .hasCompositeTitle().shizukuOnly()
@@ -52,14 +59,16 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0002)
     val launchActivity = appletOption(R.string.launch_activity) {
         singleValueAction<String> {
-            ActivityManagerBridge.startComponent(it)
+            ensurePremium()
+            ActivityManagerBridge.startComponent(it + premiumContext.empty)
             true
         }
     }.withValueArgument<String>(R.string.activity, VariantType.TEXT_ACTIVITY)
         .withValueDescriber<String> {
+            ensurePremium()
             val comp = ComponentName.unflattenFromString(it)!!
             PackageManagerBridge.loadLabelOfPackage(comp.packageName)
-                .toString() + "/" + it.substringAfterLast('/')
-        }
+                .toString() + premiumContext.delimiter + it.substringAfterLast(premiumContext.delimiter)
+        }.premiumOnly()
 
 }

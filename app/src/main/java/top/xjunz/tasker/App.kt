@@ -11,6 +11,8 @@ import android.content.res.Resources.Theme
 import android.os.Build
 import androidx.appcompat.view.ContextThemeWrapper
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import top.xjunz.tasker.premium.PremiumMixin
+import java.io.File
 
 /**
  * @author xjunz 2021/6/25
@@ -49,6 +51,9 @@ class App : Application() {
             HiddenApiBypass.addHiddenApiExemptions("")
         }
         generateAppTheme()
+        PremiumMixin.premiumContextStoragePath =
+            File(getExternalFilesDir(""), PremiumMixin.PREMIUM_CONTEXT_FILE_NAME).path
+        PremiumMixin.loadPremiumFromFileSafely()
     }
 
     fun sharedPrefsOf(name: String): SharedPreferences {

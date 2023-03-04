@@ -5,6 +5,7 @@ plugins {
     id 'dev.rikka.tools.refine'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$serialization_version"
     id 'org.jetbrains.kotlin.android'
+   // id 're.obfuscator.dprotect'
 }
 
 android {
@@ -32,17 +33,21 @@ android {
             versionName += "-debug"
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "x86", "arm64-v8a"
+        }
     }
 
     buildTypes {
         release {
-            shrinkResources true
-            minifyEnabled true
+            shrinkResources false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.xjunz
         }
         debug {
             debuggable true
+            minifyEnabled false
             signingConfig signingConfigs.xjunz
         }
     }
@@ -59,11 +64,27 @@ android {
     namespace 'top.xjunz.tasker'
 }
 
+/*dProtect {
+    configurations {
+        release {
+            defaultConfiguration 'proguard-android-optimize.txt'
+            defaultConfiguration 'proguard-android.txt'
+            configuration        'proguard-rules.pro'
+            configuration        'dprotect-rules.pro'
+        }
+        debug {
+            defaultConfiguration 'proguard-android.txt'
+            configuration        'proguard-rules.pro'
+        }
+    }
+}*/
+
 dependencies {
     compileOnly project(":hidden-apis")
     implementation project(':tasker-engine')
     implementation project(':coroutine-ui-automator')
     implementation project(':shared-library')
+    implementation project(':ssl')
 
     // shizuku
     implementation "dev.rikka.shizuku:api:$shizuku_version"
@@ -81,9 +102,13 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
     // ktor
+    def ktor_version = "2.0.2"
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
     // lifecycle
-    def lifecycle_version = "2.6.0-alpha05"
+    def lifecycle_version = "2.6.0-rc01"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"

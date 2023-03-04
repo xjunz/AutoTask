@@ -108,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/records"
+                android:text="@string/snapshots"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

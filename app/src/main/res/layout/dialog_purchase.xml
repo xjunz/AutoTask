@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.text.method.LinkMovementMethod" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="8dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/price_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:background="?colorPrimary">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/premium_edition"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:textColor="#20000000"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pls_wait"
+                android:textAppearance="?textAppearanceDisplaySmall"
+                android:textColor="?colorOnPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.36"
+                tools:text="￥18.8" />
+
+            <TextView
+                android:id="@+id/tv_original_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="4dp"
+                android:alpha=".7"
+                android:textAppearance="?textAppearanceTitleMedium"
+                android:textColor="?colorOnPrimary"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_price"
+                app:layout_constraintStart_toEndOf="@id/tv_price"
+                tools:text="￥19.8" />
+
+            <TextView
+                android:id="@+id/tv_promotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:alpha="0.8"
+                android:text="@string/premium_edition_price"
+                android:textAppearance="?textAppearanceTitleMedium"
+                android:textColor="?colorOnPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_original_price"
+                tools:text="XX节限时特惠！(截至2022年6月5日0点)" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_premium"
+            style="@style/Widget.Material3.CardView.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/price_container"
+            tools:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="8dp"
+                android:padding="16dp"
+                android:text="@string/premium_edition_desc"
+                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/price_container" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tv_prompt"
+            movementMethod="@{LinkMovementMethod.getInstance()}"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:lineSpacingExtra="8dp"
+            android:padding="16dp"
+            android:text="@string/purchase_prompt"
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cv_premium" />
+
+        <TextView
+            android:id="@+id/tv_redeem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:alpha=".8"
+            android:background="@drawable/bg_badge"
+            android:backgroundTint="#50000000"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:text="@string/redeem"
+            android:textColor="?colorOnPrimary"
+            app:drawableStartCompat="@drawable/ic_redeem_24px"
+            app:drawableTint="?colorOnPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_current_order"
+            style="@style/Widget.Material3.CardView.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tv_prompt"
+            tools:visibility="visible">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/current_order"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_title_order_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/order_id"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@+id/tv_title"
+                    app:layout_constraintTop_toBottomOf="@+id/order_divider" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/order_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    app:dividerColor="?colorOutline"
+                    app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+                <TextView
+                    android:id="@+id/tv_order_id"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="?selectableItemBackground"
+                    android:drawablePadding="8dp"
+                    app:drawableEndCompat="@drawable/ic_content_copy_24px"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tv_title_order_id"
+                    app:layout_constraintTop_toTopOf="@+id/tv_title_order_id"
+                    tools:maxLines="3"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/tv_title_create_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/create_time"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_title_order_id"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_order_id" />
+
+                <TextView
+                    android:id="@+id/tv_title_order_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/payment_amount"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_title_create_time"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_create_time" />
+
+                <TextView
+                    android:id="@+id/tv_create_time"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tv_title_create_time"
+                    app:layout_constraintTop_toTopOf="@+id/tv_title_create_time"
+                    tools:text="2022-6-12 12:22:34" />
+
+                <TextView
+                    android:id="@+id/tv_order_price"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tv_title_order_price"
+                    app:layout_constraintTop_toTopOf="@+id/tv_title_order_price"
+                    tools:text="18.79元(已折扣0.01元)" />
+
+                <TextView
+                    android:id="@+id/tv_expired_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_title"
+                    tools:text="3:21 后过期" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_refresh"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:insetTop="6dp"
+                    android:insetBottom="6dp"
+                    android:text="@string/i_have_paid"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_order_price" />
+
+                <TextView
+                    android:id="@+id/tv_caution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="?colorPrimary"
+                    android:drawablePadding="4dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp"
+                    android:text="@string/warning_order_id_after_paid"
+                    android:textColor="?colorOnPrimary"
+                    android:visibility="gone"
+                    app:drawableStartCompat="@drawable/ic_verified_24px"
+                    app:drawableTint="?colorOnPrimary"
+                    app:layout_constrainedHeight="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_order_price"
+                    app:layout_constraintVertical_bias="1.0"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/cv_current_order"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_restore"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/restore_purchase"
+            app:layout_constraintEnd_toStartOf="@+id/btn_create_order"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cv_current_order"
+            app:strokeColor="?colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_create_order"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/create_order"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_restore"
+            app:layout_constraintTop_toTopOf="@+id/btn_restore" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
