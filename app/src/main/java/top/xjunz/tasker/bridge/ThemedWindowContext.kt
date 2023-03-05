@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2023 xjunz. All rights reserved.
  */
-package top.xjunz.tasker.privileged
+package top.xjunz.tasker.bridge
 
 import android.content.Context
 import android.os.Binder
@@ -11,7 +11,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.annotation.Privileged
 
 @Privileged
-class ThemedWindowBridgeContext(context: Context, private val binder: Binder) :
+class ThemedWindowContext(context: Context, private val binder: Binder) :
     ContextThemeWrapper(context, R.style.AppTheme) {
 
     override fun getSystemService(name: String): Any {

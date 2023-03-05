@@ -29,13 +29,15 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
+import top.xjunz.tasker.ui.main.ScrollTarget
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import java.util.*
 
 /**
  * @author xjunz 2022/12/16
  */
-abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBinding>() {
+abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBinding>(),
+    ScrollTarget {
 
     override val bindingRequiredSuperClassDepth: Int = 2
 
@@ -159,24 +161,24 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         binding.groupPlaceholder.isVisible = visible
     }
 
-    fun getScrollTarget(): RecyclerView? {
+    override fun getScrollTarget(): RecyclerView? {
         return if (isAdded) binding.rvTaskList else null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvTaskList)
-        observe(viewModel.appbarHeight) {
+        val mvm = peekMainViewModel()
+        observe(mvm.appbarHeight) {
             binding.rvTaskList.updatePadding(top = it)
         }
-        observe(viewModel.paddingBottom) {
+        observe(mvm.paddingBottom) {
             binding.rvTaskList.updatePadding(bottom = it)
         }
-        val mvm = peekMainViewModel()
         observe(mvm.allTaskLoaded) {
             taskList.clear()
             taskList.addAll(initTaskList())
-            if (viewModel.paddingBottom.isNull()) {
+            if (mvm.paddingBottom.isNull()) {
                 binding.rvTaskList.doOnPreDraw {
                     binding.rvTaskList.beginAutoTransition(
                         MaterialSharedAxis(MaterialSharedAxis.Z, true)
@@ -189,7 +191,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             if (taskList.isEmpty()) togglePlaceholder(true)
         }
         observe(mvm.isServiceRunning) {
-            adapter.notifyItemRangeChanged(0, taskList.size, 0)
+            adapter.notifyItemRangeChanged(0, taskList.size, true)
         }
         observeTransient(viewModel.onTaskDeleted) {
             val index = taskList.indexOf(it)

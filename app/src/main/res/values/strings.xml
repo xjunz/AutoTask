@@ -46,9 +46,9 @@
     <string name="sort_by">排序方式</string>
     <string name="feedback">反馈</string>
     <string name="check_for_updates">检查更新</string>
-    <string name="mail_subject">「自动跳过」反馈 %s</string>
-    <string name="mail_body">%s\n*使用Gmail等邮箱软件可自动添加附件。如当前邮箱软件无法添加附件，烦请导出日志后手动添加该日志为附件。*\n问题描述:\n</string>
-    <string name="cr">Copyright © XJUNZ %d</string>
+    <string name="mail_subject">「自动任务」反馈 %s</string>
+    <string name="mail_body">%s\n问题描述:\n</string>
+    <string name="cr">Copyright © XJUNZ 2023\n\n了解我们的<a href='xtsk://privacy_policy'>《隐私政策》</a></string>
     <string name="no_log">无日志</string>
     <string name="feedback_group">加群</string>
     <string name="feedback_email">邮件</string>
@@ -496,7 +496,7 @@
     </string>
     <string name="purchase_prompt"><b>1.</b> 订单创建后，若您在有效期限内未付款，订单将会自动失效，<b>失效后请勿付款</b>。
 \n<b>2.</b> 目前仅支持<b>支付宝</b>付款，如需其他渠道付款请联系我们。
-\n<b>3.</b> 若付款成功后长时间(如订单失效后)仍未获得专业版，请<a href='webackup://payment-feedback'><b>点击此处</b></a>向我们反馈，我们会尽快处理。</string>
+\n<b>3.</b> 如果遇到其他问题，请向我们反馈，我们会尽快处理。</string>
     <string name="format_yuan">%s元</string>
     <string name="format_price">需支付金额为：%s，已复制到剪切板</string>
     <string name="format_expired_countdown">%s后失效</string>
@@ -519,12 +519,13 @@
     <string name="redeem_expired">该礼品码已过期</string>
     <string name="checking_redeem">正在检查礼品码…</string>
     <string name="premium_activated">专业版已激活</string>
+    <string name="activated">已激活</string>
+    <string name="not_activated">未激活</string>
     <string name="thanks_for_supporting">感谢您的支持</string>
     <string name="paid">已付款</string>
     <string name="too_many_requests">服务器繁忙，请稍后重试</string>
     <string name="order_id_copied">订单号已复制到剪切板</string>
-    <string name="tip_order_id_copied">订单号已复制到剪切板，请注意保管</string>
-    <string name="redeem_already_consumed">次礼品码已被使用</string>
+    <string name="redeem_already_consumed">此礼品码已被使用</string>
     <string name="format_request_failed">请求失败（%s）</string>
     <string name="order_not_found">未找到此订单信息</string>
     <string name="order_not_paid">此订单未完成付款</string>
@@ -536,4 +537,12 @@
     <string name="cancelled">已取消</string>
     <string name="error_unsupported_file">不支持的文件类型</string>
     <string name="imported">已导入</string>
+    <string name="follow_system">跟随系统</string>
+    <string name="turn_on">开启</string>
+    <string name="turn_off">关闭</string>
+    <string name="premium_status">专业版状态</string>
+    <string name="acknowledge">我已知晓</string>
+    <string name="quit">退出</string>
+    <string name="common_mode">普通模式</string>
+    <string name="order_not_found_or_paid">此订单不存在或未完成付款</string>
 </resources>

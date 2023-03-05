@@ -28,7 +28,7 @@ android {
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
         versionCode 5
-        versionName "1.1.1"
+        versionName "v1.0.0rc01"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
@@ -40,8 +40,8 @@ android {
 
     buildTypes {
         release {
-            shrinkResources false
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.xjunz
         }
@@ -73,8 +73,10 @@ android {
             configuration        'dprotect-rules.pro'
         }
         debug {
+            defaultConfiguration 'proguard-android-optimize.txt'
             defaultConfiguration 'proguard-android.txt'
             configuration        'proguard-rules.pro'
+            configuration        'dprotect-rules.pro'
         }
     }
 }*/
@@ -85,6 +87,10 @@ dependencies {
     implementation project(':coroutine-ui-automator')
     implementation project(':shared-library')
     implementation project(':ssl')
+
+    def appCenterSdkVersion = '4.4.5'
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
 
     // shizuku
     implementation "dev.rikka.shizuku:api:$shizuku_version"

@@ -19,7 +19,6 @@ import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.core.content.res.getColorOrThrow
 import androidx.core.content.res.getDimensionPixelSizeOrThrow
-import androidx.core.view.doOnPreDraw
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.useStyledAttributes
@@ -65,8 +64,6 @@ class WaveDivider @JvmOverloads constructor(
                     paint.color =
                         argbEvaluator.evaluate(f, previousPaintColor, waveRunningColor) as Int
                     waveMaxHeight = (height / 2F - previousWaveHeight) * f + previousWaveHeight
-                } else {
-                    error("Not fading out or fading in!")
                 }
                 invalidate()
             }
@@ -98,12 +95,8 @@ class WaveDivider @JvmOverloads constructor(
     }
 
     fun fadeOut() {
-        if (isLaidOut) {
+        post {
             performFadeOut()
-        } else {
-            doOnPreDraw {
-                performFadeOut()
-            }
         }
     }
 
@@ -145,12 +138,8 @@ class WaveDivider @JvmOverloads constructor(
     }
 
     fun fadeIn() {
-        if (isLaidOut) {
+        post {
             performFadeIn()
-        } else {
-            doOnPreDraw {
-                performFadeIn()
-            }
         }
     }
 

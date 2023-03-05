@@ -16,13 +16,10 @@ import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
 import top.xjunz.tasker.api.*
-import top.xjunz.tasker.bridge.ClipboardManagerBridge
-import top.xjunz.tasker.ktx.dec
-import top.xjunz.tasker.ktx.format
-import top.xjunz.tasker.ktx.require
-import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.service.premiumContext
 import kotlin.system.exitProcess
 
@@ -41,21 +38,11 @@ class PurchaseViewModel : ViewModel() {
 
     val creatingOrder = MutableLiveData<Boolean>()
 
-    val checkingOrder = MutableLiveData<Boolean>().also { liveData ->
-        liveData.observeForever {
-            if (!it && currentOrder.value != null && isOrderExpired()) {
-                shouldShowFeedbackPrompt.value = true
-            }
-        }
-    }
+    val checkingOrder = MutableLiveData<Boolean>()
 
     val checkingRedeem = MutableLiveData<Boolean>()
 
-    val purchased = MutableLiveData<Boolean>()
-
     val shouldConfetti = MutableLiveData<Boolean>()
-
-    val shouldShowFeedbackPrompt = MutableLiveData<Boolean>()
 
     val price = MutableLiveData<PriceDTO>()
 
@@ -65,8 +52,34 @@ class PurchaseViewModel : ViewModel() {
 
     val shouldDismiss = MutableLiveData<Boolean>()
 
-    init {
-        loadPrice(true)
+    fun init() {
+        if (isPremium) {
+            if (currentOrder.isNull()) {
+                createMockOrderFromPremiumContext()
+            }
+        } else {
+            if (price.isNull()) {
+                loadPrice(true)
+            }
+        }
+    }
+
+    private fun createMockOrderFromPremiumContext() {
+        currentOrder.value = OrderDTO(
+            premiumContext.orderId, 0,
+            premiumContext.createTimestamp.toLong(),
+            -1, -1,
+            -1, ""
+        )
+    }
+
+    private fun createGiftCodeOrderFromPremiumContext() {
+        currentOrder.value = OrderDTO(
+            premiumContext.orderId, -1,
+            System.currentTimeMillis(),
+            -1, -1,
+            -1, ""
+        )
     }
 
     private fun loadPrice(dismissOnFailure: Boolean) = viewModelScope.launch {
@@ -83,10 +96,6 @@ class PurchaseViewModel : ViewModel() {
                 shouldDismiss.value = true
             }
         }
-    }
-
-    fun isPurchased(): Boolean {
-        return purchased.value == true
     }
 
     fun isOrderExpired(): Boolean {
@@ -139,12 +148,7 @@ class PurchaseViewModel : ViewModel() {
                         RedeemCode.REDEEM_NOT_FOUND -> toast(R.string.invalid_redeem)
                         RedeemCode.REDEEM_SUCCESSFULLY_CONSUMED -> {
                             if (initPremiumContext(it.bodyAsText())) {
-                                val mockOrder = OrderDTO(
-                                    premiumContext.orderId, -1,
-                                    System.currentTimeMillis(),
-                                    -1, -1, -1, ""
-                                )
-                                currentOrder.value = mockOrder
+                                createGiftCodeOrderFromPremiumContext()
                             }
                         }
                         else -> toast(R.string.format_unknown_error.format(reply.code))
@@ -229,10 +233,11 @@ class PurchaseViewModel : ViewModel() {
                         PremiumUserCode.PREMIUM_USER_NEW_DEVICE,
                         PremiumUserCode.PREMIUM_USER_WITH_EXISTENT_DEVICE -> {
                             initPremiumContext(it.bodyAsText())
+                            createMockOrderFromPremiumContext()
                             restoreCountdown.value = -1
                         }
                         PremiumUserCode.PREMIUM_USER_NOT_FOUND -> {
-                            toast(R.string.order_not_paid)
+                            toast(R.string.order_not_found_or_paid)
                         }
                         PremiumUserCode.PREMIUM_USER_BUT_DEVICE_LIST_FULL -> {
                             toast(R.string.premium_user_device_list_full)
@@ -252,14 +257,11 @@ class PurchaseViewModel : ViewModel() {
             base64 = requireNotNull(raw.decryptToDTO<CodeBodyReply>().body) { "EmptyBody" }
             PremiumMixin.deserializeFromString(base64)
             // Load premium context in remote service if possible
-            ShizukuAutomatorServiceController.remoteService?.loadPremiumContext()
+            ShizukuAutomatorServiceController.remoteService?.whenAlive { it.loadPremiumContext() }
         }.onSuccess {
-            purchased.value = true
             shouldConfetti.value = true
             handler.removeCallbacksAndMessages(null)
             orderExpirationRemainingMills.value = -1
-            ClipboardManagerBridge.copyToClipboard(premiumContext.orderId)
-            toast(R.string.tip_order_id_copied)
             runCatching {
                 PremiumMixin.storeToFile(base64)
             }.onFailure {

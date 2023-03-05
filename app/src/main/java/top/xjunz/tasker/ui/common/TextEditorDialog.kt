@@ -19,7 +19,7 @@ import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
@@ -188,7 +188,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
         binding.cvContainer.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }
-        doOnEventRouted<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
+        doOnEventRoutedWithValue<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
             it.paneTitle?.run {
                 inputBox.setText(this)
                 inputBox.setSelectionToEnd()

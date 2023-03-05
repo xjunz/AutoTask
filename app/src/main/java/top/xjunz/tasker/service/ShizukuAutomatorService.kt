@@ -50,6 +50,11 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                 "The ShizukuAutomatorService is not yet started or has dead!"
             }
         }
+
+        @Privileged
+        fun get(): ShizukuAutomatorService? {
+            return instance?.get()
+        }
     }
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
@@ -190,7 +195,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             AppletOptionFactory.preloadIfNeeded()
             a11yEventDispatcher.addCallback(residentTaskScheduler)
             a11yEventDispatcher.addCallback(oneshotTaskScheduler)
-            a11yEventDispatcher.activate()
+            a11yEventDispatcher.activate(false)
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()

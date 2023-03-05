@@ -34,7 +34,7 @@ import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.EventCenter
-import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
 import top.xjunz.tasker.ui.task.editor.VarargTextEditorDialog
@@ -342,7 +342,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         observeTransient(vm.onItemChanged) {
             adapter.notifyItemChanged(option.arguments.indexOf(it), true)
         }
-        doOnEventRouted<List<SerializableInputEvent>>(FloatingInspector.EVENT_GESTURES_RECORDED) {
+        doOnEventRoutedWithValue<List<SerializableInputEvent>>(FloatingInspector.EVENT_GESTURES_RECORDED) {
             if (vm.updateGesture == null) {
                 val index = vm.option.arguments.indexOfFirst { descriptor ->
                     descriptor.variantValueType == VariantType.TEXT_GESTURES

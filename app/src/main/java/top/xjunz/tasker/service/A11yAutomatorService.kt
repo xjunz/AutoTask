@@ -150,7 +150,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
                 a11yEventDispatcher.addCallback(residentTaskScheduler)
                 a11yEventDispatcher.addCallback(oneshotTaskScheduler)
             }
-            a11yEventDispatcher.activate()
+            a11yEventDispatcher.activate(isInspectorMode)
 
             lifecycleRegistry.addObserver(this)
             lifecycleRegistry.currentState = Lifecycle.State.STARTED

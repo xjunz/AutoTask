@@ -17,6 +17,9 @@ public class PremiumContext {
     @FieldOrdinal(ordinal = 1)
     public String orderId = placeholder;
 
+    @FieldOrdinal(ordinal = 2)
+    public String createTimestamp = placeholder;
+
     @FieldOrdinal(ordinal = 20)
     public String empty = placeholder;
 
@@ -28,4 +31,5 @@ public class PremiumContext {
 
     @FieldOrdinal(ordinal = 50)
     public String checksum;
+
 }

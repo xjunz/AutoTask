@@ -18,4 +18,9 @@
         android:id="@+id/item_oneshot_tasks"
         android:icon="@drawable/ic_timer_24px"
         android:title="@string/oneshot_task" />
+
+    <item
+        android:id="@+id/item_more"
+        android:icon="@drawable/ic_tune_24px"
+        android:title="@string/more" />
 </menu>

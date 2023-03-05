@@ -4,9 +4,12 @@
 
 package top.xjunz.tasker.premium
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import x.f
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.lang.ref.WeakReference
 import java.util.zip.CRC32
 
 /**
@@ -18,10 +21,29 @@ object PremiumMixin {
     lateinit var premiumContextStoragePath: String
 
     private var PREMIUM_CONTEXT: PremiumContext? = null
+        set(value) {
+            field = value
+            _premiumStatusLiveData.postValue(field != null)
+            callbacks.forEach {
+                it.get()?.onPremiumStateChanged(field != null)
+            }
+        }
 
     const val PREMIUM_CONTEXT_FILE_NAME = ".lock"
 
-    val isPremium get() = PREMIUM_CONTEXT != null
+    val premiumStatusLiveData: LiveData<Boolean> get() = _premiumStatusLiveData
+
+    private val _premiumStatusLiveData = MutableLiveData<Boolean>()
+
+    private val callbacks = arrayListOf<WeakReference<Callback>>()
+
+    fun interface Callback {
+        fun onPremiumStateChanged(isPremium: Boolean)
+    }
+
+    fun addOnPremiumStateChangedCallback(callback: Callback) {
+        callbacks.add(WeakReference(callback))
+    }
 
     fun ensurePremium() {
         if (PREMIUM_CONTEXT == null) {

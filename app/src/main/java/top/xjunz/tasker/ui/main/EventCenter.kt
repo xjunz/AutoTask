@@ -42,9 +42,19 @@ object EventCenter {
     /**
      * Observe when the activity is launched because an event arrives.
      */
-    fun <V> LifecycleOwner.doOnEventRouted(
+    fun <V> LifecycleOwner.doOnEventRoutedWithValue(
         route: String,
         observer: (V) -> Unit
+    ) {
+        peekMainViewModel().doOnRouted(this, route, observer)
+    }
+
+    /**
+     * Observe when the activity is launched because an event arrives.
+     */
+    fun LifecycleOwner.doOnEventRouted(
+        route: String,
+        observer: () -> Unit
     ) {
         peekMainViewModel().doOnRouted(this, route, observer)
     }

@@ -31,10 +31,6 @@ class TaskShowcaseViewModel : ViewModel() {
 
     val onTaskDeleted = MutableLiveData<XTask>()
 
-    val appbarHeight = MutableLiveData<Int>()
-
-    val paddingBottom = MutableLiveData<Int>()
-
     val requestToggleTask = MutableLiveData<XTask>()
 
     val onTaskToggled = MutableLiveData<XTask>()

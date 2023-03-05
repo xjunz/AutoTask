@@ -25,6 +25,7 @@ import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.databinding.DialogPurchaseBinding
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
@@ -49,6 +50,11 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
     }
 
     private val viewModel by activityViewModels<PurchaseViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.init()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,7 +85,7 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
             }
         }
         binding.tvRedeem.setNoDoubleClickListener {
-            if (viewModel.isPurchased()) return@setNoDoubleClickListener
+            if (isPremium) return@setNoDoubleClickListener
             TextEditorDialog().init(R.string.input_redeem.str, "") { redeem ->
                 runCatching {
                     UUID.fromString(redeem)
@@ -111,7 +117,7 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        if (viewModel.isPurchased()) {
+        if (isPremium) {
             viewModel.currentOrder.value = null
         }
     }
@@ -126,7 +132,6 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
 
     @SuppressLint("SetTextI18n", "SetJavaScriptEnabled")
     private fun observeLiveData() {
-        viewModel.purchased.value = PremiumMixin.isPremium
         observe(viewModel.price) {
             binding.btnRefresh.isEnabled = it != null
             binding.btnCreateOrder.isEnabled = it != null
@@ -165,13 +170,12 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
         observeMultiple(
             viewModel.orderExpirationRemainingMills,
             viewModel.currentOrder,
-            viewModel.purchased
+            PremiumMixin.premiumStatusLiveData
         ) {
             val mills = viewModel.orderExpirationRemainingMills.require()
             val order = viewModel.currentOrder.value
-            val isPurchased = viewModel.purchased.isTrue
             binding.tvExpiredIn.text = if (mills < 1000) {
-                if (isPurchased) {
+                if (isPremium) {
                     if (order != null && order.id < 0) {
                         R.string.redeem.str
                     } else {
@@ -202,8 +206,10 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
                 binding.tvOrderId.text = it.orderId.underlined()
                 binding.tvCreateTime.text = it.createTimestamp.formatTime()
                 if (it.originPrice == -1) {
-                    binding.tvOrderPrice.text = "-"
+                    binding.tvOrderPrice.isVisible = false
+                    binding.tvTitleOrderPrice.isVisible = false
                 } else {
+                    binding.tvOrderPrice.isVisible = true
                     binding.tvOrderPrice.text =
                         it.discountedPriceLiteral.toYuan() + if (it.randomDiscount != 0) {
                             R.string.format_discounted.format(it.discountLiteral.toYuan())
@@ -233,8 +239,7 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
                 binding.btnRefresh.isEnabled = false
                 binding.btnRefresh.text = R.string.format_retry_in.format(it)
             } else {
-                binding.btnRefresh.isEnabled =
-                    viewModel.price.value != null && viewModel.purchased.value != true
+                binding.btnRefresh.isEnabled = viewModel.price.value != null && !isPremium
                 binding.btnRefresh.text = R.string.i_have_paid.str
             }
         }
@@ -243,33 +248,26 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
                 binding.btnRestore.isEnabled = false
                 binding.btnRestore.text = R.string.format_retry_in.format(it)
             } else {
-                binding.btnRestore.isEnabled = viewModel.purchased.value != true
+                binding.btnRestore.isEnabled = !isPremium
                 binding.btnRestore.text = R.string.restore_purchase.str
             }
         }
         observeTransient(viewModel.shouldDismiss) {
             dismiss()
         }
-        observe(viewModel.purchased) {
-            if (!it) return@observe
-            binding.tvPrice.text = R.string.premium_activated.text
-            binding.tvOriginalPrice.isVisible = false
-            binding.tvPromotion.text = R.string.thanks_for_supporting.str
-            binding.btnCreateOrder.isEnabled = false
-            binding.btnRestore.isEnabled = false
-            binding.btnRefresh.isVisible = false
-            binding.tvCaution.isVisible = true
-        }
-        observe(viewModel.shouldShowFeedbackPrompt) {
-            if (!it) return@observe
-            /* requireContext().makeSimplePromptDialog(msg = R.string.prompt_payment_feedback) {
-                 *//*Feedbacks.showPaymentFeedbackDialog(
-                    requireContext(),
-                    purchaseViewModel.order.value!!
-                )*//*
-            }.setOnDismissListener {
-                purchaseViewModel.shouldShowFeedbackPrompt.value = false
-            }.show()*/
+        observe(PremiumMixin.premiumStatusLiveData) {
+            if (it) {
+                binding.root.rootView.beginAutoTransition()
+                binding.tvPrompt.isVisible = false
+                binding.cvPremium.isVisible = true
+                binding.tvPrice.text = R.string.premium_activated.text
+                binding.tvOriginalPrice.isVisible = false
+                binding.tvPromotion.text = R.string.thanks_for_supporting.str
+                binding.btnCreateOrder.isEnabled = false
+                binding.btnRestore.isEnabled = false
+                binding.btnRefresh.isVisible = false
+                binding.tvCaution.isVisible = true
+            }
         }
 
         var checkingRedeemDialog: AlertDialog? = null

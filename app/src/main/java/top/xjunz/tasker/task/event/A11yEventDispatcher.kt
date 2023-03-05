@@ -9,23 +9,30 @@ import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
 import androidx.core.os.HandlerCompat
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
-import kotlinx.coroutines.cancel
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
+import top.xjunz.tasker.isAppProcess
+import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.service.ShizukuAutomatorService
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 import top.xjunz.tasker.uiautomator.CoroutineUiAutomatorBridge
+import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * @author xjunz 2022/10/29
  */
 class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomatorBridge) :
-    EventDispatcher() {
+    EventDispatcher(), PremiumMixin.Callback {
 
     companion object {
         const val PACKAGE_SYSTEM_UI = "com.android.systemui"
@@ -41,12 +48,25 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
+    private var pendingStopJob: WeakReference<Job>? = null
 
-    fun activate() {
+    fun activate(isInInspectorMode: Boolean) {
         bridge.addOnAccessibilityEventListener {
             processAccessibilityEvent(it)
         }
         bridge.startReceivingEvents()
+        if (!isPremium && !isInInspectorMode) {
+            val job = launch {
+                delay(6.toDuration(DurationUnit.HOURS))
+                if (isAppProcess) {
+                    A11yAutomatorService.get()?.destroy()
+                } else {
+                    ShizukuAutomatorService.get()?.destroy()
+                }
+            }
+            pendingStopJob = WeakReference(job)
+            PremiumMixin.addOnPremiumStateChangedCallback(this)
+        }
     }
 
     override fun destroy() {
@@ -149,6 +169,12 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
         } else {
             activityRecords.add(-hashCode)
             false
+        }
+    }
+
+    override fun onPremiumStateChanged(isPremium: Boolean) {
+        if (isPremium) {
+            pendingStopJob?.get()?.cancel()
         }
     }
 }

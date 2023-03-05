@@ -4,7 +4,10 @@
 
 package top.xjunz.tasker.task.runtime
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -14,13 +17,9 @@ import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskManager
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.isPremium
-import top.xjunz.tasker.service.serviceController
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 /**
  * @author xjunz 2022/08/05
@@ -109,17 +108,6 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
         override fun onTaskCancelled(runtime: TaskRuntime) {
             super.onTaskCancelled(runtime)
             logcat("-------- $runtime Cancelled --------")
-        }
-    }
-
-    init {
-        if (!isPremium) {
-            launch {
-                delay(2.toDuration(DurationUnit.HOURS))
-                if (serviceController.isServiceRunning) {
-                    currentService.destroy()
-                }
-            }
         }
     }
 }

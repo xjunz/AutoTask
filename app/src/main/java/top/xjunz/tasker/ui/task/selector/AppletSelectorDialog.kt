@@ -43,7 +43,7 @@ import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
-import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -265,7 +265,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             }
             bottomAdapter.notifyItemChanged(viewModel.applets.require().indexOf(it), true)
         }
-        doOnEventRouted<List<Applet>>(FloatingInspector.EVENT_NODE_INFO_SELECTED) {
+        doOnEventRoutedWithValue<List<Applet>>(FloatingInspector.EVENT_NODE_INFO_SELECTED) {
             viewModel.acceptApplets(it)
             shopCartIntegration.expand()
             rvBottom.scrollToPosition(bottomAdapter.itemCount)

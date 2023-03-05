@@ -23,7 +23,7 @@ import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
-import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
@@ -56,7 +56,7 @@ class XYEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        doOnEventRouted<Int>(FloatingInspector.EVENT_COORDINATE_SELECTED) {
+        doOnEventRoutedWithValue<Int>(FloatingInspector.EVENT_COORDINATE_SELECTED) {
             val point = IntValueUtil.parseXY(it)
             binding.etX.setText(point.x.toString())
             binding.etY.setText(point.y.toString())

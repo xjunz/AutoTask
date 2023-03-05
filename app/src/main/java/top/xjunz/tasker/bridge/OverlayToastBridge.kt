@@ -26,7 +26,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayToastBinding
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.ktx.italic
-import top.xjunz.tasker.privileged.ThemedWindowBridgeContext
 import top.xjunz.tasker.service.A11yAutomatorService
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -49,7 +48,7 @@ class OverlayToastBridge(looper: Looper) {
         if (isAppProcess) {
             ContextThemeWrapper(A11yAutomatorService.require(), R.style.AppTheme)
         } else {
-            ThemedWindowBridgeContext(ContextBridge.getAppResourceContext(), Binder())
+            ThemedWindowContext(ContextBridge.getAppResourceContext(), Binder())
         }
     }
 

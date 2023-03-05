@@ -1,6 +1,23 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myValues">
+        <value>
+          <list size="8">
+            <item index="0" class="java.lang.String" itemvalue="nobr" />
+            <item index="1" class="java.lang.String" itemvalue="noembed" />
+            <item index="2" class="java.lang.String" itemvalue="comment" />
+            <item index="3" class="java.lang.String" itemvalue="noscript" />
+            <item index="4" class="java.lang.String" itemvalue="embed" />
+            <item index="5" class="java.lang.String" itemvalue="script" />
+            <item index="6" class="java.lang.String" itemvalue="ul" />
+            <item index="7" class="java.lang.String" itemvalue="p" />
+          </list>
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
     <inspection_tool class="JavaDoc" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="TOP_LEVEL_CLASS_OPTIONS">
         <value>
@@ -31,6 +48,42 @@
       <option name="IGNORE_DUPLICATED_THROWS" value="false" />
       <option name="IGNORE_POINT_TO_ITSELF" value="false" />
       <option name="myAdditionalJavadocTags" value="hide" />
+    </inspection_tool>
+    <inspection_tool class="JavadocDeclaration" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ADDITIONAL_TAGS" value="hide" />
+    </inspection_tool>
+    <inspection_tool class="MissingJavadoc" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="PACKAGE_SETTINGS">
+        <Options>
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
+      <option name="MODULE_SETTINGS">
+        <Options>
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
+      <option name="TOP_LEVEL_CLASS_SETTINGS">
+        <Options>
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
+      <option name="INNER_CLASS_SETTINGS">
+        <Options>
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
+      <option name="METHOD_SETTINGS">
+        <Options>
+          <option name="REQUIRED_TAGS" value="@return@param@throws or @exception" />
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
+      <option name="FIELD_SETTINGS">
+        <Options>
+          <option name="ENABLED" value="false" />
+        </Options>
+      </option>
     </inspection_tool>
   </profile>
 </component>

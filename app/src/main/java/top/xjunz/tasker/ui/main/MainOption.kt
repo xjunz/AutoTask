@@ -6,7 +6,12 @@ package top.xjunz.tasker.ui.main
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
+import top.xjunz.tasker.BuildConfig
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
+import top.xjunz.tasker.isShell
+import top.xjunz.tasker.service.isPremium
 
 /**
  * @author xjunz 2023/02/27
@@ -14,23 +19,44 @@ import top.xjunz.tasker.R
 sealed class MainOption(
     @StringRes val title: Int,
     @DrawableRes val icon: Int,
-    @StringRes var desc: Int = -1,
-    @DrawableRes val enterIcon: Int = -1
+    var desc: () -> Any? = { null },
+    @StringRes var longDesc: Int = -1
 ) {
+    object PremiumStatus : MainOption(R.string.premium_status, R.drawable.ic_verified_24px, desc = {
+        if (isPremium) {
+            R.string.activated
+        } else {
+            R.string.not_activated
+        }
+    })
 
-    object CustomTasks :
-        MainOption(
-            R.string.task_list,
-            R.drawable.ic_gesture_24px,
-            enterIcon = R.drawable.ic_chevron_right_24px
-        )
+    object NightMode : MainOption(R.string.night_mode, R.drawable.ic_nights_stay_24px, desc = {
+        when (Preferences.nightMode) {
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> R.string.follow_system
+            AppCompatDelegate.MODE_NIGHT_YES -> R.string.turn_on
+            AppCompatDelegate.MODE_NIGHT_NO -> R.string.turn_off
+            else -> error("?")
+        }
+    })
+
 
     object Feedback : MainOption(R.string.feedback, R.drawable.ic_chat_24px)
 
-    object About :
-        MainOption(R.string.about, R.drawable.ic_baseline_more_vert_24, R.string.more_to_say)
+    object VersionInfo : MainOption(R.string.version_info, R.drawable.ic_info_24px, desc = {
+        BuildConfig.VERSION_NAME
+    })
+
+    object About : MainOption(
+        R.string.about,
+        R.drawable.ic_baseline_more_vert_24,
+        longDesc = R.string.more_to_say
+    )
 
     companion object {
-        val ALL_OPTIONS = arrayOf(Feedback, About)
+        val ALL_OPTIONS = if (isShell) {
+            arrayOf(NightMode, Feedback, VersionInfo, About)
+        } else {
+            arrayOf(PremiumStatus, NightMode, Feedback, VersionInfo, About)
+        }
     }
 }

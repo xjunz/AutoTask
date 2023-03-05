@@ -25,7 +25,7 @@ import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
-import top.xjunz.tasker.ui.main.EventCenter.doOnEventRouted
+import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.model.ActivityInfoWrapper
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
@@ -312,7 +312,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             else
                 binding.shoppingCart.rvBottom.adapter = bottomPkgAdapter
         }
-        doOnEventRouted<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
+        doOnEventRoutedWithValue<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
             if (viewModel.mode == MODE_PACKAGE) {
                 if (viewModel.selectedPackages.contains(it.packageName)) {
                     toast(R.string.format_already_existed.format(it.packageName))

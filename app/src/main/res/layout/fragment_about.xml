@@ -17,6 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:overScrollMode="never"
+            tools:listitem="@layout/item_main_option"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             app:spanCount="1" />

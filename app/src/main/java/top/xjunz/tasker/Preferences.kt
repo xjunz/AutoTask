@@ -5,6 +5,7 @@
 package top.xjunz.tasker
 
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import top.xjunz.tasker.service.OperatingMode
 import kotlin.properties.ReadWriteProperty
@@ -27,7 +28,10 @@ object Preferences {
     var showDragToMoveTip by global.primitive("tip_drag_to_move", true)
     var showToggleRelationTip by global.primitive("tip_toggle_relation", true)
     var showLongClickToHost by global.primitive("tip_long_click_to_host", true)
-    var recordedOrderId: String? by global.nullable("recorded_order_id", null)
+
+    var nightMode by global.primitive("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+
+    var privacyPolicyAcknowledged by global.primitive("privacy_policy_acknowledged", false)
 
     private fun <T> SharedPreferences.nullable(
         name: String,

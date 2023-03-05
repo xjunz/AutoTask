@@ -14,10 +14,10 @@
         android:padding="16dp">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/tv_icon"
+            android:id="@+id/iv_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@color/color_primary_background"
+            android:background="?colorPrimaryContainer"
             android:scaleType="centerInside"
             app:contentPadding="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -29,12 +29,15 @@
 
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            app:layout_constraintBottom_toTopOf="@+id/tv_desc"
-            app:layout_constraintStart_toEndOf="@+id/tv_icon"
+            app:layout_constraintBottom_toTopOf="@+id/tv_desc2"
+            app:layout_constraintEnd_toStartOf="@+id/tv_desc"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/iv_icon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/app_name" />
 
@@ -42,25 +45,24 @@
             android:id="@+id/tv_desc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_action"
-            app:layout_constraintEnd_toStartOf="@+id/iv_enter"
-            app:layout_constraintStart_toStartOf="@id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title"
-            tools:text="@tools:sample/lorem"
-            tools:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/iv_enter"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_chevron_right_24px"
-            tools:ignore="ContentDescription" />
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_desc2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/tv_title"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:text="@tools:sample/lorem"
+            tools:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_action"

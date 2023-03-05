@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
@@ -22,8 +23,10 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.coroutines.launch
 import top.xjunz.shared.utils.illegalArgument
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
+import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.ActivityMainBinding
 import top.xjunz.tasker.engine.applet.util.hierarchy
 import top.xjunz.tasker.engine.task.XTask
@@ -62,22 +65,24 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
 
     private val viewModel by viewModels<TaskShowcaseViewModel>()
 
-    private val fragments = arrayOfNulls<BaseTaskShowcaseFragment>(3)
+    private val scrollTargets = arrayOfNulls<ScrollTarget>(4)
 
     private lateinit var fabBehaviour: HideBottomViewOnScrollBehavior<View>
 
     private val viewPagerAdapter by lazy {
         object : FragmentStateAdapter(this) {
-            override fun getItemCount(): Int = 3
+
+            override fun getItemCount(): Int = 4
 
             override fun createFragment(position: Int): Fragment {
                 val f = when (position) {
                     0 -> EnabledTaskFragment()
                     1 -> ResidentTaskFragment()
                     2 -> OneshotTaskFragment()
+                    3 -> AboutFragment()
                     else -> illegalArgument()
                 }
-                fragments[position] = f
+                scrollTargets[position] = f
                 return f
             }
         }
@@ -85,15 +90,22 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(Preferences.nightMode)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        app.setAppTheme(theme)
         setContentView(binding.root)
         initViews()
         observeData()
         initServiceController()
         DialogStackManager.setCallback(this)
-        binding.tvTitle.setOnDoubleClickListener {
-            PremiumMixin.clearPremium()
-            toast("Premium cleared!")
+        if (BuildConfig.DEBUG) {
+            binding.tvTitle.setOnDoubleClickListener {
+                PremiumMixin.clearPremium()
+                toast("Premium cleared!")
+            }
+        }
+        if (!Preferences.privacyPolicyAcknowledged) {
+            PrivacyPolicyDialog().show(supportFragmentManager)
         }
     }
 
@@ -148,8 +160,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                             viewModel.toggleTask(task)
                         }
                     }.setNeutralButton(
-                        if (task.isEnabled) R.string.disable_all_tasks
-                        else R.string.enable_all_tasks
+                        if (task.isEnabled) R.string.disable_all_tasks else R.string.enable_all_tasks
                     ) { _, _ ->
                         val tasks = TaskStorage.getAllTasks().filter {
                             it.metadata.taskType == XTask.TYPE_RESIDENT && it.isEnabled == task.isEnabled
@@ -214,11 +225,17 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                 showErrorDialog(it)
             }
         }
-
         observeDangerousConfirmation(
             mainViewModel.stopServiceConfirmation, R.string.prompt_stop_service, R.string.stop
         ) {
             mainViewModel.toggleService()
+        }
+        observe(PremiumMixin.premiumStatusLiveData) {
+            if (it) {
+                binding.tvTitle.setDrawableEnd(R.drawable.ic_verified_24px)
+            } else {
+                binding.tvTitle.setDrawableEnd(null)
+            }
         }
     }
 
@@ -233,14 +250,14 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
             v.doOnPreDraw {
-                viewModel.appbarHeight.value = it.height
+                mainViewModel.appbarHeight.value = it.height
             }
         }
         binding.bottomBar.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
         }
         binding.fabAction.doOnPreDraw {
-            viewModel.paddingBottom.value = it.height + binding.bottomBar.height
+            mainViewModel.paddingBottom.value = it.height + binding.bottomBar.height
         }
         binding.bottomBar.background.let {
             it as MaterialShapeDrawable
@@ -268,12 +285,10 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 binding.bottomBar.selectedItemId = binding.bottomBar.menu.getItem(position).itemId
-                ((binding.bottomBar.layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior<View>).slideUp(
-                    binding.bottomBar,
-                    true
-                )
+                ((binding.bottomBar.layoutParams as CoordinatorLayout.LayoutParams).behavior
+                        as HideBottomViewOnScrollBehavior<View>).slideUp(binding.bottomBar, true)
                 fabBehaviour.slideUp(binding.fabAction, true)
-                binding.appBar.setLiftOnScrollTargetView(fragments[position]?.getScrollTarget())
+                binding.appBar.setLiftOnScrollTargetView(scrollTargets[position]?.getScrollTarget())
             }
         })
     }

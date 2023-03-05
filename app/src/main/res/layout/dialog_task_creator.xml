@@ -125,6 +125,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     app:dividerColor="@color/material_on_surface_stroke" />

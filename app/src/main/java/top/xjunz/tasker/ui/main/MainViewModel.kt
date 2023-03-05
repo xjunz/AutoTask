@@ -40,6 +40,10 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     private val onDialogDismissed = MutableLiveData<DialogStackManager.StackEntry>()
 
+    val appbarHeight = MutableLiveData<Int>()
+
+    val paddingBottom = MutableLiveData<Int>()
+
     val allTaskLoaded = MutableLiveData<Boolean>()
 
     val onNewIntent = MutableLiveData<Pair<Uri?, Any?>>()
@@ -131,6 +135,18 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         lifecycleOwner.observeTransient(onNewIntent) {
             if (it.first?.host == host) {
                 block(it.second!!.casted())
+            }
+        }
+    }
+
+    fun doOnRouted(
+        lifecycleOwner: LifecycleOwner,
+        host: String,
+        block: () -> Unit
+    ) {
+        lifecycleOwner.observeTransient(onNewIntent) {
+            if (it.first?.host == host) {
+                block()
             }
         }
     }
