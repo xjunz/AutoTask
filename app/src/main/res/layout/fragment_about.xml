@@ -14,9 +14,10 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_option"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginHorizontal="16dp"
             android:overScrollMode="never"
+            android:clipToPadding="false"
             tools:listitem="@layout/item_main_option"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"

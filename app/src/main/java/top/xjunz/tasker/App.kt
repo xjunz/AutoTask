@@ -8,10 +8,12 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.content.res.Resources.Theme
 import android.os.Build
+import androidx.lifecycle.MutableLiveData
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import top.xjunz.tasker.api.UpdateInfo
 import top.xjunz.tasker.premium.PremiumMixin
 import java.io.File
 import java.lang.ref.WeakReference
@@ -26,9 +28,11 @@ val isPrivilegedProcess: Boolean get() = !isAppProcess
 
 val app: App get() = requireNotNull(App.instance)
 
-const val isShell = false
+const val isShell = true
 
 class App : Application() {
+
+    var updateInfo = MutableLiveData<UpdateInfo>()
 
     private lateinit var appThemeRef: WeakReference<Theme>
 
@@ -38,7 +42,6 @@ class App : Application() {
 
         var instance: App? = null
             private set
-
     }
 
     fun setAppTheme(theme: Theme) {

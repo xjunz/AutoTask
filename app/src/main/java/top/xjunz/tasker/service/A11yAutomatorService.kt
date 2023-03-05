@@ -60,7 +60,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         /**
          * Indicate that the service is served as [FloatingInspector].
          */
-        var FLAG_REQUEST_INSPECTOR_MODE: Boolean = false
+        var FLAG_REQUEST_INSPECTOR_MODE: Boolean = true
 
         private var instance: WeakReference<A11yAutomatorService>? = null
 
@@ -161,7 +161,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             LAUNCH_ERROR.value = t
             destroy()
         } finally {
-            FLAG_REQUEST_INSPECTOR_MODE = false
+            FLAG_REQUEST_INSPECTOR_MODE = true
         }
     }
 

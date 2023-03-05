@@ -14,9 +14,9 @@ import kotlinx.coroutines.withContext
 /**
  * @author xjunz 2023/03/01
  */
-class Client {
+object Client {
 
-    private val host = "http://121.196.146.69:8081"
+    private const val host = "http://121.196.146.69:8081"
 
     private val httpClient: HttpClient = HttpClient(CIO) {
         expectSuccess = false
@@ -63,9 +63,11 @@ class Client {
         }
     }
 
-    suspend fun checkForUpdates() {
-        httpClient.get("https://api.bq04.com/apps/latest/62c3c53d23389f3534549fb8") {
-            parameter("api_token", "5823a317109145ad2d9257d8c81cb641")
+    suspend fun checkForUpdates(): HttpResponse {
+        return withContext(Dispatchers.IO) {
+            httpClient.get("https://api.bq04.com/apps/latest/6404da310d81cc43daf6b431") {
+                parameter("api_token", "5823a317109145ad2d9257d8c81cb641")
+            }
         }
     }
 

@@ -20,13 +20,11 @@ import androidx.lifecycle.withStarted
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.coroutines.launch
 import top.xjunz.shared.utils.illegalArgument
-import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.Preferences
-import top.xjunz.tasker.R
-import top.xjunz.tasker.app
+import top.xjunz.tasker.*
 import top.xjunz.tasker.databinding.ActivityMainBinding
 import top.xjunz.tasker.engine.applet.util.hierarchy
 import top.xjunz.tasker.engine.task.XTask
@@ -107,6 +105,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         if (!Preferences.privacyPolicyAcknowledged) {
             PrivacyPolicyDialog().show(supportFragmentManager)
         }
+        mainViewModel.checkForUpdates()
     }
 
     private var isExited = false
@@ -235,6 +234,21 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                 binding.tvTitle.setDrawableEnd(R.drawable.ic_verified_24px)
             } else {
                 binding.tvTitle.setDrawableEnd(null)
+            }
+        }
+        observe(app.updateInfo) {
+            if (!isShell && it.hasUpdates() && mainViewModel.showUpdateDialog) {
+                MaterialAlertDialogBuilder(this).setTitle(R.string.has_updates)
+                    .setMessage(it.formatToString())
+                    .setOnDismissListener {
+                        mainViewModel.showUpdateDialog = false
+                    }
+                    .setOnCancelListener {
+                        mainViewModel.showUpdateDialog = false
+                    }
+                    .setPositiveButton(R.string.download) { _, _ ->
+                        viewUrlSafely("https://spark.appc02.com/tasker")
+                    }.setNegativeButton(android.R.string.cancel, null).show()
             }
         }
     }

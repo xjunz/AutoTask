@@ -4,7 +4,6 @@
 
 package top.xjunz.tasker.ui.task.inspector
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -182,7 +181,6 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = true
         updateOverlayGrantButton()
         binding.btnCancel.setOnClickListener {
             dismiss()
@@ -226,10 +224,5 @@ class FloatingInspectorDialog : BaseBottomSheetDialog<DialogFloatingInspectorBin
                 }
             }
         }
-    }
-
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
     }
 }

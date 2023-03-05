@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
+import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.FragmentAboutBinding
 import top.xjunz.tasker.databinding.ItemMainOptionBinding
 import top.xjunz.tasker.ktx.observe
@@ -72,13 +73,18 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                 MainOption.ALL_OPTIONS.indexOf(MainOption.PremiumStatus), true
             )
         }
+        observe(app.updateInfo) {
+            adapter.notifyItemChanged(
+                MainOption.ALL_OPTIONS.indexOf(MainOption.VersionInfo), true
+            )
+        }
     }
 
     private fun onOptionClicked(view: View, option: MainOption) {
         when (option) {
             MainOption.Feedback -> Feedbacks.feedbackByEmail(null)
             MainOption.About -> {
-
+                /* no-op */
             }
             MainOption.NightMode -> {
                 val popupMenu = PopupMenu(requireContext(), view, Gravity.END)

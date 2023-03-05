@@ -30,7 +30,7 @@ class PurchaseViewModel : ViewModel() {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val client = Client()
+    private val client = Client
 
     val refreshCountdown = MutableLiveData(0)
 

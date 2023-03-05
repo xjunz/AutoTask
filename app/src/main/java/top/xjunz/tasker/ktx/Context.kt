@@ -58,12 +58,12 @@ fun Context.viewFile(file: File) {
     launchIntentSafely(intent)
 }
 
-fun Context.launchIntentSafely(intent: Intent) {
-    runCatching {
+fun Context.launchIntentSafely(intent: Intent): Boolean {
+    return runCatching {
         if (peekActivity() == null) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }.onFailure {
         it.logcatStackTrace()
         toast(R.string.app_not_found)
-    }
+    }.isSuccess
 }

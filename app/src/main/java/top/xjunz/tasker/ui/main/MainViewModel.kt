@@ -10,14 +10,18 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
-import top.xjunz.tasker.ktx.isTrue
-import top.xjunz.tasker.ktx.observeTransient
-import top.xjunz.tasker.ktx.peekActivity
-import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.api.Client
+import top.xjunz.tasker.api.UpdateInfo
+import top.xjunz.tasker.app
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
@@ -57,6 +61,12 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     val serviceBindingError = MutableLiveData<Throwable>()
 
     val operatingMode = MutableLiveData(OperatingMode.CURRENT)
+
+    val checkingForUpdates = MutableLiveData<Boolean>()
+
+    val checkingForUpdatesError = MutableLiveData<String>()
+
+    var showUpdateDialog = false
 
     init {
         AppletOptionFactory.preloadIfNeeded()
@@ -108,6 +118,32 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         }
     }
 
+    fun checkForUpdates() {
+        viewModelScope.launch {
+            checkingForUpdates.setValueIfObserved(true)
+            runCatching {
+                Client.checkForUpdates()
+            }.onSuccess { response ->
+                if (response.status == HttpStatusCode.OK) {
+                    runCatching {
+                        Json.decodeFromString<UpdateInfo>(response.bodyAsText())
+                    }.onFailure {
+                        checkingForUpdatesError.setValueIfObserved(it.message)
+                    }.onSuccess {
+                        app.updateInfo.value = it
+                    }
+                } else {
+                    checkingForUpdatesError.setValueIfObserved(
+                        R.string.format_request_failed.format(response.status)
+                    )
+                }
+            }.onFailure {
+                checkingForUpdatesError.value = R.string.format_request_failed.format(it.message)
+            }
+            checkingForUpdates.setValueIfObserved(false)
+        }
+    }
+
     override fun onStartBinding() {
         isServiceBinding.postValue(true)
     }
@@ -151,15 +187,8 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         }
     }
 
-    fun toggleOperatingMode() {
-        if (serviceController.isServiceRunning) {
-            toast(R.string.error_unable_to_switch_mode)
-            return
-        }
-        if (OperatingMode.CURRENT == OperatingMode.Privilege) {
-            setCurrentOperatingMode(OperatingMode.Accessibility)
-        } else {
-            setCurrentOperatingMode(OperatingMode.Privilege)
-        }
+    override fun onCleared() {
+        super.onCleared()
+        Client.close()
     }
 }

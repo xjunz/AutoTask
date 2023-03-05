@@ -38,8 +38,10 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
     }
 
     override fun bindService() {
-        app.launchIntentSafely(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-        toast(R.string.pls_start_a11y_service_manually)
+        if (app.launchIntentSafely(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))) {
+            A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = false
+            toast(R.string.pls_start_a11y_service_manually)
+        }
     }
 
     override fun stopService() {
@@ -67,6 +69,9 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
     }
 
     override fun syncStatus() {
+        if (service == null) {
+            A11yAutomatorService.FLAG_REQUEST_INSPECTOR_MODE = true
+        }
         RUNNING_STATE.value = service != null
     }
 

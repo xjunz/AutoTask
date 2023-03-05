@@ -7,10 +7,7 @@ package top.xjunz.tasker.ui.main
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import top.xjunz.tasker.BuildConfig
-import top.xjunz.tasker.Preferences
-import top.xjunz.tasker.R
-import top.xjunz.tasker.isShell
+import top.xjunz.tasker.*
 import top.xjunz.tasker.service.isPremium
 
 /**
@@ -43,7 +40,11 @@ sealed class MainOption(
     object Feedback : MainOption(R.string.feedback, R.drawable.ic_chat_24px)
 
     object VersionInfo : MainOption(R.string.version_info, R.drawable.ic_info_24px, desc = {
-        BuildConfig.VERSION_NAME
+        if (app.updateInfo.value?.hasUpdates() == true) {
+            R.string.new_version_detected
+        } else {
+            BuildConfig.VERSION_NAME
+        }
     })
 
     object About : MainOption(
