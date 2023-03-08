@@ -44,6 +44,8 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     private val onDialogDismissed = MutableLiveData<DialogStackManager.StackEntry>()
 
+    private val client = Client()
+
     val appbarHeight = MutableLiveData<Int>()
 
     val paddingBottom = MutableLiveData<Int>()
@@ -122,7 +124,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         viewModelScope.launch {
             checkingForUpdates.setValueIfObserved(true)
             runCatching {
-                Client.checkForUpdates()
+                client.checkForUpdates()
             }.onSuccess { response ->
                 if (response.status == HttpStatusCode.OK) {
                     runCatching {
@@ -189,6 +191,6 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     override fun onCleared() {
         super.onCleared()
-        Client.close()
+        client.close()
     }
 }

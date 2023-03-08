@@ -44,6 +44,7 @@ import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventReceived
 import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
+import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -84,7 +85,9 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             itemView.setNoDoubleClickListener {
                 val position = adapterPosition
                 val option = viewModel.options[position]
-                if (option.isValid) {
+                if (option.isPremiumOnly) {
+                    showPurchaseDialog(R.string.tip_premium_only_applet)
+                } else if (option.isValid) {
                     viewModel.requestAppendOption.value = option to position
                 }
             }
@@ -119,6 +122,14 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     binding.tvBadge.text = R.string.format_api_level.format(option.minApiLevel)
                 } else {
                     binding.tvBadge.text += " | " + R.string.format_api_level.format(option.minApiLevel)
+                }
+            }
+            if (option.isPremiumOnly) {
+                binding.tvBadge.isVisible = true
+                if (binding.tvBadge.text.isNullOrEmpty()) {
+                    binding.tvBadge.text = R.string.premium.str
+                } else {
+                    binding.tvBadge.text += " | " + R.string.premium.str
                 }
             }
             if (viewModel.animateItems) {

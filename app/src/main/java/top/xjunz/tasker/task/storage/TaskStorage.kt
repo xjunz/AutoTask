@@ -86,10 +86,8 @@ object TaskStorage {
                 var entry = it.nextEntry
                 while (entry != null) {
                     val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory)
-                    if (task.title in arrayOf("专注模式", "阻止后台运行")) {
-                        task.metadata.isPreload = true
-                        preloads.add(task)
-                    }
+                    task.metadata.isPreload = true
+                    preloads.add(task)
                     entry = it.nextEntry
                 }
             }

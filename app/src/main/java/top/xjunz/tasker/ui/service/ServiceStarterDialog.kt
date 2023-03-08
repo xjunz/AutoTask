@@ -16,7 +16,6 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.DialogServiceStarterBinding
-import top.xjunz.tasker.isShell
 import top.xjunz.tasker.ktx.beginAutoTransition
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.text
@@ -50,9 +49,6 @@ class ServiceStarterDialog : BaseBottomSheetDialog<DialogServiceStarterBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (isShell) {
-            binding.rbModeA11y.isVisible = false
-        }
         binding.btnStart.setNoDoubleClickListener {
             serviceController.bindService()
         }

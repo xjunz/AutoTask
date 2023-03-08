@@ -521,10 +521,11 @@
     <string name="premium_status">专业版状态</string>
     <string name="acknowledge">我已知晓</string>
     <string name="quit">退出</string>
-    <string name="common_mode">普通模式</string>
     <string name="order_not_found_or_paid">此订单不存在或未完成付款</string>
     <string name="download">下载</string>
     <string name="no_updates">当前已是最新版本</string>
     <string name="new_version_detected">检测到新版本！</string>
     <string name="failed">失败</string>
+    <string name="tip_premium_only_applet">很抱歉，此规则为专业版专属</string>
+    <string name="premium">专业版</string>
 </resources>

@@ -7,7 +7,10 @@ package top.xjunz.tasker.ui.main
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import top.xjunz.tasker.*
+import top.xjunz.tasker.BuildConfig
+import top.xjunz.tasker.Preferences
+import top.xjunz.tasker.R
+import top.xjunz.tasker.app
 import top.xjunz.tasker.service.isPremium
 
 /**
@@ -54,10 +57,6 @@ sealed class MainOption(
     )
 
     companion object {
-        val ALL_OPTIONS = if (isShell) {
-            arrayOf(NightMode, Feedback, VersionInfo, About)
-        } else {
-            arrayOf(PremiumStatus, NightMode, Feedback, VersionInfo, About)
-        }
+        val ALL_OPTIONS = arrayOf(PremiumStatus, NightMode, Feedback, VersionInfo, About)
     }
 }

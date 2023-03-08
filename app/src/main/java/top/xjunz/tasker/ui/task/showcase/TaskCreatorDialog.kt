@@ -13,7 +13,6 @@ import android.view.View
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
@@ -26,7 +25,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskCreatorBinding
 import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.isShell
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.storage.TaskStorage
@@ -83,10 +81,6 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (isShell) {
-            (binding.tvClickMode.parent as View).isVisible = false
-            binding.divider.isVisible = false
-        }
         binding.containerResidentTasks.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str)
             TaskMetadataEditor().init(metadata) {

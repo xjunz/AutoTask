@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             }
         }
         observe(app.updateInfo) {
-            if (!isShell && it.hasUpdates() && mainViewModel.showUpdateDialog) {
+            if (it.hasUpdates() && mainViewModel.showUpdateDialog) {
                 MaterialAlertDialogBuilder(this).setTitle(R.string.has_updates)
                     .setMessage(it.formatToString())
                     .setOnDismissListener {

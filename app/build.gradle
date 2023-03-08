@@ -5,7 +5,6 @@ plugins {
     id 'dev.rikka.tools.refine'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$serialization_version"
     id 'org.jetbrains.kotlin.android'
-   // id 're.obfuscator.dprotect'
 }
 
 android {
@@ -28,7 +27,7 @@ android {
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
         versionCode 6
-        versionName "v1.0.0rc02"
+        versionName "1.0.0"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
@@ -63,23 +62,6 @@ android {
     }
     namespace 'top.xjunz.tasker'
 }
-
-/*dProtect {
-    configurations {
-        release {
-            defaultConfiguration 'proguard-android-optimize.txt'
-            defaultConfiguration 'proguard-android.txt'
-            configuration        'proguard-rules.pro'
-            configuration        'dprotect-rules.pro'
-        }
-        debug {
-            defaultConfiguration 'proguard-android-optimize.txt'
-            defaultConfiguration 'proguard-android.txt'
-            configuration        'proguard-rules.pro'
-            configuration        'dprotect-rules.pro'
-        }
-    }
-}*/
 
 dependencies {
     compileOnly project(":hidden-apis")

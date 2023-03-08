@@ -8,12 +8,13 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.str
 
 @Serializable
 data class UpdateInfo(
     val binary: Binary,
     val build: String,
-    val changelog: String,
+    val changelog: String?,
     val direct_install_url: String,
     val installUrl: String,
     val install_url: String,
@@ -36,7 +37,7 @@ data class UpdateInfo(
         return R.string.html_updates_info.format(
             versionShort,
             Formatter.formatFileSize(app, binary.size),
-            changelog.replace("\n", "<br>")
+            changelog?.replace("\n", "<br>") ?: R.string.nothing_here.str
         ).parseAsHtml()
     }
 }

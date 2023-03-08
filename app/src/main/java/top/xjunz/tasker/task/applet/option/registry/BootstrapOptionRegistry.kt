@@ -8,7 +8,6 @@ import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.isShell
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -71,44 +70,25 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
      * Applet flow is a container flow whose child has the same target.
      */
     private val criterionFlowOptions: Array<AppletOption> by lazy {
-        if (isShell) {
-            arrayOf(
-                appCriteria,
-                textCriteria,
-                timeCriteria,
-                notificationCriteria,
-                globalCriteria
-            )
-        } else {
-            arrayOf(
-                appCriteria,
-                uiObjectCriteria,
-                textCriteria,
-                timeCriteria,
-                notificationCriteria,
-                globalCriteria
-            )
-        }
+        arrayOf(
+            appCriteria,
+            uiObjectCriteria,
+            textCriteria,
+            timeCriteria,
+            notificationCriteria,
+            globalCriteria
+        )
     }
 
     private val actionFlowOptions: Array<AppletOption> by lazy {
-        if (isShell) {
-            arrayOf(
-                globalActions,
-                textActions,
-                appActions,
-                controlActions
-            )
-        } else {
-            arrayOf(
-                globalActions,
-                uiObjectActions,
-                gestureActions,
-                textActions,
-                appActions,
-                controlActions
-            )
-        }
+        arrayOf(
+            globalActions,
+            uiObjectActions,
+            gestureActions,
+            textActions,
+            appActions,
+            controlActions
+        )
     }
 
     fun getRegistryOptions(flow: Flow): Array<AppletOption> {

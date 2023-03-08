@@ -14,9 +14,9 @@ import kotlinx.coroutines.withContext
 /**
  * @author xjunz 2023/03/01
  */
-object Client {
+class Client {
 
-    private const val host = "http://121.196.146.69:8081"
+    private val host = "http://121.196.146.69:8081"
 
     private val httpClient: HttpClient = HttpClient(CIO) {
         expectSuccess = false
