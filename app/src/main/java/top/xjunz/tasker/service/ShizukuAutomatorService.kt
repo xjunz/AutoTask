@@ -30,8 +30,9 @@ import top.xjunz.tasker.ktx.isAlive
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
+import top.xjunz.tasker.task.event.ClipboardEventDispatcher
+import top.xjunz.tasker.task.event.MetaEventDispatcher
 import top.xjunz.tasker.task.runtime.*
-import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
@@ -67,9 +68,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         uiAutomationHidden.casted()
     }
 
-    private val residentTaskScheduler by lazy {
-        ResidentTaskScheduler(PrivilegedTaskManager)
-    }
+    private val residentTaskScheduler = ResidentTaskScheduler(PrivilegedTaskManager)
 
     private val oneshotTaskScheduler by lazy {
         OneshotTaskScheduler()
@@ -80,7 +79,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     @Local
     private lateinit var delegate: IRemoteAutomatorService
 
-    override val a11yEventDispatcher by lazy {
+    private val a11yEventDispatcher by lazy {
         A11yEventDispatcher(looper, uiAutomatorBridge)
     }
 
@@ -121,6 +120,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         PrivilegedUiAutomatorBridge(uiAutomation)
     }
 
+    override val eventDispatcher = MetaEventDispatcher()
+
     @Anywhere
     override fun getStartTimestamp(): Long {
         return if (isPrivilegedProcess) startTimestamp else delegate.startTimestamp
@@ -146,15 +147,13 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         if (isAppProcess) {
             delegate.suppressResidentTaskScheduler(suppress)
         } else {
-            if (::residentTaskScheduler.isLazilyInitialized) {
-                residentTaskScheduler.isSuppressed = suppress
-            }
+            residentTaskScheduler.isSuppressed = suppress
         }
     }
 
     @Privileged
     override fun scheduleOneshotTask(id: Long, callback: ITaskCompletionCallback) {
-        oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.findTask(id), callback)
+        oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.requireTask(id), callback)
     }
 
     override fun setPremiumContextStoragePath(path: String) {
@@ -167,10 +166,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     @Local
     override fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback) {
-        // If not present in task manager, add it first
-        if (!LocalTaskManager.isTaskExistentInRemote(task.checksum)) {
-            LocalTaskManager.addNewOneshotTask(task)
-        }
         delegate.scheduleOneshotTask(task.checksum, onCompletion)
     }
 
@@ -193,13 +188,19 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
             AppletOptionFactory.preloadIfNeeded()
-            a11yEventDispatcher.addCallback(residentTaskScheduler)
-            a11yEventDispatcher.addCallback(oneshotTaskScheduler)
-            a11yEventDispatcher.activate(false)
+            initEventDispatcher()
             startTimestamp = System.currentTimeMillis()
         } catch (t: Throwable) {
             t.rethrowInRemoteProcess()
         }
+    }
+
+    private fun initEventDispatcher() {
+        eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
+        eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
+        eventDispatcher.addCallback(residentTaskScheduler)
+        eventDispatcher.addCallback(oneshotTaskScheduler)
+        a11yEventDispatcher.activate(false)
     }
 
     @Anywhere
@@ -207,7 +208,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         if (isAppProcess) {
             delegate.destroy()
         } else try {
-            a11yEventDispatcher.destroy()
+            eventDispatcher.destroy()
             residentTaskScheduler.shutdown()
             if (::uiAutomationHidden.isInitialized) {
                 Binder.clearCallingIdentity()

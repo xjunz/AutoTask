@@ -18,6 +18,7 @@ import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
+import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.EventCenter
@@ -38,7 +39,7 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
     private fun initTasks() {
         tasks.clear()
         tasks.addAll(TaskStorage.getAllTasks().filter {
-            it.metadata.taskType == XTask.TYPE_ONESHOT
+            it.isOneshot
         })
     }
 
@@ -110,6 +111,8 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
         inspector.observeTransient(vm.requestLaunchOneshotTask) {
             if (serviceController.isServiceRunning) {
                 rootView.post {
+                    // If not present in task manager, add it first
+                    LocalTaskManager.addOneshotTaskIfAbsent(it)
                     currentService.scheduleOneshotTask(it, taskCompletionCallback)
                 }
                 vm.makeToast(R.string.format_launch_oneshot_task.format(it.title))

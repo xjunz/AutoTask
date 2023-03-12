@@ -34,6 +34,7 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ContainerFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -85,7 +86,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             itemView.setNoDoubleClickListener {
                 val position = adapterPosition
                 val option = viewModel.options[position]
-                if (option.isPremiumOnly) {
+                if (!isPremium && option.isPremiumOnly) {
                     showPurchaseDialog(R.string.tip_premium_only_applet)
                 } else if (option.isValid) {
                     viewModel.requestAppendOption.value = option to position

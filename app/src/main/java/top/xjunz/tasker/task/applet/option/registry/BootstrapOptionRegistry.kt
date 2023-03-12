@@ -82,12 +82,12 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     private val actionFlowOptions: Array<AppletOption> by lazy {
         arrayOf(
+            controlActions,
             globalActions,
             uiObjectActions,
             gestureActions,
             textActions,
-            appActions,
-            controlActions
+            appActions
         )
     }
 

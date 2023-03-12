@@ -6,8 +6,6 @@ package top.xjunz.tasker.util
 
 import top.xjunz.shared.ktx.casted
 import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KProperty0
-import kotlin.reflect.jvm.isAccessible
 
 /**
  * @author xjunz 2022/07/14
@@ -35,13 +33,4 @@ object ReflectionUtil {
             it.isAccessible = true
         }.invoke(this, *args)!!.casted()
     }
-
-    /**
-     * Whether a lazy property is initialized.
-     */
-    val KProperty0<*>.isLazilyInitialized: Boolean
-        get() {
-            isAccessible = true
-            return getDelegate()!!.casted<Lazy<*>>().isInitialized()
-        }
 }

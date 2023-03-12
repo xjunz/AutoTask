@@ -77,3 +77,7 @@ top.xjunz.tasker.engine.dto.XTaskDTO # <-- List serializable classes with named 
 -keepnames class <1>$$serializer { # -keepnames suffices; class is kept when serializer() is kept.
     static <1>$$serializer INSTANCE;
 }
+
+-keepclassmembers,allowobfuscation class top.xjunz.tasker.premium.PremiumContext {
+    *;
+}

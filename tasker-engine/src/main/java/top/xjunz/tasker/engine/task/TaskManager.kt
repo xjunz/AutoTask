@@ -15,11 +15,13 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
 
     protected abstract fun asTask(carrier: TaskCarrier): XTask
 
+    protected abstract val TaskCarrier.identifier: TaskIdentifier
+
     protected abstract fun List<XTask>.indexOfTask(identifier: TaskIdentifier): Int
 
     fun getEnabledResidentTasks(): List<XTask> {
         return tasks.filter {
-            it.metadata.taskType == XTask.TYPE_RESIDENT
+            it.isResident
         }
     }
 
@@ -39,8 +41,10 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         tasks.add(task)
     }
 
-    open fun addNewOneshotTask(carrier: TaskCarrier) {
-        tasks.add(asTask(carrier))
+    open fun addOneshotTaskIfAbsent(carrier: TaskCarrier) {
+        if (tasks.indexOfTask(carrier.identifier) < 0) {
+            tasks.add(asTask(carrier))
+        }
     }
 
     open fun updateTask(previousChecksum: Long, updated: TaskCarrier) {
@@ -55,23 +59,23 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
     }
 
     open fun clearSnapshots(id: TaskIdentifier) {
-        findTask(id).snapshots.clear()
+        requireTask(id).snapshots.clear()
     }
 
-    fun findTask(id: TaskIdentifier): XTask {
+    private fun findTask(id: TaskIdentifier): XTask? {
+        return tasks.getOrNull(tasks.indexOfTask(id))
+    }
+
+    fun requireTask(id: TaskIdentifier): XTask {
         return tasks[tasks.indexOfTask(id)]
     }
 
     open fun getSnapshotCount(id: TaskIdentifier): Int {
-        return findTask(id).snapshots.size
+        return findTask(id)?.snapshots?.size ?: 0
     }
 
     open fun getAllSnapshots(id: TaskIdentifier): Array<TaskSnapshot> {
-        return findTask(id).snapshots.toTypedArray()
-    }
-
-    open fun isTaskExistent(id: TaskIdentifier): Boolean {
-        return tasks.indexOfTask(id) >= 0
+        return requireTask(id).snapshots.toTypedArray()
     }
 
     fun clearAllSnapshots() {

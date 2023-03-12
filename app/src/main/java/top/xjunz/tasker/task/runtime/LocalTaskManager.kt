@@ -49,12 +49,10 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
-    override fun addNewOneshotTask(carrier: XTask) {
-        // No [super.addNewOneshotTask(carrier)]
+    override fun addOneshotTaskIfAbsent(carrier: XTask) {
+        super.addOneshotTaskIfAbsent(carrier)
         peer?.whenAlive {
-            if (!it.isTaskExistent(carrier.checksum)) {
-                it.addNewOneshotTask(carrier.toDTO())
-            }
+            it.addOneshotTaskIfAbsent(carrier.toDTO())
         }
     }
 
@@ -88,10 +86,6 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
-    fun isTaskExistentInRemote(identifier: Long): Boolean {
-        return peer?.isTaskExistent(identifier) == true
-    }
-
     override fun asTask(carrier: XTask): XTask {
         return carrier
     }
@@ -99,5 +93,7 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
     override fun List<XTask>.indexOfTask(identifier: XTask): Int {
         return indexOf(identifier)
     }
+
+    override val XTask.identifier: XTask get() = this
 
 }

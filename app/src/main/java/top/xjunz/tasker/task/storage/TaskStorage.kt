@@ -153,13 +153,13 @@ object TaskStorage {
 
     fun getResidentTasks(): List<XTask> {
         return all.filter {
-            it.metadata.taskType == XTask.TYPE_RESIDENT
+            it.isResident
         }
     }
 
     fun getOneshotTasks(): List<XTask> {
         return all.filter {
-            it.metadata.taskType == XTask.TYPE_ONESHOT
+            it.isOneshot
         }
     }
 }

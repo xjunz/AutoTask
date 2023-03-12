@@ -31,6 +31,8 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.event.A11yEventDispatcher
+import top.xjunz.tasker.task.event.ClipboardEventDispatcher
+import top.xjunz.tasker.task.event.MetaEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.inspector.InspectorViewModel
@@ -39,7 +41,6 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.OneshotTaskScheduler
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.uiautomator.A11yGestureController
-import top.xjunz.tasker.util.ReflectionUtil.isLazilyInitialized
 import top.xjunz.tasker.util.ReflectionUtil.requireFieldFromSuperClass
 import java.lang.ref.WeakReference
 
@@ -81,13 +82,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
 
-    private val residentTaskScheduler by lazy {
-        ResidentTaskScheduler(LocalTaskManager)
-    }
+    private val residentTaskScheduler = ResidentTaskScheduler(LocalTaskManager)
 
-    private val oneshotTaskScheduler by lazy {
-        OneshotTaskScheduler()
-    }
+    private val oneshotTaskScheduler = OneshotTaskScheduler()
 
     private val componentChangeCallbackForInspector by lazy {
         EventDispatcher.Callback {
@@ -108,21 +105,26 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         A11yUiAutomatorBridge(uiAutomation)
     }
 
-    override val a11yEventDispatcher: A11yEventDispatcher by lazy {
+    override val eventDispatcher = MetaEventDispatcher()
+
+    private val a11yEventDispatcher: A11yEventDispatcher by lazy {
         A11yEventDispatcher(Looper.getMainLooper(), uiAutomatorBridge)
     }
 
-    override val overlayToastBridge: OverlayToastBridge by lazy {
+    private val overlayToastBridgeLazy = lazy {
         OverlayToastBridge(Looper.getMainLooper())
     }
 
-    private var isInspectorMode = false
+    override val overlayToastBridge: OverlayToastBridge by overlayToastBridgeLazy
 
     private var startTimestamp: Long = -1
 
     private var callbacks: AccessibilityServiceHidden.Callbacks? = null
 
     lateinit var inspector: FloatingInspector
+        private set
+
+    var isInspectorMode = false
         private set
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
@@ -147,8 +149,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             uiAutomationHidden.connect()
 
             if (!isInspectorMode) {
-                a11yEventDispatcher.addCallback(residentTaskScheduler)
-                a11yEventDispatcher.addCallback(oneshotTaskScheduler)
+                initTaskScheduler()
             }
             a11yEventDispatcher.activate(isInspectorMode)
 
@@ -165,6 +166,13 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
+    private fun initTaskScheduler() {
+        eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
+        eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
+        eventDispatcher.addCallback(residentTaskScheduler)
+        eventDispatcher.addCallback(oneshotTaskScheduler)
+    }
+
     fun destroyFloatingInspector() {
         inspector.dismiss()
         stopListeningComponentChanges()
@@ -173,6 +181,11 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         } else if (serviceController.isServiceRunning) {
             currentService.suppressResidentTaskScheduler(false)
         }
+    }
+
+    fun switchToWorkerMode() {
+        isInspectorMode = false
+        initTaskScheduler()
     }
 
     fun showFloatingInspector(mode: InspectorMode) {
@@ -192,9 +205,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun suppressResidentTaskScheduler(suppress: Boolean) {
-        if (::residentTaskScheduler.isLazilyInitialized) {
-            residentTaskScheduler.isSuppressed = suppress
-        }
+        residentTaskScheduler.isSuppressed = suppress
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -235,18 +246,16 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override fun onDestroy() {
         super.onDestroy()
-        a11yEventDispatcher.destroy()
-        if (::overlayToastBridge.isLazilyInitialized) {
+        eventDispatcher.destroy()
+        if (overlayToastBridgeLazy.isInitialized()) {
             overlayToastBridge.destroy()
         }
-        if (::residentTaskScheduler.isLazilyInitialized) {
-            residentTaskScheduler.shutdown()
-        }
-        if (::oneshotTaskScheduler.isLazilyInitialized) {
-            oneshotTaskScheduler.shutdown()
-        }
+        residentTaskScheduler.shutdown()
+        oneshotTaskScheduler.shutdown()
         LocalTaskManager.clearAllSnapshots()
-        if (isInspectorShown) inspector.dismiss()
+        if (isInspectorShown) {
+            inspector.dismiss()
+        }
         if (::uiAutomationHidden.isInitialized) {
             uiAutomationHidden.disconnect()
         }

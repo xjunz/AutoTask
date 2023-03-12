@@ -125,9 +125,9 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.tvTaskDesc.text = metadata.description
                 b.tvTaskDesc.isEnabled = true
             }
-            if (metadata.taskType == XTask.TYPE_ONESHOT) {
+            if (task.isOneshot) {
                 b.msEnabled.isInvisible = true
-            } else if (metadata.taskType == XTask.TYPE_RESIDENT) {
+            } else if (task.isResident) {
                 b.ibRun.isInvisible = true
             }
             // b.tvBadge.isVisible = task.isPreload
@@ -147,7 +147,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 b.msEnabled.setText(R.string.not_is_enabled)
                 b.wave.fadeOut()
             }
-            if (task.metadata.taskType == XTask.TYPE_ONESHOT) {
+            if (task.isOneshot) {
                 b.ibSnapshot.isVisible = true
             }
         }

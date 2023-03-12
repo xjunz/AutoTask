@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2023 xjunz. All rights reserved.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/item_feedback_group" android:title="@string/feedback_group"/>
+    <item android:id="@+id/item_feedback_email" android:title="@string/feedback_email"/>
+</menu>

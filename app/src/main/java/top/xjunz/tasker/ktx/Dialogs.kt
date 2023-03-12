@@ -17,6 +17,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.LayoutProgressBinding
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import top.xjunz.tasker.util.Feedbacks
 
 /**
  * @author xjunz 2022/07/25
@@ -55,7 +56,7 @@ fun Context.showErrorDialog(stackTrace: String): AlertDialog {
         .setNegativeButton(android.R.string.cancel, null).create()
     dialog.show()
     dialog.getButton(DialogInterface.BUTTON_POSITIVE).setNoDoubleClickListener {
-      //  Feedbacks.showErrorFeedbackDialog(this, stackTrace)
+        Feedbacks.feedbackErrorByEmail(stackTrace)
     }
     return dialog
 }

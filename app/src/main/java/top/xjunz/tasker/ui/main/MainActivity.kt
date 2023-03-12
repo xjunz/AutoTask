@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                         if (task.isEnabled) R.string.disable_all_tasks else R.string.enable_all_tasks
                     ) { _, _ ->
                         val tasks = TaskStorage.getAllTasks().filter {
-                            it.metadata.taskType == XTask.TYPE_RESIDENT && it.isEnabled == task.isEnabled
+                            it.isResident && it.isEnabled == task.isEnabled
                         }.toList()
                         if (!task.isEnabled && !isPremium && tasks.size + LocalTaskManager.getEnabledResidentTasks().size >
                             ResidentTaskScheduler.MAX_ENABLED_RESIDENT_TASKS_FOR_NON_PREMIUM_USER
@@ -213,7 +213,17 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             }
         }
         observeDialog(mainViewModel.serviceBindingError) {
-            if (it is TimeoutException) {
+            if (it is IllegalArgumentException) {
+                val st = it.stackTraceToString()
+                if (st.contains("already registered")) {
+                    makeSimplePromptDialog(
+                        title = R.string.tip,
+                        msg = R.string.error_automation_already_registered
+                    ).show()
+                } else {
+                    showErrorDialog(st)
+                }
+            } else if (it is TimeoutException) {
                 makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out).setTitle(R.string.error_occurred)
                     .setNegativeButton(R.string.launch_shizuku_manager) { _, _ ->
                         ShizukuUtil.launchShizukuManager()

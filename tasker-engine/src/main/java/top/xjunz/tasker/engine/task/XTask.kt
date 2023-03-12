@@ -12,7 +12,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.xjunz.shared.ktx.md5
-import top.xjunz.shared.trace.logcat
+import top.xjunz.shared.trace.debugLogcat
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.engine.applet.base.*
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -54,6 +54,10 @@ class XTask : ValueRegistry() {
 
     internal val snapshots = ConcurrentLinkedDeque<TaskSnapshot>()
 
+    inline val isOneshot get() = metadata.taskType == TYPE_ONESHOT
+
+    inline val isResident get() = metadata.taskType == TYPE_RESIDENT
+
     var flow: RootFlow? = null
 
     var previousLaunchTime = -1L
@@ -86,37 +90,40 @@ class XTask : ValueRegistry() {
     private inner class SnapshotObserver(private val snapshot: TaskSnapshot) :
         TaskRuntime.Observer {
 
-        private var eventHit: Boolean? = null
+        private var snapshotAdded: Boolean? = null
 
         override fun onAppletStarted(victim: Applet, runtime: TaskRuntime) {
             if (victim is Flow) {
-                logcat(indent(runtime.tracker.depth) + victim.relationToString() + victim)
+                debugLogcat(indent(runtime.tracker.depth) + victim.relationToString() + victim)
             }
             snapshot.current = runtime.tracker.getCurrentHierarchy()
         }
 
         override fun onAppletTerminated(victim: Applet, runtime: TaskRuntime) {
             val indents = indent(runtime.tracker.depth)
-            logcat(indents + victim.relationToString() + "$victim -> ${runtime.isSuccessful}")
+            debugLogcat(indents + victim.relationToString() + "$victim -> ${runtime.isSuccessful}")
             if (!runtime.isSuccessful) {
                 if (runtime.result.actual != null) {
-                    logcat(indents + "actual: ${runtime.result.actual}")
+                    debugLogcat(indents + "actual: ${runtime.result.actual}")
                 }
                 if (runtime.result.throwable != null) {
-                    logcat(indents + "error: ${runtime.result.throwable}")
+                    debugLogcat(indents + "error: ${runtime.result.throwable}")
                 }
             }
             snapshot.current = -1
-            if (eventHit == null && victim is When) {
+            if (isResident && snapshotAdded == null && victim is When) {
                 if (runtime.isSuccessful) {
-                    eventHit = true
-                    // Only when the event is hit, we offer the snapshot
+                    snapshotAdded = true
+                    // As for resident task, only when the event is hit, we offer the snapshot
                     snapshots.offerFirst(snapshot)
                 } else {
-                    eventHit = false
+                    snapshotAdded = false
                 }
+            } else if (isOneshot) {
+                snapshotAdded = true
+                snapshots.offerFirst(snapshot)
             }
-            if (eventHit != false) {
+            if (snapshotAdded != false) {
                 val hierarchy = runtime.tracker.getCurrentHierarchy()
                 if (runtime.isSuccessful) {
                     snapshot.successes.add(hierarchy)
@@ -129,7 +136,7 @@ class XTask : ValueRegistry() {
         }
 
         override fun onAppletSkipped(victim: Applet, runtime: TaskRuntime) {
-            logcat(indent(runtime.tracker.depth) + victim.relationToString() + "$victim -> skipped")
+            debugLogcat(indent(runtime.tracker.depth) + victim.relationToString() + "$victim -> skipped")
         }
 
         private fun indent(count: Int): String {

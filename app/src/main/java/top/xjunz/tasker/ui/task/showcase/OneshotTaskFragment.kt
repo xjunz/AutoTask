@@ -21,7 +21,7 @@ class OneshotTaskFragment : BaseTaskShowcaseFragment() {
     }
 
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.getAllTasks().filter { it.metadata.taskType == XTask.TYPE_ONESHOT }
+        return TaskStorage.getAllTasks().filter { it.isOneshot }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

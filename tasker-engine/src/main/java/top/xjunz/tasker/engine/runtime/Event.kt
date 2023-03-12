@@ -14,7 +14,7 @@ import top.xjunz.shared.ktx.casted
  */
 class Event private constructor(
     private var _type: Int,
-    pkgName: String,
+    pkgName: String? = null,
     actName: String? = null,
     paneTitle: String? = null
 ) {
@@ -57,9 +57,11 @@ class Event private constructor(
 
         const val EVENT_ON_NEW_WINDOW = 5
 
+        const val EVENT_ON_PRIMARY_CLIP_CHANGED = 6
+
         fun obtain(
             eventType: Int,
-            pkgName: String,
+            pkgName: String? = null,
             actName: String? = null,
             paneTitle: String? = null
         ): Event {
@@ -77,7 +79,8 @@ class Event private constructor(
         EVENT_ON_PACKAGE_EXITED,
         EVENT_ON_CONTENT_CHANGED,
         EVENT_ON_NOTIFICATION_RECEIVED,
-        EVENT_ON_NEW_WINDOW
+        EVENT_ON_NEW_WINDOW,
+        EVENT_ON_PRIMARY_CLIP_CHANGED
     )
     annotation class EventType
 
@@ -88,6 +91,7 @@ class Event private constructor(
             EVENT_ON_PACKAGE_EXITED -> "pkgExited"
             EVENT_ON_NOTIFICATION_RECEIVED -> "notificationReceived"
             EVENT_ON_NEW_WINDOW -> "newWindow"
+            EVENT_ON_PRIMARY_CLIP_CHANGED -> "primaryClipChanged"
             else -> "undefined"
         }
         return "Event(type=$typeName, compInfo=$componentInfo)"

@@ -16,7 +16,7 @@ import top.xjunz.tasker.task.storage.TaskStorage
 class ResidentTaskFragment : BaseTaskShowcaseFragment() {
 
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.getAllTasks().filter { it.metadata.taskType == XTask.TYPE_RESIDENT }
+        return TaskStorage.getAllTasks().filter { it.isResident }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

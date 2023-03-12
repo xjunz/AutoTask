@@ -21,6 +21,7 @@ import top.xjunz.tasker.databinding.ItemMainOptionBinding
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
@@ -82,7 +83,22 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
 
     private fun onOptionClicked(view: View, option: MainOption) {
         when (option) {
-            MainOption.Feedback -> Feedbacks.feedbackByEmail(null)
+            MainOption.Feedback -> {
+                val menu = PopupMenu(requireContext(), view, Gravity.END)
+                menu.inflate(R.menu.feedbacks)
+                menu.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.item_feedback_email -> {
+                            Feedbacks.feedbackByEmail(null)
+                        }
+                        R.id.item_feedback_group -> {
+                            requireContext().viewUrlSafely("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=258644994&card_type=group&source=qrcode")
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+                menu.show()
+            }
             MainOption.About -> {
                 /* no-op */
             }

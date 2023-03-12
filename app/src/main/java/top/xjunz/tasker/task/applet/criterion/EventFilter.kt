@@ -10,6 +10,7 @@ import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
+import top.xjunz.tasker.task.event.ClipboardEventDispatcher
 
 /**
  * @author xjunz 2022/08/25
@@ -29,14 +30,17 @@ class EventFilter(eventType: Int) : Applet() {
         return if (hit == null) {
             AppletResult.EMPTY_FAILURE
         } else {
-            val wrapper = ComponentInfoWrapper.wrap(hit.componentInfo)
             when (hit.type) {
                 Event.EVENT_ON_NOTIFICATION_RECEIVED -> {
                     NotificationReferent(
-                        wrapper, hit.getExtra(NotificationReferent.EXTRA_IS_TOAST)
+                        ComponentInfoWrapper.wrap(hit.componentInfo),
+                        hit.getExtra(NotificationReferent.EXTRA_IS_TOAST)
                     ).asResult()
                 }
-                else -> wrapper.asResult()
+                Event.EVENT_ON_PRIMARY_CLIP_CHANGED -> {
+                    AppletResult.succeeded(hit.getExtra(ClipboardEventDispatcher.EXTRA_PRIMARY_CLIP_TEXT))
+                }
+                else -> ComponentInfoWrapper.wrap(hit.componentInfo).asResult()
             }
         }
     }

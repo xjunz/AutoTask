@@ -11,13 +11,11 @@ interface IRemoteTaskManager {
 
     void updateTask(long previous, in XTaskDTO updated);
 
-    boolean isTaskExistent(long identifier);
-
     void disableResidentTask(long identifier);
 
     void enableResidentTask(in XTaskDTO carrier);
 
-    void addNewOneshotTask(in XTaskDTO carrier);
+    void addOneshotTaskIfAbsent(in XTaskDTO carrier);
 
     int getSnapshotCount(long identifier);
 

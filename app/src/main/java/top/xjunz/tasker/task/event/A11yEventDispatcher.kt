@@ -32,7 +32,7 @@ import kotlin.time.toDuration
  * @author xjunz 2022/10/29
  */
 class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomatorBridge) :
-    EventDispatcher(), PremiumMixin.Callback {
+    EventDispatcher(), CoroutineScope, PremiumMixin.Callback {
 
     companion object {
         const val PACKAGE_SYSTEM_UI = "com.android.systemui"

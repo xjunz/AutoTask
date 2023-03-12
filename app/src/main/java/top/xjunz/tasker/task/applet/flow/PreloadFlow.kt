@@ -31,9 +31,9 @@ class PreloadFlow : ControlFlow(), Referent {
 
     override fun getReferredValue(which: Int): Any? {
         return when (which) {
-            0 -> currentService.a11yEventDispatcher.getCurrentComponentInfo()
-            1 -> currentService.a11yEventDispatcher.getCurrentComponentInfo().packageName
-            2 -> currentService.a11yEventDispatcher.getCurrentComponentInfo().label
+            0 -> currentService.getCurrentComponentInfo()
+            1 -> currentService.getCurrentComponentInfo().packageName
+            2 -> currentService.getCurrentComponentInfo().label
             3 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
             else -> super.getReferredValue(which)
         }

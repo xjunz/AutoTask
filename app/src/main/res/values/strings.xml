@@ -528,4 +528,7 @@
     <string name="failed">失败</string>
     <string name="tip_premium_only_applet">很抱歉，此规则为专业版专属</string>
     <string name="premium">专业版</string>
+    <string name="error_automation_already_registered">服务注册失败，请先关闭设备上其他类似的服务！</string>
+    <string name="on_primary_clip_changed">剪切板文字改变时</string>
+    <string name="current_primary_clip_text">当前剪切板上的文字</string>
 </resources>

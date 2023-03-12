@@ -50,4 +50,9 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0004)
     val newWindow = eventFilterOption(Event.EVENT_ON_NEW_WINDOW, R.string.on_new_window)
         .withTitleModifier(R.string.tip_new_window)
+
+    @AppletOrdinal(0x0005)
+    val primaryClipChanged =
+        eventFilterOption(Event.EVENT_ON_PRIMARY_CLIP_CHANGED, R.string.on_primary_clip_changed)
+            .withResult<String>(R.string.current_primary_clip_text)
 }

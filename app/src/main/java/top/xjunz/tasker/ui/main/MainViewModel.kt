@@ -22,7 +22,9 @@ import top.xjunz.tasker.api.Client
 import top.xjunz.tasker.api.UpdateInfo
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.OperatingMode
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -110,6 +112,11 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         serviceController.setStateListener(this)
         operatingMode.value = mode
         isServiceRunning.value = serviceController.isServiceRunning
+        if (mode == OperatingMode.Accessibility
+            && A11yAutomatorService.get()?.isInspectorMode == true
+        ) {
+            a11yAutomatorService.switchToWorkerMode()
+        }
     }
 
     fun toggleService() {

@@ -55,4 +55,12 @@ object Feedbacks {
         }
         app.launchIntentSafely(intent)
     }
+
+    fun feedbackErrorByEmail(error: String) {
+        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).putExtra(
+            Intent.EXTRA_SUBJECT, R.string.mail_subject.format(formatCurrentTime())
+        ).putExtra(Intent.EXTRA_TEXT, R.string.mail_body.format(dumpEnvInfo() + "\n" + error))
+            .putExtra(Intent.EXTRA_EMAIL, arrayOf("webackup.feedback@gmail.com"))
+        app.launchIntentSafely(intent)
+    }
 }
