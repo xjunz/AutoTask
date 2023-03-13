@@ -390,10 +390,15 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         val behavior = (binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior
                 as HideBottomViewOnScrollBehavior
-        observe(vm.isFabVisible) {
+        observe(vm.isFabVisible) { show ->
             binding.root.beginAutoTransition(binding.fabAction, MaterialFadeThrough())
-            if (it) behavior.slideUp(binding.fabAction, true)
-            binding.fabAction.isVisible = it
+            if (show) behavior.slideUp(binding.fabAction, true)
+            binding.fabAction.isVisible = show
+            if (show) {
+                binding.fabAction.doOnPreDraw {
+                    binding.rvTaskEditor.updatePadding(bottom = it.height + 16.dp)
+                }
+            }
         }
         observeTransient(vm.onAppletLongClicked) {
             if (!vm.isReadyOnly && !vm.isInMultiSelectionMode) {

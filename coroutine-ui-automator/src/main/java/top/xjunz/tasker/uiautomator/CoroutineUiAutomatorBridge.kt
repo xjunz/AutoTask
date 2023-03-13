@@ -6,6 +6,7 @@ package top.xjunz.tasker.uiautomator
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.UiAutomation
 import android.app.UiAutomation.OnAccessibilityEventListener
+import android.os.Build
 import android.os.SystemClock
 import android.util.ArraySet
 import android.util.DisplayMetrics
@@ -13,8 +14,11 @@ import android.view.Display
 import android.view.InputEvent
 import android.view.accessibility.AccessibilityEvent
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.TimeoutException
 
 abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
 
@@ -33,6 +37,12 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
     val uiDevice: CoroutineUiDevice by lazy {
         CoroutineUiDevice(this)
     }
+
+    private val mutex = Mutex()
+
+    private val eventQueue = ArrayList<AccessibilityEvent>()
+
+    private var waitingForEventDelivery = false
 
     private val waitForIdleJobs = ConcurrentLinkedDeque<WeakReference<CoroutineScope>>()
 
@@ -63,6 +73,92 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
 
     abstract val gestureController: CoroutineGestureController
 
+    /**
+     * Executes a command and waits for a specific accessibility event up to a
+     * given wait timeout. To detect a sequence of events one can implement a
+     * filter that keeps track of seen events of the expected sequence and
+     * returns true after the last event of that sequence is received.
+     *
+     *
+     * **Note:** It is caller's responsibility to recycle the returned event.
+     *
+     *
+     * @param command The command to execute.
+     * @param filter Filter that recognizes the expected event.
+     * @param timeoutMillis The wait timeout in milliseconds.
+     *
+     */
+    suspend fun executeAndWaitForEvent(
+        command: suspend () -> Unit,
+        filter: UiAutomation.AccessibilityEventFilter, timeoutMillis: Long
+    ): AccessibilityEvent {
+        // Acquire the lock and prepare for receiving events.
+        mutex.withLock {
+            eventQueue.clear()
+            // Prepare to wait for an event.
+            waitingForEventDelivery = true
+        }
+
+        // Note: We have to release the lock since calling out with this lock held
+        // can bite. We will correctly filter out events from other interactions,
+        // so starting to collect events before running the action is just fine.
+
+        // We will ignore events from previous interactions.
+        val executionStartTimeMillis = SystemClock.uptimeMillis()
+        // Execute the command *without* the lock being held.
+        command.invoke()
+        val receivedEvents: MutableList<AccessibilityEvent> = ArrayList()
+
+        // Acquire the lock and wait for the event.
+        try {
+            // Wait for the event.
+            val startTimeMillis = SystemClock.uptimeMillis()
+            while (true) {
+                val localEvents: MutableList<AccessibilityEvent> = ArrayList()
+                mutex.withLock {
+                    localEvents.addAll(eventQueue)
+                    eventQueue.clear()
+                }
+                // Drain the event queue
+                while (localEvents.isNotEmpty()) {
+                    val event = localEvents.removeAt(0)
+                    // Ignore events from previous interactions.
+                    if (event.eventTime < executionStartTimeMillis) {
+                        continue
+                    }
+                    if (filter.accept(event)) {
+                        return event
+                    }
+                    receivedEvents.add(event)
+                }
+                // Check if timed out and if not wait.
+                val elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis
+                val remainingTimeMillis = timeoutMillis - elapsedTimeMillis
+                if (remainingTimeMillis <= 0) {
+                    throw TimeoutException(
+                        "Expected event not received within: "
+                                + timeoutMillis + " ms among: " + receivedEvents
+                    )
+                }
+                mutex.withLock {
+                    if (eventQueue.isEmpty()) {
+                        delay(remainingTimeMillis)
+                    }
+                }
+            }
+        } finally {
+            val size = receivedEvents.size
+            for (i in 0 until size) {
+                @Suppress("DEPRECATION")
+                receivedEvents[i].recycle()
+            }
+            mutex.withLock {
+                waitingForEventDelivery = false
+                eventQueue.clear()
+            }
+        }
+    }
+
     private fun cancelAllWaitForIdleJobs() {
         for (it in waitForIdleJobs) {
             it.get()?.cancel()
@@ -75,6 +171,14 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
         addOnAccessibilityEventListener {
             latestEventTimestamp = SystemClock.uptimeMillis()
             cancelAllWaitForIdleJobs()
+            if (waitingForEventDelivery) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    eventQueue.add(AccessibilityEvent(it))
+                } else {
+                    @Suppress("DEPRECATION")
+                    eventQueue.add(AccessibilityEvent.obtain(it))
+                }
+            }
         }
     }
 

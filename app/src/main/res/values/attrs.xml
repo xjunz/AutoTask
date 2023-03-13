@@ -31,4 +31,8 @@
         <attr name="waveStrokeColor" format="color" />
         <attr name="waveRunningColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="DrawBoundsFrameLayout">
+        <attr name="boundsStrokeWidth" format="dimension" />
+        <attr name="boundsStrokeColor" format="color" />
+    </declare-styleable>
 </resources>

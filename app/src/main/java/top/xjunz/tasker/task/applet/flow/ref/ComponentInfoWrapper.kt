@@ -9,6 +9,7 @@ import android.content.pm.PackageInfo
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.ComponentInfo
 import top.xjunz.tasker.engine.runtime.Referent
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 
 /**
  * @author xjunz 2022/10/18
@@ -33,11 +34,11 @@ data class ComponentInfoWrapper(
         PackageManagerBridge.loadLabelOfPackage(packageName).toString()
     }
 
-    override fun getReferredValue(which: Int): Any? {
+    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
         return when (which) {
             1 -> packageName
             2 -> label
-            else -> super.getReferredValue(which)
+            else -> super.getReferredValue(runtime, which)
         }
     }
 

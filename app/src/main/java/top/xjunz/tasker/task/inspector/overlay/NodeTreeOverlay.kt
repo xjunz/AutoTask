@@ -131,6 +131,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
                 binding.rvBreadCrumbs.adapter = breadCrumbAdapter
             } else {
                 breadCrumbAdapter.notifyDataSetChanged()
+                binding.rvBreadCrumbs.scrollToPosition(nodeBreadCrumbs.lastIndex)
             }
             childrenNodes.clear()
             if (nodeBreadCrumbs.isNotEmpty()) {
@@ -139,6 +140,7 @@ class NodeTreeOverlay(inspector: FloatingInspector) :
             selectedIndex = childrenNodes.indexOfFirst { nodeInfo ->
                 nodeInfo == vm.highlightNode.value || vm.highlightNode.value?.isChildOf(nodeInfo) == true
             }
+
             if (binding.rvNodes.adapter == null) {
                 binding.rvNodes.adapter = nodeAdapter
             } else {

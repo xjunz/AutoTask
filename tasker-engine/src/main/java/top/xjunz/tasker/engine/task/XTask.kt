@@ -119,7 +119,7 @@ class XTask : ValueRegistry() {
                 } else {
                     snapshotAdded = false
                 }
-            } else if (isOneshot) {
+            } else if (isOneshot && snapshotAdded != true) {
                 snapshotAdded = true
                 snapshots.offerFirst(snapshot)
             }
@@ -189,6 +189,7 @@ class XTask : ValueRegistry() {
             }
             currentRuntime = null
             listener = null
+            clearValues()
             runtime.recycle()
         }
     }

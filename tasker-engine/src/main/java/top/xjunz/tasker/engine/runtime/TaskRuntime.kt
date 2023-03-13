@@ -30,8 +30,8 @@ class TaskRuntime private constructor() {
 
     private class IndexedReferent(val which: Int, private val referent: Any?) {
 
-        fun getReferentValue(): Any? {
-            return if (referent is Referent) referent.getReferredValue(which) else referent
+        fun getReferentValue(runtime: TaskRuntime): Any? {
+            return if (referent is Referent) referent.getReferredValue(runtime, which) else referent
         }
     }
 
@@ -79,7 +79,7 @@ class TaskRuntime private constructor() {
 
     val result: AppletResult get() = _result!!
 
-    val events: Array<out Event> get() = _events!!
+    val events: Array<out Event>? get() = _events
 
     /**
      * Identify all arguments applied to the task runtime. This is helpful for judging whether
@@ -199,7 +199,7 @@ class TaskRuntime private constructor() {
     }
 
     private fun getReferentByName(name: String?): Any? {
-        return referents[name]?.getReferentValue()
+        return referents[name]?.getReferentValue(this)
     }
 
     fun setTarget(any: Any?) {

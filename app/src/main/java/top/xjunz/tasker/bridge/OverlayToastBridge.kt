@@ -11,8 +11,12 @@ import android.os.Handler
 import android.os.Looper
 import android.transition.Transition
 import android.transition.TransitionManager
-import android.view.*
+import android.view.ContextThemeWrapper
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.WindowInsets.Side
+import android.view.WindowManager
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.core.os.postDelayed
 import androidx.core.transition.doOnEnd
@@ -27,6 +31,7 @@ import top.xjunz.tasker.databinding.OverlayToastBinding
 import top.xjunz.tasker.isAppProcess
 import top.xjunz.tasker.ktx.italic
 import top.xjunz.tasker.service.A11yAutomatorService
+import top.xjunz.tasker.ui.widget.DrawBoundsFrameLayout
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -38,6 +43,7 @@ class OverlayToastBridge(looper: Looper) {
     companion object {
         private const val QUEUE_MAX_MESSAGE_COUNT = 40
         private const val TOAST_DURATION_MILLS = 1500
+        private const val CLEAR_BOUNDS_DELAY = 5_000L
     }
 
     private val handler: Handler by lazy {
@@ -58,7 +64,10 @@ class OverlayToastBridge(looper: Looper) {
 
     private lateinit var textView: TextView
 
-    private val container: ViewGroup by lazy {
+    private val container: DrawBoundsFrameLayout by lazy {
+        val field = context.baseContext.javaClass.getDeclaredField("mClassLoader")
+        field.isAccessible = true
+        field.set(context.baseContext, javaClass.classLoader)
         val binding = OverlayToastBinding.inflate(LayoutInflater.from(context))
         textView = binding.tvToast
         binding.root.casted()
@@ -134,6 +143,31 @@ class OverlayToastBridge(looper: Looper) {
         } else {
             enqueueMessage(msg)
         }
+    }
+
+    private val clearBoundsTask = Runnable {
+        container.clearBounds()
+    }
+
+    fun drawAccessibilityBounds(node: AccessibilityNodeInfo) {
+        if (!::textView.isInitialized) {
+            handler.post {
+                windowManager.addView(container, baseLayoutParams)
+                postDrawAccessibilityBounds(node)
+            }
+        } else {
+            postDrawAccessibilityBounds(node)
+        }
+    }
+
+    private fun postDrawAccessibilityBounds(node: AccessibilityNodeInfo) {
+        handler.removeCallbacks(clearBoundsTask)
+        container.drawAccessibilityNode(node)
+        handler.postDelayed(clearBoundsTask, CLEAR_BOUNDS_DELAY)
+    }
+
+    fun clearAccessibilityBounds() {
+        clearBoundsTask.run()
     }
 
     fun destroy() {

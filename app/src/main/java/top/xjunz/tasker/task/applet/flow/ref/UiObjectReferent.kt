@@ -7,6 +7,7 @@ package top.xjunz.tasker.task.applet.flow.ref
 import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.tasker.engine.runtime.Referent
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 
 /**
@@ -20,12 +21,12 @@ class UiObjectReferent(private val node: AccessibilityNodeInfo) : Referent {
         IntValueUtil.composeXY(bounds.centerX(), bounds.centerY())
     }
 
-    override fun getReferredValue(which: Int): Any? {
+    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
         return when (which) {
             0 -> node
             1 -> node.text?.toString()
             2 -> centerCoordinate
-            else -> super.getReferredValue(which)
+            else -> super.getReferredValue(runtime, which)
         }
     }
 }

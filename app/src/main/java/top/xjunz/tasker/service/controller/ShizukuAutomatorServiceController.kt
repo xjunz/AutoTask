@@ -7,10 +7,7 @@ package top.xjunz.tasker.service.controller
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.graphics.Typeface
-import android.os.Build
-import android.os.IBinder
-import android.os.IInterface
-import android.os.SharedMemory
+import android.os.*
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.engine.dto.toDTO
@@ -43,29 +40,38 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
     @SuppressLint("BlockedPrivateApi", "PrivateApi")
     override fun onServiceConnected(remote: IInterface) {
         remote as IRemoteAutomatorService
-        runCatching {
-            if (!remote.isConnected) {
-                remote.connect()
-                remote.setPremiumContextStoragePath(PremiumMixin.premiumContextStoragePath)
-                remote.loadPremiumContext()
-                if (Build.VERSION.SDK_INT >= 31) {
-                    val field = Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
-                    field.isAccessible = true
-                    remote.setSystemTypefaceSharedMemory(field.get(null) as SharedMemory)
+        if (remote.isConnected) {
+            doFinally(remote)
+        } else {
+            remote.connect(object : ResultReceiver(null) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (resultCode < 0) {
+                        remote.destroy()
+                        listener?.onError(resultData?.getString(ShizukuAutomatorService.KEY_CONNECTION_ERROR))
+                    } else {
+                        remote.setPremiumContextStoragePath(PremiumMixin.premiumContextStoragePath)
+                        remote.loadPremiumContext()
+                        if (Build.VERSION.SDK_INT >= 31) {
+                            val field =
+                                Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
+                            field.isAccessible = true
+                            remote.setSystemTypefaceSharedMemory(field.get(null) as SharedMemory)
+                        }
+                        doFinally(remote)
+                    }
                 }
-            }
-        }.onSuccess {
-            val rtm = remote.taskManager
-            LocalTaskManager.setRemotePeer(rtm)
-            if (!rtm.isInitialized) {
-                rtm.initialize(LocalTaskManager.getEnabledResidentTasks().map { it.toDTO() })
-            }
-            remoteService = remote
-            service = ShizukuAutomatorService(remote)
-        }.onFailure {
-            remote.destroy()
-            throw it
+            })
         }
+    }
+
+    private fun doFinally(remote: IRemoteAutomatorService) {
+        val rtm = remote.taskManager
+        LocalTaskManager.setRemotePeer(rtm)
+        if (!rtm.isInitialized) {
+            rtm.initialize(LocalTaskManager.getEnabledResidentTasks().map { it.toDTO() })
+        }
+        remoteService = remote
+        service = ShizukuAutomatorService(remote)
     }
 
     override fun stopService() {

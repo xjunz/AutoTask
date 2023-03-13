@@ -5,9 +5,11 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
+    <top.xjunz.tasker.ui.widget.DrawBoundsFrameLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:boundsStrokeColor="@android:color/holo_red_dark"
+        app:boundsStrokeWidth="4dp">
 
         <TextView
             android:id="@+id/tv_toast"
@@ -25,5 +27,5 @@
             android:visibility="gone"
             tools:text="@tools:sample/lorem"
             tools:visibility="visible" />
-    </FrameLayout>
+    </top.xjunz.tasker.ui.widget.DrawBoundsFrameLayout>
 </layout>

@@ -62,7 +62,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val isServiceBinding = MutableLiveData<Boolean>()
 
-    val serviceBindingError = MutableLiveData<Throwable>()
+    val serviceBindingError = MutableLiveData<Any?>()
 
     val operatingMode = MutableLiveData(OperatingMode.CURRENT)
 
@@ -157,7 +157,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         isServiceBinding.postValue(true)
     }
 
-    override fun onError(t: Throwable) {
+    override fun onError(t: Any?) {
         isServiceBinding.postValue(false)
         isServiceRunning.postValue(false)
         serviceBindingError.postValue(t)

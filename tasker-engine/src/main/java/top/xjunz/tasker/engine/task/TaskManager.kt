@@ -25,7 +25,7 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         }
     }
 
-    open fun disableResidentTask(identifier: TaskIdentifier) {
+    open fun removeTask(identifier: TaskIdentifier) {
         val index = tasks.indexOfTask(identifier)
         if (index >= 0) {
             tasks[index].halt()

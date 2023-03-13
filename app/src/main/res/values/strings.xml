@@ -38,7 +38,7 @@
     <string name="ascending">升序</string>
     <string name="app_label">应用名称</string>
     <string name="sort_by">排序方式</string>
-    <string name="feedback">反馈</string>
+    <string name="feedback">反馈 &amp; 交流</string>
     <string name="check_for_updates">检查更新</string>
     <string name="mail_subject">「自动任务」反馈 %s</string>
     <string name="mail_body">%s\n问题描述:\n</string>
@@ -197,9 +197,9 @@
     <string name="prompt_split_container_flow">确定要解散当前规则组吗？这可能导致规则的逻辑发生变化。</string>
     <string name="unable_to_merge">无法合并所选规则</string>
     <string name="ui_object_operations">控件操作</string>
-    <string name="format_copy_text">将%s复制到剪贴板</string>
+    <string name="format_copy_text">将%s复制到剪切板</string>
     <string name="format_extract_text">从%s中提取文本</string>
-    <string name="matched_ui_object_text">控件的文字</string>
+    <string name="ui_object_text">控件的文字</string>
     <string name="matched_ui_object">满足条件的控件</string>
     <string name="extracted_text">提取的文本</string>
     <string name="input_field">文本框</string>
@@ -306,7 +306,7 @@
     <string name="format_swipe_ui_object">在%s内滑动</string>
     <string name="specified_activity">指定页面</string>
     <string name="task_updated">任务已更新</string>
-    <string name="center_coordinate">中心点坐标</string>
+    <string name="ui_object_center_coordinate">控件中心点坐标</string>
     <string name="x_coordinate">X坐标</string>
     <string name="y_coordinate">Y坐标</string>
     <string name="tip_select_coordinate_with_inspector">使用悬浮助手帮助您从屏幕上选择坐标点</string>
@@ -318,6 +318,7 @@
     <string name="error_number_too_large">输入的值过大！</string>
     <string name="gesture_operations">手势操作</string>
     <string name="format_swipe_args">方向: %s, 比例: %d%%, 速度: %d像素每秒</string>
+    <string name="format_scroll_args">方向: %s, 速度: %d</string>
     <string name="app_left">离开的应用</string>
     <string name="notification_owner_app">发送通知的应用</string>
     <string name="empty" translatable="false" />
@@ -531,4 +532,18 @@
     <string name="error_automation_already_registered">服务注册失败，请先关闭设备上其他类似的服务！</string>
     <string name="on_primary_clip_changed">剪切板文字改变时</string>
     <string name="current_primary_clip_text">当前剪切板上的文字</string>
+    <string name="scroll_to_end">滑动列表到底</string>
+    <string name="scroll_list">滑动列表</string>
+    <string name="scroll_into_ui_object">滑动%s直到出现控件</string>
+    <string name="ui_object_found">找到的控件</string>
+    <string name="search_apps">搜索应用程序</string>
+    <string name="for_each_ui_scrollable">遍历%s</string>
+    <string name="current_child">当前遍历的项目</string>
+    <string name="current_child_count">已遍历的项目数</string>
+    <string name="current_window">当前窗口</string>
+    <string name="target">目标</string>
+    <string name="format_ui_object_matches">%s满足</string>
+    <string name="ui_object_conditions">控件条件</string>
+    <string name="format_draw_node_bounds">绘制%s的边界</string>
+    <string name="clear_node_bounds">清除绘制的控件边界</string>
 </resources>

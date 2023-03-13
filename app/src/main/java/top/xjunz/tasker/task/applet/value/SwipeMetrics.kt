@@ -9,7 +9,7 @@ import androidx.test.uiautomator.Direction
 /**
  * @author xjunz 2023/01/08
  */
-class Swipe(val direction: Direction, val percent: Float, val speed: Int) {
+class SwipeMetrics(val direction: Direction, val percent: Float, val speed: Int) {
 
     companion object {
 
@@ -21,9 +21,9 @@ class Swipe(val direction: Direction, val percent: Float, val speed: Int) {
             BitwiseValueComposer.integer(MAX_SPEED)
         )
 
-        fun parse(composed: Long): Swipe {
+        fun parse(composed: Long): SwipeMetrics {
             val parsed = COMPOSER.parse(composed)
-            return Swipe(
+            return SwipeMetrics(
                 Direction.ALL_DIRECTIONS[parsed[0] as Int],
                 (parsed[1] as Int) / 100F,
                 parsed[2] as Int

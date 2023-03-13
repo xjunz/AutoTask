@@ -24,7 +24,7 @@ class EventFilter(eventType: Int) : Applet() {
     override val valueType: Int = VAL_TYPE_INT
 
     override suspend fun apply(runtime: TaskRuntime): AppletResult {
-        val hit = runtime.events.find {
+        val hit = runtime.events?.find {
             it.type == value
         }
         return if (hit == null) {

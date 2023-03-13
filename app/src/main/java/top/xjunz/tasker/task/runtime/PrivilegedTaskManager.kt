@@ -36,8 +36,8 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
             PrivilegedTaskManager.updateTask(previous, updated)
         }
 
-        override fun disableResidentTask(identifier: Long) {
-            PrivilegedTaskManager.disableResidentTask(identifier)
+        override fun removeTask(identifier: Long) {
+            PrivilegedTaskManager.removeTask(identifier)
         }
 
         override fun enableResidentTask(carrier: XTaskDTO) {

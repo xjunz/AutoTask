@@ -102,6 +102,10 @@ class AppletOption(
             }.foreColored().backColored().underlined()
         }
 
+        fun makeAppletIdentifier(registryId: Int, appletId: Int): Int {
+            return registryId shl 16 or appletId
+        }
+
     }
 
     var appletId: Int = -1
@@ -111,6 +115,14 @@ class AppletOption(
             }
             field = value
         }
+
+    var scopeRegistryId: Int = -1
+        private set
+
+    fun withScopeRegistryId(registryId: Int): AppletOption {
+        scopeRegistryId = registryId
+        return this
+    }
 
     private var describer: (Applet?, Any?) -> CharSequence? = DEFAULT_DESCRIBER
 
@@ -270,7 +282,7 @@ class AppletOption(
             "Invalid applet option unable to yield an applet!"
         }
         return rawCreateApplet().also {
-            it.id = registryId shl 16 or appletId
+            it.id = makeAppletIdentifier(registryId, appletId)
             it.isInverted = isInverted
             it.isInvertible = isInvertible
             if (!isValueInnate) {

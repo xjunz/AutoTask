@@ -179,9 +179,14 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                     }
                 }
                 XTask.TYPE_ONESHOT -> {
-                    FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT).doOnSucceeded {
-                        floatingInspector.viewModel.isCollapsed.value = false
-                    }.show(supportFragmentManager)
+                    if (!serviceController.isServiceRunning) {
+                        ServiceStarterDialog().show(supportFragmentManager)
+                    } else {
+                        FloatingInspectorDialog().setMode(InspectorMode.TASK_ASSISTANT)
+                            .doOnSucceeded {
+                                floatingInspector.viewModel.isCollapsed.value = false
+                            }.show(supportFragmentManager)
+                    }
                 }
             }
         }
@@ -231,7 +236,8 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                         serviceController.bindService()
                     }.show()
             } else {
-                showErrorDialog(it)
+                val error = if (it is Throwable) it.stackTraceToString() else it.toString()
+                showErrorDialog(error)
             }
         }
         observeDangerousConfirmation(

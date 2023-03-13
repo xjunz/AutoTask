@@ -57,10 +57,13 @@ object AppletOptionFactory : AppletFactory {
     val controlActionRegistry =
         ControlActionRegistry(BootstrapOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
 
+    val uiObjectFlowRegistry =
+        UiObjectFlowRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_FLOW_REGISTRY)
+
     private val allRegistries = arrayOf(
-        // meta
+        /* meta */
         flowRegistry,
-        // criterion
+        /* criterion */
         eventRegistry,
         applicationRegistry,
         uiObjectRegistry,
@@ -68,13 +71,15 @@ object AppletOptionFactory : AppletFactory {
         globalInfoRegistry,
         textRegistry,
         notificationRegistry,
-        // action
+        /* action */
         controlActionRegistry,
         globalActionRegistry,
         uiObjectActionRegistry,
         gestureActionRegistry,
         textActionRegistry,
-        appActionRegistry
+        appActionRegistry,
+        /* control */
+        uiObjectFlowRegistry,
     )
 
     fun requireOption(applet: Applet): AppletOption {

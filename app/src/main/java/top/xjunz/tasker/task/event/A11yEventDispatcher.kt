@@ -131,8 +131,11 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
                             dispatchEvents(enterEvent, newWindowEvent)
                         }
                         latestPackageName = packageName
+                        latestActivityName = className
+                    } else {
+                        latestActivityName = className
+                        dispatchEvents(newEvent(Event.EVENT_ON_NEW_WINDOW, packageName))
                     }
-                    latestActivityName = className
                 } else {
                     dispatchEvents(newEvent(Event.EVENT_ON_NEW_WINDOW, packageName))
                 }

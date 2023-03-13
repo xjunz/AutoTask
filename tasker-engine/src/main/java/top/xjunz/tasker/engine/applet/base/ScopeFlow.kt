@@ -15,16 +15,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 abstract class ScopeFlow<Target : Any> : Flow() {
 
     /**
-     * The key used to register target to runtime, equivalent to [id] by default, which means
-     * all flows with the same id will share an identical target at runtime.
-     */
-    protected open fun generateTargetKey(): Long {
-        return id.toLong()
-    }
-
-    private var targetKey: Long = -1
-
-    /**
      * Generate the overall target. The result will be registered to the snapshot in runtime
      * and can be accessed across tasks with a key. This is done in [onPrepareApply].
      */
@@ -46,11 +36,8 @@ abstract class ScopeFlow<Target : Any> : Flow() {
 
     override fun onPrepareApply(runtime: TaskRuntime) {
         super.onPrepareApply(runtime)
-        if (targetKey == -1L) {
-            targetKey = generateTargetKey()
-        }
         runtime.setTarget(
-            runtime.getScopedValue(TaskRuntime.GLOBAL_SCOPE_EVENT, targetKey) {
+            runtime.getScopedValue(TaskRuntime.GLOBAL_SCOPE_TASK, id) {
                 initializeTarget(runtime)
             }
         )

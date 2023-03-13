@@ -9,8 +9,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.bridge.PackageManagerBridge
+import top.xjunz.tasker.ktx.isNotTrue
+import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.ktx.require
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.ui.model.PackageInfoWrapper
@@ -49,33 +53,36 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
 
     val currentPackages = MutableLiveData<List<PackageInfoWrapper>>()
 
+    val isInSearchMode = MutableLiveData<Boolean>()
+
+    val currentQuery = MutableLiveData<String?>()
+
+    val currentSortBy = MutableLiveData(PackageInfoWrapper.SORT_BY_SUSPICION)
+
+    val showSystemApps = MutableLiveData(false)
+
+    val isOrderReversed = MutableLiveData(false)
+
     var title: CharSequence? = null
 
     lateinit var onCompleted: (Collection<String>) -> Unit
 
-    private lateinit var allPackages: MutableList<PackageInfoWrapper>
-
-    private lateinit var sortedPackages: List<PackageInfoWrapper>
-
-    var sortBy: Int = -1
-
-    var isOrderReversed: Boolean = false
-
-    var showSystemApps = false
+    lateinit var allPackages: List<PackageInfoWrapper>
 
     val appBarHeight = MutableLiveData<Int>()
 
+    private var filteringJob: Job? = null
+
     fun findPackageInfo(pkgName: String): PackageInfoWrapper? {
-        val index = sortedPackages.binarySearchBy(pkgName) { it.packageName }
-        if (index >= 0) {
-            return sortedPackages[index]
-        }
-        return null
+        return allPackages.find { pkgName == it.packageName }
     }
 
-    fun sortPackagesBy(what: Int) {
-        if (what == sortBy) return
-        viewModelScope.launch(Dispatchers.Default) {
+    fun filterAndSortPackages() {
+        val query = currentQuery.value
+        val sortBy = currentSortBy.require()
+        filteringJob?.cancel()
+        filteringJob = viewModelScope.launch(Dispatchers.Default) {
+            var finalPackages: List<PackageInfoWrapper>
             if (!::allPackages.isInitialized) {
                 allPackages = PackageManagerBridge.loadAllPackages().map {
                     PackageInfoWrapper(it).also { pkgInfo ->
@@ -83,43 +90,35 @@ class ComponentSelectorViewModel(states: SavedStateHandle) : SavedStateViewModel
                             comp.packageName == pkgInfo.packageName
                         }
                     }
-                }.toMutableList()
-                sortedPackages = allPackages.sortedBy { it.packageName }
+                }
             }
-            if (isOrderReversed) {
-                when (what) {
-                    PackageInfoWrapper.SORT_BY_LABEL -> allPackages.sortByDescending { it.label.toString() }
-                    PackageInfoWrapper.SORT_BY_SUSPICION -> allPackages.sortBy { it.loadSuspicion() }
-                    PackageInfoWrapper.SORT_BY_SIZE -> allPackages.sortBy { it.apkSize }
-                    PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME -> allPackages.sortBy { it.source.firstInstallTime }
+            finalPackages = if (query.isNullOrBlank()) {
+                allPackages
+            } else {
+                allPackages.filter { it.label.contains(query,true) }
+            }
+            if (showSystemApps.isNotTrue) {
+                finalPackages = finalPackages.filter { !it.isSystemApp() }
+            }
+            finalPackages = if (isOrderReversed.isTrue) {
+                when (sortBy) {
+                    PackageInfoWrapper.SORT_BY_LABEL -> finalPackages.sortedByDescending { it.label.toString() }
+                    PackageInfoWrapper.SORT_BY_SUSPICION -> finalPackages.sortedBy { it.loadSuspicion() }
+                    PackageInfoWrapper.SORT_BY_SIZE -> finalPackages.sortedBy { it.apkSize }
+                    PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME -> finalPackages.sortedBy { it.source.firstInstallTime }
+                    else -> illegalArgument()
                 }
             } else {
-                when (what) {
-                    PackageInfoWrapper.SORT_BY_LABEL -> allPackages.sortBy { it.label.toString() }
-                    PackageInfoWrapper.SORT_BY_SUSPICION -> allPackages.sortBy { -it.loadSuspicion() }
-                    PackageInfoWrapper.SORT_BY_SIZE -> allPackages.sortBy { -it.apkSize }
-                    PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME -> allPackages.sortBy { -it.source.firstInstallTime }
+                when (sortBy) {
+                    PackageInfoWrapper.SORT_BY_LABEL -> finalPackages.sortedBy { it.label.toString() }
+                    PackageInfoWrapper.SORT_BY_SUSPICION -> finalPackages.sortedBy { -it.loadSuspicion() }
+                    PackageInfoWrapper.SORT_BY_SIZE -> finalPackages.sortedBy { -it.apkSize }
+                    PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME -> finalPackages.sortedBy { -it.source.firstInstallTime }
+                    else -> illegalArgument()
                 }
             }
-            filterSystemApps(showSystemApps, true)
-            sortBy = what
+            currentPackages.postValue(finalPackages)
         }
-    }
-
-    fun reverseOrder(reverse: Boolean) {
-        if (reverse == isOrderReversed) return
-        currentPackages.postValue(currentPackages.require().reversed())
-        isOrderReversed = reverse
-    }
-
-    fun filterSystemApps(show: Boolean, force: Boolean = false) {
-        if (!force && show == showSystemApps) return
-        if (show) {
-            currentPackages.postValue(allPackages)
-        } else {
-            currentPackages.postValue(allPackages.filter { !it.isSystemApp() })
-        }
-        showSystemApps = show
     }
 
     fun complete(): Boolean {

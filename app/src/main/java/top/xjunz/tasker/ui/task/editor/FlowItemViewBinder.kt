@@ -83,7 +83,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             // Set text style
             when {
                 depth == 1 && applet is Flow -> {
-                    tvTitle.setTextAppearance(TextAppearance_Material3_TitleLarge)
+                    tvTitle.setTextAppearance(TextAppearance_Material3_ActionBar_Title)
                     if (applet is ControlFlow) {
                         tvTitle.setTextColor(controlFlowTextTint)
                     }

@@ -56,3 +56,39 @@ private fun AccessibilityNodeInfo.getScrollableParent(): AccessibilityNodeInfo? 
     }
     return null
 }
+
+suspend fun AccessibilityNodeInfo.findFirst(
+    checkSelf: Boolean,
+    condition: suspend (AccessibilityNodeInfo) -> Boolean
+): AccessibilityNodeInfo? {
+    if (checkSelf) {
+        if (!isVisibleToUser) return null
+        if (condition(this)) {
+            return this
+        }
+    }
+    for (i in 0 until childCount) {
+        val child = getChild(i) ?: continue
+        if (!child.isVisibleToUser) continue
+        try {
+            if (condition(child)) {
+                return child
+            } else if (child.childCount > 0) {
+                val ret = child.findFirst(false, condition)
+                if (ret != null) return ret
+            }
+        } finally {
+            @Suppress("DEPRECATION")
+            child.recycle()
+        }
+    }
+    return null
+}
+
+
+fun AccessibilityNodeInfo.ensureRefresh() {
+    check(refresh()) {
+        "Node is stale!"
+    }
+}
+

@@ -13,6 +13,8 @@ object VariantType {
 
     const val BITS_SWIPE = 1 shl 16 or Applet.VAL_TYPE_LONG
 
+    const val BITS_SCROLL = 2 shl 16 or Applet.VAL_TYPE_LONG
+
     const val INT_COORDINATE = 1 shl 16 or Applet.VAL_TYPE_INT
 
     const val INT_INTERVAL = 2 shl 16 or Applet.VAL_TYPE_INT

@@ -10,20 +10,20 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.test.uiautomator.Direction
-import androidx.test.uiautomator.PointerGesture
+import androidx.test.uiautomator.*
 
 /**
  * A copy of [androidx.test.uiautomator.UiObject2].
  *
  * @author xjunz 2023/02/23
  */
-class CoroutineUiObject internal constructor(
-    private val bridge: CoroutineUiAutomatorBridge,
-    private val source: AccessibilityNodeInfo
+open class CoroutineUiObject internal constructor(
+    protected val bridge: CoroutineUiAutomatorBridge,
+    protected val source: AccessibilityNodeInfo
 ) : AutoCloseable {
 
     companion object {
+
         private val TAG = CoroutineUiObject::class.java.simpleName
 
         // Default gesture speeds
@@ -158,7 +158,6 @@ class CoroutineUiObject internal constructor(
             Log.w(TAG, "AccessibilityNodeInfo#performAction(ACTION_SET_TEXT) failed")
         }
     }
-
 
     /**
      * Returns the visible bounds of this object with the margins removed.

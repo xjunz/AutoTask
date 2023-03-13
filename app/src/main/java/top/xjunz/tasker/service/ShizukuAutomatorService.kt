@@ -14,10 +14,10 @@ import android.os.*
 import android.system.Os
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.Keep
+import androidx.core.os.bundleOf
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcat
 import top.xjunz.shared.trace.logcatStackTrace
-import top.xjunz.shared.utils.rethrowInRemoteProcess
 import top.xjunz.tasker.annotation.Anywhere
 import top.xjunz.tasker.annotation.Local
 import top.xjunz.tasker.annotation.Privileged
@@ -44,6 +44,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     companion object {
 
         private var instance: WeakReference<ShizukuAutomatorService>? = null
+
+        const val KEY_CONNECTION_ERROR = "bundle.key.CONNECTION_ERROR"
 
         @Privileged
         fun require(): ShizukuAutomatorService {
@@ -173,25 +175,30 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         return startTimestamp != -1L
     }
 
-    override fun connect() {
+    override fun connect(callback: ResultReceiver) {
         Binder.clearCallingIdentity()
         try {
             uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
             uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
-                eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
-                        AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
-                        AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED or
-                        AccessibilityEvent.TYPE_ANNOUNCEMENT
+                eventTypes = AccessibilityEvent.TYPES_ALL_MASK
                 flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                         AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS and
                         AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
             }
-            AppletOptionFactory.preloadIfNeeded()
-            initEventDispatcher()
-            startTimestamp = System.currentTimeMillis()
+            Handler(looper).post {
+                try {
+                    AppletOptionFactory.preloadIfNeeded()
+                    initEventDispatcher()
+                    startTimestamp = System.currentTimeMillis()
+                    callback.send(0, null)
+                } catch (t: Throwable) {
+                    callback.send(-1, bundleOf(KEY_CONNECTION_ERROR to t.stackTraceToString()))
+                }
+            }
         } catch (t: Throwable) {
-            t.rethrowInRemoteProcess()
+            t.logcatStackTrace()
+            callback.send(-1, bundleOf(KEY_CONNECTION_ERROR to t.stackTraceToString()))
         }
     }
 

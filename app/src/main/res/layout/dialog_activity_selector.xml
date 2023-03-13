@@ -56,7 +56,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_baseline_filter_list_24"
+                    app:srcCompat="@drawable/ic_filter_list_24px"
                     app:tint="?colorOnPrimaryContainer"
                     tools:visibility="visible" />
             </androidx.constraintlayout.widget.ConstraintLayout>

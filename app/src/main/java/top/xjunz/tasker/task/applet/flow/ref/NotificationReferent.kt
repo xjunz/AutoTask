@@ -5,6 +5,7 @@
 package top.xjunz.tasker.task.applet.flow.ref
 
 import top.xjunz.tasker.engine.runtime.Referent
+import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.task.applet.option.registry.EventCriterionRegistry
 
 /**
@@ -19,13 +20,13 @@ class NotificationReferent(private val componentInfo: ComponentInfoWrapper, val 
         const val EXTRA_IS_TOAST = 1
     }
 
-    override fun getReferredValue(which: Int): Any? {
+    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
         return when (which) {
             // Notification content
             1 -> componentInfo.paneTitle
             // ComponentInfo which sends the notification
             2 -> componentInfo
-            else -> super.getReferredValue(which)
+            else -> super.getReferredValue(runtime, which)
         }
     }
 }

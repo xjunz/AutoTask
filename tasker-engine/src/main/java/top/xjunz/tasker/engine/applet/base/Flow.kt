@@ -5,7 +5,6 @@
 package top.xjunz.tasker.engine.applet.base
 
 import androidx.annotation.CallSuper
-import androidx.annotation.CheckResult
 import kotlinx.coroutines.CancellationException
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.engine.runtime.TaskRuntime
@@ -31,8 +30,6 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
      */
     open val isRepetitive: Boolean = false
 
-    @CallSuper
-    @CheckResult
     protected open suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         for ((index: Int, applet: Applet) in withIndex()) {
             runtime.ensureActive()
@@ -114,10 +111,12 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         // Backup the target, because sub-flows may change the target,
         // we don't want the changed target to fall through.
         val backup = runtime.getRawTarget()
-        val succeeded = applyFlow(runtime)
-        // Restore the target
-        runtime.setTarget(backup)
-        runtime.tracker.jumpOut()
-        return succeeded
+        try {
+            return applyFlow(runtime)
+        } finally {
+            // Restore the target
+            runtime.setTarget(backup)
+            runtime.tracker.jumpOut()
+        }
     }
 }

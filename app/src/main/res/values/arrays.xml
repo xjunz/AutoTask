@@ -85,10 +85,14 @@
         <item>请在该规则后添加规则</item>
         <item>请在该规则后添加规则</item>
     </string-array>
-    <string-array name="swipe_arg_hints">
+    <string-array name="swipe_metrics_hints">
         <item>滑动方向</item>
         <item>滑动百分比(%)</item>
         <item>滑动速度(像素/秒)</item>
+    </string-array>
+    <string-array name="scroll_metrics_hints">
+        <item>滑动方向</item>
+        <item>滑动速度(1至99)</item>
     </string-array>
     <string-array name="swipe_directions">
         <item>向左</item>

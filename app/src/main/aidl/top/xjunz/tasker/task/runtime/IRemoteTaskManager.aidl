@@ -11,7 +11,7 @@ interface IRemoteTaskManager {
 
     void updateTask(long previous, in XTaskDTO updated);
 
-    void disableResidentTask(long identifier);
+    void removeTask(long identifier);
 
     void enableResidentTask(in XTaskDTO carrier);
 

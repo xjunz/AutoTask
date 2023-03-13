@@ -9,10 +9,11 @@ import android.os.SharedMemory;
 import java.util.List;
 import top.xjunz.tasker.engine.dto.XTaskDTO;
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback;
+import android.os.ResultReceiver;
 
 interface IRemoteAutomatorService {
 
-    void connect() = 1;
+    void connect(in ResultReceiver callback) = 1;
 
     long getStartTimestamp() = 2;
 

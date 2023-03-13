@@ -51,7 +51,7 @@ class TaskShowcaseViewModel : ViewModel() {
         val task = requestDeleteTask.require()
         runCatching {
             TaskStorage.removeTask(task)
-            LocalTaskManager.disableResidentTask(task)
+            LocalTaskManager.removeTask(task)
             onTaskDeleted.value = task
             toast(R.string.format_task_removed.format(task.metadata.title))
         }.onFailure {
@@ -105,7 +105,7 @@ class TaskShowcaseViewModel : ViewModel() {
 
     fun toggleTask(task: XTask) {
         if (task.isEnabled) {
-            LocalTaskManager.disableResidentTask(task)
+            LocalTaskManager.removeTask(task)
         } else {
             LocalTaskManager.enableResidentTask(task)
         }

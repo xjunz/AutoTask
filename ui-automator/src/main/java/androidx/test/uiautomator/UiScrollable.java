@@ -407,10 +407,10 @@ public class UiScrollable extends UiCollection {
         Rect rect = new Rect();
         node.getBoundsInScreen(rect);
 
-        int downX = 0;
-        int downY = 0;
-        int upX = 0;
-        int upY = 0;
+        int downX;
+        int downY;
+        int upX;
+        int upY;
 
         // scrolling is by default assumed vertically unless the object is explicitly
         // set otherwise by setAsHorizontalContainer()

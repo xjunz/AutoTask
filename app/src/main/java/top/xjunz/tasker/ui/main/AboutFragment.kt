@@ -23,6 +23,8 @@ import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.floatingInspector
+import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
@@ -118,9 +120,14 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                         }
                         else -> illegalArgument()
                     }
-                    AppCompatDelegate.setDefaultNightMode(mode)
-                    Preferences.nightMode = mode
-                    adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+                    if (Preferences.nightMode != mode) {
+                        AppCompatDelegate.setDefaultNightMode(mode)
+                        if (isFloatingInspectorShown) {
+                            floatingInspector.viewModel.onConfigurationChanged()
+                        }
+                        Preferences.nightMode = mode
+                        adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+                    }
                     return@setOnMenuItemClickListener true
                 }
                 popupMenu.show()

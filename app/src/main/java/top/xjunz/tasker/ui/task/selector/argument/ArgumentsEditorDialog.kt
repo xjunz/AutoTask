@@ -25,7 +25,8 @@ import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
 import top.xjunz.tasker.task.applet.util.IntValueUtil
-import top.xjunz.tasker.task.applet.value.Swipe
+import top.xjunz.tasker.task.applet.value.ScrollMetrics
+import top.xjunz.tasker.task.applet.value.SwipeMetrics
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.task.gesture.SerializableInputEvent
 import top.xjunz.tasker.task.inspector.FloatingInspector
@@ -146,10 +147,25 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     }.show(fragmentManager)
             }
             VariantType.BITS_SWIPE ->
-                BitsValueEditorDialog().init(arg.name, applet.value as? Long, Swipe.COMPOSER) {
+                BitsValueEditorDialog().init(
+                    arg.name,
+                    applet.value as? Long,
+                    SwipeMetrics.COMPOSER
+                ) {
                     updateValue(it)
                 }.setEnums(0, R.array.swipe_directions)
-                    .setHints(R.array.swipe_arg_hints)
+                    .setHints(R.array.swipe_metrics_hints)
+                    .show(fragmentManager)
+
+            VariantType.BITS_SCROLL ->
+                BitsValueEditorDialog().init(
+                    arg.name,
+                    (applet.value as? Long) ?: ScrollMetrics.COMPOSER.compose(3, 50),
+                    ScrollMetrics.COMPOSER
+                ) {
+                    updateValue(it)
+                }.setEnums(0, R.array.swipe_directions)
+                    .setHints(R.array.scroll_metrics_hints)
                     .show(fragmentManager)
 
             VariantType.TEXT_PACKAGE_NAME -> {

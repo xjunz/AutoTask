@@ -20,7 +20,9 @@ fun Throwable.rethrowAsRuntimeException(): Nothing {
 }
 
 fun Throwable.rethrowInRemoteProcess(): Nothing {
-    throw IllegalArgumentException(this)
+    val throwable = IllegalArgumentException(this)
+    throwable.addSuppressed(this)
+    throw throwable
 }
 
 fun illegalArgument(name: String, value: Any): Nothing {

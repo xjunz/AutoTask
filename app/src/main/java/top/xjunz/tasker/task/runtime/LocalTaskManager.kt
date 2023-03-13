@@ -27,7 +27,7 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
-    val XTask.isEnabled: Boolean get() = tasks.contains(this)
+    val XTask.isEnabled: Boolean get() = isResident && tasks.contains(this)
 
     fun setRemotePeer(peer: IRemoteTaskManager) {
         this.peer?.asBinder()?.linkToDeath(peerDeathRecipient, 0)
@@ -35,10 +35,10 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         peer.asBinder().linkToDeath(peerDeathRecipient, 0)
     }
 
-    override fun disableResidentTask(identifier: XTask) {
-        super.disableResidentTask(identifier)
+    override fun removeTask(identifier: XTask) {
+        super.removeTask(identifier)
         peer?.whenAlive {
-            it.disableResidentTask(identifier.checksum)
+            it.removeTask(identifier.checksum)
         }
     }
 

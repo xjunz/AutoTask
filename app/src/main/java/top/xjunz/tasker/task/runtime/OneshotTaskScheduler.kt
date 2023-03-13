@@ -27,7 +27,7 @@ class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
     private var currentActiveTask: XTask? = null
 
     override fun haltAll() {
-        /* no-op */
+        currentActiveTask?.halt()
     }
 
     override val coroutineContext: CoroutineContext =

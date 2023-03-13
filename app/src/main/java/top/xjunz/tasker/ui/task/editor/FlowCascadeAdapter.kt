@@ -35,20 +35,16 @@ class FlowCascadeAdapter(private val viewModel: FlowEditorViewModel) :
         val ret = mutableListOf<CharSequence>()
         var flow: Flow? = viewModel.flow
         while (flow != null && flow !is RootFlow) {
-            if (flow.comment != null) {
-                ret.add(flow.comment!!)
+            if (flow.isContainer) {
+                ret.add(
+                    if (flow.controlFlow is If) {
+                        R.string.matches_rule_set.text
+                    } else {
+                        R.string.execute_rule_set.text
+                    }
+                )
             } else {
-                if (flow.isContainer) {
-                    ret.add(
-                        if (flow.controlFlow is If) {
-                            R.string.matches_rule_set.text
-                        } else {
-                            R.string.execute_rule_set.text
-                        }
-                    )
-                } else {
-                    ret.add(AppletOptionFactory.requireOption(flow).loadTitle(flow)!!)
-                }
+                ret.add(AppletOptionFactory.requireOption(flow).loadTitle(flow).toString())
             }
             flow = flow.parent
         }

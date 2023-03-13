@@ -26,11 +26,11 @@ class Repeat : Flow(), Referent {
 
     private var currentCount: Int = 0
 
-    override fun getReferredValue(which: Int): Any? {
+    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
         return when (which) {
             1 -> currentCount
             2 -> currentCount.toString()
-            else -> super.getReferredValue(which)
+            else -> super.getReferredValue(runtime, which)
         }
     }
 

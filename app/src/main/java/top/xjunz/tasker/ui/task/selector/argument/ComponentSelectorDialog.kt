@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.*
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -131,21 +132,29 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                 when (it.itemId) {
                     R.id.item_sort_by -> {
                         popup.menu.findItem(
-                            when (viewModel.sortBy) {
+                            when (viewModel.currentSortBy.value) {
                                 PackageInfoWrapper.SORT_BY_LABEL -> R.id.item_sort_by_name
                                 PackageInfoWrapper.SORT_BY_SUSPICION -> R.id.item_sort_by_sus
                                 PackageInfoWrapper.SORT_BY_SIZE -> R.id.item_sort_by_size
                                 PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME -> R.id.item_sort_by_install_time
-                                else -> illegalArgument("sortBy", viewModel.sortBy)
+                                else -> illegalArgument()
                             }
                         ).isChecked = true
                     }
-                    R.id.item_sort_by_name -> viewModel.sortPackagesBy(PackageInfoWrapper.SORT_BY_LABEL)
-                    R.id.item_sort_by_sus -> viewModel.sortPackagesBy(PackageInfoWrapper.SORT_BY_SUSPICION)
-                    R.id.item_sort_by_size -> viewModel.sortPackagesBy(PackageInfoWrapper.SORT_BY_SIZE)
-                    R.id.item_sort_by_install_time -> viewModel.sortPackagesBy(PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME)
-                    R.id.item_reverse_order -> viewModel.reverseOrder(!it.isChecked)
-                    R.id.item_show_system_app -> viewModel.filterSystemApps(!it.isChecked)
+                    R.id.item_sort_by_name -> viewModel.currentSortBy.setValueIfDistinct(
+                        PackageInfoWrapper.SORT_BY_LABEL
+                    )
+                    R.id.item_sort_by_sus -> viewModel.currentSortBy.setValueIfDistinct(
+                        PackageInfoWrapper.SORT_BY_SUSPICION
+                    )
+                    R.id.item_sort_by_size -> viewModel.currentSortBy.setValueIfDistinct(
+                        PackageInfoWrapper.SORT_BY_SIZE
+                    )
+                    R.id.item_sort_by_install_time -> viewModel.currentSortBy.setValueIfDistinct(
+                        PackageInfoWrapper.SORT_BY_FIRST_INSTALL_TIME
+                    )
+                    R.id.item_reverse_order -> viewModel.isOrderReversed.setValueIfDistinct(!it.isChecked)
+                    R.id.item_show_system_app -> viewModel.showSystemApps.setValueIfDistinct(!it.isChecked)
                     else -> return@l false
                 }
                 return@l true
@@ -169,7 +178,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.sortPackagesBy(PackageInfoWrapper.SORT_BY_SUSPICION)
+        viewModel.filterAndSortPackages()
         binding.tvTitle.text = viewModel.title
         binding.appBar.oneShotApplySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)
@@ -180,8 +189,10 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.ibSortBy.setOnTouchListener(popupMenu.dragToOpenListener)
         binding.ibSortBy.setNoDoubleClickListener {
             popupMenu.show()
-            popupMenu.menu.findItem(R.id.item_reverse_order).isChecked = viewModel.isOrderReversed
-            popupMenu.menu.findItem(R.id.item_show_system_app).isChecked = viewModel.showSystemApps
+            popupMenu.menu.findItem(R.id.item_reverse_order).isChecked =
+                viewModel.isOrderReversed.isTrue
+            popupMenu.menu.findItem(R.id.item_show_system_app).isChecked =
+                viewModel.showSystemApps.isTrue
         }
         shoppingCartIntegration.init(this)
         binding.viewPager.adapter = viewPagerAdapter
@@ -207,13 +218,19 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
         binding.fabInspector.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }
+        binding.ibSearch.setNoDoubleClickListener {
+            viewModel.isInSearchMode.toggle()
+        }
+        binding.etSearch.doAfterTextChanged {
+            viewModel.currentQuery.value = it?.toString()
+        }
         observeLiveData()
     }
 
     private fun selectPackage(pkgName: String): Boolean {
-        if (viewModel.selectedPackages.contains(pkgName)) {
+        return if (viewModel.selectedPackages.contains(pkgName)) {
             viewModel.itemToRemove.value = pkgName
-            return false
+            false
         } else {
             if (viewModel.isSingleSelection) {
                 val removed = viewModel.selectedPackages.singleOrNull()
@@ -223,14 +240,14 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             }
             viewModel.selectedPackages.add(pkgName)
             viewModel.addedItem.value = pkgName
-            return true
+            true
         }
     }
 
     private fun selectActivity(compName: ComponentName): Boolean {
-        if (viewModel.selectedActivities.contains(compName)) {
+        return if (viewModel.selectedActivities.contains(compName)) {
             viewModel.itemToRemove.value = compName
-            return false
+            false
         } else {
             if (viewModel.isSingleSelection) {
                 val removed = viewModel.selectedActivities.singleOrNull()
@@ -240,7 +257,7 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             }
             viewModel.selectedActivities.add(compName)
             viewModel.addedItem.value = compName
-            return true
+            true
         }
     }
 
@@ -307,10 +324,11 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
             viewModel.onSelectionCleared.value = true
         }
         observeOnce(viewModel.currentPackages) {
-            if (viewModel.mode == MODE_ACTIVITY)
+            if (viewModel.mode == MODE_ACTIVITY) {
                 binding.shoppingCart.rvBottom.adapter = bottomActAdapter
-            else
+            } else {
                 binding.shoppingCart.rvBottom.adapter = bottomPkgAdapter
+            }
         }
         doOnEventRoutedWithValue<ComponentInfoWrapper>(FloatingInspector.EVENT_COMPONENT_SELECTED) {
             if (viewModel.mode == MODE_PACKAGE) {
@@ -330,6 +348,30 @@ class ComponentSelectorDialog : BaseDialogFragment<DialogComponentSelectorBindin
                     }
                 }
             }
+        }
+        observe(viewModel.isInSearchMode) {
+            binding.appBar.beginAutoTransition()
+            if (it) {
+                binding.etSearch.isVisible = true
+                binding.tvTitle.isVisible = false
+                binding.ibSearch.setIconResource(R.drawable.ic_baseline_close_24)
+                binding.ibSearch.setContentDescriptionAndTooltip(R.string.dismiss.str)
+                showSoftInput(binding.etSearch)
+            } else {
+                binding.etSearch.isVisible = false
+                viewModel.currentQuery.value = null
+                binding.tvTitle.isVisible = true
+                binding.ibSearch.setIconResource(R.drawable.ic_search_24px)
+                binding.ibSearch.setContentDescriptionAndTooltip(R.string.search_apps.str)
+            }
+        }
+        observeMultiple(
+            viewModel.currentSortBy,
+            viewModel.currentQuery,
+            viewModel.showSystemApps,
+            viewModel.isOrderReversed
+        ) {
+            viewModel.filterAndSortPackages()
         }
     }
 

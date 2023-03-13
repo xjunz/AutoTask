@@ -36,7 +36,8 @@ class AppletResult private constructor(private var successful: Boolean) {
             return (Pool.acquire() ?: AppletResult(false)).also {
                 it.successful = isSuccessful
                 it.returned = returned
-                it.actual = actual
+                // Boolean value is unnecessary
+                it.actual = if (actual is Boolean) null else actual
                 it.throwable = throwable
             }
         }

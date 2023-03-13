@@ -45,7 +45,7 @@ open class ValueRegistry {
         return requireRegistry().getOrPut(key, initializer).casted()
     }
 
-    fun clear() {
+    fun clearValues() {
         registry = null
         weakRegistry = null
     }

@@ -69,7 +69,13 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         title = factory.requireOption(controlFlow).rawTitle
         if (scope is ScopeFlow<*>) {
             isScoped = true
-            registryOptions = arrayOf(factory.requireRegistryOption(scope.appletId))
+            val option = factory.requireOption(scope)
+            val registryId = if (option.scopeRegistryId != -1) {
+                option.scopeRegistryId
+            } else {
+                scope.appletId
+            }
+            registryOptions = arrayOf(factory.requireRegistryOption(registryId))
         } else {
             isScoped = false
             registryOptions = factory.flowRegistry.getRegistryOptions(controlFlow)

@@ -32,6 +32,13 @@ class CoroutineUiDevice internal constructor(internal val bridge: CoroutineUiAut
         return CoroutineUiObject(bridge, source)
     }
 
+    fun wrapUiScrollable(
+        isVerticalList: Boolean,
+        source: AccessibilityNodeInfo
+    ): CoroutineUiScrollable {
+        return CoroutineUiScrollable(bridge, source, isVerticalList)
+    }
+
     /**
      * Gets the width of the display, in pixels. The width and height details
      * are reported based on the current orientation of the display.

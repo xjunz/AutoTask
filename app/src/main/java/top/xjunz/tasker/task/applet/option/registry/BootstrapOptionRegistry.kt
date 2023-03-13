@@ -21,14 +21,14 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     companion object {
 
-        private const val ID_BOOTSTRAP_REGISTRY = 0
+        const val ID_BOOTSTRAP_REGISTRY = 0
         const val ID_EVENT_FILTER_REGISTRY: Int = 0xF
         const val ID_APP_CRITERION_REGISTRY = 0x10
-        const val ID_UI_OBJECT_CRITERION_REGISTRY = 0x11
         const val ID_TIME_CRITERION_REGISTRY = 0x12
         const val ID_GLOBAL_CRITERION_REGISTRY = 0x13
         const val ID_NOTIFICATION_CRITERION_REGISTRY = 0x14
         const val ID_TEXT_CRITERION_REGISTRY = 0x15
+        const val ID_UI_OBJECT_CRITERION_REGISTRY = 0x16
 
         const val ID_GLOBAL_ACTION_REGISTRY = 0x50
         const val ID_UI_OBJECT_ACTION_REGISTRY = 0x51
@@ -36,6 +36,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         const val ID_APP_ACTION_REGISTRY = 0x53
         const val ID_TEXT_ACTION_REGISTRY = 0x54
         const val ID_GESTURE_ACTION_REGISTRY = 0x55
+
+        const val ID_UI_OBJECT_FLOW_REGISTRY = 0x60
     }
 
     private inline fun <reified F : Flow> flowOptionWithId(
@@ -54,7 +56,6 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     }
 
     fun getPeerOptions(flow: ControlFlow, before: Boolean): Array<AppletOption> {
-        // 验证码： Regex("\\D(\\d{4,})")
         return when (flow) {
             is When -> if (before) emptyArray()
             else arrayOf(ifFlow, doFlow, waitUntilFlow, waitForFlow)
@@ -72,7 +73,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     private val criterionFlowOptions: Array<AppletOption> by lazy {
         arrayOf(
             appCriteria,
-            uiObjectCriteria,
+            uiObjectFlows,
             textCriteria,
             timeCriteria,
             notificationCriteria,
@@ -112,6 +113,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         .withResult<String>(R.string.current_package_name)
         .withResult<String>(R.string.current_package_label)
         .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
+        .withResult<AccessibilityNodeInfo>(R.string.current_window)
 
     @AppletOrdinal(0x0002)
     val whenFlow = flowOption<When>(R.string._when)
@@ -155,11 +157,9 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     val appCriteria = flowOptionWithId<PhantomFlow>(ID_APP_CRITERION_REGISTRY, R.string.app_info)
 
     @AppletOrdinal(0x0012)
-    val uiObjectCriteria =
-        flowOptionWithId<UiObjectFlow>(ID_UI_OBJECT_CRITERION_REGISTRY, R.string.ui_object_exists)
-            .withResult<AccessibilityNodeInfo>(R.string.ui_object)
-            .withResult<String>(R.string.matched_ui_object_text)
-            .withResult<Int>(R.string.center_coordinate, VariantType.INT_COORDINATE)
+    val uiObjectCriteria = flowOptionWithId<PhantomFlow>(
+        ID_UI_OBJECT_CRITERION_REGISTRY, R.string.ui_object_conditions
+    )
 
     @AppletOrdinal(0x0013)
     val timeCriteria = flowOptionWithId<TimeFlow>(ID_TIME_CRITERION_REGISTRY, R.string.current_time)
@@ -201,5 +201,9 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x0025)
     val controlActions =
         flowOptionWithId<PhantomFlow>(ID_CONTROL_ACTION_REGISTRY, R.string.control_actions)
+
+    @AppletOrdinal(0x0030)
+    val uiObjectFlows =
+        flowOptionWithId<PhantomFlow>(ID_UI_OBJECT_FLOW_REGISTRY, R.string.ui_object_conditions)
 
 }
