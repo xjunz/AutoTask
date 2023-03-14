@@ -59,10 +59,11 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         return when (flow) {
             is When -> if (before) emptyArray()
             else arrayOf(ifFlow, doFlow, waitUntilFlow, waitForFlow)
-            is If -> if (before) emptyArray() else arrayOf(doFlow)
-            is Else -> if (before) emptyArray() else arrayOf(ifFlow, waitUntilFlow, waitForFlow)
+            is If -> if (before) emptyArray() else arrayOf(doFlow, elseFlow)
+            is Else -> if (before) emptyArray()
+            else arrayOf(ifFlow, waitUntilFlow, waitForFlow, anywayFlow)
             is Do -> if (before) emptyArray()
-            else arrayOf(ifFlow, elseIfFlow, elseFlow)
+            else arrayOf(ifFlow, elseIfFlow, elseFlow, anywayFlow, waitForFlow, waitUntilFlow)
             else -> illegalArgument("control flow", flow)
         }
     }
@@ -94,11 +95,11 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     fun getRegistryOptions(flow: Flow): Array<AppletOption> {
         return when (flow) {
+            is When -> arrayOf(eventCriteria)
+
             is If -> criterionFlowOptions
 
             is Do, is RootFlow -> actionFlowOptions
-
-            is When -> arrayOf(eventCriteria)
 
             else -> illegalArgument("control flow", flow)
         }
@@ -112,8 +113,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         .withResult<ComponentInfoWrapper>(R.string.current_top_app)
         .withResult<String>(R.string.current_package_name)
         .withResult<String>(R.string.current_package_label)
-        .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
         .withResult<AccessibilityNodeInfo>(R.string.current_window)
+        .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
 
     @AppletOrdinal(0x0002)
     val whenFlow = flowOption<When>(R.string._when)
@@ -149,6 +150,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
+    @AppletOrdinal(0x000A)
+    val anywayFlow = flowOption<Anyway>(R.string.anyway)
 
     @AppletOrdinal(0x0010)
     val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)

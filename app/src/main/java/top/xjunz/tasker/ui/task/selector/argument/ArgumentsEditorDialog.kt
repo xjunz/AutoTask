@@ -254,7 +254,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             binding.btnRefer.setNoDoubleClickListener {
                 val pos = adapterPosition
                 showReferenceSelectorDialog(
-                    false, pos,
+                    false,
+                    pos,
                     option.arguments[pos],
                     applet.references[pos]
                 )

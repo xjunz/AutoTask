@@ -15,7 +15,7 @@ import java.lang.ref.WeakReference
  *
  * @author xjunz 2023/02/11
  */
-class WaitFor : When() {
+class WaitFor : ControlFlow() {
 
     override val requiredIndex: Int = -1
 

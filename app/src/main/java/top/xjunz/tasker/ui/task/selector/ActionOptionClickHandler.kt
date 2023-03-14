@@ -26,9 +26,9 @@ class ActionOptionClickHandler(private val fragmentManager: FragmentManager) {
         when {
             option.arguments.isEmpty() -> when (applet.valueType) {
                 Applet.VAL_TYPE_IRRELEVANT -> {
-                    if (applet.index != 0) {
+                  /*  if (applet.index != 0) {
                         applet.toggleRelation()
-                    }
+                    }*/
                     onCompleted()
                 }
                 Applet.VAL_TYPE_INT -> {

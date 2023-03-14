@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.applet.value.VariantType
 class UiObjectFlowRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0)
-    val containsUiObject = appletOption(R.string.format_contains_ui_object) {
+    val containsUiObject = invertibleAppletOption(R.string.format_contains_ui_object) {
         ContainsUiObject()
     }.withRefArgument<AccessibilityNodeInfo>(R.string.target, R.string.empty)
         .withResult<AccessibilityNodeInfo>(R.string.ui_object)

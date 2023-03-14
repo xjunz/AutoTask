@@ -50,11 +50,18 @@ open class FlowItemTouchHelperCallback(
     }
 
     object DiffCallback : DiffUtil.ItemCallback<Applet>() {
+
+        private val Applet.essence: Applet get() = cloneSource?.essence ?: this
+
         override fun areItemsTheSame(oldItem: Applet, newItem: Applet): Boolean {
-            return oldItem === newItem
+            return oldItem.essence === newItem.essence
         }
 
         override fun areContentsTheSame(oldItem: Applet, newItem: Applet): Boolean {
+            return Objects.equals(newItem, oldItem)
+        }
+
+        override fun getChangePayload(oldItem: Applet, newItem: Applet): Any {
             return true
         }
     }

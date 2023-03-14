@@ -33,10 +33,15 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     protected open suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
         for ((index: Int, applet: Applet) in withIndex()) {
             runtime.ensureActive()
+            if (runtime.shouldStop) break
             applet.onPreApply(runtime)
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
-            if (applet.shouldSkip(runtime) || index != 0 && (!applet.isAnyway && applet.isAnd != runtime.isSuccessful)) {
+            if (runtime.shouldSkip()
+                || applet.shouldSkip(runtime)
+                || !applet.isEnabled
+                || (index != 0 && !applet.isAnyway && applet.isAnd != runtime.isSuccessful)
+            ) {
                 applet.onSkipped(runtime)
                 if (!isRepetitive) {
                     runtime.observer?.onAppletSkipped(applet, runtime)
@@ -65,8 +70,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             runtime.isSuccessful = result.isSuccessful
             // For repetitive applets, they may be executed multiple times and we cannot
             // tell which result is the more important one, so just ignore the result.
-            // TODO: register result if there is any repetitive applet being executed only once
-            if (!isRepetitive) {
+            if (!isRepetitive || result.isSuccessful) {
                 runtime.registerResult(applet, result)
                 runtime.observer?.onAppletTerminated(applet, runtime)
             }
@@ -84,8 +88,9 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         forEach {
             if (it is Flow) {
                 val error = it.performStaticCheck()
-                if (error != null)
+                if (error != null) {
                     return error
+                }
             }
         }
         return null
@@ -111,11 +116,15 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
         // Backup the target, because sub-flows may change the target,
         // we don't want the changed target to fall through.
         val backup = runtime.getRawTarget()
+        val ifSuccessful = runtime.ifSuccessful
+        val loop = runtime.currentLoop
         try {
             return applyFlow(runtime)
         } finally {
             // Restore the target
             runtime.setTarget(backup)
+            runtime.ifSuccessful = ifSuccessful
+            runtime.currentLoop = loop
             runtime.tracker.jumpOut()
         }
     }

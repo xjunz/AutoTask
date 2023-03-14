@@ -29,16 +29,14 @@ class PreloadFlow : ControlFlow(), Referent {
         runtime.registerReferent(this)
     }
 
-    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
             0 -> currentService.getCurrentComponentInfo()
             1 -> currentService.getCurrentComponentInfo().packageName
             2 -> currentService.getCurrentComponentInfo().label
-            3 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
-            4 -> runtime.getScopedValue(TaskRuntime.GLOBAL_SCOPE_EVENT, id) {
-                uiAutomation.rootInActiveWindow
-            }
-            else -> super.getReferredValue(runtime, which)
+            3 -> uiAutomation.rootInActiveWindow
+            4 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            else -> super.getReferredValue(which, runtime)
         }
     }
 }

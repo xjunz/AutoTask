@@ -240,6 +240,10 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         oneshotTaskScheduler.scheduleTask(task, onCompletion)
     }
 
+    override fun stopOneshotTask(task: XTask) {
+        task.halt()
+    }
+
     override fun onInterrupt() {
 
     }

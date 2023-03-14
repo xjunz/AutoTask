@@ -153,10 +153,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    @Privileged
-    override fun scheduleOneshotTask(id: Long, callback: ITaskCompletionCallback) {
-        oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.requireTask(id), callback)
-    }
 
     override fun setPremiumContextStoragePath(path: String) {
         PremiumMixin.premiumContextStoragePath = path
@@ -166,9 +162,24 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         PremiumMixin.loadPremiumFromFileSafely()
     }
 
+    @Privileged
+    override fun scheduleOneshotTask(id: Long, callback: ITaskCompletionCallback) {
+        oneshotTaskScheduler.scheduleTask(PrivilegedTaskManager.requireTask(id), callback)
+    }
+
     @Local
     override fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback) {
         delegate.scheduleOneshotTask(task.checksum, onCompletion)
+    }
+
+    @Privileged
+    override fun stopOneshotTask(id: Long) {
+        PrivilegedTaskManager.requireTask(id).halt()
+    }
+
+    @Local
+    override fun stopOneshotTask(task: XTask) {
+        delegate.stopOneshotTask(task.checksum)
     }
 
     override fun isConnected(): Boolean {

@@ -83,4 +83,12 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
             it.snapshots.clear()
         }
     }
+
+    open fun clearLog(checksum: Long, snapshotId: String) {
+        tasks.find {
+            it.checksum == checksum
+        }?.snapshots?.find {
+            it.id == snapshotId
+        }?.clearLog()
+    }
 }

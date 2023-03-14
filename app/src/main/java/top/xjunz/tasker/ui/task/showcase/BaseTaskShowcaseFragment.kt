@@ -116,13 +116,12 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             val b = holder.binding
             b.msEnabled.isChecked = task.isEnabled
             b.tvTaskName.text = metadata.title
-            b.tvTaskDesc.text = metadata.description
             b.tvAuthor.text = metadata.author
             if (metadata.description.isNullOrEmpty()) {
                 b.tvTaskDesc.text = R.string.no_desc_provided.text
                 b.tvTaskDesc.isEnabled = false
             } else {
-                b.tvTaskDesc.text = metadata.description
+                b.tvTaskDesc.text = metadata.spannedDescription
                 b.tvTaskDesc.isEnabled = true
             }
             if (task.isOneshot) {

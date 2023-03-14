@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.transition.platform.MaterialFadeThrough
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,6 +60,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     private val vm by viewModels<FlowEditorViewModel>()
 
     private val factory = AppletOptionFactory
+
+    private var confirmed = false
 
     private val adapter by lazy {
         TaskFlowAdapter(this)
@@ -109,9 +110,6 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         }
         if (savedInstanceState == null) {
             binding.rvTaskEditor.post {
-                binding.rvTaskEditor.beginAutoTransition(
-                    MaterialSharedAxis(MaterialSharedAxis.X, false)
-                )
                 binding.rvTaskEditor.adapter = adapter
             }
         } else {
@@ -170,7 +168,10 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                     }
                 }
             } else {
-                if (vm.complete()) dismiss()
+                if (vm.complete()) {
+                    confirmed = true
+                    dismiss()
+                }
             }
         }
         if (vm.flow is RootFlow) {
@@ -192,11 +193,24 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             binding.ibCheck.setNoDoubleClickListener {
                 vm.showClearSnapshotsConfirmation.value = true
             }
+            binding.ibCheck.post {
+                binding.ibCheck.setContentDescriptionAndTooltip(R.string.clear_all.text)
+            }
+            binding.ibMenu.isVisible = true
+            binding.ibMenu.setIconResource(R.drawable.ic_description_24px)
+            binding.ibMenu.post {
+                binding.ibMenu.setContentDescriptionAndTooltip(R.string.log.text)
+            }
+            binding.ibMenu.setNoDoubleClickListener {
+                if (gvm.currentSnapshot?.log.isNullOrEmpty()) {
+                    toast(R.string.no_log)
+                } else {
+                    SnapshotLogDialog().setSnapshot(vm.task.title, gvm.currentSnapshot!!)
+                        .show(childFragmentManager)
+                }
+            }
         } else if (vm.isSelectingReferent) {
             observeOnce(vm.requestShowReferentTip) {
-                binding.root.beginAutoTransition(
-                    binding.cvHeader, MaterialSharedAxis(MaterialSharedAxis.X, false)
-                )
                 showHeader()
                 binding.tvHeaderTitle.isVisible = false
                 binding.ibHeaderAction.isVisible = false
@@ -337,13 +351,15 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 binding.tvTitle.text = R.string.format_selection_count.format(it.size)
                 binding.ibDismiss.setContentDescriptionAndTooltip(R.string.quit_multi_selection.text)
             }
-            binding.ibMenu.isVisible = it.isNotEmpty()
-            if (it.isNotEmpty()) {
-                val popup = if (it.size > 1) menuHelper.createBatchMenu(binding.ibMenu, it)
-                else menuHelper.createStandaloneMenu(binding.ibMenu, it.single())
-                binding.ibMenu.setOnTouchListener(popup.dragToOpenListener)
-                binding.ibMenu.setNoDoubleClickListener {
-                    popup.show()
+            if (!vm.isInTrackMode) {
+                binding.ibMenu.isVisible = it.isNotEmpty()
+                if (it.isNotEmpty()) {
+                    val popup = if (it.size > 1) menuHelper.createBatchMenu(binding.ibMenu, it)
+                    else menuHelper.createStandaloneMenu(binding.ibMenu, it.single())
+                    binding.ibMenu.setOnTouchListener(popup.dragToOpenListener)
+                    binding.ibMenu.setNoDoubleClickListener {
+                        popup.show()
+                    }
                 }
             }
         }
@@ -431,7 +447,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             } else {
                 if (it is Action<*> && Preferences.showToggleRelationTip) {
                     PreferenceHelpDialog().init(
-                        R.string.tip, R.string.tip_applet_relation
+                        R.string.tip,
+                        R.string.tip_applet_relation
                     ) { noMore ->
                         Preferences.showToggleRelationTip = !noMore
                     }.show(childFragmentManager)
@@ -511,7 +528,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         vm.doOnArgSelected = block
     }
 
-    fun doAfterFlowEdited(block: (Flow) -> Unit) = doWhenCreated {
+    fun doOnResult(block: (Boolean, Flow) -> Unit) = doWhenCreated {
         vm.onFlowCompleted = block
     }
 
@@ -544,7 +561,8 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             task.flow = vm.generateDefaultFlow(task.metadata.taskType)
         }
         vm.task = task
-        vm.initialize(task.requireFlow(), readonly)
+        vm.isReadyOnly = readonly
+        vm.initFlow(task.requireFlow())
         gvm.root = vm.flow as RootFlow
     }
 
@@ -556,6 +574,14 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     ): FlowEditorDialog = doWhenCreated {
         vm.task = task
         vm.global = gvm
-        vm.initialize(flow, readonly)
+        vm.isReadyOnly = readonly
+        vm.initFlow(flow)
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        if (!confirmed && !vm.isReadyOnly && !vm.isBase) {
+            vm.onFlowCompleted(true, gvm.unmodifiedRoots.getValue(vm.flow))
+        }
     }
 }

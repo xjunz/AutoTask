@@ -20,13 +20,13 @@ class NotificationReferent(private val componentInfo: ComponentInfoWrapper, val 
         const val EXTRA_IS_TOAST = 1
     }
 
-    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
             // Notification content
             1 -> componentInfo.paneTitle
             // ComponentInfo which sends the notification
             2 -> componentInfo
-            else -> super.getReferredValue(runtime, which)
+            else -> super.getReferredValue(which, runtime)
         }
     }
 }

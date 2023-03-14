@@ -15,6 +15,7 @@ import top.xjunz.tasker.engine.applet.util.isAheadOf
 import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.task.editor.AppletReferenceEditor
+import java.util.*
 
 /**
  * A global view model serving all [FlowEditorDialog]s, this view model is expected to
@@ -48,14 +49,14 @@ class GlobalFlowEditorViewModel : ViewModel() {
 
     val onSnapshotsCleared = MutableLiveData<Boolean>()
 
+    val unmodifiedRoots = WeakHashMap<Flow, Flow>()
+
     fun renameReferentInRoot(prev: Set<String>, cur: String?) {
         root.forEachReferent { applet, which, referent ->
             if (prev.contains(referent)) {
                 referenceEditor.setReferent(applet, which, cur)
-                true
-            } else {
-                false
             }
+            false
         }
         root.forEachReference { applet, which, referent ->
             if (prev.contains(referent)) {

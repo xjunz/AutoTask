@@ -20,4 +20,9 @@ class Else : Do() {
     override fun shouldSkip(runtime: TaskRuntime): Boolean {
         return runtime.ifSuccessful != false
     }
+
+    override fun onPostApply(runtime: TaskRuntime) {
+        super.onPostApply(runtime)
+        runtime.isSuccessful = runtime.ifSuccessful == true
+    }
 }

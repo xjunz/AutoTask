@@ -62,7 +62,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val isBase: Boolean get() = flow is RootFlow
 
-    val selectedApplet = MutableLiveData<Applet?>()
+    val selectedApplet = MutableLiveData<Applet>()
 
     val isFabVisible = MutableLiveData<Boolean>()
 
@@ -72,7 +72,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showTitleRepeatedPrompt = MutableLiveData<String>()
 
-    lateinit var onFlowCompleted: (Flow) -> Unit
+    lateinit var onFlowCompleted: (Boolean, Flow) -> Unit
 
     lateinit var onTaskCompleted: () -> Unit
 
@@ -199,9 +199,20 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         notifyFlowChanged()
     }
 
-    fun initialize(initialFlow: Flow, readonly: Boolean) {
-        isReadyOnly = readonly
-        flow = if (readonly) initialFlow else initialFlow.clone(factory)
+    fun initFlow(initialFlow: Flow) {
+        if (isReadyOnly) {
+            flow = initialFlow
+        } else {
+            if (initialFlow is RootFlow) {
+                flow = initialFlow.clone(factory)
+            } else {
+                flow = initialFlow
+                global.unmodifiedRoots[initialFlow] = initialFlow.clone(factory)
+                addCloseable {
+                    global.unmodifiedRoots.remove(initialFlow)
+                }
+            }
+        }
     }
 
     fun complete(): Boolean {
@@ -231,7 +242,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 onTaskCompleted.invoke()
             }
         } else {
-            onFlowCompleted.invoke(flow)
+            onFlowCompleted.invoke(false, global.unmodifiedRoots.getValue(flow))
         }
         return true
     }

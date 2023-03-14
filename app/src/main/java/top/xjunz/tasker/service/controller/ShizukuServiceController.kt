@@ -63,7 +63,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
                     listener?.onServiceBound()
                 }
             } catch (t: Throwable) {
-                listener?.onError(t.stackTraceToString())
+                listener?.onError(t)
             }
         }
 
@@ -86,7 +86,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
             bindingJob?.invokeOnCompletion {
                 bindingJob = null
                 if (it != null && it !is CancellationException) {
-                    listener?.onError(it.stackTraceToString())
+                    listener?.onError(it)
                 }
             }
         }

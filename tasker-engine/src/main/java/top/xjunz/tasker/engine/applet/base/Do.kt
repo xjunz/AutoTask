@@ -4,10 +4,16 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.tasker.engine.runtime.TaskRuntime
+
 /**
  * @author xjunz 2022/11/03
  */
 open class Do : ControlFlow() {
 
     override var relation: Int = REL_AND
+
+    override fun shouldSkip(runtime: TaskRuntime): Boolean {
+        return runtime.ifSuccessful != true
+    }
 }

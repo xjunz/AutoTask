@@ -34,17 +34,11 @@ import kotlin.time.toDuration
 class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomatorBridge) :
     EventDispatcher(), CoroutineScope, PremiumMixin.Callback {
 
-    companion object {
-        const val PACKAGE_SYSTEM_UI = "com.android.systemui"
-        const val CLASS_SOFT_INPUT_WINDOW = "android.inputmethodservice.SoftInputWindow"
-    }
-
     override val coroutineContext: CoroutineContext = HandlerCompat.createAsync(looper)
         .asCoroutineDispatcher("A11yEventCoroutineDispatcher") + SupervisorJob()
 
     private val activityRecords = ArraySet<Int>()
 
-    private var latestFilteredEventTimestamp = -1L
     private var latestPackageName: String? = null
     private var latestActivityName: String? = null
     private var latestPaneTitle: String? = null
@@ -78,10 +72,7 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
         val packageName = event.packageName?.toString() ?: return
         // Do not send events from the host application!
         if (packageName == BuildConfig.APPLICATION_ID) return
-        if (packageName == PACKAGE_SYSTEM_UI) return
-        if (event.eventTime < latestFilteredEventTimestamp) return
         val className = event.className?.toString()
-        if (className == CLASS_SOFT_INPUT_WINDOW) return
         dispatchEventsFromAccessibilityEvent(event, packageName, className)
     }
 
@@ -90,7 +81,6 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
         packageName: String,
         className: String?
     ) {
-        latestFilteredEventTimestamp = a11yEvent.eventTime
         val firstText = a11yEvent.text.firstOrNull()?.toString()
         val prevPaneTitle = latestPaneTitle
         if (!firstText.isNullOrEmpty()

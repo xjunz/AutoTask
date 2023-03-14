@@ -20,7 +20,7 @@ class Suspension : Action<Int>(VAL_TYPE_INT) {
 
     private val scopes = ArrayMap<Long, WeakReference<CoroutineScope>>()
 
-    override val defaultValue: Int = 1000
+    override val defaultValue: Int = 0
 
     override suspend fun doAction(value: Int?, runtime: TaskRuntime): AppletResult {
         check(value != null)

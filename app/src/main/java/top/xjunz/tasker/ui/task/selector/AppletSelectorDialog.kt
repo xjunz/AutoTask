@@ -247,7 +247,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             bottomAdapter.submitList(it)
         }
         observeTransient(viewModel.onAppletChanged) {
-            bottomAdapter.notifyItemChanged(bottomAdapter.currentList.indexOf(it))
+            bottomAdapter.notifyItemChanged(bottomAdapter.currentList.indexOf(it), true)
         }
         observeTransient(viewModel.onAppletAdded) {
             val vh = binding.rvRight.findViewHolderForAdapterPosition(it)

@@ -8,6 +8,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.os.SystemClock
 import android.util.SparseArray
+import androidx.core.text.parseAsHtml
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -116,12 +117,14 @@ class XTask : ValueRegistry() {
                     snapshotAdded = true
                     // As for resident task, only when the event is hit, we offer the snapshot
                     snapshots.offerFirst(snapshot)
+                    runtime.snapshot = snapshot
                 } else {
                     snapshotAdded = false
                 }
             } else if (isOneshot && snapshotAdded != true) {
                 snapshotAdded = true
                 snapshots.offerFirst(snapshot)
+                runtime.snapshot = snapshot
             }
             if (snapshotAdded != false) {
                 val hierarchy = runtime.tracker.getCurrentHierarchy()
@@ -145,7 +148,7 @@ class XTask : ValueRegistry() {
 
         private fun Applet.relationToString(): String {
             if (index == 0) return ""
-            return if (isAnd) "And " else if (isOr) "Or " else "Anyway"
+            return if (isAnd) "And " else if (isOr) "Or " else "Anyway "
         }
 
     }
@@ -156,7 +159,8 @@ class XTask : ValueRegistry() {
      * @return `true` if the task starts executed and `false` otherwise
      */
     suspend fun launch(runtime: TaskRuntime) {
-        val snapshot = TaskSnapshot(checksum, System.currentTimeMillis())
+        val snapshot =
+            TaskSnapshot(UUID.randomUUID().toString(), checksum, System.currentTimeMillis())
         try {
             previousLaunchTime = SystemClock.uptimeMillis()
             runtime.observer = SnapshotObserver(snapshot)
@@ -173,7 +177,12 @@ class XTask : ValueRegistry() {
             when (t) {
                 is CancellationException -> {
                     listener?.onTaskCancelled(runtime)
-                    snapshots.remove(snapshot)
+                    if (isResident) {
+                        snapshots.remove(snapshot)
+                    }
+                }
+                is TaskRuntime.StopshipException -> {
+                    listener?.onTaskCancelled(runtime)
                 }
                 else -> listener?.onTaskError(runtime, t)
             }
@@ -181,6 +190,7 @@ class XTask : ValueRegistry() {
         } finally {
             snapshot.endTimestamp = System.currentTimeMillis()
             snapshot.isSuccessful = runtime.isSuccessful
+            snapshot.closeLog()
             snapshots.removeIf {
                 it.contentEquals(snapshot)
             }
@@ -282,6 +292,8 @@ class XTask : ValueRegistry() {
     ) : Parcelable {
 
         inline val identifier get() = checksum.toString().md5.substring(0, 7)
+
+        val spannedDescription get() = description?.replace("\n", "<br>")?.parseAsHtml()
 
         constructor(parcel: Parcel) : this(
             parcel.readString()!!,

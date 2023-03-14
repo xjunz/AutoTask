@@ -40,7 +40,7 @@ sealed class MainOption(
     })
 
 
-    object Feedback : MainOption(R.string.feedback, R.drawable.ic_chat_24px)
+    object Feedback : MainOption(R.string.feedback_and_communicate, R.drawable.ic_chat_24px)
 
     object VersionInfo : MainOption(R.string.version_info, R.drawable.ic_info_24px, desc = {
         if (app.updateInfo.value?.hasUpdates() == true) {

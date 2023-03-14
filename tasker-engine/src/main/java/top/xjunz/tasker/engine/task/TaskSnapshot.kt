@@ -18,10 +18,12 @@ import top.xjunz.tasker.engine.runtime.AppletIndexer
  * @author xjunz 2023/01/24
  */
 class TaskSnapshot(
+    val id: String,
     val checksum: Long,
     var startTimestamp: Long = -1,
     var endTimestamp: Long = -1,
     var isSuccessful: Boolean = false,
+    var log: String? = null
 ) : Parcelable {
 
     val isRunning get() = endTimestamp == -1L
@@ -54,6 +56,10 @@ class TaskSnapshot(
         }
     }
 
+    fun clearLog() {
+        logcatBuffer.clear()
+    }
+
     private fun getAppletWithHierarchy(root: RootFlow, hierarchy: Long): Applet {
         val parsed = AppletIndexer.parse(hierarchy)
         var applet: Applet = root
@@ -64,10 +70,12 @@ class TaskSnapshot(
     }
 
     constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
         parcel.readLong(),
         parcel.readLong(),
         parcel.readLong(),
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
+        parcel.readString()
     ) {
         successes = parcel.createLongArray()!!.toMutableSet()
         failures = ParcelCompat.readParcelableArray(
@@ -78,12 +86,13 @@ class TaskSnapshot(
         current = parcel.readLong()
     }
 
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
         parcel.writeLong(checksum)
         parcel.writeLong(startTimestamp)
         parcel.writeLong(endTimestamp)
         parcel.writeByte(if (isSuccessful) 1 else 0)
+        parcel.writeString(log)
         parcel.writeLongArray(successes.toLongArray())
         parcel.writeParcelableArray(failures.toTypedArray(), 0)
         parcel.writeLong(current)
@@ -101,6 +110,22 @@ class TaskSnapshot(
         if (!successes.toTypedArray().contentEquals(other.successes.toTypedArray())) return false
         if (!failures.toTypedArray().contentEquals(other.failures.toTypedArray())) return false
         return true
+    }
+
+    private val logcatBuffer by lazy {
+        StringBuilder()
+    }
+
+    fun logcat(log: String?) {
+        logcatBuffer.appendLine(log ?: "")
+        if (logcatBuffer.length > 128 * 1024) {
+            logcatBuffer.deleteRange(0, 128)
+        }
+    }
+
+    fun closeLog() {
+        log = logcatBuffer.toString()
+        logcatBuffer.clear()
     }
 
     companion object CREATOR : Parcelable.Creator<TaskSnapshot> {
@@ -156,7 +181,6 @@ class TaskSnapshot(
         }
 
         companion object CREATOR : Parcelable.Creator<Failure> {
-
             fun fromAppletResult(hierarchy: Long, result: AppletResult): Failure {
                 return Failure(
                     hierarchy,

@@ -36,6 +36,8 @@ interface AutomatorService {
 
     fun scheduleOneshotTask(task: XTask, onCompletion: ITaskCompletionCallback)
 
+    fun stopOneshotTask(task: XTask)
+
     fun suppressResidentTaskScheduler(suppress: Boolean)
 
     fun destroy() {

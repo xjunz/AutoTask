@@ -35,4 +35,8 @@
         <attr name="boundsStrokeWidth" format="dimension" />
         <attr name="boundsStrokeColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="LineCounterView">
+        <attr name="lineCounterTextColor" format="reference|color" />
+        <attr name="lineCounterTextSize" format="reference|dimension" />
+    </declare-styleable>
 </resources>

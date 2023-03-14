@@ -13,6 +13,7 @@
     <string name="current_top_app">当前所处应用</string>
     <string name="current_notification">当前通知</string>
     <string name="format_contains_ui_object">%s包含控件满足</string>
+    <string name="not_format_contains_ui_object">%s不包含控件满足</string>
     <string name="current_time">当前时间</string>
 
     <string name="package_name">包名</string>

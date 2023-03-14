@@ -11,7 +11,7 @@ import top.xjunz.tasker.engine.applet.base.AppletResult
  */
 interface Referent {
 
-    fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         if (which == 0) {
             return this
         }

@@ -236,6 +236,7 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     clone.isInverted = isInverted
     clone.isInvertible = isInvertible
     clone.comment = comment
+    clone.cloneSource = this
     if (referents.isEmpty()) {
         clone.referents = emptyMap()
     } else {

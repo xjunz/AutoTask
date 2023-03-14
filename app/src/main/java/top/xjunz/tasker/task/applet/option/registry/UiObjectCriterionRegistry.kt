@@ -267,6 +267,14 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withTitleModifier("Scrollable")
 
+    @AppletOrdinal(0x0208)
+    val childCount = invertibleAppletOption(R.string.child_node_count_in_range) {
+        numberRangeCriterion<UiObjectTarget, Int> {
+            it.source.childCount
+        }
+    }.withValueArgument<Int>(R.string.not_child_node_count_in_range,VariantType.INT_RANGE)
+        .withDefaultRangeDescriber()
+
     // Position
     @AppletOrdinal(0x0300)
     val left = appletOption(R.string.left_margin) {

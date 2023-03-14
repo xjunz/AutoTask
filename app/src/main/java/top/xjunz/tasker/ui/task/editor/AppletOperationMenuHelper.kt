@@ -10,7 +10,10 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.FragmentManager
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.StaticError
 import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.engine.applet.util.isDescendantOf
 import top.xjunz.tasker.ktx.*
@@ -119,11 +122,6 @@ class AppletOperationMenuHelper(
                 if (factory.flowRegistry.getPeerOptions(applet, true).isEmpty()) {
                     menu.removeItem(R.id.item_add_before)
                 }
-                if (applet is Do
-                    && applet.requireParent().getOrNull(applet.index - 1) !is If
-                ) {
-                    menu.removeItem(R.id.item_add_after)
-                }
                 if (factory.flowRegistry.getPeerOptions(applet, false).isEmpty()) {
                     menu.removeItem(R.id.item_add_after)
                 }
@@ -206,19 +204,25 @@ class AppletOperationMenuHelper(
                     applet as Flow,
                     viewModel.isReadyOnly,
                     viewModel.global
-                ).doAfterFlowEdited { edited ->
-                    if (edited.isEmpty() && applet.isContainer) {
+                ).doOnResult { cancelled, origin ->
+                    if (applet.isEmpty() && applet.isContainer) {
                         // If all children in a container is removed, remove the container as well
                         applet.requireParent().remove(applet)
                         viewModel.updateChildrenIndexesIfNeeded(applet.requireParent())
                     } else {
-                        // We don't need to replace the flow, just refilling it is ok
-                        applet.clear()
-                        applet.addAll(edited)
-                        if (edited.isNotEmpty()) viewModel.clearStaticErrorIfNeeded(
-                            applet, StaticError.PROMPT_ADD_INSIDE
-                        )
-                        viewModel.onAppletChanged.value = applet
+                        if (cancelled) {
+                            applet.clear()
+                            applet.addAll(origin)
+                        } else {
+                            if (origin.isEmpty() && applet.isNotEmpty()) {
+                                viewModel.clearStaticErrorIfNeeded(
+                                    applet, StaticError.PROMPT_ADD_INSIDE
+                                )
+                                viewModel.onAppletChanged.value = applet
+                            } else if (origin.size != applet.size) {
+                                viewModel.onAppletChanged.value = applet
+                            }
+                        }
                     }
                     viewModel.notifyFlowChanged()
                 }.doSplit {

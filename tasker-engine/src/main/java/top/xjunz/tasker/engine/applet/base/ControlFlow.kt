@@ -9,6 +9,11 @@ package top.xjunz.tasker.engine.applet.base
  */
 abstract class ControlFlow : Flow() {
 
-    final override var isInvertible: Boolean = false
+    override var relation: Int = REL_ANYWAY
+        set(value) {
+            check(value == REL_ANYWAY)
+            field = REL_ANYWAY
+        }
 
+    final override var isInvertible: Boolean = false
 }

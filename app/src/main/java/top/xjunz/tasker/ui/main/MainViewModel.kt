@@ -70,7 +70,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     val checkingForUpdatesError = MutableLiveData<String>()
 
-    var showUpdateDialog = false
+    var showUpdateDialog = true
 
     init {
         AppletOptionFactory.preloadIfNeeded()

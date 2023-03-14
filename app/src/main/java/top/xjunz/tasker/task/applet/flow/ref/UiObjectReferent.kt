@@ -21,12 +21,12 @@ class UiObjectReferent(private val node: AccessibilityNodeInfo) : Referent {
         IntValueUtil.composeXY(bounds.centerX(), bounds.centerY())
     }
 
-    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
             0 -> node
             1 -> node.text?.toString()
             2 -> centerCoordinate
-            else -> super.getReferredValue(runtime, which)
+            else -> super.getReferredValue(which, runtime)
         }
     }
 }

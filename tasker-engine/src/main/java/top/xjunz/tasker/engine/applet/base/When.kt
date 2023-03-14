@@ -4,6 +4,8 @@
 
 package top.xjunz.tasker.engine.applet.base
 
+import top.xjunz.tasker.engine.runtime.TaskRuntime
+
 /**
  * @author xjunz 2022/08/11
  */
@@ -20,5 +22,12 @@ open class When : ControlFlow() {
             return StaticError.ERR_WHEN_NO_FELLOW
         }
         return super.staticCheckMyself()
+    }
+
+    override fun onPostApply(runtime: TaskRuntime) {
+        super.onPostApply(runtime)
+        if (!runtime.isSuccessful) {
+            runtime.halt()
+        }
     }
 }

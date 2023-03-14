@@ -94,6 +94,13 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         return indexOf(identifier)
     }
 
+    override fun clearLog(checksum: Long, snapshotId: String) {
+        super.clearLog(checksum, snapshotId)
+        peer?.whenAlive {
+            it.clearLog(checksum, snapshotId)
+        }
+    }
+
     override val XTask.identifier: XTask get() = this
 
 }

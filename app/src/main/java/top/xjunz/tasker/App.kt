@@ -49,10 +49,12 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        AppCenter.start(
-            this, "5cc80607-5168-4c05-b3d6-acbbfc25f8df",
-            Analytics::class.java, Crashes::class.java
-        )
+        if (!BuildConfig.DEBUG) {
+            AppCenter.start(
+                this, "5cc80607-5168-4c05-b3d6-acbbfc25f8df",
+                Analytics::class.java, Crashes::class.java
+            )
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.addHiddenApiExemptions("")
         }

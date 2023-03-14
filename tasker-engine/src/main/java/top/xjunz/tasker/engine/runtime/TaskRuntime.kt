@@ -12,10 +12,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.illegalArgument
-import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.engine.applet.base.AppletResult
-import top.xjunz.tasker.engine.applet.base.Flow
-import top.xjunz.tasker.engine.applet.base.WaitFor
+import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32
 
@@ -31,7 +29,7 @@ class TaskRuntime private constructor() {
     private class IndexedReferent(val which: Int, private val referent: Any?) {
 
         fun getReferentValue(runtime: TaskRuntime): Any? {
-            return if (referent is Referent) referent.getReferredValue(runtime, which) else referent
+            return if (referent is Referent) referent.getReferredValue(which, runtime) else referent
         }
     }
 
@@ -44,6 +42,8 @@ class TaskRuntime private constructor() {
         fun onAppletSkipped(victim: Applet, runtime: TaskRuntime) {}
     }
 
+    internal class StopshipException : RuntimeException()
+
     companion object {
 
         const val GLOBAL_SCOPE_TASK = 1
@@ -51,7 +51,7 @@ class TaskRuntime private constructor() {
 
         fun CoroutineScope.obtainTaskRuntime(task: XTask): TaskRuntime {
             val instance = Pool.acquire() ?: TaskRuntime()
-            instance.task = task
+            instance._attachingTask = task
             instance.runtimeScope = this
             return instance
         }
@@ -73,6 +73,8 @@ class TaskRuntime private constructor() {
         }
     }
 
+    var snapshot: TaskSnapshot? = null
+
     val tracker = AppletIndexer()
 
     val isActive get() = runtimeScope?.isActive == true
@@ -90,6 +92,10 @@ class TaskRuntime private constructor() {
     var isSuspending = false
 
     var observer: Observer? = null
+
+    var currentLoop: Loop? = null
+
+    var shouldStop: Boolean = false
 
     /**
      * Whether the applying of current applet is successful.
@@ -131,7 +137,16 @@ class TaskRuntime private constructor() {
      */
     private var target: Any? = null
 
-    private lateinit var task: XTask
+    private var _attachingTask: XTask? = null
+
+    val attachingTask: XTask
+        get() = requireNotNull(_attachingTask) {
+            "Current runtime is not attached!"
+        }
+
+    fun shouldSkip(): Boolean {
+        return currentLoop?.shouldContinue == true || currentLoop?.shouldBreak == true
+    }
 
     fun updateFingerprint(any: Any?) {
         fingerprintCrc.update(any.hashCode())
@@ -152,10 +167,10 @@ class TaskRuntime private constructor() {
     fun <V : Any> getScopedValue(scope: Int, key: Any, initializer: () -> V): V {
         val registry = when (scope) {
             GLOBAL_SCOPE_EVENT -> eventValueRegistry
-            GLOBAL_SCOPE_TASK -> task
+            GLOBAL_SCOPE_TASK -> attachingTask
             else -> illegalArgument("scope", scope)
         } // fallback to task registry if there is no event value registry
-            ?: task
+            ?: attachingTask
         return if (key is ValueRegistry.WeakKey) {
             registry.getWeakValue(key, initializer)
         } else {
@@ -226,6 +241,7 @@ class TaskRuntime private constructor() {
         eventValueRegistry = null
         _events = null
         _result = null
+        _attachingTask = null
         runtimeScope = null
         referents.clear()
         tracker.reset()
@@ -236,10 +252,13 @@ class TaskRuntime private constructor() {
         ifSuccessful = null
         waitingFor = null
         fingerprintCrc.reset()
+        snapshot = null
+        currentLoop = null
+        shouldStop = false
         Pool.release(this)
     }
 
     override fun toString(): String {
-        return "TaskRuntime@${hashCode().toString(16)}(${task.title})"
+        return "TaskRuntime@${hashCode().toString(16)}(${attachingTask.title})"
     }
 }

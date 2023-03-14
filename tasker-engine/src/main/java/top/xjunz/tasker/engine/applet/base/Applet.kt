@@ -8,6 +8,7 @@ import androidx.annotation.CheckResult
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.runtime.TaskRuntime
+import java.lang.ref.WeakReference
 
 /**
  * The base executable element of a [Flow].
@@ -174,6 +175,20 @@ abstract class Applet {
      */
     abstract val valueType: Int
 
+    private var cloneSourceRef: WeakReference<Applet>? = null
+
+    var cloneSource: Applet?
+        get() {
+            return cloneSourceRef?.get()
+        }
+        set(value) {
+            cloneSourceRef = if (value == null) {
+                null
+            } else {
+                WeakReference(value)
+            }
+        }
+
     /**
      * Execute the applet.
      *
@@ -247,17 +262,10 @@ abstract class Applet {
     }
 
     internal open fun shouldSkip(runtime: TaskRuntime): Boolean {
-        return !isEnabled
+        return false
     }
 
     open fun onSkipped(runtime: TaskRuntime) {
-        /* no-op */
-    }
-
-    /**
-     * Just before the flow executing its elements.
-     */
-    open fun onPrepareApply(runtime: TaskRuntime) {
         /* no-op */
     }
 
@@ -266,6 +274,13 @@ abstract class Applet {
      * not yet assigned to this flow. This is guaranteed to be called even if this is skipped.
      */
     open fun onPreApply(runtime: TaskRuntime) {}
+
+    /**
+     * Just before the flow executing its elements.
+     */
+    open fun onPrepareApply(runtime: TaskRuntime) {
+        /* no-op */
+    }
 
     /**
      * Do something after the applying is completed.
@@ -287,7 +302,7 @@ abstract class Applet {
     }
 
     override fun toString(): String {
-        return javaClass.simpleName
+        return javaClass.simpleName + "@${System.identityHashCode(this).toString(16)}"
     }
 
 }

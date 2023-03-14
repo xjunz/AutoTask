@@ -138,6 +138,7 @@ object TaskStorage {
                             LocalTaskManager.enableResidentTask(task)
                         }
                     }.onFailure {
+                        //file.renameTo(File(file.parentFile, file.name + ".brk"))
                         it.logcatStackTrace()
                     }
                 }

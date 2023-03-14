@@ -68,7 +68,7 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
                 binding.btnAdd.text = R.string.imported.text
             }
             binding.tvTaskName.text = task.metadata.title
-            binding.tvTaskDesc.text = task.metadata.description
+            binding.tvTaskDesc.text = task.metadata.spannedDescription
         }
     }
 

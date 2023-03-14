@@ -16,13 +16,17 @@ import android.view.accessibility.AccessibilityEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.TimeoutException
 
 abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
 
-    private var latestEventTimestamp = -1L
+
+    companion object {
+        const val PACKAGE_SYSTEM_UI = "com.android.systemui"
+        const val CLASS_SOFT_INPUT_WINDOW = "android.inputmethodservice.SoftInputWindow"
+        const val APPLICATION_ID = "top.xjunz.tasker"
+    }
 
     /**
      * Only for density purpose, may not accurate for screen width and screen height.
@@ -44,17 +48,31 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
 
     private var waitingForEventDelivery = false
 
-    private val waitForIdleJobs = ConcurrentLinkedDeque<WeakReference<CoroutineScope>>()
+    private val waitForIdleJobs = ConcurrentLinkedDeque<Job>()
 
     private val eventListeners = ArraySet<OnAccessibilityEventListener>(2)
 
-    private val eventListener = OnAccessibilityEventListener { event: AccessibilityEvent ->
+    @Suppress("DEPRECATION")
+    private val eventListener = OnAccessibilityEventListener listener@{ event: AccessibilityEvent ->
         try {
+            val packageName = event.packageName?.toString() ?: return@listener
+            // Do not send events from the host application!
+            if (packageName == APPLICATION_ID) return@listener
+            if (packageName == PACKAGE_SYSTEM_UI) return@listener
+            val className = event.className?.toString()
+            if (className == CLASS_SOFT_INPUT_WINDOW) return@listener
+            cancelAllWaitForIdleJobs()
+            if (waitingForEventDelivery) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    eventQueue.add(AccessibilityEvent(event))
+                } else {
+                    eventQueue.add(AccessibilityEvent.obtain(event))
+                }
+            }
             for (listener in eventListeners) {
                 listener.onAccessibilityEvent(event)
             }
         } finally {
-            @Suppress("DEPRECATION")
             event.recycle()
         }
     }
@@ -161,25 +179,13 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
 
     private fun cancelAllWaitForIdleJobs() {
         for (it in waitForIdleJobs) {
-            it.get()?.cancel()
+            it?.cancel()
         }
         waitForIdleJobs.clear()
     }
 
     fun startReceivingEvents() {
         uiAutomation.setOnAccessibilityEventListener(eventListener)
-        addOnAccessibilityEventListener {
-            latestEventTimestamp = SystemClock.uptimeMillis()
-            cancelAllWaitForIdleJobs()
-            if (waitingForEventDelivery) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    eventQueue.add(AccessibilityEvent(it))
-                } else {
-                    @Suppress("DEPRECATION")
-                    eventQueue.add(AccessibilityEvent.obtain(it))
-                }
-            }
-        }
     }
 
     fun stopReceivingEvents() {
@@ -204,25 +210,26 @@ abstract class CoroutineUiAutomatorBridge(val uiAutomation: UiAutomation) {
         uiAutomation.serviceInfo = info
     }
 
-    suspend fun waitForIdle(idleMills: Long, maxWaitMills: Long): Boolean {
-        check(maxWaitMills >= idleMills)
-        var elapsed = if (latestEventTimestamp == -1L) 0
-        else SystemClock.uptimeMillis() - latestEventTimestamp
-
-        if (elapsed >= idleMills) {
-            return true
-        }
-        while (elapsed < maxWaitMills) {
+    suspend fun waitForIdle(idleAckMills: Long, maxWaitMills: Long): Boolean {
+        check(maxWaitMills >= idleAckMills)
+        var elapsedMills = 0L
+        while (elapsedMills < maxWaitMills) {
             val start = SystemClock.uptimeMillis()
-            coroutineScope {
-                delay(idleMills)
-                waitForIdleJobs.addLast(WeakReference(this))
+            if (maxWaitMills - elapsedMills < idleAckMills) {
+                return false
             }
-            val idle = SystemClock.uptimeMillis() - start
-            if (idle >= idleMills) {
+            coroutineScope {
+                val job = async(start = CoroutineStart.LAZY) {
+                    delay(idleAckMills)
+                }
+                waitForIdleJobs.offer(job)
+                job.join()
+            }
+            val actualIdleMills = SystemClock.uptimeMillis() - start
+            if (actualIdleMills >= idleAckMills) {
                 return true
             }
-            elapsed += idle
+            elapsedMills += actualIdleMills
         }
         return false
     }

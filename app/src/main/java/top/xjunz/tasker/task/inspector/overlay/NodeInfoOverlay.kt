@@ -95,8 +95,12 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             uncheckedApplets.add(allApplets.last())
 
         allApplets.add(uiObjectRegistry.isScrollable.yield(node.isScrollable))
-        if (!node.isScrollable)
+        if (!node.isScrollable) {
             uncheckedApplets.add(allApplets.last())
+        }
+
+        allApplets.add(uiObjectRegistry.childCount.yield(listOf( node.childCount,node.childCount)))
+        uncheckedApplets.add(allApplets.last())
     }
 
     @SuppressLint("NotifyDataSetChanged")

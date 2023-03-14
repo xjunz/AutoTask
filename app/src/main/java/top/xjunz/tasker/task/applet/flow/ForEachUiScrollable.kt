@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.flow
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import top.xjunz.tasker.engine.applet.base.AppletResult
-import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.Loop
 import top.xjunz.tasker.engine.runtime.Referent
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.ktx.ensureRefresh
@@ -17,7 +17,7 @@ import top.xjunz.tasker.task.applet.value.ScrollMetrics
 /**
  * @author xjunz 2023/03/13
  */
-class ForEachUiScrollable : Flow(), Referent {
+class ForEachUiScrollable : Loop(), Referent {
 
     override val valueType: Int = VAL_TYPE_LONG
 
@@ -27,17 +27,10 @@ class ForEachUiScrollable : Flow(), Referent {
 
     private var currentChild: AccessibilityNodeInfo? = null
 
-    private var traversedCount: Int = 0
-
     override fun onPrepareApply(runtime: TaskRuntime) {
-        super.onPreApply(runtime)
+        super.onPrepareApply(runtime)
         runtime.registerReferent(this)
         runtime.setTarget(UiObjectTarget())
-    }
-
-    override fun onPreApply(runtime: TaskRuntime) {
-        super.onPreApply(runtime)
-        traversedCount = 0
     }
 
     override fun onPostApply(runtime: TaskRuntime) {
@@ -54,14 +47,16 @@ class ForEachUiScrollable : Flow(), Referent {
             for (i in 0 until referentNode.childCount) {
                 val child = referentNode.getChild(i) ?: continue
                 try {
+                    child.ensureRefresh()
                     if (!child.isVisibleToUser) continue
                     currentChild = child
                     runtime.getTarget<UiObjectTarget>().source = child
                     super.applyFlow(runtime)
-                    traversedCount++
+                    currentCount++
                 } finally {
                     AccessibilityNodeInfoCompat.wrap(child).recycle()
                 }
+                if (shouldBreak) break
             }
             if (!scrollable.scrollForward(metrics.steps)) {
                 hitBottomCount++
@@ -70,11 +65,11 @@ class ForEachUiScrollable : Flow(), Referent {
         return AppletResult.EMPTY_SUCCESS
     }
 
-    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
             0 -> currentChild
-            1 -> traversedCount
-            else -> super.getReferredValue(runtime, which)
+            1 -> currentCount
+            else -> super.getReferredValue(which, runtime)
         }
     }
 }

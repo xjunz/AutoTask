@@ -34,11 +34,11 @@ data class ComponentInfoWrapper(
         PackageManagerBridge.loadLabelOfPackage(packageName).toString()
     }
 
-    override fun getReferredValue(runtime: TaskRuntime, which: Int): Any? {
+    override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
             1 -> packageName
             2 -> label
-            else -> super.getReferredValue(runtime, which)
+            else -> super.getReferredValue(which, runtime)
         }
     }
 

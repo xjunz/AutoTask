@@ -77,6 +77,8 @@ class InspectorViewModel {
 
     var bubbleY: Int = 0
 
+    var currentRunningOneshotTask: XTask? = null
+
     private var previousRecordTimestamp = -1L
 
     fun makeToast(any: Any?, post: Boolean = false) {

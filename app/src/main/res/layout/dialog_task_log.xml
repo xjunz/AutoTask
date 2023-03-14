@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2023 xjunz. All rights reserved.
+  -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?colorSurface">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@animator/sla_appbar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_insetEdge="top"
+            app:liftOnScroll="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/app_bar_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="?selectableItemBackground"
+                    android:drawableTint="?colorPrimary"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:labelFor="@id/et_log"
+                    android:maxLines="1"
+                    android:text="@string/log"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_save"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toEndOf="@+id/ib_dismiss"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_clear"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@{@string/clear_all}"
+                    app:icon="@drawable/ic_clear_all_24px"
+                    app:iconSize="24dp"
+                    app:iconTint="?colorPrimary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_dismiss"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:contentDescription="@{@string/dismiss}"
+                    app:icon="@drawable/ic_arrow_back_24px"
+                    app:iconSize="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_save"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@{@string/save_to_storage}"
+                    app:icon="@drawable/ic_save_24px"
+                    app:iconSize="24dp"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_clear"
+                    app:layout_constraintTop_toTopOf="@+id/ib_dismiss" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider"
+                android:layout_width="wrap_content"
+                android:layout_height="1dp"
+                app:dividerColor="@color/material_on_surface_stroke" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_dodgeInsetEdges="top|bottom">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <top.xjunz.tasker.ui.widget.LineCounterView
+                    android:id="@+id/line_counter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:background="?colorPrimary"
+                    android:paddingHorizontal="4dp"
+                    app:lineCounterTextColor="?colorOnPrimary" />
+
+                <EditText
+                    android:id="@+id/et_log"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:editable="false"
+                    android:gravity="top|start"
+                    android:importantForAutofill="no"
+                    android:inputType="none"
+                    android:padding="8dp"
+                    android:scrollbars="vertical"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textIsSelectable="true"
+                    tools:ignore="Deprecated" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

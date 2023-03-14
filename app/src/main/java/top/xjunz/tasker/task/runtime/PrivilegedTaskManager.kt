@@ -56,6 +56,10 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
             PrivilegedTaskManager.clearSnapshots(identifier)
         }
 
+        override fun clearLog(checksum: Long, snapshotId: String) {
+            PrivilegedTaskManager.clearLog(checksum, snapshotId)
+        }
+
         override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
             return PrivilegedTaskManager.getAllSnapshots(identifier)
         }

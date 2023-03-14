@@ -21,5 +21,7 @@ interface IRemoteTaskManager {
 
     void clearSnapshots(long identifier);
 
-    TaskSnapshot[] getAllSnapshots(long identifier);
+    void clearLog(long checksum, String snapshotId);
+
+    TaskSnapshot[] getAllSnapshots(long task);
 }

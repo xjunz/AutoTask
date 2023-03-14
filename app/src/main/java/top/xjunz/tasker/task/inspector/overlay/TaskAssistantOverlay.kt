@@ -52,10 +52,20 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
     private val adapter by lazy {
         inlineAdapter(tasks, ItemTaskAssistantBinding::class.java, {
             binding.ibRun.setNoDoubleClickListener {
-                vm.isCollapsed.value = true
-                vm.requestLaunchOneshotTask.value = tasks[adapterPosition]
+                val task = tasks[adapterPosition]
+                if (task !== vm.currentRunningOneshotTask) {
+                    vm.isCollapsed.value = true
+                    vm.requestLaunchOneshotTask.value = tasks[adapterPosition]
+                } else {
+                    currentService.stopOneshotTask(task)
+                }
             }
         }) { binding, pos, task ->
+            if (task === vm.currentRunningOneshotTask) {
+                binding.ibRun.setIconResource(R.drawable.ic_baseline_stop_24)
+            } else {
+                binding.ibRun.setIconResource(R.drawable.ic_baseline_play_arrow_24)
+            }
             binding.tvTaskName.text = (pos + 1).toString().bold()
                 .foreColored(R.color.md_theme_dark_primary.color) + "  " + task.title
         }
@@ -64,11 +74,16 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
     private val taskCompletionCallback by lazy {
         object : ITaskCompletionCallback.Stub() {
             override fun onTaskCompleted(isSuccessful: Boolean) {
+                val runningTask = vm.currentRunningOneshotTask
+                vm.currentRunningOneshotTask = null
                 vm.makeToast(
                     R.string.format_task_finished.format(
                         if (isSuccessful) R.string.succeeded.str else R.string.failed.str
                     ), true
                 )
+                binding.root.post {
+                    adapter.notifyItemChanged(tasks.indexOf(runningTask))
+                }
             }
         }
     }
@@ -113,7 +128,9 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
                 rootView.post {
                     // If not present in task manager, add it first
                     LocalTaskManager.addOneshotTaskIfAbsent(it)
+                    vm.currentRunningOneshotTask = it
                     currentService.scheduleOneshotTask(it, taskCompletionCallback)
+                    adapter.notifyItemChanged(tasks.indexOf(it))
                 }
                 vm.makeToast(R.string.format_launch_oneshot_task.format(it.title))
             } else {

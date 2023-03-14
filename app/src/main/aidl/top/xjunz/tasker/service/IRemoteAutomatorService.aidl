@@ -27,9 +27,11 @@ interface IRemoteAutomatorService {
 
     void scheduleOneshotTask(long id, in ITaskCompletionCallback callback) = 11;
 
-    void setPremiumContextStoragePath(in String path) = 12;
+    void stopOneshotTask(long id) = 12;
 
-    void loadPremiumContext() = 13;
+    void setPremiumContextStoragePath(in String path) = 13;
+
+    void loadPremiumContext() = 14;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server
 

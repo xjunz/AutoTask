@@ -26,7 +26,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:contentDescription="@{@string/run}"
             app:icon="@drawable/ic_baseline_play_arrow_24"
             app:iconTint="?colorPrimaryContainer"
             app:layout_constraintEnd_toEndOf="parent"

@@ -17,6 +17,8 @@ import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
  */
 class ContainsUiObject : ScopeFlow<UiObjectTarget>() {
 
+    override var isInvertible: Boolean = true
+
     override val isRepetitive: Boolean = true
 
     override fun initializeTarget(runtime: TaskRuntime): UiObjectTarget {
@@ -30,6 +32,9 @@ class ContainsUiObject : ScopeFlow<UiObjectTarget>() {
         val node = referentNode.findFirst(false) {
             ctx.source = it
             super.applyFlow(runtime).isSuccessful
+        }
+        if (isInverted) {
+            return AppletResult.emptyResult(node == null)
         }
         return if (node != null) UiObjectReferent(node).asResult() else AppletResult.EMPTY_FAILURE
     }

@@ -38,7 +38,8 @@
     <string name="ascending">升序</string>
     <string name="app_label">应用名称</string>
     <string name="sort_by">排序方式</string>
-    <string name="feedback">反馈 &amp; 交流</string>
+    <string name="feedback">反馈</string>
+    <string name="feedback_and_communicate">反馈 &amp; 交流</string>
     <string name="check_for_updates">检查更新</string>
     <string name="mail_subject">「自动任务」反馈 %s</string>
     <string name="mail_body">%s\n问题描述:\n</string>
@@ -122,7 +123,9 @@
     <string name="no_node_selected">未选中任何节点</string>
     <string name="node_info_overlay_subtitle">请勾选想要指定的规则</string>
     <string name="ui_object">控件</string>
-    <string name="child_node">子节点</string>
+    <string name="child_node">子控件</string>
+    <string name="child_node_count_in_range">子控件数量在指定范围</string>
+    <string name="not_child_node_count_in_range">子控件数量不在指定范围</string>
     <string name="seekbar">拖动条</string>
     <string name="tip_floating_inspector_enabled">悬浮助手已启用</string>
     <string name="options_from_inspector_added">已添加%d条规则</string>
@@ -137,7 +140,7 @@
     <string name="unit">单位</string>
     <string name="relative_to">相对于</string>
     <string name="screen">屏幕</string>
-    <string name="parent_node">父节点</string>
+    <string name="parent_node">父控件</string>
     <string name="px">像素</string>
     <string name="dip">dp</string>
     <string name="screen_width">屏幕宽度</string>
@@ -323,13 +326,13 @@
     <string name="notification_owner_app">发送通知的应用</string>
     <string name="empty" translatable="false" />
     <string name="app_entered">进入的应用</string>
-    <string name="break_loop">跳出%s</string>
+    <string name="break_current_loop">结束当前循环</string>
     <string name="text_starts_with">起始文本是</string>
     <string name="not_text_starts_with">起始文本不是</string>
     <string name="text_ends_with">结束文本是</string>
     <string name="not_text_ends_with">结束文本不是</string>
-    <string name="text_matches_pattern">满足正则表达式</string>
-    <string name="not_text_matches_pattern">不满足正则表达式</string>
+    <string name="text_matches_pattern">文本满足正则表达式</string>
+    <string name="not_text_matches_pattern">文本不满足正则表达式</string>
     <string name="app_collection">应用名单</string>
     <string name="activity_collection">页面名单</string>
     <string name="prefix">起始文本</string>
@@ -430,7 +433,7 @@
 \n<b>最多等待时长</b>：如果等待超过该时长仍然未检测到屏幕空闲，那么视为失败。</string>
     <string name="format_wait_for_idle_desc">空闲门槛：%s，最多等待时长：%s</string>
     <string name="displayed_text">显示的文本</string>
-    <string name="tip_selecting_referents">使用强调色标注的引用项代表它已被您设置标识，<b>长按</b>它可修改其标识。</string>
+    <string name="tip_selecting_referents">使用强调色标注的引用项代表它已被设置标识，<b>长按</b>它可修改其标识。</string>
     <string name="format_set_referent_name">为\"%s\"设置标识</string>
     <string name="error_referent_still_in_reference">不能清空当前标识，因为它正在被其他规则引用</string>
     <string name="prompt_task_title_repeated">已经存在另一个名为\"%s\"的任务，是否重命名当前任务？</string>
@@ -546,4 +549,21 @@
     <string name="ui_object_conditions">控件条件</string>
     <string name="format_draw_node_bounds">绘制%s的边界</string>
     <string name="clear_node_bounds">清除绘制的控件边界</string>
+    <string name="logcat_text">打印日志</string>
+    <string name="log_text">日志内容</string>
+    <string name="tip_logcat">日志可以在任务的运行记录中查看</string>
+    <string name="log">日志</string>
+    <string name="save_to_storage">保存到本地</string>
+    <string name="prompt_clear_snapshot_log">你确定要清空当前日志吗？</string>
+    <string name="format_snapshot_filename">[日志]%s-%s</string>
+    <string name="saved_to_storage">已保存日志到本地</string>
+    <string name="tip_select_log_save_dir">请选择日志保存的文件夹</string>
+    <string name="stopship_current_task">结束当前任务</string>
+    <string name="disable_current_task">禁用当前任务</string>
+    <string name="continue_current_loop">跳过此次循环</string>
+    <string name="tip_continue_loop">仅跳过此次，循环将继续</string>
+    <string name="format_get_child_at">获取%s的子控件</string>
+    <string name="format_number">第%d个</string>
+    <string name="certain_ui_object">某个控件</string>
+    <string name="which_one">第几个子控件</string>
 </resources>

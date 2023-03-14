@@ -12,7 +12,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 open class If : ControlFlow() {
 
     override fun staticCheckMyself(): Int {
-        if (requireParent().getOrNull(index + 1)?.javaClass != Do::class.java) {
+        if (requireParent().getOrNull(index + 1)?.relation == REL_ANYWAY) {
             return StaticError.ERR_IF_NOT_FOLLOWED_BY_DO
         }
         return super.staticCheckMyself()

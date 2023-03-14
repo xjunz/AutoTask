@@ -8,20 +8,18 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.uiautomator.Direction
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction
-import top.xjunz.tasker.engine.applet.action.pureAction
-import top.xjunz.tasker.engine.applet.action.singleArgAction
-import top.xjunz.tasker.engine.applet.action.singleArgValueAction
+import top.xjunz.tasker.engine.applet.action.*
+import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction.Companion.referenceAction
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.isPrivilegedProcess
-import top.xjunz.tasker.ktx.array
-import top.xjunz.tasker.ktx.ensureRefresh
-import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ForEachUiScrollable
 import top.xjunz.tasker.task.applet.flow.ScrollIntoUiObject
+import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.applet.value.ScrollMetrics
@@ -119,7 +117,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0010)
     val setText = appletOption(R.string.format_perform_input_text) {
-        LambdaReferenceAction<String>(Applet.VAL_TYPE_TEXT) { args, value, _ ->
+        referenceAction<String> { args, value, _ ->
             val node = args[0] as AccessibilityNodeInfo
             node.ensureRefresh()
             if (!node.isEditable) false else {
@@ -189,6 +187,27 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withResult<AccessibilityNodeInfo>(R.string.current_child)
         .withResult<Int>(R.string.current_child_count)
         .withValueDescriber(scrollDescriber)
+        .hasCompositeTitle()
+
+    @AppletOrdinal(0x0048)
+    val getChildAt = appletOption(R.string.format_get_child_at) {
+        LambdaReferenceAction<Int>(Applet.VAL_TYPE_INT) { args, value, _ ->
+            val parent = args.single() as AccessibilityNodeInfo
+            parent.ensureRefresh()
+            val child = parent.getChild(value as Int - 1)
+            if (child != null) {
+                UiObjectReferent(child).asResult()
+            } else {
+                AppletResult.EMPTY_FAILURE
+            }
+        }
+    }.withRefArgument<AccessibilityNodeInfo>(R.string.parent_node, R.string.certain_ui_object)
+        .withValueArgument<Int>(R.string.which_one)
+        .withValueDescriber<Int> {
+            R.string.format_number.formatSpans(it.toString().foreColored())
+        }
+        .withResult<AccessibilityNodeInfo>(R.string.child_node)
+        .withResult<String>(R.string.ui_object_text)
         .hasCompositeTitle()
 
     @AppletOrdinal(0x0050)

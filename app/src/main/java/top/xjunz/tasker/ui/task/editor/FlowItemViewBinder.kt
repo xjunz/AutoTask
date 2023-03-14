@@ -296,8 +296,8 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                 }.setAllowEmptyInput().init(R.string.edit_referent_name.text) {
                     if (it.isEmpty()) {
                         // The referent is still referred
-                        if (vm.flow.forEachReferent { _, _, referent ->
-                                referent == referentName
+                        if (vm.flow.forEachReference { _, _, reference ->
+                                reference == referentName
                             }) {
                             return@init R.string.error_referent_still_in_reference.text
                         }
