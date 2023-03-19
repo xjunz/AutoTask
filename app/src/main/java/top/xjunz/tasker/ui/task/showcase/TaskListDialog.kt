@@ -6,6 +6,7 @@ package top.xjunz.tasker.ui.task.showcase
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.updatePadding
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
@@ -77,6 +78,9 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
         binding.tvTitle.text = viewModel.title
         if (viewModel.preloadTaskMode) {
             viewModel.preloadTasks()
+        }
+        binding.rvTaskList.applySystemInsets { v, insets ->
+            v.updatePadding(bottom = insets.bottom)
         }
         observe(viewModel.taskList) {
             if (it.isNotEmpty()) {

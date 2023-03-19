@@ -105,7 +105,7 @@ open class AppletOptionClickHandler(private val fragmentManager: FragmentManager
 
             applet.valueType == Applet.VAL_TYPE_TEXT -> {
                 val dialog = TextEditorDialog().configEditText {
-                    it.setMaxLength(64)
+                    it.setMaxLength(128)
                 }.init(title, applet.value?.casted()) {
                     applet.value = it
                     onCompleted()

@@ -32,10 +32,9 @@ sealed class MainOption(
 
     object NightMode : MainOption(R.string.night_mode, R.drawable.ic_nights_stay_24px, desc = {
         when (Preferences.nightMode) {
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> R.string.follow_system
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.turn_on
             AppCompatDelegate.MODE_NIGHT_NO -> R.string.turn_off
-            else -> error("?")
+            else -> R.string.follow_system
         }
     })
 

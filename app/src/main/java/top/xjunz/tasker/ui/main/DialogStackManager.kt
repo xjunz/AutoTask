@@ -52,6 +52,7 @@ object DialogStackManager {
     fun destroyAll() {
         requireStack().clear()
         stack = null
+        callback = null
     }
 
     /** Whether the target is visible. */

@@ -21,7 +21,7 @@ abstract class FlowViewModel(states: SavedStateHandle) : SavedStateViewModel(sta
 
     var isReadyOnly: Boolean = false
 
-    val applets = MutableLiveData(emptyList<Applet>())
+    val applets = MutableLiveData<List<Applet>>(emptyList())
 
     val onAppletChanged = MutableLiveData<Applet>()
 

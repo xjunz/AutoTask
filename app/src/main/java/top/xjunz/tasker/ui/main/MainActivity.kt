@@ -88,7 +88,13 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AppCompatDelegate.setDefaultNightMode(Preferences.nightMode)
+        val lightTheme = resources.getBoolean(R.bool.lightTheme)
+        if ((lightTheme && Preferences.nightMode == AppCompatDelegate.MODE_NIGHT_YES)
+            || (!lightTheme && Preferences.nightMode == AppCompatDelegate.MODE_NIGHT_NO)
+        ) {
+            AppCompatDelegate.setDefaultNightMode(Preferences.nightMode)
+            return
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         app.setAppTheme(theme)
         setContentView(binding.root)
