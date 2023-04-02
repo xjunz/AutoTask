@@ -12,7 +12,6 @@ import android.transition.TransitionSet
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.core.view.doOnPreDraw
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
@@ -103,7 +102,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
             )
             binding.tvLabel.text = title
-            binding.ibInvert.isInvisible = !option.isInvertible
+            binding.ibInvert.isVisible = option.isInvertible
             if (!option.isValid) {
                 binding.tvLabel.setTextAppearance(TextAppearance_Material3_TitleMedium)
                 binding.tvLabel.setTextColor(ColorScheme.colorPrimary)
@@ -210,6 +209,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     gestureOption to AppletOptionFactory.gestureActionRegistry
                         .categorizedOptions.indexOf(gestureOption)
             }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
+                FloatingInspectorDialog().setMode(InspectorMode.UI_OBJECT)
+                    .show(childFragmentManager)
+                toast(R.string.tip_select_ui_object_from_screen)
+            }
         }
     }
 
@@ -278,7 +282,11 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
             bottomAdapter.notifyItemChanged(viewModel.applets.require().indexOf(it), true)
         }
         doOnEventRoutedWithValue<List<Applet>>(FloatingInspector.EVENT_NODE_INFO_SELECTED) {
-            viewModel.acceptApplets(it)
+            if (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR == TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK) {
+                viewModel.acceptAppletsFromAutoClick(it)
+            } else {
+                viewModel.acceptApplets(it)
+            }
             shopCartIntegration.expand()
             rvBottom.scrollToPosition(bottomAdapter.itemCount)
         }

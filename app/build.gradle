@@ -26,8 +26,8 @@ android {
         applicationId "top.xjunz.tasker"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 10
-        versionName "1.0.1r03"
+        versionCode 11
+        versionName "1.1.0"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
@@ -82,8 +82,8 @@ dependencies {
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     // ktx
     implementation "androidx.core:core-ktx:$ktx_version"
-    implementation 'androidx.activity:activity-ktx:1.6.1'
-    implementation 'androidx.fragment:fragment-ktx:1.5.5'
+    implementation 'androidx.activity:activity-ktx:1.7.0'
+    implementation 'androidx.fragment:fragment-ktx:1.5.6'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design
@@ -99,7 +99,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
     // lifecycle
-    def lifecycle_version = "2.6.0-rc01"
+    def lifecycle_version = "2.6.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
@@ -111,5 +111,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+    // debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 }

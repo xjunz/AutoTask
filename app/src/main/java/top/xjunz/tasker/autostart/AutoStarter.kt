@@ -8,8 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import rikka.shizuku.Shizuku
-import top.xjunz.tasker.Preferences
-import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.controller.ShizukuAutomatorServiceController
 import top.xjunz.tasker.util.ShizukuUtil
 
@@ -20,11 +18,11 @@ class AutoStarter : BroadcastReceiver() {
 
     private val oneShotBinderReceivedListener = object : Shizuku.OnBinderReceivedListener {
         override fun onBinderReceived() {
+            Shizuku.removeBinderReceivedListener(this)
             if (ShizukuUtil.isShizukuAvailable) {
                 // TODO: Show countdown as a notification
-                ShizukuAutomatorServiceController.bindService()
+                ShizukuAutomatorServiceController.bindServiceOnBoot()
             }
-            Shizuku.removeBinderReceivedListener(this)
         }
     }
 
@@ -32,8 +30,6 @@ class AutoStarter : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED
             || intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED
         ) {
-            // only available when it is Shizuku mode
-            if (Preferences.operatingMode != OperatingMode.Privilege.VALUE) return
             Shizuku.addBinderReceivedListenerSticky(oneShotBinderReceivedListener)
         }
     }

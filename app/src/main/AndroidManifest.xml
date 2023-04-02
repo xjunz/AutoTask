@@ -77,7 +77,6 @@
 
         <receiver
             android:name=".autostart.AutoStarter"
-            android:directBootAware="true"
             android:enabled="false"
             android:exported="true">
             <intent-filter>

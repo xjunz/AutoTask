@@ -31,7 +31,6 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.isTrue
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.event.A11yEventDispatcher
-import top.xjunz.tasker.task.event.ClipboardEventDispatcher
 import top.xjunz.tasker.task.event.MetaEventDispatcher
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -107,7 +106,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     override val eventDispatcher = MetaEventDispatcher()
 
-    private val a11yEventDispatcher: A11yEventDispatcher by lazy {
+    val a11yEventDispatcher: A11yEventDispatcher by lazy {
         A11yEventDispatcher(Looper.getMainLooper(), uiAutomatorBridge)
     }
 
@@ -168,7 +167,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private fun initTaskScheduler() {
         eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
-        eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
+        // eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
         eventDispatcher.addCallback(residentTaskScheduler)
         eventDispatcher.addCallback(oneshotTaskScheduler)
     }
@@ -332,6 +331,5 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    override val lifecycle: Lifecycle
-        get() = lifecycleRegistry
+    override val lifecycle: Lifecycle get() = lifecycleRegistry
 }

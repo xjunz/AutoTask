@@ -30,7 +30,6 @@ import top.xjunz.tasker.ktx.isAlive
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.event.A11yEventDispatcher
-import top.xjunz.tasker.task.event.ClipboardEventDispatcher
 import top.xjunz.tasker.task.event.MetaEventDispatcher
 import top.xjunz.tasker.task.runtime.*
 import java.lang.ref.WeakReference
@@ -153,7 +152,6 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-
     override fun setPremiumContextStoragePath(path: String) {
         PremiumMixin.premiumContextStoragePath = path
     }
@@ -215,7 +213,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private fun initEventDispatcher() {
         eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
-        eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
+        //eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
         eventDispatcher.addCallback(residentTaskScheduler)
         eventDispatcher.addCallback(oneshotTaskScheduler)
         a11yEventDispatcher.activate(false)

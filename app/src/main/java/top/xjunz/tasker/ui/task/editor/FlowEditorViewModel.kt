@@ -18,6 +18,7 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
+import top.xjunz.tasker.task.editor.AppletReferenceEditor
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 
@@ -331,7 +332,8 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     fun generateDefaultFlow(taskType: Int): RootFlow {
         val root = factory.flowRegistry.rootFlow.yield() as RootFlow
-        root.add(factory.flowRegistry.preloadFlow.yield())
+        val preloadFlow = factory.flowRegistry.preloadFlow.yield()
+        root.add(preloadFlow)
         when (TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR) {
             TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
                 /* no-op */
@@ -343,6 +345,21 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 delay.comment = R.string.comment_click_automation_delay_mills.str
                 repeat.add(delay)
                 root.add(repeat)
+            }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
+                val whenFlow = factory.flowRegistry.whenFlow.yield() as When
+                whenFlow.add(factory.eventRegistry.contentChanged.yield())
+                root.add(whenFlow)
+                val ifFlow = factory.flowRegistry.ifFlow.yield() as If
+                root.add(ifFlow)
+                val editor = AppletReferenceEditor(false)
+                editor.setReferent(preloadFlow, 0, R.string.current_top_app.str)
+                editor.setReferent(preloadFlow, 3, R.string.current_window.str)
+                val doFlow = factory.flowRegistry.doFlow.yield() as Do
+                root.add(doFlow)
+                val click = factory.uiObjectActionRegistry.click.yield()
+                editor.setReference(click, null, 0, R.string.matched_ui_object.str)
+                doFlow.add(click)
             }
             else -> {
                 if (taskType == XTask.TYPE_RESIDENT) {

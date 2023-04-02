@@ -11,6 +11,7 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
+import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.service.isPremium
 
 /**
@@ -30,6 +31,15 @@ sealed class MainOption(
         }
     })
 
+    object AutoStart :
+        MainOption(R.string.auto_start_after_boot, R.drawable.ic_restart_alt_24px, desc = {
+            if (AutoStartUtil.isAutoStartEnabled) {
+                R.string.is_enabled
+            } else {
+                R.string.not_is_enabled
+            }
+        }, R.string.desc_auto_start)
+
     object NightMode : MainOption(R.string.night_mode, R.drawable.ic_nights_stay_24px, desc = {
         when (Preferences.nightMode) {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.turn_on
@@ -37,7 +47,6 @@ sealed class MainOption(
             else -> R.string.follow_system
         }
     })
-
 
     object Feedback : MainOption(R.string.feedback_and_communicate, R.drawable.ic_chat_24px)
 
@@ -56,6 +65,6 @@ sealed class MainOption(
     )
 
     companion object {
-        val ALL_OPTIONS = arrayOf(PremiumStatus, NightMode, Feedback, VersionInfo, About)
+        val ALL_OPTIONS = arrayOf(PremiumStatus, AutoStart, NightMode, Feedback, VersionInfo, About)
     }
 }

@@ -14,6 +14,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import rikka.shizuku.Shizuku
 import top.xjunz.shared.utils.runtimeException
+import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.util.ShizukuUtil
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
@@ -72,6 +74,13 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     protected open fun onServiceConnectionError() {
 
+    }
+
+    fun bindServiceOnBoot() {
+        PremiumMixin.loadPremiumFromFileSafely()
+        if (isPremium) {
+            bindService()
+        }
     }
 
     override fun bindService() {

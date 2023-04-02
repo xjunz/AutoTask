@@ -9,7 +9,7 @@
     <string name="more_to_say">本应用专注于帮助您执行自动任务。\n\n
         我们的优势在于：\n\n
         • 可自定义任务\n
-        • 使用简单，功能丰富\n
+        • 功能丰富\n
         • 省电且占用系统资源较少\n
     </string>
     <string name="more">更多</string>
@@ -490,6 +490,7 @@
     <string name="restore_purchase">恢复购买</string>
     <string name="create_order">创建订单</string>
     <string name="premium_edition_desc"><b>专业版优势:</b>
+\n• 开机自启
 \n• 无6小时自动停止的限制
 \n• 无最多同时启用3个常驻任务的限制
 \n• 自定义任务可使用专享规则
@@ -566,4 +567,13 @@
     <string name="format_number">第%d个</string>
     <string name="certain_ui_object">某个控件</string>
     <string name="which_one">第几个子控件</string>
+    <string name="quick_create">快速创建</string>
+    <string name="auto_click">自动点击</string>
+    <string name="tip_select_ui_object_from_screen">启用悬浮助手以从屏幕上选择控件</string>
+    <string name="execute_sh_file">执行.sh脚本文件</string>
+    <string name="execute_shell_cmd">执行Shell指令</string>
+    <string name="file_path">文件路径</string>
+    <string name="shell_cmd">Shell指令</string>
+    <string name="desc_auto_start">只支持以Shizuku模式启动</string>
+    <string name="tip_auto_start_need_premium">很抱歉，开机自启功能仅限专业版可用</string>
 </resources>

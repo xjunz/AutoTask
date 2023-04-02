@@ -124,10 +124,10 @@ class AppletReferenceEditor(private val revocable: Boolean = true) {
         }
     }
 
-    fun setReference(applet: Applet, arg: ArgumentDescriptor, whichArg: Int, referent: String?) {
+    fun setReference(applet: Applet, arg: ArgumentDescriptor?, whichArg: Int, referent: String?) {
         val prevReferent = applet.references[whichArg]
         val prevValue = applet.value
-        if (applet.rawSetReference(whichArg, referent)) {
+        if (applet.rawSetReference(whichArg, referent) && arg != null) {
             // Clear its value once the arg is set to a reference
             if (!arg.isReferenceOnly) {
                 applet.value = null

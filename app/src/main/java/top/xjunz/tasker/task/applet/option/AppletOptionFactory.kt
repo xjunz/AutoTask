@@ -22,7 +22,7 @@ object AppletOptionFactory : AppletFactory {
 
     val eventRegistry = EventCriterionRegistry(BootstrapOptionRegistry.ID_EVENT_FILTER_REGISTRY)
 
-    private val applicationRegistry =
+    val applicationRegistry =
         ApplicationCriterionRegistry(BootstrapOptionRegistry.ID_APP_CRITERION_REGISTRY)
 
     val uiObjectRegistry =
@@ -42,7 +42,7 @@ object AppletOptionFactory : AppletFactory {
     private val globalActionRegistry =
         GlobalActionRegistry(BootstrapOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
 
-    private val uiObjectActionRegistry =
+    val uiObjectActionRegistry =
         UiObjectActionRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_ACTION_REGISTRY)
 
     val gestureActionRegistry =
@@ -56,6 +56,9 @@ object AppletOptionFactory : AppletFactory {
 
     val controlActionRegistry =
         ControlActionRegistry(BootstrapOptionRegistry.ID_CONTROL_ACTION_REGISTRY)
+
+    private val shellCmdActionRegistry =
+        ShellCmdActionRegistry(BootstrapOptionRegistry.ID_SHELL_CMD_ACTION_REGISTRY)
 
     val uiObjectFlowRegistry =
         UiObjectFlowRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_FLOW_REGISTRY)
@@ -78,6 +81,7 @@ object AppletOptionFactory : AppletFactory {
         gestureActionRegistry,
         textActionRegistry,
         appActionRegistry,
+        shellCmdActionRegistry,
         /* control */
         uiObjectFlowRegistry,
     )

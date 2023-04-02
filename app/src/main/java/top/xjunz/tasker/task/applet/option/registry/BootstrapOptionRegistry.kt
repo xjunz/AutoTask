@@ -36,6 +36,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         const val ID_APP_ACTION_REGISTRY = 0x53
         const val ID_TEXT_ACTION_REGISTRY = 0x54
         const val ID_GESTURE_ACTION_REGISTRY = 0x55
+        const val ID_SHELL_CMD_ACTION_REGISTRY = 0x56
 
         const val ID_UI_OBJECT_FLOW_REGISTRY = 0x60
     }
@@ -89,7 +90,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             uiObjectActions,
             gestureActions,
             textActions,
-            appActions
+            appActions,
+            shellCmdActions
         )
     }
 
@@ -209,4 +211,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     val uiObjectFlows =
         flowOptionWithId<PhantomFlow>(ID_UI_OBJECT_FLOW_REGISTRY, R.string.ui_object_conditions)
 
+    @AppletOrdinal(0x0040)
+    val shellCmdActions =
+        flowOptionWithId<PhantomFlow>(ID_SHELL_CMD_ACTION_REGISTRY, R.string.shell_cmd)
 }

@@ -29,6 +29,7 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.OverlayToastBinding
 import top.xjunz.tasker.isAppProcess
+import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.italic
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.ui.widget.DrawBoundsFrameLayout
@@ -65,9 +66,11 @@ class OverlayToastBridge(looper: Looper) {
     private lateinit var textView: TextView
 
     private val container: DrawBoundsFrameLayout by lazy {
-        val field = context.baseContext.javaClass.getDeclaredField("mClassLoader")
-        field.isAccessible = true
-        field.set(context.baseContext, javaClass.classLoader)
+        if (isPrivilegedProcess) {
+            val field = context.baseContext.javaClass.getDeclaredField("mClassLoader")
+            field.isAccessible = true
+            field.set(context.baseContext, javaClass.classLoader)
+        }
         val binding = OverlayToastBinding.inflate(LayoutInflater.from(context))
         textView = binding.tvToast
         binding.root.casted()
@@ -109,11 +112,17 @@ class OverlayToastBridge(looper: Looper) {
         textView.text = msg ?: "null".italic()
     }
 
-    private fun transitToastToDismiss(onEnd: (Transition) -> Unit) {
-        val transition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
-        transition.doOnEnd(onEnd)
-        TransitionManager.beginDelayedTransition(container, transition)
-        textView.isVisible = false
+    private inline fun transitToastToDismiss(crossinline onEnd: () -> Unit) {
+        if (textView.isVisible) {
+            val transition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+            transition.doOnEnd {
+                onEnd()
+            }
+            TransitionManager.beginDelayedTransition(container, transition)
+            textView.isVisible = false
+        } else {
+            onEnd()
+        }
     }
 
     private fun showQueued() {

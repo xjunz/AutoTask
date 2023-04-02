@@ -15,6 +15,8 @@ import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.service.isPremium
+import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.util.ShizukuUtil
 
 /**
@@ -30,43 +32,49 @@ object AutoStartUtil {
     }
 
     private val myAutoStartComponentName by lazy {
-        ComponentName(BuildConfig.APPLICATION_ID, AutoStarter::class.java.name)
+        ComponentName(
+            BuildConfig.APPLICATION_ID + premiumContext.empty,
+            AutoStarter::class.java.name + premiumContext.empty
+        )
     }
 
-    private fun enableShizukuAutoStart(): Boolean {
-        if (isShizukuAutoStartEnabled) return true
-        return ShizukuUtil.isShizukuAvailable && runCatching {
-            val ipm = IPackageManager.Stub.asInterface(
-                ShizukuBinderWrapper(SystemServiceHelper.getSystemService("package"))
-            )
-            ipm.setComponentEnabledSetting(
-                shizukuAutoStartComponentName,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP,
-                Os.getuid() / 100_000
-            )
-        }.isSuccess
-    }
+    private fun enableShizukuAutoStart() = runCatching {
+        val ipm = IPackageManager.Stub.asInterface(
+            ShizukuBinderWrapper(SystemServiceHelper.getSystemService("package"))
+        )
+        ipm.setComponentEnabledSetting(
+            shizukuAutoStartComponentName,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP,
+            Os.getuid() / 100_000
+        )
+    }.isSuccess
 
-    val isAutoStartEnabled get() = isComponentEnabled(myAutoStartComponentName) && isShizukuAutoStartEnabled
+    val isAutoStartEnabled
+        get() = isPremium && isComponentEnabled(
+            myAutoStartComponentName, false
+        ) && isShizukuAutoStartEnabled
 
     fun toggleAutoStart(enabled: Boolean) {
         if (isAutoStartEnabled == enabled) return
-        if (!isShizukuAutoStartEnabled && (!ShizukuUtil.isShizukuAvailable || !enableShizukuAutoStart())) {
+        if (enabled && !isShizukuAutoStartEnabled && (!ShizukuUtil.isShizukuAvailable || !enableShizukuAutoStart())) {
             toast(R.string.tip_enable_shizuku_auto_start)
             ShizukuUtil.launchShizukuManager()
             return
         }
-        val newState = if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else
+        val newState = if (enabled) {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        } else {
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
         packageManager.setComponentEnabledSetting(
             myAutoStartComponentName, newState, PackageManager.DONT_KILL_APP
         )
     }
 
     private inline val isShizukuAutoStartEnabled
-        get() = isComponentEnabled(shizukuAutoStartComponentName)
+        get() = isComponentEnabled(shizukuAutoStartComponentName, true)
 
-    private fun isComponentEnabled(componentName: ComponentName, def: Boolean = true): Boolean {
+    private fun isComponentEnabled(componentName: ComponentName, def: Boolean): Boolean {
         return try {
             when (packageManager.getComponentEnabledSetting(componentName)) {
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false

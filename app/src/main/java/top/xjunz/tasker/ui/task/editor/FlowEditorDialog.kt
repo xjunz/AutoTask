@@ -232,6 +232,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
                 binding.fabAction.performClick()
             }
+            TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
+                if (!vm.isSelectingReferent) {
+                    menuHelper.triggerMenuItem(null, (vm.flow[2] as Flow), R.id.item_add_inside)
+                }
+            }
         }
     }
 

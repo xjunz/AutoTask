@@ -16,6 +16,7 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
+import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.databinding.FragmentAboutBinding
 import top.xjunz.tasker.databinding.ItemMainOptionBinding
 import top.xjunz.tasker.ktx.observe
@@ -25,10 +26,12 @@ import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
+import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.purchase.PurchaseDialog
+import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.Feedbacks
 
@@ -74,6 +77,9 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
         observe(PremiumMixin.premiumStatusLiveData) {
             adapter.notifyItemChanged(
                 MainOption.ALL_OPTIONS.indexOf(MainOption.PremiumStatus), true
+            )
+            adapter.notifyItemChanged(
+                MainOption.ALL_OPTIONS.indexOf(MainOption.AutoStart), true
             )
         }
         observe(app.updateInfo) {
@@ -134,6 +140,14 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
             }
             MainOption.PremiumStatus -> PurchaseDialog().show(childFragmentManager)
             MainOption.VersionInfo -> VersionInfoDialog().show(childFragmentManager)
+            MainOption.AutoStart -> {
+                if (!isPremium) {
+                    showPurchaseDialog(R.string.tip_auto_start_need_premium)
+                } else {
+                    AutoStartUtil.toggleAutoStart(!AutoStartUtil.isAutoStartEnabled)
+                    adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+                }
+            }
         }
     }
 

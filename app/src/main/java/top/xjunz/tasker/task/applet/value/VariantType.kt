@@ -32,4 +32,7 @@ object VariantType {
     const val TEXT_PANE_TITLE = 3 shl 16 or Applet.VAL_TYPE_TEXT
 
     const val TEXT_GESTURES = 4 shl 16 or Applet.VAL_TYPE_TEXT
+
+    const val TEXT_FILE_PATH = 5 shl 16 or Applet.VAL_TYPE_TEXT
+
 }

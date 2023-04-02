@@ -5,6 +5,7 @@
 package android.app;
 
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 
 import dev.rikka.tools.refine.RefineAs;
 
@@ -28,6 +29,10 @@ public class UiAutomationHidden {
     }
 
     public void disconnect() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public ParcelFileDescriptor[] executeShellCommandRwe(String command) {
         throw new RuntimeException("Stub!");
     }
 }

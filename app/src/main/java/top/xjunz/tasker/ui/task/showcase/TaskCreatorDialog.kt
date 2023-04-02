@@ -45,6 +45,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
         var REQUESTED_QUICK_TASK_CREATOR = -1
         const val QUICK_TASK_CREATOR_CLICK_AUTOMATION = 1
         const val QUICK_TASK_CREATOR_GESTURE_RECORDER = 2
+        const val QUICK_TASK_CREATOR_AUTO_CLICK = 3
     }
 
     private class InnerViewModel : ViewModel() {
@@ -81,7 +82,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.containerResidentTasks.setNoDoubleClickListener {
+        binding.containerResident.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str)
             TaskMetadataEditor().init(metadata) {
                 viewModel.onMetadataEdited.value = metadata
@@ -109,6 +110,11 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
             REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_GESTURE_RECORDER
             viewModel.onMetadataEdited.value =
                 XTask.Metadata(R.string.perform_custom_gestures.str, XTask.TYPE_ONESHOT)
+        }
+        binding.btnAutoClick.setNoDoubleClickListener {
+            REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_AUTO_CLICK
+            viewModel.onMetadataEdited.value =
+                XTask.Metadata(R.string.auto_click.str, XTask.TYPE_RESIDENT)
         }
         binding.containerPreloadTasks.setNoDoubleClickListener {
             TaskListDialog().setPreloadTaskMode().show(requireActivity().supportFragmentManager)

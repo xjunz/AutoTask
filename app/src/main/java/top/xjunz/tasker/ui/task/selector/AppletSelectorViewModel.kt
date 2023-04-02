@@ -16,11 +16,15 @@ import top.xjunz.tasker.engine.applet.util.controlFlow
 import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.ktx.eq
 import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.service.a11yAutomatorService
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
+import top.xjunz.tasker.task.editor.AppletReferenceEditor
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
+import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import java.util.*
 
 /**
@@ -111,13 +115,39 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         return true
     }
 
+    fun acceptAppletsFromAutoClick(applets: List<Applet>) {
+        val containsUiObject = factory.uiObjectFlowRegistry.containsUiObject.yield() as Flow
+        val editor = AppletReferenceEditor(false)
+        editor.setReference(containsUiObject, null, 0, R.string.current_window.str)
+        editor.setReferent(containsUiObject, 0, R.string.matched_ui_object.str)
+        if (flow.isEmpty()) {
+            val comp = a11yAutomatorService.a11yEventDispatcher.getCurrentComponentInfo()
+            val isCertainApp = factory.applicationRegistry.isCertainApp.yield(comp.packageName)
+            editor.setReference(isCertainApp, null, 0, R.string.current_top_app.str)
+            flow.add(isCertainApp)
+            comp.getComponentName()?.flattenToShortString()?.let {
+                val inActivityCollection =
+                    factory.applicationRegistry.activityCollection.yield(
+                        Collections.singletonList(it)
+                    )
+                editor.setReference(inActivityCollection, null, 0, R.string.current_top_app.str)
+                flow.add(inActivityCollection)
+            }
+        } else {
+            containsUiObject.relation = Applet.REL_OR
+        }
+        containsUiObject.addAll(applets)
+        flow.add(containsUiObject)
+        notifyFlowChanged()
+    }
+
     fun acceptApplets(applets: List<Applet>) {
         val flowOption = factory.requireRegistryOption(applets.first().registryId)
 
         if (!flow.addSafely(flowOption.yield() as Flow)) return
         var count = 0
-        applets.forEach {
-            if (!appendApplet(it)) return@forEach
+        for (it in applets) {
+            if (!appendApplet(it)) continue
             count++
         }
         toast(R.string.options_from_inspector_added.format(count))
@@ -173,5 +203,10 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         }
         toast(R.string.error_over_max_applet_size)
         return false
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR = -1
     }
 }

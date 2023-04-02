@@ -99,7 +99,7 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             uncheckedApplets.add(allApplets.last())
         }
 
-        allApplets.add(uiObjectRegistry.childCount.yield(listOf( node.childCount,node.childCount)))
+        allApplets.add(uiObjectRegistry.childCount.yield(listOf(node.childCount, node.childCount)))
         uncheckedApplets.add(allApplets.last())
     }
 
