@@ -5,14 +5,14 @@ buildscript {
         compile_sdk_version = 33
         min_sdk_version = 24
         target_sdk_version = 33
-        kotlin_version = "1.8.0"
-        refine_version = "3.1.1"
-        shizuku_version = '12.1.0'
-        ktor_version = '2.1.1'
+        kotlin_version = "1.8.21"
+        refine_version = "4.3.0"
+        shizuku_version = '13.1.2'
+        ktor_version = '2.3.1'
         appcompat_version = "1.6.1"
-        coroutine_version = "1.6.4"
+        coroutine_version = "1.7.1"
         serialization_version = '1.6.21'
-        ktx_version = "1.9.0"
+        ktx_version = '1.10.1'
     }
     def localProperties = new Properties()
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))
@@ -28,10 +28,10 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "dev.rikka.tools.refine:gradle-plugin:$refine_version"
-        classpath 're.obfuscator:dprotect-gradle:1.0.0'
+        // classpath 're.obfuscator:dprotect-gradle:1.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

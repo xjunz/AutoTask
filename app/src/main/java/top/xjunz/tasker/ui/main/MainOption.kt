@@ -13,6 +13,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.service.isPremium
+import top.xjunz.tasker.upForGrabs
 
 /**
  * @author xjunz 2023/02/27
@@ -65,6 +66,10 @@ sealed class MainOption(
     )
 
     companion object {
-        val ALL_OPTIONS = arrayOf(PremiumStatus, AutoStart, NightMode, Feedback, VersionInfo, About)
+        val ALL_OPTIONS = if (upForGrabs) {
+            arrayOf(AutoStart, NightMode, Feedback, VersionInfo, About)
+        } else {
+            arrayOf(PremiumStatus, AutoStart, NightMode, Feedback, VersionInfo, About)
+        }
     }
 }

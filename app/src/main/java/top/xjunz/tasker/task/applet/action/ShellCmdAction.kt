@@ -10,7 +10,6 @@ import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.applet.action.Action
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.service.uiAutomation
 
 /**
@@ -22,7 +21,7 @@ class ShellCmdAction(private val isFile: Boolean) : Action<String>(VAL_TYPE_TEXT
         check(value != null) {
             "Shell cmd is empty!"
         }
-        val cmd = premiumContext.empty + if (isFile) "sh $value" else value
+        val cmd = if (isFile) "sh $value" else value
         val out = uiAutomation.casted<UiAutomationHidden>().executeShellCommandRwe(cmd)
         try {
             val stdErr = out[2]

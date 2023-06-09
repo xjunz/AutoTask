@@ -14,8 +14,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTextEditorBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.setSelectionToEnd
+import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.textString
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -161,10 +168,12 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
                     R.string.clear_all.str -> {
                         inputBox.text.clear()
                     }
+
                     R.string._default.str -> {
                         inputBox.setText(viewModel.defText)
                         inputBox.setSelectionToEnd()
                     }
+
                     android.R.string.cancel.str -> {
                         dismiss()
                     }
@@ -184,7 +193,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             }
             return@l false
         }
-        binding.cvContainer.isVisible = viewModel.variantType != -1
+        binding.cvContainer.isVisible = viewModel.variantType == VariantType.TEXT_ACTIVITY
         binding.cvContainer.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }

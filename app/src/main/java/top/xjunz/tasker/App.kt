@@ -28,6 +28,8 @@ val isPrivilegedProcess: Boolean get() = !isAppProcess
 
 val app: App get() = requireNotNull(App.instance)
 
+const val upForGrabs = true
+
 class App : Application() {
 
     var updateInfo = MutableLiveData<UpdateInfo>()

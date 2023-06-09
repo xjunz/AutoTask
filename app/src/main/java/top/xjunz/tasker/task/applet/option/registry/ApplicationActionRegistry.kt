@@ -8,10 +8,11 @@ import android.content.ComponentName
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
-import top.xjunz.tasker.engine.applet.action.*
+import top.xjunz.tasker.engine.applet.action.binaryArgValueAction
+import top.xjunz.tasker.engine.applet.action.singleArgAction
+import top.xjunz.tasker.engine.applet.action.singleValueAction
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.service.ensurePremium
-import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.value.VariantType
@@ -60,7 +61,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val launchActivity = appletOption(R.string.launch_activity) {
         singleValueAction<String> {
             ensurePremium()
-            ActivityManagerBridge.startComponent(it + premiumContext.empty)
+            ActivityManagerBridge.startComponent(it)
             true
         }
     }.withValueArgument<String>(R.string.activity, VariantType.TEXT_ACTIVITY)
@@ -68,7 +69,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             ensurePremium()
             val comp = ComponentName.unflattenFromString(it)!!
             PackageManagerBridge.loadLabelOfPackage(comp.packageName)
-                .toString() + premiumContext.delimiter + it.substringAfterLast(premiumContext.delimiter)
+                .toString() + "/" + it.substringAfterLast("/")
         }.premiumOnly()
 
 }

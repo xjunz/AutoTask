@@ -7,9 +7,12 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.accessibilityservice.AccessibilityService
 import android.os.Build
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.action.*
-import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.service.premiumContext
+import top.xjunz.tasker.engine.applet.action.simpleAction
+import top.xjunz.tasker.engine.applet.action.singleValueAction
+import top.xjunz.tasker.ktx.array
+import top.xjunz.tasker.ktx.clickable
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.service.uiAutomation
 import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -75,7 +78,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val takeScreenshot = appletOption(R.string.take_screenshot) {
         simpleAction {
             uiAutomation.performGlobalAction(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) premiumContext.screenShotAction.toInt()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
                 else -1
             )
         }

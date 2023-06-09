@@ -24,6 +24,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     namespace 'top.xjunz.tasker'
+    buildFeatures {
+        aidl true
+    }
 }
 
 dependencies {

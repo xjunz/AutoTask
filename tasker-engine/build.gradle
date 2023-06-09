@@ -29,6 +29,9 @@ android {
         jvmTarget = '1.8'
     }
     namespace 'top.xjunz.tasker.engine'
+    buildFeatures {
+        aidl true
+    }
 }
 
 dependencies {

@@ -8,8 +8,10 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.MeasureSpec
+import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.webkit.WebView
 import androidx.appcompat.app.AlertDialog
@@ -29,6 +31,7 @@ import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
 import top.xjunz.tasker.ui.main.ColorScheme
+import top.xjunz.tasker.upForGrabs
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.formatMinSec
 import top.xjunz.tasker.util.formatTime
@@ -51,13 +54,21 @@ class PurchaseDialog : BaseBottomSheetDialog<DialogPurchaseBinding>() {
 
     private val viewModel by activityViewModels<PurchaseViewModel>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.init()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        if (upForGrabs) {
+            dismiss()
+            return null
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.init()
         initViews()
         observeLiveData()
     }

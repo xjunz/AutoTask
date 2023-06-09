@@ -6,6 +6,7 @@ package top.xjunz.tasker.premium
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import top.xjunz.tasker.upForGrabs
 import x.f
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -80,12 +81,16 @@ object PremiumMixin {
     }
 
     fun loadPremiumFromFileSafely() {
-        val file = File(premiumContextStoragePath)
-        if (file.exists()) {
-            runCatching {
-                deserializeFromString(file.readText())
-            }.onFailure {
-                file.delete()
+        if (upForGrabs) {
+            PREMIUM_CONTEXT = PremiumContext()
+        } else {
+            val file = File(premiumContextStoragePath)
+            if (file.exists()) {
+                runCatching {
+                    deserializeFromString(file.readText())
+                }.onFailure {
+                    file.delete()
+                }
             }
         }
     }

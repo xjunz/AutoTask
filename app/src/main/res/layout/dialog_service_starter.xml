@@ -178,7 +178,5 @@
                 app:icon="@drawable/ic_chevron_right_24px"
                 app:iconGravity="textEnd" />
         </LinearLayout>
-
-
     </LinearLayout>
 </layout>

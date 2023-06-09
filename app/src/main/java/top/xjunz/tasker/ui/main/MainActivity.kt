@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                             .setTextColor(ColorScheme.colorError)
                     }
                 }
+
                 XTask.TYPE_ONESHOT -> {
                     if (!serviceController.isServiceRunning) {
                         ServiceStarterDialog().show(supportFragmentManager)
@@ -224,9 +225,9 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             }
         }
         observeDialog(mainViewModel.serviceBindingError) {
-            if (it is IllegalArgumentException) {
+            if (it is IllegalStateException) {
                 val st = it.stackTraceToString()
-                if (st.contains("already registered")) {
+                if (st.contains("registered")) {
                     makeSimplePromptDialog(
                         title = R.string.tip,
                         msg = R.string.error_automation_already_registered
@@ -252,7 +253,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             mainViewModel.toggleService()
         }
         observe(PremiumMixin.premiumStatusLiveData) {
-            if (it) {
+            if (it && !upForGrabs) {
                 binding.tvTitle.setDrawableEnd(R.drawable.ic_verified_24px)
             } else {
                 binding.tvTitle.setDrawableEnd(null)

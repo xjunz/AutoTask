@@ -47,6 +47,7 @@ import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
+import top.xjunz.tasker.upForGrabs
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
@@ -124,7 +125,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     binding.tvBadge.text += " | " + R.string.format_api_level.format(option.minApiLevel)
                 }
             }
-            if (option.isPremiumOnly) {
+            if (option.isPremiumOnly && !upForGrabs) {
                 binding.tvBadge.isVisible = true
                 if (binding.tvBadge.text.isNullOrEmpty()) {
                     binding.tvBadge.text = R.string.premium.str

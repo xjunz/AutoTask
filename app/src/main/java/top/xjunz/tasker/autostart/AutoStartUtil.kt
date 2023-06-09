@@ -16,7 +16,6 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.service.isPremium
-import top.xjunz.tasker.service.premiumContext
 import top.xjunz.tasker.util.ShizukuUtil
 
 /**
@@ -32,10 +31,7 @@ object AutoStartUtil {
     }
 
     private val myAutoStartComponentName by lazy {
-        ComponentName(
-            BuildConfig.APPLICATION_ID + premiumContext.empty,
-            AutoStarter::class.java.name + premiumContext.empty
-        )
+        ComponentName(BuildConfig.APPLICATION_ID, AutoStarter::class.java.name)
     }
 
     private fun enableShizukuAutoStart() = runCatching {

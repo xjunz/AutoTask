@@ -82,7 +82,7 @@ object TaskStorage {
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun loadPresetTasks(factory: AppletFactory) {
         withContext(Dispatchers.IO) {
-            ZipInputStream(app.assets.open("prextsks")).use {
+            ZipInputStream(app.assets.open("prextsks.zip")).use {
                 var entry = it.nextEntry
                 while (entry != null) {
                     val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory)

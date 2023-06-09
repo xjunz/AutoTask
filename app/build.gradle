@@ -26,14 +26,14 @@ android {
         applicationId "top.xjunz.tasker"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 11
-        versionName "1.1.0"
+        versionCode 12
+        versionName "1.1.1"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters "x86", "arm64-v8a"
+            abiFilters "x86", "arm64-v8a", "x86_64"
         }
     }
 
@@ -52,14 +52,13 @@ android {
     }
     buildFeatures {
         dataBinding true
+        aidl true
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_18
+        targetCompatibility JavaVersion.VERSION_18
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
+
     lintOptions {
         disable "NullSafeMutableLiveData"
     }
@@ -73,7 +72,7 @@ dependencies {
     implementation project(':shared-library')
     implementation project(':ssl')
 
-    def appCenterSdkVersion = '4.4.5'
+    def appCenterSdkVersion = '5.0.1'
     implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
     implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
 
@@ -82,18 +81,18 @@ dependencies {
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     // ktx
     implementation "androidx.core:core-ktx:$ktx_version"
-    implementation 'androidx.activity:activity-ktx:1.7.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.6'
+    implementation 'androidx.activity:activity-ktx:1.7.2'
+    implementation 'androidx.fragment:fragment-ktx:1.6.0'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     // coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
     // ktor
-    def ktor_version = "2.0.2"
+    def ktor_version = '2.3.1'
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     implementation("io.ktor:ktor-client-core:$ktor_version")

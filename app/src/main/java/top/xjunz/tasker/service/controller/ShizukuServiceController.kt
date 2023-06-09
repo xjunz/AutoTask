@@ -110,7 +110,7 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
 
     override fun bindExistingServiceIfExists() {
         if (ShizukuUtil.isShizukuAvailable &&
-            Shizuku.peekUserService(userServiceStandaloneProcessArgs, userServiceConnection)
+            Shizuku.peekUserService(userServiceStandaloneProcessArgs, userServiceConnection) != -1
         ) {
             bindService()
         }
