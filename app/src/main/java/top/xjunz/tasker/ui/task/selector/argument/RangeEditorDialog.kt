@@ -8,13 +8,20 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.View
 import android.widget.EditText
+import androidx.annotation.Keep
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogRangeEditorBinding
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.setDigits
+import top.xjunz.tasker.ktx.setMaxLength
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -52,6 +59,10 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         }
     }
 
+    /**
+     * Keep this method to workaround a R8 issue.
+     */
+    @Keep
     protected open fun Number.toStringOrNull(): String? {
         return toString()
     }

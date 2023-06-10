@@ -26,8 +26,8 @@ android {
         applicationId "top.xjunz.tasker"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 12
-        versionName "1.1.1"
+        versionCode 13
+        versionName "1.1.1r01"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
