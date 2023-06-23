@@ -28,6 +28,14 @@
     public static *** inflate(...);
 }
 
+-keep class top.xjunz.tasker.task.inspector.overlay.FloatingInspectorOverlay{
+ *;
+}
+
+-keep class * extends top.xjunz.tasker.task.inspector.overlay.FloatingInspectorOverlay{
+ *;
+}
+
 -keepclassmembers class * extends top.xjunz.tasker.task.applet.option.registry.AppletOptionRegistry {
     *;
 }
