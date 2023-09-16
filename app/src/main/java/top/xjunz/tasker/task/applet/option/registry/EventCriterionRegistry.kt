@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.runtime.Event
-import top.xjunz.tasker.engine.runtime.Event.*
+import top.xjunz.tasker.engine.runtime.Event.EventType
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.EventFilter
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
@@ -42,17 +42,32 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0003)
     val notificationReceived =
-        eventFilterOption(Event.EVENT_ON_NOTIFICATION_RECEIVED, R.string.on_notification_received)
-            .withResult<NotificationReferent>(R.string.notification_received)
+        eventFilterOption(
+            Event.EVENT_ON_NOTIFICATION_RECEIVED,
+            R.string.on_status_bar_notification_received
+        ).withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
             .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
 
     @AppletOrdinal(0x0004)
+    val toastReceived =
+        eventFilterOption(
+            Event.EVENT_ON_TOAST_RECEIVED,
+            R.string.on_toast_notification_received
+        ).withResult<NotificationReferent>(R.string.notification_received)
+            .withResult<String>(R.string.notification_content)
+            .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
+
+    @AppletOrdinal(0x0005)
     val newWindow = eventFilterOption(Event.EVENT_ON_NEW_WINDOW, R.string.on_new_window)
         .withTitleModifier(R.string.tip_new_window)
 
-   /* @AppletOrdinal(0x0005)
-    val primaryClipChanged =
-        eventFilterOption(Event.EVENT_ON_PRIMARY_CLIP_CHANGED, R.string.on_primary_clip_changed)
-            .withResult<String>(R.string.current_primary_clip_text)*/
+    @AppletOrdinal(0x0006)
+    val timeChanged = eventFilterOption(Event.EVENT_ON_TICK, R.string.on_tik_tok)
+        .withTitleModifier(R.string.tip_on_tik_tok)
+
+    /* @AppletOrdinal(0x0005)
+     val primaryClipChanged =
+         eventFilterOption(Event.EVENT_ON_PRIMARY_CLIP_CHANGED, R.string.on_primary_clip_changed)
+             .withResult<String>(R.string.current_primary_clip_text)*/
 }

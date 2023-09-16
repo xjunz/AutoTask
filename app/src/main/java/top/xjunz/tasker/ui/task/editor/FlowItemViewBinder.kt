@@ -88,6 +88,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                         tvTitle.setTextColor(controlFlowTextTint)
                     }
                 }
+
                 depth == 2 || depth == 1 -> {
                     tvTitle.setTextAppearance(TextAppearance_Material3_TitleMedium)
                     bullet.isVisible = true
@@ -97,6 +98,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                         dividerVertical.isVisible = true
                     }
                 }
+
                 else -> {
                     dividerTop.isVisible = true
                     tvNumber.isVisible = true
@@ -174,6 +176,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             ibAction.isGone = ibAction.tag == null || ((vm.isSelectingReferent || vm.isReadyOnly)
                     && ibAction.tag != ACTION_COLLAPSE
                     && ibAction.tag != ACTION_ENTER)
+                    || (ibAction.tag == ACTION_ADD && applet is Flow && applet.maxSize == 0)
 
             if (!tvTitle.isEnabled) {
                 title = title?.toString()

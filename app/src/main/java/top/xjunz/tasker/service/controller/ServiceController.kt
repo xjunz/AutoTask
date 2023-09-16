@@ -51,7 +51,7 @@ abstract class ServiceController<S : Any> : CoroutineScope {
     interface ServiceStateListener {
         fun onStartBinding()
         fun onError(t: Any?)
-        fun onServiceBound()
+        fun onServiceStarted()
         fun onServiceDisconnected()
     }
 

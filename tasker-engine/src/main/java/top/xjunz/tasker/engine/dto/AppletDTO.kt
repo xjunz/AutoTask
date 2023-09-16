@@ -119,8 +119,8 @@ class AppletDTO(
         }
     }
 
-    fun toApplet(registry: AppletFactory): Applet {
-        val prototype = registry.createAppletById(id)
+    fun toApplet(registry: AppletFactory, compatMode: Boolean): Applet {
+        val prototype = registry.createAppletById(id, compatMode)
         prototype.relation = relation
         prototype.isEnabled = isEnabled
         prototype.isInverted = isInverted
@@ -129,7 +129,7 @@ class AppletDTO(
         prototype.comment = comment
         if (prototype is Flow) {
             elements?.forEach {
-                prototype.add(it.toApplet(registry))
+                prototype.add(it.toApplet(registry, compatMode))
             }
         }
         if (serialized != null) prototype.deserializeValue(serialized)

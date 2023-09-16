@@ -4,7 +4,7 @@
 
 package top.xjunz.tasker.engine.task
 
-import java.util.*
+import java.util.Collections
 
 /**
  * @author xjunz 2022/12/25
@@ -19,6 +19,28 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
 
     protected abstract fun List<XTask>.indexOfTask(identifier: TaskIdentifier): Int
 
+    private var onTaskPausedStateChangedListener: XTask.OnTaskPausedStateChangedListener? = null
+
+    private val globalOnTaskPausedStateChangedListener =
+        XTask.OnTaskPausedStateChangedListener { checksum ->
+            onTaskPausedStateChangedListener?.onTaskPauseStateChanged(checksum)
+        }
+
+    open fun setOnTaskPausedStateChangedListener(listener: XTask.OnTaskPausedStateChangedListener?) {
+        onTaskPausedStateChangedListener = listener
+        tasks.forEach {
+            setOnTaskPauseStateChangedListenerSticky(it)
+        }
+    }
+
+    private fun setOnTaskPauseStateChangedListenerSticky(task: XTask) {
+        if (onTaskPausedStateChangedListener != null) {
+            task.setOnPausedStateChangedListener(globalOnTaskPausedStateChangedListener)
+        } else {
+            task.setOnPausedStateChangedListener(null)
+        }
+    }
+
     fun getEnabledResidentTasks(): List<XTask> {
         return tasks.filter {
             it.isResident
@@ -28,7 +50,7 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
     open fun removeTask(identifier: TaskIdentifier) {
         val index = tasks.indexOfTask(identifier)
         if (index >= 0) {
-            tasks[index].halt()
+            tasks[index].halt(true)
             tasks.removeAt(index)
         }
     }
@@ -39,6 +61,7 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
             "Task [${task.title}] already enabled!"
         }
         tasks.add(task)
+        setOnTaskPauseStateChangedListenerSticky(task)
     }
 
     open fun addOneshotTaskIfAbsent(carrier: TaskCarrier) {
@@ -52,7 +75,7 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
             it.checksum == previousChecksum
         }
         if (task != null) {
-            task.halt()
+            task.halt(true)
             Collections.replaceAll(tasks, task, asTask(updated))
             task.snapshots.clear()
         }
@@ -90,5 +113,10 @@ abstract class TaskManager<TaskIdentifier, TaskCarrier> {
         }?.snapshots?.find {
             it.id == snapshotId
         }?.clearLog()
+    }
+
+    open fun getTaskPauseInfo(identifier: TaskIdentifier): LongArray {
+        val task = requireTask(identifier)
+        return longArrayOf(task.pauseStartTime, task.pauseFor)
     }
 }

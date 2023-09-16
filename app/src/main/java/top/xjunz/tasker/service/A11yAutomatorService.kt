@@ -16,13 +16,19 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import android.os.PowerManager
 import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.MutableLiveData
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.unsupportedOperation
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.bridge.A11yUiAutomatorBridge
 import top.xjunz.tasker.bridge.OverlayToastBridge
 import top.xjunz.tasker.engine.runtime.Event
@@ -81,9 +87,9 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     private val uiAutomation: UiAutomation get() = uiAutomationHidden.casted()
 
-    private val residentTaskScheduler = ResidentTaskScheduler(LocalTaskManager)
+    override val residentTaskScheduler = ResidentTaskScheduler(LocalTaskManager)
 
-    private val oneshotTaskScheduler = OneshotTaskScheduler()
+    override val oneshotTaskScheduler = OneshotTaskScheduler()
 
     private val componentChangeCallbackForInspector by lazy {
         EventDispatcher.Callback {
@@ -104,11 +110,14 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         A11yUiAutomatorBridge(uiAutomation)
     }
 
+    override val looper: Looper get() = mainLooper
+
     override val eventDispatcher = MetaEventDispatcher()
 
-    val a11yEventDispatcher: A11yEventDispatcher by lazy {
+    override val a11yEventDispatcher: A11yEventDispatcher by lazy {
         A11yEventDispatcher(Looper.getMainLooper(), uiAutomatorBridge)
     }
+    override var wakeLock: PowerManager.WakeLock? = null
 
     private val overlayToastBridgeLazy = lazy {
         OverlayToastBridge(Looper.getMainLooper())
@@ -148,7 +157,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
             uiAutomationHidden.connect()
 
             if (!isInspectorMode) {
-                initTaskScheduler()
+                prepareWorkerMode(Preferences.enableWakeLock)
             }
             a11yEventDispatcher.activate(isInspectorMode)
 
@@ -165,13 +174,6 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
         }
     }
 
-    private fun initTaskScheduler() {
-        eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
-        // eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
-        eventDispatcher.addCallback(residentTaskScheduler)
-        eventDispatcher.addCallback(oneshotTaskScheduler)
-    }
-
     fun destroyFloatingInspector() {
         inspector.dismiss()
         stopListeningComponentChanges()
@@ -184,7 +186,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
 
     fun switchToWorkerMode() {
         isInspectorMode = false
-        initTaskScheduler()
+        prepareWorkerMode(Preferences.enableWakeLock)
     }
 
     fun showFloatingInspector(mode: InspectorMode) {
@@ -240,7 +242,7 @@ class A11yAutomatorService : AccessibilityService(), AutomatorService, IUiAutoma
     }
 
     override fun stopOneshotTask(task: XTask) {
-        task.halt()
+        task.halt(true)
     }
 
     override fun onInterrupt() {

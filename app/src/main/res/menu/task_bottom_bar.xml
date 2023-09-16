@@ -16,7 +16,7 @@
 
     <item
         android:id="@+id/item_oneshot_tasks"
-        android:icon="@drawable/ic_timer_24px"
+        android:icon="@drawable/ic_baseline_send_24"
         android:title="@string/oneshot_task" />
 
     <item

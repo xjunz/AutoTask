@@ -33,6 +33,10 @@ class ClipboardEventDispatcher : EventDispatcher(), ClipboardManager.OnPrimaryCl
         clipboardManager.removePrimaryClipChangedListener(this)
     }
 
+    override fun onRegistered() {
+
+    }
+
     private fun ClipData.getOrNull(index: Int): ClipData.Item? {
         if (itemCount - 1 >= index) {
             return getItemAt(index)

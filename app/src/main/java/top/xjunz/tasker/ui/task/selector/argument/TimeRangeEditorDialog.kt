@@ -45,7 +45,9 @@ class TimeRangeEditorDialog : RangeEditorDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvSubtitleMin.text = R.string.start_time.str
-        binding.tvSubtitleMax.text = R.string.end_time.str
+        if (!isUnaryRange) {
+            binding.tvSubtitleMin.text = R.string.start_time.str
+            binding.tvSubtitleMax.text = R.string.end_time.str
+        }
     }
 }

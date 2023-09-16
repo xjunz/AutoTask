@@ -18,7 +18,14 @@ import com.google.android.material.textfield.TextInputLayout
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogBitsValueEditorBinding
 import top.xjunz.tasker.databinding.ItemInputLayoutBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.array
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.setDigits
+import top.xjunz.tasker.ktx.setEntries
+import top.xjunz.tasker.ktx.setMaxLength
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.value.BitwiseValueComposer
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -55,7 +62,7 @@ class BitsValueEditorDialog : BaseDialogFragment<DialogBitsValueEditorBinding>()
 
         val isNullable = BitwiseValueComposer.isNullable(rawDescriptor)
 
-        val maxValue = 1 shl BitwiseValueComposer.getBitCount(rawDescriptor)
+        val maxValue = (1 shl BitwiseValueComposer.getBitCount(rawDescriptor)) -1
 
         val type = BitwiseValueComposer.getType(rawDescriptor)
 

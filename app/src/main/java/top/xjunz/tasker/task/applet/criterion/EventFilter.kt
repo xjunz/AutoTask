@@ -32,14 +32,17 @@ class EventFilter(eventType: Int) : Applet() {
         } else {
             when (hit.type) {
                 Event.EVENT_ON_NOTIFICATION_RECEIVED -> {
-                    NotificationReferent(
-                        ComponentInfoWrapper.wrap(hit.componentInfo),
-                        hit.getExtra(NotificationReferent.EXTRA_IS_TOAST)
-                    ).asResult()
+                    NotificationReferent(ComponentInfoWrapper.wrap(hit.componentInfo)).asResult()
                 }
+
                 Event.EVENT_ON_PRIMARY_CLIP_CHANGED -> {
                     AppletResult.succeeded(hit.getExtra(ClipboardEventDispatcher.EXTRA_PRIMARY_CLIP_TEXT))
                 }
+
+                Event.EVENT_ON_TICK -> {
+                    AppletResult.EMPTY_SUCCESS
+                }
+
                 else -> ComponentInfoWrapper.wrap(hit.componentInfo).asResult()
             }
         }

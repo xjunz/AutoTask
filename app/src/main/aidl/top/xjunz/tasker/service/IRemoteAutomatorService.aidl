@@ -13,7 +13,7 @@ import android.os.ResultReceiver;
 
 interface IRemoteAutomatorService {
 
-    void connect(in ResultReceiver callback) = 1;
+    void connect(boolean acquireWakeLock, in ResultReceiver callback) = 1;
 
     long getStartTimestamp() = 2;
 
@@ -32,6 +32,10 @@ interface IRemoteAutomatorService {
     void setPremiumContextStoragePath(in String path) = 13;
 
     void loadPremiumContext() = 14;
+
+    void acquireWakeLock() = 15;
+
+    void releaseWakeLock() = 16;
 
     oneway void destroy() = 16777114; // Destroy method defined by Shizuku server
 

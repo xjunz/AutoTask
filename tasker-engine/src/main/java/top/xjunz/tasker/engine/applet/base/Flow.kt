@@ -100,9 +100,6 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
     protected open fun staticCheckMyself(): Int {
         // Code layer checks: find bugs
         check(size <= maxSize)
-        if (requiredSize != -1) {
-            check(isEnabled)
-        }
         // User layer checks: find improper operations
         if (requiredSize != 0 && isEmpty()) {
             return StaticError.ERR_FLOW_NO_ELEMENT

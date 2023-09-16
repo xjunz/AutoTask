@@ -15,6 +15,10 @@ object VariantType {
 
     const val BITS_SCROLL = 2 shl 16 or Applet.VAL_TYPE_LONG
 
+    const val BITS_LONG_DURATION = 3 shl 16 or Applet.VAL_TYPE_LONG
+
+    const val LONG_TIME = 4 shl 16 or Applet.VAL_TYPE_LONG
+
     const val INT_COORDINATE = 1 shl 16 or Applet.VAL_TYPE_INT
 
     const val INT_INTERVAL = 2 shl 16 or Applet.VAL_TYPE_INT
@@ -24,6 +28,8 @@ object VariantType {
     const val INT_RANGE = 4 shl 16 or Applet.VAL_TYPE_INT
 
     const val INT_ROTATION = 5 shl 16 or Applet.VAL_TYPE_INT
+
+    const val INT_TIME_IN_DAY = 6 shl 16 or Applet.VAL_TYPE_INT
 
     const val TEXT_PACKAGE_NAME = 1 shl 16 or Applet.VAL_TYPE_TEXT
 

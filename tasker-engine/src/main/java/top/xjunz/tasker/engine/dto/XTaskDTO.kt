@@ -33,9 +33,9 @@ class XTaskDTO(
         return metadata.checksum == calculateChecksum()
     }
 
-    fun toXTask(factory: AppletFactory): XTask {
+    fun toXTask(factory: AppletFactory, compatMode: Boolean): XTask {
         val task = XTask()
-        task.flow = flow.toApplet(factory) as RootFlow
+        task.flow = flow.toApplet(factory, compatMode) as RootFlow
         task.metadata = metadata
         return task
     }

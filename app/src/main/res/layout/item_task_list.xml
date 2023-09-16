@@ -14,15 +14,26 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp">
 
+        <ImageView
+            android:id="@+id/iv_task_type"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/task_name"
+            app:layout_constraintBottom_toBottomOf="@id/tv_task_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_task_name"
+            app:tint="?colorPrimary"
+            tools:src="@drawable/ic_hourglass_bottom_24px" />
+
         <TextView
             android:id="@+id/tv_task_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="4dp"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="?colorPrimary"
-            app:layout_constraintEnd_toStartOf="@+id/btn_add"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_task_type"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/preload_tasks" />
 
@@ -31,11 +42,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
-            android:maxLines="3"
-            app:layout_constraintEnd_toEndOf="@+id/tv_task_name"
+            app:layout_constraintEnd_toStartOf="@+id/btn_add"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_task_name"
+            tools:maxLines="3"
             tools:text="@tools:sample/lorem/random" />
 
         <com.google.android.material.button.MaterialButton
@@ -46,8 +58,8 @@
             android:insetTop="6dp"
             android:insetBottom="6dp"
             android:text="@string/_import"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_task_desc"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/tv_task_desc" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -18,7 +18,14 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskListBinding
 import top.xjunz.tasker.databinding.ItemTaskListBinding
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.applySystemInsets
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.invokeOnError
+import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.observeTransient
+import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.toastUnexpectedError
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
@@ -36,14 +43,26 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
 
         var preloadTaskMode = false
 
+        var exampleTaskMode = false
+
         var taskList = MutableLiveData<List<XTask>>(emptyList())
 
-        fun preloadTasks() {
+        fun loadExampleTasks() {
+            if (TaskStorage.exampleTaskLoaded) {
+                taskList.value = TaskStorage.getExampleTasks()
+            } else viewModelScope.async {
+                TaskStorage.loadExampleTasks(AppletOptionFactory)
+                taskList.value = TaskStorage.getExampleTasks()
+            }.invokeOnError {
+                toastUnexpectedError(it)
+            }
+        }
+
+        fun loadPresetTasks() {
             if (TaskStorage.presetTaskLoaded) {
                 taskList.value = TaskStorage.getPreloadTasks()
             } else viewModelScope.async {
                 TaskStorage.loadPresetTasks(AppletOptionFactory)
-                TaskStorage.presetTaskLoaded = true
                 taskList.value = TaskStorage.getPreloadTasks()
             }.invokeOnError {
                 toastUnexpectedError(it)
@@ -59,7 +78,7 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
         inlineAdapter(viewModel.taskList.require(), ItemTaskListBinding::class.java, {
             binding.btnAdd.setNoDoubleClickListener {
                 parentViewModel.requestAddNewTask.value =
-                    viewModel.taskList.require()[adapterPosition]
+                    viewModel.taskList.require()[adapterPosition].clone(AppletOptionFactory)
             }
         }) { binding, _, task ->
             binding.btnAdd.isEnabled = !TaskStorage.getAllTasks().contains(task)
@@ -70,6 +89,11 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
             }
             binding.tvTaskName.text = task.metadata.title
             binding.tvTaskDesc.text = task.metadata.spannedDescription
+            if (task.isResident) {
+                binding.ivTaskType.setImageResource(R.drawable.ic_hourglass_bottom_24px)
+            } else if (task.isOneshot) {
+                binding.ivTaskType.setImageResource(R.drawable.ic_baseline_send_24)
+            }
         }
     }
 
@@ -77,7 +101,9 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
         super.onViewCreated(view, savedInstanceState)
         binding.tvTitle.text = viewModel.title
         if (viewModel.preloadTaskMode) {
-            viewModel.preloadTasks()
+            viewModel.loadPresetTasks()
+        } else if (viewModel.exampleTaskMode) {
+            viewModel.loadExampleTasks()
         }
         binding.rvTaskList.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
@@ -85,6 +111,7 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
         observe(viewModel.taskList) {
             if (it.isNotEmpty()) {
                 binding.rvTaskList.adapter = adapter
+                binding.tvTitle.append("（${it.size}）")
             }
         }
         observeTransient(parentViewModel.onNewTaskAdded) {
@@ -95,6 +122,11 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
     fun setPreloadTaskMode() = doWhenCreated {
         viewModel.preloadTaskMode = true
         viewModel.title = R.string.preload_tasks.text
+    }
+
+    fun setExampleTaskMode() = doWhenCreated {
+        viewModel.exampleTaskMode = true
+        viewModel.title = R.string.example_tasks.text
     }
 
     fun setTitle(title: CharSequence?) = doWhenCreated {

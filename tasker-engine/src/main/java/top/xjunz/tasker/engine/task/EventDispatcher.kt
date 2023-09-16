@@ -17,6 +17,8 @@ abstract class EventDispatcher {
 
     abstract fun destroy()
 
+    abstract fun onRegistered()
+
     open fun addCallback(callback: Callback) {
         callbacks.add(callback)
     }

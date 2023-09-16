@@ -24,7 +24,7 @@ object A11yAutomatorServiceController : ServiceController<A11yAutomatorService>(
 
     private val statusObserver = Observer<Boolean> {
         if (it) {
-            listener?.onServiceBound()
+            listener?.onServiceStarted()
         } else {
             listener?.onServiceDisconnected()
         }

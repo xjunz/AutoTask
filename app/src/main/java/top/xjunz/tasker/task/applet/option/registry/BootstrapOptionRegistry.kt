@@ -7,11 +7,26 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.view.accessibility.AccessibilityNodeInfo
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Anyway
+import top.xjunz.tasker.engine.applet.base.ContainerFlow
+import top.xjunz.tasker.engine.applet.base.ControlFlow
+import top.xjunz.tasker.engine.applet.base.Do
+import top.xjunz.tasker.engine.applet.base.Else
+import top.xjunz.tasker.engine.applet.base.ElseIf
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.applet.base.Then
+import top.xjunz.tasker.engine.applet.base.WaitFor
+import top.xjunz.tasker.engine.applet.base.WaitUntil
+import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.flow.*
+import top.xjunz.tasker.task.applet.flow.ElseStopship
+import top.xjunz.tasker.task.applet.flow.PhantomFlow
+import top.xjunz.tasker.task.applet.flow.PreloadFlow
+import top.xjunz.tasker.task.applet.flow.TimeFlow
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantType
@@ -60,11 +75,23 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         return when (flow) {
             is When -> if (before) emptyArray()
             else arrayOf(ifFlow, doFlow, waitUntilFlow, waitForFlow)
-            is If -> if (before) emptyArray() else arrayOf(doFlow, elseFlow)
+
+            is If -> if (before) emptyArray() else arrayOf(doFlow, elseFlow, elseStopshipFlow)
             is Else -> if (before) emptyArray()
-            else arrayOf(ifFlow, waitUntilFlow, waitForFlow, anywayFlow)
+            else arrayOf(thenFlow, ifFlow, waitUntilFlow, waitForFlow, anywayFlow)
+
             is Do -> if (before) emptyArray()
-            else arrayOf(ifFlow, elseIfFlow, elseFlow, anywayFlow, waitForFlow, waitUntilFlow)
+            else arrayOf(
+                ifFlow,
+                elseIfFlow,
+                elseFlow,
+                elseStopshipFlow,
+                thenFlow,
+                anywayFlow,
+                waitForFlow,
+                waitUntilFlow
+            )
+
             else -> illegalArgument("control flow", flow)
         }
     }
@@ -78,7 +105,6 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             uiObjectFlows,
             textCriteria,
             timeCriteria,
-            notificationCriteria,
             globalCriteria
         )
     }
@@ -97,7 +123,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     fun getRegistryOptions(flow: Flow): Array<AppletOption> {
         return when (flow) {
-            is When -> arrayOf(eventCriteria)
+            is When, is WaitFor -> arrayOf(eventCriteria)
 
             is If -> criterionFlowOptions
 
@@ -155,6 +181,12 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x000A)
     val anywayFlow = flowOption<Anyway>(R.string.anyway)
 
+    @AppletOrdinal(0x000B)
+    val elseStopshipFlow = flowOption<ElseStopship>(R.string.else_stopship)
+
+    @AppletOrdinal(0x000C)
+    val thenFlow = flowOption<Then>(R.string.then)
+
     @AppletOrdinal(0x0010)
     val eventCriteria = flowOptionWithId<PhantomFlow>(ID_EVENT_FILTER_REGISTRY, R.string.event)
 
@@ -176,11 +208,6 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x0015)
     val textCriteria = flowOptionWithId<PhantomFlow>(
         ID_TEXT_CRITERION_REGISTRY, R.string.text_criteria
-    )
-
-    @AppletOrdinal(0x0016)
-    val notificationCriteria = flowOptionWithId<PhantomFlow>(
-        ID_NOTIFICATION_CRITERION_REGISTRY, R.string.notification_info
     )
 
     @AppletOrdinal(0x0020)

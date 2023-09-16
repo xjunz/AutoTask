@@ -19,6 +19,8 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
         return TaskStorage.getAllTasks().filter { it.isResident }
     }
 
+    override val index: Int = 1
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTransient(viewModel.onNewTaskAdded) {
@@ -29,6 +31,7 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
             taskList.add(it)
             if (taskList.size == 1) togglePlaceholder(false)
             adapter.notifyItemInserted(taskList.lastIndex)
+            notifyBadgeNumberChanged()
         }
         observeTransient(viewModel.onTaskToggled) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)

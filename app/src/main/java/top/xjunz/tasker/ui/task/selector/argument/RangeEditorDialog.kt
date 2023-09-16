@@ -9,6 +9,7 @@ import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import androidx.annotation.Keep
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import top.xjunz.shared.utils.illegalArgument
@@ -35,6 +36,8 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
     private class InnerViewModel : ViewModel() {
 
+        var isUnaryRange: Boolean = false
+
         var type: Int = Applet.VAL_TYPE_INT
 
         var variantType: Int = -1
@@ -45,10 +48,14 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
 
         var rangeEnd: Number? = null
 
+        var unarySubtitle: CharSequence? = null
+
         lateinit var onCompletion: (start: Number?, end: Number?) -> Unit
     }
 
     private val viewModel by viewModels<InnerViewModel>()
+
+    protected val isUnaryRange get() = viewModel.isUnaryRange
 
     protected open fun String.toNumberOrNull(): Number? {
         return when (viewModel.type) {
@@ -82,9 +89,11 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
                 et.inputType = InputType.TYPE_CLASS_NUMBER
                 et.setDigits("0123456789")
             }
+
             Applet.VAL_TYPE_FLOAT -> {
                 et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             }
+
             else -> illegalArgument("number type", viewModel.type)
         }
         if (viewModel.variantType == VariantType.INT_RANGE) {
@@ -105,12 +114,16 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
             return true
         }
         if (min == null && max == null) {
-            toastAndShake(
-                R.string.format_error_no_limit.format(
-                    binding.tvSubtitleMin.text,
-                    binding.tvSubtitleMax.text
+            if (viewModel.isUnaryRange) {
+                toastAndShake(R.string.error_empty_input)
+            } else {
+                toastAndShake(
+                    R.string.format_error_no_limit.format(
+                        binding.tvSubtitleMin.text,
+                        binding.tvSubtitleMax.text
+                    )
                 )
-            )
+            }
             return true
         }
         if (min != null && max != null && compare(max, min) < 0) {
@@ -139,18 +152,27 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         }
         binding.btnComplete.setNoDoubleClickListener {
             val min: Number? = binding.etMinimum.textString.toNumberOrNull()
+            if (viewModel.isUnaryRange) {
+                binding.etMaximum.setText(binding.etMinimum.text)
+            }
             val max: Number? = binding.etMaximum.textString.toNumberOrNull()
             if (!hasError(min, max)) {
                 viewModel.onCompletion(min, max)
                 dismiss()
             }
         }
-        configEditText(binding.etMaximum)
+
         configEditText(binding.etMinimum)
+        configEditText(binding.etMaximum)
 
         if (savedInstanceState == null) {
             binding.etMinimum.setText(viewModel.rangeStart?.toStringOrNull())
             binding.etMaximum.setText(viewModel.rangeEnd?.toStringOrNull())
+        }
+
+        if (viewModel.isUnaryRange) {
+            binding.containerMaximum.isVisible = false
+            binding.tvSubtitleMin.text = viewModel.unarySubtitle
         }
     }
 
@@ -162,9 +184,20 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
         viewModel.title = title
     }
 
-    fun setType(type: Int, variantType: Int = -1): RangeEditorDialog = doWhenCreated {
+    fun setType(
+        type: Int,
+        variantType: Int = -1
+    ): RangeEditorDialog = doWhenCreated {
         viewModel.type = type
         viewModel.variantType = variantType
+    }
+
+    fun asUnary() = doWhenCreated {
+        viewModel.isUnaryRange = true
+    }
+
+    fun setUnarySubtitle(subtitle: CharSequence) = doWhenCreated {
+        viewModel.unarySubtitle = subtitle
     }
 
     fun setRange(start: Number?, end: Number?, defStart: Number? = null, defEnd: Number? = null) =
@@ -176,5 +209,4 @@ open class RangeEditorDialog : BaseDialogFragment<DialogRangeEditorBinding>() {
                 viewModel.rangeEnd = defEnd
             }
         }
-
 }

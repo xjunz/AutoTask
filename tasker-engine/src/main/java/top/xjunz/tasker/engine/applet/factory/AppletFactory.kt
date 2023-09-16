@@ -11,6 +11,5 @@ import top.xjunz.tasker.engine.applet.base.Applet
  */
 interface AppletFactory {
 
-    fun createAppletById(id: Int): Applet
-
+    fun createAppletById(id: Int, compatMode: Boolean): Applet
 }

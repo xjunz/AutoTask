@@ -67,6 +67,13 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
 
     private lateinit var fabBehaviour: HideBottomViewOnScrollBehavior<View>
 
+    private val bottomItemIds
+        get() = intArrayOf(
+            R.id.item_running_tasks,
+            R.id.item_resident_tasks,
+            R.id.item_oneshot_tasks
+        )
+
     private val viewPagerAdapter by lazy {
         object : FragmentStateAdapter(this) {
 
@@ -204,8 +211,13 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         }
         observeTransient(viewModel.onNewTaskAdded) {
             when (it.metadata.taskType) {
-                XTask.TYPE_ONESHOT -> binding.viewPager.currentItem = 2
-                XTask.TYPE_RESIDENT -> binding.viewPager.currentItem = 1
+                XTask.TYPE_ONESHOT -> {
+                    binding.viewPager.currentItem = 2
+                }
+
+                XTask.TYPE_RESIDENT -> {
+                    binding.viewPager.currentItem = 1
+                }
             }
         }
         observeTransient(viewModel.requestAddNewTask) {
@@ -219,23 +231,14 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             if (it) {
                 binding.btnServiceControl.setText(R.string.stop_service)
                 binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_stop_24)
+                viewModel.listenTaskPauseStateChanges()
             } else {
                 binding.btnServiceControl.setText(R.string.start_service)
                 binding.btnServiceControl.setIconResource(R.drawable.ic_baseline_play_arrow_24)
             }
         }
         observeDialog(mainViewModel.serviceBindingError) {
-            if (it is IllegalStateException) {
-                val st = it.stackTraceToString()
-                if (st.contains("registered")) {
-                    makeSimplePromptDialog(
-                        title = R.string.tip,
-                        msg = R.string.error_automation_already_registered
-                    ).show()
-                } else {
-                    showErrorDialog(st)
-                }
-            } else if (it is TimeoutException) {
+            if (it is TimeoutException) {
                 makeSimplePromptDialog(msg = R.string.prompt_shizuku_time_out).setTitle(R.string.error_occurred)
                     .setNegativeButton(R.string.launch_shizuku_manager) { _, _ ->
                         ShizukuUtil.launchShizukuManager()
@@ -244,7 +247,14 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                     }.show()
             } else {
                 val error = if (it is Throwable) it.stackTraceToString() else it.toString()
-                showErrorDialog(error)
+                if (error.contains("registered")) {
+                    makeSimplePromptDialog(
+                        title = R.string.tip,
+                        msg = R.string.error_automation_already_registered
+                    ).show()
+                } else {
+                    showErrorDialog(error)
+                }
             }
         }
         observeDangerousConfirmation(
@@ -272,6 +282,11 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                     .setPositiveButton(R.string.download) { _, _ ->
                         viewUrlSafely("https://spark.appc02.com/tasker")
                     }.setNegativeButton(android.R.string.cancel, null).show()
+            }
+        }
+        mainViewModel.taskNumbers.forEachIndexed { index, ld ->
+            observeNotNull(ld) {
+                binding.bottomBar.getOrCreateBadge(bottomItemIds[index]).number = it
             }
         }
     }
@@ -318,14 +333,22 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         }
         fabBehaviour =
             ((binding.fabAction.layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior<View>)
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        binding.viewPager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                binding.bottomBar.selectedItemId = binding.bottomBar.menu.getItem(position).itemId
+                binding.bottomBar.selectedItemId =
+                    binding.bottomBar.menu.getItem(position).itemId
                 ((binding.bottomBar.layoutParams as CoordinatorLayout.LayoutParams).behavior
-                        as HideBottomViewOnScrollBehavior<View>).slideUp(binding.bottomBar, true)
+                        as HideBottomViewOnScrollBehavior<View>).slideUp(
+                    binding.bottomBar,
+                    true
+                )
                 fabBehaviour.slideUp(binding.fabAction, true)
                 binding.appBar.setLiftOnScrollTargetView(scrollTargets[position]?.getScrollTarget())
+                for (i in 0..bottomItemIds.lastIndex) {
+                    binding.bottomBar.getOrCreateBadge(bottomItemIds[i]).isVisible = i == position
+                }
             }
         })
     }

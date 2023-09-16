@@ -14,7 +14,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime.Companion.obtainTaskRuntime
 import top.xjunz.tasker.engine.task.EventDispatcher
 import top.xjunz.tasker.engine.task.TaskScheduler
 import top.xjunz.tasker.engine.task.XTask
-import java.util.*
+import java.util.Collections
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -26,8 +26,8 @@ class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
 
     private var currentActiveTask: XTask? = null
 
-    override fun haltAll() {
-        currentActiveTask?.halt()
+    override fun suppressAll() {
+        currentActiveTask?.halt(false)
     }
 
     override val coroutineContext: CoroutineContext =
@@ -40,7 +40,7 @@ class OneshotTaskScheduler : TaskScheduler<Unit>(), EventDispatcher.Callback {
                 "Unsupported task type!"
             }
             launch {
-                task.setListener(listener)
+                task.setStateListener(listener)
                 currentActiveTask = task
                 task.launch(obtainTaskRuntime(task))
                 currentActiveTask = null

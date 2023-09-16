@@ -7,7 +7,6 @@ package top.xjunz.tasker.task.inspector
 import android.graphics.Rect
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
-import android.webkit.WebView
 import android.widget.Button
 import android.widget.ImageView
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
@@ -39,7 +38,7 @@ class StableNodeInfo constructor(val source: AccessibilityNodeInfo) {
                 // This may happen
                 if (child.className == null) continue
                 // Skip WebView
-                if (child.className == WebView::class.java.name) continue
+               // if (child.className == WebView::class.java.name) continue
                 val current = child.freeze()
                 current.parent = node
                 current.index = children.size

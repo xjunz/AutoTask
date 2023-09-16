@@ -63,16 +63,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     private val handlerThread = HandlerThread("ShizukuAutomatorThread")
 
-    private val looper get() = handlerThread.looper
-
     private val uiAutomation: UiAutomation by lazy {
         uiAutomationHidden.casted()
-    }
-
-    private val residentTaskScheduler = ResidentTaskScheduler(PrivilegedTaskManager)
-
-    private val oneshotTaskScheduler by lazy {
-        OneshotTaskScheduler()
     }
 
     private var startTimestamp: Long = -1
@@ -80,13 +72,23 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
     @Local
     private lateinit var delegate: IRemoteAutomatorService
 
-    private val a11yEventDispatcher by lazy {
+    override val looper: Looper get() = handlerThread.looper
+
+    override val a11yEventDispatcher by lazy {
         A11yEventDispatcher(looper, uiAutomatorBridge)
     }
 
     override val overlayToastBridge: OverlayToastBridge by lazy {
         OverlayToastBridge(looper)
     }
+
+    override val residentTaskScheduler = ResidentTaskScheduler(PrivilegedTaskManager)
+
+    override val oneshotTaskScheduler by lazy {
+        OneshotTaskScheduler()
+    }
+
+    override var wakeLock: PowerManager.WakeLock? = null
 
     /**
      * This constructor will be called by ShizukuServer, keep it!
@@ -172,7 +174,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
 
     @Privileged
     override fun stopOneshotTask(id: Long) {
-        PrivilegedTaskManager.requireTask(id).halt()
+        PrivilegedTaskManager.requireTask(id).halt(true)
     }
 
     @Local
@@ -180,11 +182,27 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         delegate.stopOneshotTask(task.checksum)
     }
 
+    override fun acquireWakeLock() {
+        if (isPrivilegedProcess) {
+            super.acquireWakeLock()
+        } else {
+            delegate.acquireWakeLock()
+        }
+    }
+
+    override fun releaseWakeLock() {
+        if (isPrivilegedProcess) {
+            super.releaseWakeLock()
+        } else {
+            delegate.releaseWakeLock()
+        }
+    }
+
     override fun isConnected(): Boolean {
         return startTimestamp != -1L
     }
 
-    override fun connect(callback: ResultReceiver) {
+    override fun connect(acquireWakeLock: Boolean, callback: ResultReceiver) {
         Binder.clearCallingIdentity()
         try {
             uiAutomationHidden = UiAutomationHidden(looper, UiAutomationConnection())
@@ -198,7 +216,7 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
             Handler(looper).post {
                 try {
                     AppletOptionFactory.preloadIfNeeded()
-                    initEventDispatcher()
+                    prepareWorkerMode(acquireWakeLock)
                     startTimestamp = System.currentTimeMillis()
                     callback.send(0, null)
                 } catch (t: Throwable) {
@@ -211,11 +229,8 @@ class ShizukuAutomatorService : IRemoteAutomatorService.Stub, AutomatorService {
         }
     }
 
-    private fun initEventDispatcher() {
-        eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
-        //eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
-        eventDispatcher.addCallback(residentTaskScheduler)
-        eventDispatcher.addCallback(oneshotTaskScheduler)
+    override fun initEventDispatcher() {
+        super.initEventDispatcher()
         a11yEventDispatcher.activate(false)
     }
 

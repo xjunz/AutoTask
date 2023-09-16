@@ -7,6 +7,8 @@ package top.xjunz.tasker.task.applet.option.registry
 import android.accessibilityservice.AccessibilityService
 import android.os.Build
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.PowerManagerBridge
+import top.xjunz.tasker.engine.applet.action.pureAction
 import top.xjunz.tasker.engine.applet.action.simpleAction
 import top.xjunz.tasker.engine.applet.action.singleValueAction
 import top.xjunz.tasker.ktx.array
@@ -96,4 +98,11 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
                 AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE, applet)
             })
         }.descAsTitle()
+
+    @AppletOrdinal(0x0008)
+    val wakeUpScreen = appletOption(R.string.wake_up_screen) {
+        pureAction {
+            PowerManagerBridge.wakeUpScreen()
+        }
+    }
 }

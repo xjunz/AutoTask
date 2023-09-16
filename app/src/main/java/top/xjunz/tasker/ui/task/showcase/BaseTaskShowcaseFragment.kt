@@ -28,9 +28,10 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.main.ColorScheme
-import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
+import top.xjunz.tasker.ui.main.MainViewModel
 import top.xjunz.tasker.ui.main.ScrollTarget
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
+import top.xjunz.tasker.util.formatTime
 import java.util.*
 
 /**
@@ -43,11 +44,15 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
 
     protected val viewModel by activityViewModels<TaskShowcaseViewModel>()
 
+    private val mvm by activityViewModels<MainViewModel>()
+
     protected val taskList = mutableListOf<XTask>()
 
     protected val adapter = TaskAdapter()
 
     abstract fun initTaskList(): List<XTask>
+
+    abstract val index: Int
 
     @SuppressLint("ClickableViewAccessibility")
     protected inner class TaskViewHolder(val binding: ItemTaskShowcaseBinding) :
@@ -149,6 +154,20 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             if (task.isOneshot) {
                 b.ibSnapshot.isVisible = true
             }
+            if (task.isEnabled) {
+                val pauseInfo = LocalTaskManager.getTaskPauseInfo(task)
+                val start = pauseInfo[0]
+                val duration = pauseInfo[1]
+                if (start != -1L) {
+                    b.tvLabel.isVisible = true
+                    b.tvLabel.text =
+                        R.string.format_pause_until.format((start + duration).formatTime())
+                } else {
+                    b.tvLabel.isVisible = false
+                }
+            } else {
+                b.tvLabel.isVisible = false
+            }
         }
 
         override fun getItemCount() = taskList.size
@@ -164,10 +183,13 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         return if (isAdded) binding.rvTaskList else null
     }
 
+    protected fun notifyBadgeNumberChanged() {
+        mvm.taskNumbers[index].value = taskList.size
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvTaskList)
-        val mvm = peekMainViewModel()
         observe(mvm.appbarHeight) {
             binding.rvTaskList.updatePadding(top = it)
         }
@@ -177,6 +199,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
         observe(mvm.allTaskLoaded) {
             taskList.clear()
             taskList.addAll(initTaskList())
+            notifyBadgeNumberChanged()
             if (mvm.paddingBottom.isNull()) {
                 binding.rvTaskList.doOnPreDraw {
                     binding.rvTaskList.beginAutoTransition(
@@ -198,11 +221,22 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                 taskList.removeAt(index)
                 adapter.notifyItemRemoved(index)
                 if (taskList.isEmpty()) togglePlaceholder(true)
+                notifyBadgeNumberChanged()
             }
         }
         observeTransient(viewModel.onTaskUpdated) {
             adapter.notifyItemChanged(taskList.indexOf(it), true)
         }
+        observeTransient(viewModel.onTaskPauseStateChanged) { cs ->
+            val index = taskList.indexOfFirst { it.checksum == cs }
+            if (index >= 0) {
+                adapter.notifyItemChanged(index)
+            }
+        }
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        LocalTaskManager.setOnTaskPausedStateChangedListener(null)
     }
 }

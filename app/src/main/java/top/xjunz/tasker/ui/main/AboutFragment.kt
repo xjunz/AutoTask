@@ -24,9 +24,11 @@ import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
+import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.service.isPremium
+import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
@@ -90,6 +92,9 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
     }
 
     private fun onOptionClicked(view: View, option: MainOption) {
+        fun updateOption() {
+            adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+        }
         when (option) {
             MainOption.Feedback -> {
                 val menu = PopupMenu(requireContext(), view, Gravity.END)
@@ -99,6 +104,7 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                         R.id.item_feedback_email -> {
                             Feedbacks.feedbackByEmail(null)
                         }
+
                         R.id.item_feedback_group -> {
                             requireContext().viewUrlSafely("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=258644994&card_type=group&source=qrcode")
                         }
@@ -107,9 +113,11 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                 }
                 menu.show()
             }
+
             MainOption.About -> {
                 /* no-op */
             }
+
             MainOption.NightMode -> {
                 val popupMenu = PopupMenu(requireContext(), view, Gravity.END)
                 popupMenu.inflate(R.menu.night_modes)
@@ -118,12 +126,15 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                         R.id.item_turn_on -> {
                             AppCompatDelegate.MODE_NIGHT_YES
                         }
+
                         R.id.item_turn_off -> {
                             AppCompatDelegate.MODE_NIGHT_NO
                         }
+
                         R.id.item_follow_system -> {
                             AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                         }
+
                         else -> illegalArgument()
                     }
                     if (Preferences.nightMode != mode) {
@@ -132,12 +143,13 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                             floatingInspector.viewModel.onConfigurationChanged()
                         }
                         Preferences.nightMode = mode
-                        adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+                        updateOption()
                     }
                     return@setOnMenuItemClickListener true
                 }
                 popupMenu.show()
             }
+
             MainOption.PremiumStatus -> PurchaseDialog().show(childFragmentManager)
             MainOption.VersionInfo -> VersionInfoDialog().show(childFragmentManager)
             MainOption.AutoStart -> {
@@ -145,9 +157,22 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                     showPurchaseDialog(R.string.tip_auto_start_need_premium)
                 } else {
                     AutoStartUtil.toggleAutoStart(!AutoStartUtil.isAutoStartEnabled)
-                    adapter.notifyItemChanged(MainOption.ALL_OPTIONS.indexOf(option))
+                    updateOption()
                 }
             }
+
+            MainOption.WakeLock -> {
+                Preferences.enableWakeLock = !Preferences.enableWakeLock
+                if (serviceController.isServiceRunning) {
+                    if (Preferences.enableWakeLock) {
+                        currentService.acquireWakeLock()
+                    } else {
+                        currentService.releaseWakeLock()
+                    }
+                }
+                updateOption()
+            }
+
         }
     }
 

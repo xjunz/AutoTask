@@ -100,6 +100,12 @@
         <item>向右</item>
         <item>向下</item>
     </string-array>
+    <string-array name="long_duration_units">
+        <item>@string/day</item>
+        <item>@string/hour</item>
+        <item>@string/minute</item>
+        <item>@string/second</item>
+    </string-array>
     <string-array name="rotations">
         <item>0°</item>
         <item>90°</item>

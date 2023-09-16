@@ -41,6 +41,20 @@ sealed class MainOption(
             }
         }, R.string.desc_auto_start)
 
+    object WakeLock :
+        MainOption(
+            R.string.wake_lock,
+            R.drawable.baseline_lock_24,
+            desc = {
+                if (Preferences.enableWakeLock) {
+                    R.string.enabled
+                } else {
+                    R.string.not_is_enabled
+                }
+            },
+            longDesc = R.string.tip_wake_lock
+        )
+
     object NightMode : MainOption(R.string.night_mode, R.drawable.ic_nights_stay_24px, desc = {
         when (Preferences.nightMode) {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.turn_on
@@ -67,7 +81,7 @@ sealed class MainOption(
 
     companion object {
         val ALL_OPTIONS = if (upForGrabs) {
-            arrayOf(AutoStart, NightMode, Feedback, VersionInfo, About)
+            arrayOf(AutoStart, WakeLock, NightMode, Feedback, VersionInfo, About)
         } else {
             arrayOf(PremiumStatus, AutoStart, NightMode, Feedback, VersionInfo, About)
         }

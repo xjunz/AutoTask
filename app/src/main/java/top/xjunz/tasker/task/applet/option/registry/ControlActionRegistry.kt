@@ -5,13 +5,23 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.action.*
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.action.Repeat
+import top.xjunz.tasker.engine.applet.action.Suspension
+import top.xjunz.tasker.engine.applet.action.pureAction
+import top.xjunz.tasker.engine.applet.base.Break
+import top.xjunz.tasker.engine.applet.base.Continue
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.WaitFor
+import top.xjunz.tasker.engine.applet.base.WaitUntil
 import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.task.applet.action.PauseFor
+import top.xjunz.tasker.task.applet.action.PauseUntilTomorrow
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
+import top.xjunz.tasker.task.applet.value.LongDuration
 import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.util.formatMinSecMills
@@ -87,4 +97,36 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
             LocalTaskManager.removeTask(it.attachingTask)
         }
     }
+
+    @AppletOrdinal(0x0020)
+    val pauseUntilTomorrow = appletOption(R.string.pause_until_tomorrow) {
+        PauseUntilTomorrow()
+    }
+
+    @AppletOrdinal(0x0020)
+    val pauseFor = appletOption(R.string.pause_for) {
+        PauseFor()
+    }.withValueArgument<Long>(R.string.specified_duration, VariantType.BITS_LONG_DURATION)
+        .withDescriber<Long> { _, duration ->
+            checkNotNull(duration)
+            val parsed = LongDuration.parse(duration)
+            buildString {
+                if (parsed.day != 0) {
+                    append(parsed.day)
+                    append(R.string.day.str)
+                }
+                if (parsed.hour != 0) {
+                    append(parsed.hour)
+                    append(R.string.hour.str)
+                }
+                if (parsed.min != 0) {
+                    append(parsed.min)
+                    append(R.string.minute.str)
+                }
+                if (parsed.sec != 0) {
+                    append(parsed.sec)
+                    append(R.string.second.str)
+                }
+            }
+        }
 }

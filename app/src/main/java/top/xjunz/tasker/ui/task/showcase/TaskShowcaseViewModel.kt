@@ -13,7 +13,11 @@ import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.invokeOnError
+import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ktx.toast
+import top.xjunz.tasker.ktx.toastUnexpectedError
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.task.storage.TaskStorage
@@ -46,6 +50,19 @@ class TaskShowcaseViewModel : ViewModel() {
      * When a new task is added.
      */
     val onNewTaskAdded = MutableLiveData<XTask>()
+
+    val onTaskPauseStateChanged = MutableLiveData<Long>()
+
+    fun listenTaskPauseStateChanges() {
+        LocalTaskManager.setOnTaskPausedStateChangedListener {
+            onTaskPauseStateChanged.postValue(it)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        LocalTaskManager.setOnTaskPausedStateChangedListener(null)
+    }
 
     fun deleteRequestedTask() {
         val task = requestDeleteTask.require()

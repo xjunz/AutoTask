@@ -33,6 +33,8 @@ object Preferences {
 
     var privacyPolicyAcknowledged by global.primitive("privacy_policy_acknowledged", false)
 
+    var enableWakeLock by global.primitive("enable_wake_lock", false)
+
     private fun <T> SharedPreferences.nullable(
         name: String,
         defValue: T?
@@ -90,6 +92,7 @@ object Preferences {
                 Set::class.java -> sp.getStringSet(
                     key, defValue as? Set<String>
                 ) as T
+
                 else -> error("unsupported type: $type")
             }
         }

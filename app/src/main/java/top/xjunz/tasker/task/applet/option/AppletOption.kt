@@ -119,6 +119,9 @@ class AppletOption(
     var scopeRegistryId: Int = -1
         private set
 
+    /**
+     * Tell which type of option should be accepted
+     */
     fun withScopeRegistryId(registryId: Int): AppletOption {
         scopeRegistryId = registryId
         return this

@@ -10,10 +10,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.Preferences
@@ -21,7 +20,11 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.api.Client
 import top.xjunz.tasker.api.UpdateInfo
 import top.xjunz.tasker.app
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.isTrue
+import top.xjunz.tasker.ktx.observeTransient
+import top.xjunz.tasker.ktx.peekActivity
+import top.xjunz.tasker.ktx.setValueIfObserved
 import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.OperatingMode
 import top.xjunz.tasker.service.a11yAutomatorService
@@ -47,6 +50,8 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     private val onDialogDismissed = MutableLiveData<DialogStackManager.StackEntry>()
 
     private val client = Client()
+
+    val taskNumbers = Array<MutableLiveData<Int>>(3) { MutableLiveData() }
 
     val appbarHeight = MutableLiveData<Int>()
 
@@ -163,7 +168,7 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
         serviceBindingError.postValue(t)
     }
 
-    override fun onServiceBound() {
+    override fun onServiceStarted() {
         isServiceBinding.postValue(false)
         isServiceRunning.postValue(true)
     }

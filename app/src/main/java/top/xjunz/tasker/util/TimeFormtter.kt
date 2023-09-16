@@ -7,7 +7,8 @@ package top.xjunz.tasker.util
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.str
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import kotlin.concurrent.getOrSet
 
 /**
@@ -16,12 +17,19 @@ import kotlin.concurrent.getOrSet
 
 private val localDateFormat = ThreadLocal<SimpleDateFormat>()
 
+private val localDateFormatNoMills = ThreadLocal<SimpleDateFormat>()
+
 private val dateFormat
     get() = localDateFormat.getOrSet {
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.getDefault())
     }
 
-fun Long.formatTime(): String = dateFormat.format(Date(this))
+private val dateFormatNoMills
+    get() = localDateFormat.getOrSet {
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    }
+
+fun Long.formatTime(): String = dateFormatNoMills.format(Date(this))
 
 fun formatCurrentTime(): String = dateFormat.format(Date(System.currentTimeMillis()))
 

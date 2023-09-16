@@ -13,6 +13,7 @@ import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import rikka.sui.Sui
 import top.xjunz.tasker.api.UpdateInfo
 import top.xjunz.tasker.premium.PremiumMixin
 import java.io.File
@@ -51,6 +52,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        Sui.init(BuildConfig.APPLICATION_ID)
         if (!BuildConfig.DEBUG) {
             AppCenter.start(
                 this, "5cc80607-5168-4c05-b3d6-acbbfc25f8df",

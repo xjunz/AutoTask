@@ -18,7 +18,7 @@ abstract class TaskScheduler<Arg> : CoroutineScope {
         set(value) {
             field = value
             if (value) {
-                haltAll()
+                suppressAll()
             }
         }
 
@@ -26,7 +26,7 @@ abstract class TaskScheduler<Arg> : CoroutineScope {
         tasks: List<XTask>, arg: Arg, listener: XTask.TaskStateListener? = null
     )
 
-    abstract fun haltAll()
+    abstract fun suppressAll()
 
     /**
      * After shutdown, do not use this object anymore.

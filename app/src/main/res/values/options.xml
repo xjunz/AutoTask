@@ -116,7 +116,8 @@
     <string name="not_in_notification_pkg_names">发送通知的应用不是</string>
     <string name="notification_matches">通知内容满足正则表达式</string>
     <string name="not_notification_matches">通知内容不满足正则表达式</string>
-    <string name="on_notification_received">收到通知时</string>
+    <string name="on_status_bar_notification_received">收到状态栏通知时</string>
+    <string name="on_toast_notification_received">收到吐司通知时</string>
     <string name="open_notification_shade">下拉通知栏</string>
     <string name="lock_screen">熄灭屏幕</string>
 </resources>

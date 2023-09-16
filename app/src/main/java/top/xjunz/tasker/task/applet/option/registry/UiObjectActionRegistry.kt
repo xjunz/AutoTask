@@ -8,16 +8,27 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.uiautomator.Direction
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.action.*
+import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction
 import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction.Companion.referenceAction
+import top.xjunz.tasker.engine.applet.action.pureAction
+import top.xjunz.tasker.engine.applet.action.singleArgAction
+import top.xjunz.tasker.engine.applet.action.singleArgValueAction
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.isPrivilegedProcess
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.array
+import top.xjunz.tasker.ktx.ensureRefresh
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiDevice
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.flow.ClickButtonWithText
+import top.xjunz.tasker.task.applet.flow.ClickUiObjectIfExists
+import top.xjunz.tasker.task.applet.flow.ClickUiObjectWithText
 import top.xjunz.tasker.task.applet.flow.ForEachUiScrollable
+import top.xjunz.tasker.task.applet.flow.InputTextToFirstTextField
 import top.xjunz.tasker.task.applet.flow.ScrollIntoUiObject
 import top.xjunz.tasker.task.applet.flow.ref.UiObjectReferent
 import top.xjunz.tasker.task.applet.option.AppletOption
@@ -30,6 +41,9 @@ import top.xjunz.tasker.task.applet.value.VariantType
  * @author xjunz 2022/11/15
  */
 class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
+
+    override val categoryNames: IntArray
+        get() = intArrayOf(R.string.quick_create, R.string.universal)
 
     private val swipeDirections by lazy {
         R.array.swipe_directions.array
@@ -55,7 +69,39 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
+    private fun AppletOption.withUiObjectResult(): AppletOption {
+        return withResult<AccessibilityNodeInfo>(R.string.matched_ui_object)
+            .withResult<String>(R.string.ui_object_text)
+            .withResult<Int>(R.string.ui_object_center_coordinate, VariantType.INT_COORDINATE)
+    }
+
     @AppletOrdinal(0x0001)
+    val clickIfExits = appletOption(R.string.click_if_exists) {
+        ClickUiObjectIfExists()
+    }.withScopeRegistryId(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
+        .withUiObjectResult()
+
+    @AppletOrdinal(0x0002)
+    val clickButtonWithText = appletOption(R.string.format_click_button_with_text) {
+        ClickButtonWithText()
+    }.withUnaryArgument<String>(R.string.specified_text)
+        .withUiObjectResult()
+        .hasCompositeTitle()
+
+    @AppletOrdinal(0x0003)
+    val clickUiObjectWithText = appletOption(R.string.format_click_uiobject_with_text) {
+        ClickUiObjectWithText()
+    }.withUnaryArgument<String>(R.string.specified_text)
+        .withUiObjectResult()
+        .hasCompositeTitle()
+
+    @AppletOrdinal(0x0004)
+    val setTextToFirstTextField = appletOption(R.string.format_input_text_to_first_text_field) {
+        InputTextToFirstTextField()
+    }.withUnaryArgument<String>(R.string.text)
+        .hasCompositeTitle()
+
+    @AppletOrdinal(0x0101)
     val click = simpleUiObjectActionOption(R.string.format_perform_click) {
         it.ensureRefresh()
         if (it.isClickable) {
@@ -71,7 +117,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
-    @AppletOrdinal(0x0002)
+    @AppletOrdinal(0x0102)
     val longClick = simpleUiObjectActionOption(R.string.format_perform_long_click) {
         it.ensureRefresh()
         if (it.isLongClickable) {
@@ -82,7 +128,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object).hasCompositeTitle()
 
-    @AppletOrdinal(0x00_03)
+    @AppletOrdinal(0x0103)
     val drag = uiObjectActionOption<Int>(R.string.format_drag) { node, v ->
         check(v != null)
         node.ensureRefresh()
@@ -99,7 +145,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x00_04)
+    @AppletOrdinal(0x0104)
     val swipe = uiObjectActionOption<Long>(R.string.format_swipe_ui_object) { node, v ->
         check(v != null)
         node.ensureRefresh()
@@ -115,13 +161,13 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x0010)
+    @AppletOrdinal(0x0110)
     val setText = appletOption(R.string.format_perform_input_text) {
         referenceAction<String> { args, value, _ ->
             val node = args[0] as AccessibilityNodeInfo
             node.ensureRefresh()
             if (!node.isEditable) false else {
-                uiDevice.wrapUiObject(node).setText(args[1]?.casted() ?: value)
+                uiDevice.wrapUiObject(node).setText(args.getOrNull(1)?.casted() ?: value)
                 true
             }
         }
@@ -135,7 +181,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         R.string.format_scroll_args.format(direction, metrics.speed)
     }
 
-    @AppletOrdinal(0x0020)
+    @AppletOrdinal(0x0120)
     val scrollForward = appletOption(R.string.scroll_list) {
         singleArgValueAction<AccessibilityNodeInfo, Long> { node, v ->
             node?.ensureRefresh()
@@ -150,7 +196,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withValueDescriber(scrollDescriber)
         .withValueArgument<Long>(R.string.swipe_args, VariantType.BITS_SCROLL)
 
-    @AppletOrdinal(0x0021)
+    @AppletOrdinal(0x0121)
     val scrollToEnd = appletOption(R.string.scroll_to_end) {
         singleArgValueAction<AccessibilityNodeInfo, Long> { node, v ->
             node?.ensureRefresh()
@@ -167,19 +213,17 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withValueDescriber(scrollDescriber)
         .withValueArgument<Long>(R.string.swipe_args, VariantType.BITS_SCROLL)
 
-    @AppletOrdinal(0x0030)
+    @AppletOrdinal(0x0130)
     val scrollIntoUiObject = appletOption(R.string.scroll_into_ui_object) {
         ScrollIntoUiObject()
     }.withScopeRegistryId(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
         .withRefArgument<AccessibilityNodeInfo>(R.string.list)
         .withValueArgument<Long>(R.string.swipe_args, VariantType.BITS_SCROLL)
-        .withResult<AccessibilityNodeInfo>(R.string.matched_ui_object)
-        .withResult<String>(R.string.ui_object_text)
-        .withResult<Int>(R.string.ui_object_center_coordinate, VariantType.INT_COORDINATE)
+        .withUiObjectResult()
         .withValueDescriber(scrollDescriber)
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x0040)
+    @AppletOrdinal(0x0140)
     val forEachUiScrollable = appletOption(R.string.for_each_ui_scrollable) {
         ForEachUiScrollable()
     }.withRefArgument<AccessibilityNodeInfo>(R.string.list)
@@ -189,7 +233,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withValueDescriber(scrollDescriber)
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x0048)
+    @AppletOrdinal(0x0148)
     val getChildAt = appletOption(R.string.format_get_child_at) {
         LambdaReferenceAction<Int>(Applet.VAL_TYPE_INT) { args, value, _ ->
             val parent = args.single() as AccessibilityNodeInfo
@@ -210,7 +254,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .withResult<String>(R.string.ui_object_text)
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x0050)
+    @AppletOrdinal(0x0150)
     val drawNodeBounds = appletOption(R.string.format_draw_node_bounds) {
         singleArgAction<AccessibilityNodeInfo> {
             if (it != null) {
@@ -223,7 +267,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
         .hasCompositeTitle()
 
-    @AppletOrdinal(0x0051)
+    @AppletOrdinal(0x0151)
     val clearNodeBounds = appletOption(R.string.clear_node_bounds) {
         pureAction {
             currentService.overlayToastBridge.clearAccessibilityBounds()

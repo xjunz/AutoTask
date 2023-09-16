@@ -9,8 +9,13 @@ import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
 import androidx.core.os.HandlerCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
@@ -21,7 +26,6 @@ import top.xjunz.tasker.service.A11yAutomatorService
 import top.xjunz.tasker.service.ShizukuAutomatorService
 import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
-import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 import top.xjunz.tasker.uiautomator.CoroutineUiAutomatorBridge
 import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
@@ -68,6 +72,10 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
         bridge.stopReceivingEvents()
     }
 
+    override fun onRegistered() {
+        /* no-op */
+    }
+
     private fun processAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
         // Do not send events from the host application!
@@ -92,12 +100,9 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
 
         when (a11yEvent.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
-                val event = newEvent(Event.EVENT_ON_NOTIFICATION_RECEIVED, packageName)
-                event.putExtra(
-                    NotificationReferent.EXTRA_IS_TOAST,
-                    className == Toast::class.java.name
-                )
-                dispatchEvents(event)
+                val eventType = if( className == Toast::class.java.name) Event.EVENT_ON_TOAST_RECEIVED
+                else Event.EVENT_ON_NOTIFICATION_RECEIVED
+                dispatchEvents(newEvent(eventType, packageName))
             }
 
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -130,11 +135,13 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
                     dispatchEvents(newEvent(Event.EVENT_ON_NEW_WINDOW, packageName))
                 }
             }
+
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                 dispatchEvents(newEvent(Event.EVENT_ON_CONTENT_CHANGED, packageName))
             }
+
             else -> {
-                // logcat(a11yEvent)
+               // dispatchEvents(newEvent(Event.EVENT_ON_CONTENT_CHANGED, packageName))
             }
         }
     }

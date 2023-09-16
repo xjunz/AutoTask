@@ -36,11 +36,9 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
     override val coroutineContext: CoroutineContext =
         Dispatchers.Default + CoroutineName("ResidentTaskScope") + SupervisorJob()
 
-    override fun haltAll() {
-        taskManager.getEnabledResidentTasks().asSequence().filter {
-            it.metadata.taskType == taskType
-        }.forEach {
-            it.halt()
+    override fun suppressAll() {
+        taskManager.getEnabledResidentTasks().forEach {
+            it.halt(false)
         }
     }
 
@@ -61,7 +59,7 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
                 if (task.isOverheat(eventsHash)) continue
                 launch {
                     task.previousArgumentHash = eventsHash
-                    task.setListener(listener)
+                    task.setStateListener(listener)
                     task.launch(obtainTaskRuntime(task, registry, arg))
                 }
             } else {

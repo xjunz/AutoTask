@@ -5,7 +5,11 @@
 package top.xjunz.tasker.engine.applet.base
 
 import android.os.SystemClock
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import java.lang.ref.WeakReference
@@ -18,6 +22,8 @@ import java.lang.ref.WeakReference
 class WaitFor : If() {
 
     override val requiredIndex: Int = -1
+
+    override val valueType: Int = VAL_TYPE_INT
 
     private var waitingJob: WeakReference<Job>? = null
 

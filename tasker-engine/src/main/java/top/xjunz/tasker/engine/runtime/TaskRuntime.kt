@@ -12,7 +12,12 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import top.xjunz.shared.ktx.casted
 import top.xjunz.shared.utils.illegalArgument
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.Loop
+import top.xjunz.tasker.engine.applet.base.WaitFor
 import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.engine.task.XTask
 import java.util.zip.CRC32

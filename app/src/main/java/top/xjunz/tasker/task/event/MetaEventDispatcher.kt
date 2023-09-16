@@ -17,6 +17,7 @@ class MetaEventDispatcher : EventDispatcher() {
 
     fun registerEventDispatcher(eventDispatcher: EventDispatcher) {
         allDispatchers[eventDispatcher::class.java] = eventDispatcher
+        eventDispatcher.onRegistered()
     }
 
     fun <T> getEventDispatcher(clz: Class<T>): T {
@@ -39,5 +40,9 @@ class MetaEventDispatcher : EventDispatcher() {
         allDispatchers.values.forEach {
             it.destroy()
         }
+    }
+
+    override fun onRegistered() {
+        // no-op
     }
 }

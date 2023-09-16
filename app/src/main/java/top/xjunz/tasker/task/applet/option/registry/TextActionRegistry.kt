@@ -41,7 +41,6 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0001)
     val extractText = appletOption(R.string.format_extract_text) {
         unaryArgProcessor<String, String> { arg, v ->
-            arg?.firstGroupValue(".+?\\([*]+[^*]\\)")
             if (v == null) null else arg?.firstGroupValue(v)
         }
     }.withRefArgument<String>(R.string.text)

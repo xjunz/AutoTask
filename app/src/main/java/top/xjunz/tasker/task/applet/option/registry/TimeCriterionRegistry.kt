@@ -7,14 +7,16 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion
 import top.xjunz.tasker.engine.applet.criterion.CollectionCriterion.Companion.collectionCriterion
+import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.numberRangeCriterion
 import top.xjunz.tasker.task.applet.util.IntValueUtil
+import top.xjunz.tasker.task.applet.value.VariantType
 import top.xjunz.tasker.util.formatTime
-import java.util.*
+import java.util.Calendar
 
 /**
  * @author xjunz 2022/10/01
@@ -40,6 +42,7 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             start != null && stop != null -> R.string.format_range.format(
                 start.formatTime(), stop.formatTime()
             )
+
             else -> R.string.no_limit.str
         }
     }
@@ -81,6 +84,10 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
+    private fun formatTimeInDay(time: Int): String {
+        return "%02d:%02d:%02d".format(*IntValueUtil.parseTime(time))
+    }
+
     @AppletOrdinal(0x00_04)
     val hourMinSec = invertibleAppletOption(R.string.in_hour_min_sec_range) {
         numberRangeCriterion<Calendar, Int> {
@@ -91,24 +98,44 @@ class TimeCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             )
         }
     }.withValueDescriber<List<Int>> {
-        fun format(time: Int): String {
-            return "%02d:%02d:%02d".format(*IntValueUtil.parseTime(time))
-        }
-
         val start = it.firstOrNull()
         val stop = it.lastOrNull()
         when {
-            start == null && stop != null -> R.string.format_before.format(format(stop))
-            start != null && stop == null -> R.string.format_after.format(format(start))
+            start == null && stop != null -> R.string.format_before.format(formatTimeInDay(stop))
+            start != null && stop == null -> R.string.format_after.format(formatTimeInDay(start))
             start != null && stop != null ->
                 if (start != stop) {
-                    R.string.format_range.format(format(start), format(stop))
+                    R.string.format_range.format(formatTimeInDay(start), formatTimeInDay(stop))
                 } else {
-                    format(start)
+                    formatTimeInDay(start)
                 }
+
             else -> R.string.no_limit.str
         }
     }
 
+    @AppletOrdinal(0x00_05)
+    val isSpecifiedTime = appletOption(R.string.is_specified_time) {
+        LambdaCriterion.equalCriterion<Calendar, Long> { calendar ->
+            calendar.timeInMillis
+        }
+    }.withValueArgument<Long>(R.string.specified_time, VariantType.LONG_TIME)
+        .withValueDescriber<Long> {
+            it.formatTime()
+        }
 
+
+    @AppletOrdinal(0x00_06)
+    val isSpecifiedTimeInDay = appletOption(R.string.is_specified_time_in_day) {
+        LambdaCriterion.equalCriterion<Calendar, Int> {
+            IntValueUtil.composeTime(
+                it.get(Calendar.HOUR_OF_DAY),
+                it.get(Calendar.MINUTE),
+                it.get(Calendar.SECOND)
+            )
+        }
+    }.withValueArgument<Int>(R.string.specified_time, VariantType.INT_TIME_IN_DAY)
+        .withValueDescriber<Int> {
+            formatTimeInDay(it)
+        }
 }

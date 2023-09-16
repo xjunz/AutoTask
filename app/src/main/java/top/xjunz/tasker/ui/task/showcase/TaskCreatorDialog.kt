@@ -117,7 +117,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
                 XTask.Metadata(R.string.auto_click.str, XTask.TYPE_RESIDENT)
         }
         binding.containerPreloadTasks.setNoDoubleClickListener {
-            TaskListDialog().setPreloadTaskMode().show(requireActivity().supportFragmentManager)
+            TaskCollectionSelectorDialog().show(requireActivity().supportFragmentManager)
         }
         observeTransient(viewModel.onMetadataEdited) { metadata ->
             val task = XTask()
@@ -150,14 +150,14 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
                 if (path.endsWith(TaskStorage.X_TASK_FILE_SUFFIX)) {
                     requireActivity().contentResolver.openInputStream(uri)?.use {
                         val dto = Json.decodeFromStream<XTaskDTO>(it)
-                        tasks.add(dto.toXTask(AppletOptionFactory))
+                        tasks.add(dto.toXTask(AppletOptionFactory, true))
                     }
                 } else if (path.endsWith(TaskStorage.X_TASK_FILE_ARCHIVE_SUFFIX)) {
                     ZipInputStream(requireActivity().contentResolver.openInputStream(uri)).use {
                         var entry: ZipEntry? = it.nextEntry
                         while (entry != null) {
                             val dto = Json.decodeFromStream<XTaskDTO>(it)
-                            tasks.add(dto.toXTask(AppletOptionFactory))
+                            tasks.add(dto.toXTask(AppletOptionFactory, true))
                             entry = it.nextEntry
                         }
                     }

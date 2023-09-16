@@ -60,6 +60,19 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
             PrivilegedTaskManager.clearLog(checksum, snapshotId)
         }
 
+        override fun setOnTaskPausedListener(listener: IOnTaskPauseStateListener?) {
+            PrivilegedTaskManager.setOnTaskPausedStateChangedListener(
+                if (listener == null) null
+                else XTask.OnTaskPausedStateChangedListener { checksum ->
+                    listener.onTaskPauseStateChanged(checksum)
+                }
+            )
+        }
+
+        override fun getTaskPauseInfo(identifier: Long): LongArray {
+            return PrivilegedTaskManager.getTaskPauseInfo(identifier)
+        }
+
         override fun getAllSnapshots(identifier: Long): Array<TaskSnapshot> {
             return PrivilegedTaskManager.getAllSnapshots(identifier)
         }
@@ -67,7 +80,7 @@ object PrivilegedTaskManager : TaskManager<Long, XTaskDTO>() {
     }
 
     override fun asTask(carrier: XTaskDTO): XTask {
-        return carrier.toXTask(AppletOptionFactory)
+        return carrier.toXTask(AppletOptionFactory, false)
     }
 
     override fun List<XTask>.indexOfTask(identifier: Long): Int {

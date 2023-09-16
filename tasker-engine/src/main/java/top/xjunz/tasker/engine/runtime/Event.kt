@@ -27,7 +27,7 @@ class Event private constructor(
         it.paneTitle = paneTitle
     }
 
-    private val extras = SparseArray<Any>()
+    private val extras by lazy { SparseArray<Any>() }
 
     companion object {
         /**
@@ -59,6 +59,10 @@ class Event private constructor(
 
         const val EVENT_ON_PRIMARY_CLIP_CHANGED = 6
 
+        const val EVENT_ON_TICK = 7
+
+        const val EVENT_ON_TOAST_RECEIVED = 8
+
         fun obtain(
             eventType: Int,
             pkgName: String? = null,
@@ -80,7 +84,9 @@ class Event private constructor(
         EVENT_ON_CONTENT_CHANGED,
         EVENT_ON_NOTIFICATION_RECEIVED,
         EVENT_ON_NEW_WINDOW,
-        EVENT_ON_PRIMARY_CLIP_CHANGED
+        EVENT_ON_PRIMARY_CLIP_CHANGED,
+        EVENT_ON_TICK,
+        EVENT_ON_TOAST_RECEIVED
     )
     annotation class EventType
 
@@ -89,9 +95,11 @@ class Event private constructor(
             EVENT_ON_CONTENT_CHANGED -> "contentChanged"
             EVENT_ON_PACKAGE_ENTERED -> "pkgEntered"
             EVENT_ON_PACKAGE_EXITED -> "pkgExited"
-            EVENT_ON_NOTIFICATION_RECEIVED -> "notificationReceived"
+            EVENT_ON_NOTIFICATION_RECEIVED -> "statusBarNotificationReceived"
             EVENT_ON_NEW_WINDOW -> "newWindow"
             EVENT_ON_PRIMARY_CLIP_CHANGED -> "primaryClipChanged"
+            EVENT_ON_TICK -> "tick"
+            EVENT_ON_TOAST_RECEIVED -> "toastNotificationReceived"
             else -> "undefined"
         }
         return "Event(type=$typeName, compInfo=$componentInfo)"

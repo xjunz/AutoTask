@@ -8,6 +8,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.os.SystemClock
 import android.util.SparseArray
+import androidx.annotation.IntRange
 import androidx.core.text.parseAsHtml
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
@@ -16,6 +17,8 @@ import top.xjunz.shared.ktx.md5
 import top.xjunz.shared.trace.debugLogcat
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.engine.dto.toDTO
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.engine.runtime.ValueRegistry
 import java.util.*
@@ -61,31 +64,80 @@ class XTask : ValueRegistry() {
 
     var flow: RootFlow? = null
 
-    var previousLaunchTime = -1L
-
     var previousArgumentHash = -1
 
     lateinit var metadata: Metadata
 
     internal var registry = SparseArray<Any>()
 
-    private var listener: TaskStateListener? = null
+    private var stateListener: TaskStateListener? = null
 
     private var currentRuntime: TaskRuntime? = null
+
+    var pauseFor: Long = -1
+
+    var pauseStartTime: Long = -1
+
+    private var previousLaunchTime = -1L
+
+    private var onPausedListener: OnTaskPausedStateChangedListener? = null
+
+    private val isPaused: Boolean
+        get() {
+            if (pauseFor == -1L || pauseStartTime == -1L) {
+                return false
+            }
+            if (System.currentTimeMillis() - pauseStartTime > pauseFor) {
+                pauseFor = -1
+                pauseStartTime = -1
+                onPausedListener?.onTaskPauseStateChanged(checksum)
+                return false
+            }
+            return true
+        }
+
+    fun pause(@IntRange(from = 1) duration: Long) {
+        check(duration > 0) {
+            "The pause duration must be positive!"
+        }
+        check(!isPaused) {
+            "The task is already paused!"
+        }
+        pauseFor = duration
+        pauseStartTime = System.currentTimeMillis()
+        onPausedListener?.onTaskPauseStateChanged(checksum)
+    }
 
     fun requireFlow(): RootFlow = requireNotNull(flow) {
         "RootFlow is not initialized!"
     }
 
-    fun setListener(listener: TaskStateListener?) {
-        this.listener = listener
+    fun setStateListener(listener: TaskStateListener?) {
+        stateListener = listener
+    }
+
+    fun setOnPausedStateChangedListener(listener: OnTaskPausedStateChangedListener?) {
+        onPausedListener = listener
     }
 
     /**
      * Halt the runtime if running.
+     *
+     * @param reset Reset the task cache.
      */
-    fun halt() {
+    fun halt(reset: Boolean) {
         currentRuntime?.halt()
+        if (reset) {
+            resetCache()
+        }
+    }
+
+    private fun resetCache() {
+        pauseFor = -1L
+        pauseStartTime = 1L
+        onPausedListener?.onTaskPauseStateChanged(checksum)
+        previousArgumentHash = -1
+        previousLaunchTime = -1L
     }
 
     private inner class SnapshotObserver(private val snapshot: TaskSnapshot) :
@@ -159,32 +211,38 @@ class XTask : ValueRegistry() {
      * @return `true` if the task starts executed and `false` otherwise
      */
     suspend fun launch(runtime: TaskRuntime) {
+        if (isPaused) {
+            debugLogcat("Current task(${metadata.title}) is paused!")
+            return
+        }
         val snapshot =
             TaskSnapshot(UUID.randomUUID().toString(), checksum, System.currentTimeMillis())
         try {
             previousLaunchTime = SystemClock.uptimeMillis()
             runtime.observer = SnapshotObserver(snapshot)
             currentRuntime = runtime
-            listener?.onTaskStarted(runtime)
+            stateListener?.onTaskStarted(runtime)
             runtime.isSuccessful = requireFlow().apply(runtime).isSuccessful
             if (runtime.isSuccessful) {
-                listener?.onTaskSuccess(runtime)
+                stateListener?.onTaskSuccess(runtime)
             } else {
-                listener?.onTaskFailure(runtime)
+                stateListener?.onTaskFailure(runtime)
             }
         } catch (t: Throwable) {
             runtime.isSuccessful = false
             when (t) {
                 is CancellationException -> {
-                    listener?.onTaskCancelled(runtime)
+                    stateListener?.onTaskCancelled(runtime)
                     if (isResident) {
                         snapshots.remove(snapshot)
                     }
                 }
+
                 is TaskRuntime.StopshipException -> {
-                    listener?.onTaskCancelled(runtime)
+                    stateListener?.onTaskCancelled(runtime)
                 }
-                else -> listener?.onTaskError(runtime, t)
+
+                else -> stateListener?.onTaskError(runtime, t)
             }
             t.logcatStackTrace()
         } finally {
@@ -198,7 +256,7 @@ class XTask : ValueRegistry() {
                 snapshots.pollLast()
             }
             currentRuntime = null
-            listener = null
+            stateListener = null
             clearValues()
             runtime.recycle()
         }
@@ -226,6 +284,14 @@ class XTask : ValueRegistry() {
     fun isOverheat(argumentHash: Int): Boolean {
         return argumentHash == previousArgumentHash && previousLaunchTime != -1L
                 && SystemClock.uptimeMillis() - previousLaunchTime <= RATE_LIMIT
+    }
+
+    fun interface OnTaskPausedStateChangedListener {
+        fun onTaskPauseStateChanged(checksum: Long)
+    }
+
+    fun clone(factory: AppletFactory): XTask {
+        return toDTO().toXTask(factory, false)
     }
 
     interface TaskStateListener {

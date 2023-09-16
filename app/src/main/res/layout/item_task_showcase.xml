@@ -26,6 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/tv_task_name"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -51,6 +52,21 @@
                 tools:text="@tools:sample/lorem/random" />
 
             <TextView
+                android:id="@+id/tv_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="4dp"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                android:visibility="gone"
+                app:drawableStartCompat="@drawable/baseline_schedule_24"
+                app:layout_constraintStart_toStartOf="@+id/tv_task_name"
+                app:layout_constraintTop_toBottomOf="@+id/tv_task_name"
+                tools:text="@tools:sample/lorem"
+                app:drawableTint="?colorControlNormal" />
+
+            <TextView
                 android:id="@+id/tv_task_desc"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -61,7 +77,7 @@
                 android:maxLines="5"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_task_name"
+                app:layout_constraintTop_toBottomOf="@+id/tv_label"
                 tools:text="@tools:sample/lorem/random" />
 
             <TextView
@@ -73,9 +89,10 @@
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="?colorPrimary"
                 android:gravity="center_vertical"
-                android:text="@string/preload_tasks"
+                android:text="@string/is_paused"
                 android:textColor="?colorOnPrimary"
                 android:visibility="gone"
+                app:drawableTint="?colorOnPrimary"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintBottom_toBottomOf="@+id/tv_task_name"
                 app:layout_constraintEnd_toStartOf="@+id/tv_author"
@@ -87,7 +104,7 @@
                 android:id="@+id/wave"
                 android:layout_width="match_parent"
                 android:layout_height="6dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintTop_toBottomOf="@+id/tv_task_desc"
                 app:waveRunningColor="?colorPrimary"
                 app:waveStrokeColor="?colorOutline"

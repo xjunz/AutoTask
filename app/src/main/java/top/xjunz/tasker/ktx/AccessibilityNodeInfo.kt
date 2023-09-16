@@ -88,7 +88,7 @@ suspend fun AccessibilityNodeInfo.findFirst(
 
 fun AccessibilityNodeInfo.ensureRefresh() {
     check(refresh()) {
-        "Node is stale!"
+        "This node is stale!"
     }
 }
 

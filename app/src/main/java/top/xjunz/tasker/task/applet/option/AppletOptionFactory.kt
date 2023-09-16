@@ -6,7 +6,22 @@ package top.xjunz.tasker.task.applet.option
 
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
-import top.xjunz.tasker.task.applet.option.registry.*
+import top.xjunz.tasker.task.applet.option.registry.AppletOptionRegistry
+import top.xjunz.tasker.task.applet.option.registry.ApplicationActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.ApplicationCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.BootstrapOptionRegistry
+import top.xjunz.tasker.task.applet.option.registry.ControlActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.EventCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.GestureActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.GlobalActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.GlobalCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.ShellCmdActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.TextActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.TextCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.TimeCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.UiObjectActionRegistry
+import top.xjunz.tasker.task.applet.option.registry.UiObjectCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.UiObjectFlowRegistry
 
 
 /**
@@ -35,9 +50,6 @@ object AppletOptionFactory : AppletFactory {
 
     private val textRegistry =
         TextCriterionRegistry(BootstrapOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
-
-    private val notificationRegistry =
-        NotificationCriterionRegistry(BootstrapOptionRegistry.ID_NOTIFICATION_CRITERION_REGISTRY)
 
     private val globalActionRegistry =
         GlobalActionRegistry(BootstrapOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
@@ -73,7 +85,6 @@ object AppletOptionFactory : AppletFactory {
         timeRegistry,
         globalInfoRegistry,
         textRegistry,
-        notificationRegistry,
         /* action */
         controlActionRegistry,
         globalActionRegistry,
@@ -96,10 +107,16 @@ object AppletOptionFactory : AppletFactory {
         return requireRegistryById(applet.registryId).findAppletOptionById(applet.appletId)
     }
 
-    override fun createAppletById(id: Int): Applet {
+    override fun createAppletById(id: Int, compatMode: Boolean): Applet {
         val registryId = id ushr 16
-        val appletId = id and 0xFFFF
-        return requireRegistryById(registryId).createAppletFromId(appletId)
+        val originId = id and 0xFFFF
+        var appletId = originId
+        if (compatMode) appletId = AppletFactoryUpdateHelper.checkUpdate(registryId, originId)
+        val ret = requireRegistryById(registryId).createAppletFromId(appletId)
+        if (originId != appletId) {
+            ret.obsoletedId = originId
+        }
+        return ret
     }
 
     fun preloadIfNeeded() {

@@ -101,6 +101,28 @@ object LocalTaskManager : TaskManager<XTask, XTask>() {
         }
     }
 
+    override fun setOnTaskPausedStateChangedListener(listener: XTask.OnTaskPausedStateChangedListener?) {
+        super.setOnTaskPausedStateChangedListener(listener)
+        peer?.whenAlive {
+            it.setOnTaskPausedListener(
+                if (listener == null) null
+                else object : IOnTaskPauseStateListener.Stub() {
+                    override fun onTaskPauseStateChanged(checksum: Long) {
+                        listener.onTaskPauseStateChanged(checksum)
+                    }
+                }
+            )
+        }
+    }
+
+    override fun getTaskPauseInfo(identifier: XTask): LongArray {
+        val remote = peer
+        if (remote != null) {
+            return remote.getTaskPauseInfo(identifier.checksum)
+        }
+        return super.getTaskPauseInfo(identifier)
+    }
+
     override val XTask.identifier: XTask get() = this
 
 }

@@ -35,6 +35,10 @@ object TaskStorage {
     var storageTaskLoaded = false
 
     var presetTaskLoaded = false
+        private set
+
+    var exampleTaskLoaded = false
+        private set
 
     private val all = mutableListOf<XTask>()
 
@@ -42,10 +46,16 @@ object TaskStorage {
         return all
     }
 
-    private val preloads = mutableListOf<XTask>()
+    private val presets = mutableListOf<XTask>()
+
+    private val examples = mutableListOf<XTask>()
 
     fun getPreloadTasks(): List<XTask> {
-        return preloads
+        return presets
+    }
+
+    fun getExampleTasks(): List<XTask> {
+        return examples
     }
 
     private val storageDir: File = app.getExternalFilesDir("xtsk")!!
@@ -85,12 +95,31 @@ object TaskStorage {
             ZipInputStream(app.assets.open("prextsks.zip")).use {
                 var entry = it.nextEntry
                 while (entry != null) {
-                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory)
+                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory, false)
                     task.metadata.isPreload = true
-                    preloads.add(task)
+                    presets.add(task)
                     entry = it.nextEntry
                 }
             }
+            presetTaskLoaded = true
+            presets.sortBy { it.title }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun loadExampleTasks(factory: AppletFactory) {
+        withContext(Dispatchers.IO) {
+            ZipInputStream(app.assets.open("extsks.zip")).use {
+                var entry = it.nextEntry
+                while (entry != null) {
+                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory, false)
+                    task.metadata.isPreload = true
+                    examples.add(task)
+                    entry = it.nextEntry
+                }
+            }
+            exampleTaskLoaded = true
+            examples.sortBy { it.title }
         }
     }
 
@@ -132,7 +161,7 @@ object TaskStorage {
                             check(verifyChecksum()) {
                                 "Checksum mismatch for xtsk file $file?!"
                             }
-                        }.toXTask(AppletOptionFactory)
+                        }.toXTask(AppletOptionFactory, true)
                         all.add(task)
                         if (isEnabled) {
                             LocalTaskManager.enableResidentTask(task)

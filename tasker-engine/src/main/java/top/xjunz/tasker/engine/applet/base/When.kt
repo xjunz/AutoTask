@@ -26,6 +26,7 @@ open class When : ControlFlow() {
 
     override fun onPostApply(runtime: TaskRuntime) {
         super.onPostApply(runtime)
+        runtime.ifSuccessful = runtime.isSuccessful
         if (!runtime.isSuccessful) {
             runtime.halt()
         }

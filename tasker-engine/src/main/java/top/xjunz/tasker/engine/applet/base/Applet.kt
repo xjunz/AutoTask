@@ -189,6 +189,8 @@ abstract class Applet {
             }
         }
 
+    var obsoletedId: Int = -1
+
     /**
      * Execute the applet.
      *
@@ -235,6 +237,9 @@ abstract class Applet {
 
     internal fun serializeValue(): String? {
         val value = this.value
+        if (value != null && rawType == VAL_TYPE_IRRELEVANT) {
+            throw IllegalArgumentException("Type value of [$this] should not be irrelevant!")
+        }
         return when {
             value == null -> null
             rawType == VAL_TYPE_IRRELEVANT -> null
@@ -246,6 +251,7 @@ abstract class Applet {
                         serializeValueToString(it)
                     }
                 }
+
             else -> serializeValueToString(value)
         }
     }

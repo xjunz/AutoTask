@@ -24,6 +24,8 @@ class OneshotTaskFragment : BaseTaskShowcaseFragment() {
         return TaskStorage.getAllTasks().filter { it.isOneshot }
     }
 
+    override val index: Int = 2
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTransient(viewModel.onNewTaskAdded) {
@@ -33,6 +35,7 @@ class OneshotTaskFragment : BaseTaskShowcaseFragment() {
             if (taskList.size == 1) togglePlaceholder(false)
             adapter.notifyItemInserted(taskList.lastIndex)
             EventCenter.sendEvent(EVENT_ONESHOT_TASK_ADDED, taskList.lastIndex)
+            notifyBadgeNumberChanged()
         }
     }
 }

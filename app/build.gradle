@@ -26,8 +26,8 @@ android {
         applicationId "top.xjunz.tasker"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 14
-        versionName "1.1.1r02"
+        versionCode 15
+        versionName "1.1.2"
         if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }) {
             versionName += "-debug"
         }
@@ -59,10 +59,10 @@ android {
         targetCompatibility JavaVersion.VERSION_18
     }
 
-    lintOptions {
-        disable "NullSafeMutableLiveData"
-    }
     namespace 'top.xjunz.tasker'
+    lint {
+        disable 'NullSafeMutableLiveData'
+    }
 }
 
 dependencies {
@@ -72,7 +72,7 @@ dependencies {
     implementation project(':shared-library')
     implementation project(':ssl')
 
-    def appCenterSdkVersion = '5.0.1'
+    def appCenterSdkVersion = '5.0.2'
     implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
     implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
 
@@ -82,7 +82,7 @@ dependencies {
     // ktx
     implementation "androidx.core:core-ktx:$ktx_version"
     implementation 'androidx.activity:activity-ktx:1.7.2'
-    implementation 'androidx.fragment:fragment-ktx:1.6.0'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
     // kt reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // design
@@ -92,7 +92,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
     // ktor
-    def ktor_version = '2.3.1'
+    def ktor_version = '2.3.2'
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     implementation("io.ktor:ktor-client-core:$ktor_version")

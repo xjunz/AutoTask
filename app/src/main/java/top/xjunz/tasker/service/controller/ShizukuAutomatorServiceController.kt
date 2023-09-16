@@ -7,9 +7,15 @@ package top.xjunz.tasker.service.controller
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.graphics.Typeface
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.IBinder
+import android.os.IInterface
+import android.os.ResultReceiver
+import android.os.SharedMemory
 import rikka.shizuku.Shizuku
 import top.xjunz.tasker.BuildConfig
+import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.engine.dto.toDTO
 import top.xjunz.tasker.ktx.whenAlive
 import top.xjunz.tasker.premium.PremiumMixin
@@ -43,7 +49,7 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         if (remote.isConnected) {
             doFinally(remote)
         } else {
-            remote.connect(object : ResultReceiver(null) {
+            remote.connect(Preferences.enableWakeLock, object : ResultReceiver(null) {
                 override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
                     if (resultCode < 0) {
                         remote.destroy()
@@ -72,6 +78,7 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
         }
         remoteService = remote
         service = ShizukuAutomatorService(remote)
+        listener?.onServiceStarted()
     }
 
     override fun stopService() {

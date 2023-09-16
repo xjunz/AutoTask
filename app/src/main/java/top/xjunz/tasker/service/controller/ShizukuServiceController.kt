@@ -62,7 +62,6 @@ abstract class ShizukuServiceController<S : Any> : ServiceController<S>() {
                         serviceInterface = it
                         onServiceConnected(it)
                     }
-                    listener?.onServiceBound()
                 }
             } catch (t: Throwable) {
                 listener?.onError(t)

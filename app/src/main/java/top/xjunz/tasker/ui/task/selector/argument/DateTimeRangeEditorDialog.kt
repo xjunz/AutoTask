@@ -13,7 +13,7 @@ import top.xjunz.tasker.ktx.setMaxLength
 import top.xjunz.tasker.ktx.str
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 /**
  * @author xjunz 2022/10/26
@@ -26,8 +26,10 @@ class DateTimeRangeEditorDialog : RangeEditorDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvSubtitleMin.text = R.string.start_time.str
-        binding.tvSubtitleMax.text = R.string.end_time.str
+        if (!isUnaryRange) {
+            binding.tvSubtitleMin.text = R.string.start_time.str
+            binding.tvSubtitleMax.text = R.string.end_time.str
+        }
     }
 
     override fun String.toNumberOrNull(): Number? {

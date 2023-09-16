@@ -8,9 +8,9 @@ buildscript {
         kotlin_version = "1.8.21"
         refine_version = "4.3.0"
         shizuku_version = '13.1.2'
-        ktor_version = '2.3.1'
+        ktor_version = '2.3.2'
         appcompat_version = "1.6.1"
-        coroutine_version = "1.7.1"
+        coroutine_version = '1.7.2'
         serialization_version = '1.6.21'
         ktx_version = '1.10.1'
     }
@@ -28,7 +28,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath 'com.android.tools.build:gradle:8.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "dev.rikka.tools.refine:gradle-plugin:$refine_version"
         // classpath 're.obfuscator:dprotect-gradle:1.0.0'

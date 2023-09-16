@@ -42,8 +42,7 @@ class DialogStackMixin(
         }
     }
 
-    var isStopped = false
-        private set
+    private var isStopped = false
 
     private var isExiting = false
 

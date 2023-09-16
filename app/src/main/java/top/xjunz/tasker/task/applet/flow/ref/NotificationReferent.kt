@@ -9,16 +9,12 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.task.applet.option.registry.EventCriterionRegistry
 
 /**
- * @see [EventCriterionRegistry.notificationReceived]
+ * @see [EventCriterionRegistry.statusBarNotificationReceived]
  *
  * @author xjunz 2023/02/12
  */
-class NotificationReferent(private val componentInfo: ComponentInfoWrapper, val isToast: Boolean) :
+class NotificationReferent(private val componentInfo: ComponentInfoWrapper) :
     Referent {
-
-    companion object {
-        const val EXTRA_IS_TOAST = 1
-    }
 
     override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {

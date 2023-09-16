@@ -16,6 +16,8 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class WaitUntil : If() {
 
+    override val valueType: Int = VAL_TYPE_INT
+
     companion object {
         const val POLL_INTERVAL = 100L
     }

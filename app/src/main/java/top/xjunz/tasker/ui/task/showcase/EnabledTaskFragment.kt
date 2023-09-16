@@ -20,6 +20,8 @@ class EnabledTaskFragment : BaseTaskShowcaseFragment() {
         return LocalTaskManager.getEnabledResidentTasks()
     }
 
+    override val index: Int = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTransient(viewModel.onTaskToggled) {
@@ -34,6 +36,7 @@ class EnabledTaskFragment : BaseTaskShowcaseFragment() {
                 adapter.notifyItemRemoved(index)
                 if (taskList.isEmpty()) togglePlaceholder(true)
             }
+            notifyBadgeNumberChanged()
         }
     }
 }
