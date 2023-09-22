@@ -32,6 +32,7 @@ import top.xjunz.tasker.service.controller.ServiceController
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.storage.TaskStorage
+import java.io.File
 
 /**
  * @author xjunz 2022/07/08
@@ -76,6 +77,8 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
     val checkingForUpdatesError = MutableLiveData<String>()
 
     var showUpdateDialog = true
+
+    val currentSharedFile = MutableLiveData<File>()
 
     init {
         AppletOptionFactory.preloadIfNeeded()

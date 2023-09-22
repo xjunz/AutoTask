@@ -35,7 +35,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_task_type"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/preload_tasks" />
+            tools:text="@string/preset_tasks" />
 
         <TextView
             android:id="@+id/tv_task_desc"

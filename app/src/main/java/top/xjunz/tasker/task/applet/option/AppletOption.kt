@@ -174,7 +174,7 @@ class AppletOption(
     var descAsTitle: Boolean = false
         private set
 
-    var isTitleComposite: Boolean = false
+    private var isTitleComposite: Boolean = false
         private set
 
     var isShizukuOnly = false

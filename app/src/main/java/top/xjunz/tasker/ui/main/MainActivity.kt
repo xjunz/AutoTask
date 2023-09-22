@@ -9,6 +9,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -93,6 +95,8 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         }
     }
 
+    private lateinit var fileShareLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val lightTheme = resources.getBoolean(R.bool.lightTheme)
@@ -101,6 +105,9 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         ) {
             AppCompatDelegate.setDefaultNightMode(Preferences.nightMode)
             return
+        }
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            mainViewModel.currentSharedFile.value?.delete()
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         app.setAppTheme(theme)
@@ -283,6 +290,13 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                         viewUrlSafely("https://spark.appc02.com/tasker")
                     }.setNegativeButton(android.R.string.cancel, null).show()
             }
+        }
+        observeNotNull(mainViewModel.currentSharedFile) {
+            fileShareLauncher.launch(
+                Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, it.makeContentUri())
+                    .setType("*/*")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            )
         }
         mainViewModel.taskNumbers.forEachIndexed { index, ld ->
             observeNotNull(ld) {

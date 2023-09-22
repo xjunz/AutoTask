@@ -60,10 +60,10 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
 
         fun loadPresetTasks() {
             if (TaskStorage.presetTaskLoaded) {
-                taskList.value = TaskStorage.getPreloadTasks()
+                taskList.value = TaskStorage.getPresetTasks()
             } else viewModelScope.async {
                 TaskStorage.loadPresetTasks(AppletOptionFactory)
-                taskList.value = TaskStorage.getPreloadTasks()
+                taskList.value = TaskStorage.getPresetTasks()
             }.invokeOnError {
                 toastUnexpectedError(it)
             }
@@ -115,13 +115,13 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
             }
         }
         observeTransient(parentViewModel.onNewTaskAdded) {
-            adapter.notifyItemChanged(TaskStorage.getPreloadTasks().indexOf(it), true)
+            adapter.notifyItemChanged(viewModel.taskList.value?.indexOf(it) ?: -1, true)
         }
     }
 
     fun setPreloadTaskMode() = doWhenCreated {
         viewModel.preloadTaskMode = true
-        viewModel.title = R.string.preload_tasks.text
+        viewModel.title = R.string.preset_tasks.text
     }
 
     fun setExampleTaskMode() = doWhenCreated {

@@ -44,7 +44,7 @@ sealed class MainOption(
     object WakeLock :
         MainOption(
             R.string.wake_lock,
-            R.drawable.baseline_lock_24,
+            R.drawable.ic_outline_lock_24,
             desc = {
                 if (Preferences.enableWakeLock) {
                     R.string.enabled

@@ -60,7 +60,7 @@
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                 android:visibility="gone"
-                app:drawableStartCompat="@drawable/baseline_schedule_24"
+                app:drawableStartCompat="@drawable/ic_baseline_schedule_24"
                 app:layout_constraintStart_toStartOf="@+id/tv_task_name"
                 app:layout_constraintTop_toBottomOf="@+id/tv_task_name"
                 tools:text="@tools:sample/lorem"
@@ -119,6 +119,8 @@
                 android:layout_marginBottom="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@+id/linearLayout2"
                 app:layout_constraintTop_toBottomOf="@+id/wave" />
 
             <com.google.android.material.button.MaterialButton
@@ -135,6 +137,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/wave" />
 
             <LinearLayout
+                android:id="@+id/linearLayout2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -166,6 +169,15 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@{@string/task_snapshots}"
                     app:icon="@drawable/ic_history_24px"
+                    app:iconTint="@color/color_text_control_normal" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ib_share"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@{@string/share_this_task}"
+                    app:icon="@drawable/ic_outline_share_24"
                     app:iconTint="@color/color_text_control_normal" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

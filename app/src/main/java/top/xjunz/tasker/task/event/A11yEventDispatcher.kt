@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.task.event
 
+import android.app.Notification
 import android.os.Looper
 import android.util.ArraySet
 import android.view.accessibility.AccessibilityEvent
@@ -100,9 +101,11 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
 
         when (a11yEvent.eventType) {
             AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
-                val eventType = if( className == Toast::class.java.name) Event.EVENT_ON_TOAST_RECEIVED
-                else Event.EVENT_ON_NOTIFICATION_RECEIVED
-                dispatchEvents(newEvent(eventType, packageName))
+                if (className == Toast::class.java.name) {
+                    dispatchEvents(newEvent(Event.EVENT_ON_TOAST_RECEIVED, packageName))
+                } else if (className == Notification::class.java.name) {
+                    dispatchEvents(newEvent(Event.EVENT_ON_NOTIFICATION_RECEIVED, packageName))
+                }
             }
 
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -141,7 +144,7 @@ class A11yEventDispatcher(looper: Looper, private val bridge: CoroutineUiAutomat
             }
 
             else -> {
-               // dispatchEvents(newEvent(Event.EVENT_ON_CONTENT_CHANGED, packageName))
+                // dispatchEvents(newEvent(Event.EVENT_ON_CONTENT_CHANGED, packageName))
             }
         }
     }

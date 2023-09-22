@@ -14,14 +14,10 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 abstract class ReferenceAction<V>(valueType: Int) : Action<V>(valueType) {
 
-    abstract suspend fun doWithArgs(
-        args: Array<Any?>,
-        value: V?,
-        runtime: TaskRuntime
-    ): AppletResult
+    abstract suspend fun doAction(refs: Array<Any?>, value: V?, runtime: TaskRuntime): AppletResult
 
     final override suspend fun doAction(value: V?, runtime: TaskRuntime): AppletResult {
-        return doWithArgs(runtime.getAllReferentOf(this), value?.casted(), runtime)
+        return doAction(runtime.getAllReferentOf(this), value?.casted(), runtime)
     }
 }
 
@@ -40,12 +36,12 @@ class LambdaReferenceAction<V>(
         }
     }
 
-    override suspend fun doWithArgs(
-        args: Array<Any?>,
+    override suspend fun doAction(
+        refs: Array<Any?>,
         value: V?,
         runtime: TaskRuntime
     ): AppletResult {
-        return action(args, value, runtime)
+        return action(refs, value, runtime)
     }
 }
 

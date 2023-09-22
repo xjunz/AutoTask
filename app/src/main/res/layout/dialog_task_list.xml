@@ -20,7 +20,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/preload_tasks" />
+            tools:text="@string/preset_tasks" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_task_list"

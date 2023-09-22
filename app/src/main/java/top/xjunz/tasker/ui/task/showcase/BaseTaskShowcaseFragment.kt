@@ -26,12 +26,15 @@ import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.service.serviceController
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
+import top.xjunz.tasker.task.storage.TaskStorage.X_TASK_FILE_SUFFIX
+import top.xjunz.tasker.task.storage.TaskStorage.fileOnStorage
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.ui.main.MainViewModel
 import top.xjunz.tasker.ui.main.ScrollTarget
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.formatTime
+import java.io.File
 import java.util.*
 
 /**
@@ -79,6 +82,14 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             }
             binding.ibEdit.setNoDoubleClickListener {
                 viewModel.requestEditTask.value = taskList[adapterPosition] to null
+            }
+            binding.ibShare.setNoDoubleClickListener {
+                val task = taskList[adapterPosition]
+                val origin = task.fileOnStorage
+                val target =
+                    File(requireActivity().noBackupFilesDir, task.title + X_TASK_FILE_SUFFIX)
+                origin.copyRecursively(target, true)
+                mvm.currentSharedFile.value = target
             }
         }
     }

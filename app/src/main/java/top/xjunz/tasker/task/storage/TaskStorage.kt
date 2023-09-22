@@ -50,7 +50,7 @@ object TaskStorage {
 
     private val examples = mutableListOf<XTask>()
 
-    fun getPreloadTasks(): List<XTask> {
+    fun getPresetTasks(): List<XTask> {
         return presets
     }
 
@@ -65,7 +65,7 @@ object TaskStorage {
         return File(storageDir, task.metadata.identifier + flag + X_TASK_FILE_SUFFIX)
     }
 
-    private val XTask.fileOnStorage: File
+    val XTask.fileOnStorage: File
         get() {
             return getTaskFileOnStorage(this, isEnabled)
         }

@@ -264,7 +264,7 @@
     <string name="no_desc_provided">未提供该任务的描述</string>
     <string name="enabled">已启用</string>
     <string name="start_task">启动任务</string>
-    <string name="preload_tasks">预置任务</string>
+    <string name="preset_tasks">预置任务</string>
     <string name="format_error_code">发生错误(%d)</string>
     <string name="format_error_occurred">发生错误: %s</string>
     <string name="import_tasks">导入任务</string>
@@ -603,4 +603,11 @@
     <string name="example_tasks">示例任务</string>
     <string name="desc_example_tasks">导入示例任务帮助您学习和理解如何创建自定义任务</string>
     <string name="desc_preload_tasks">导入开发者预置的任务</string>
+    <string name="share_this_task">分享此任务</string>
+    <string name="view_uri">打开Uri</string>
+    <string name="delete_file">删除文件</string>
+    <string name="copy_file">拷贝文件</string>
+    <string name="view_uri_via_package">用指定应用打开Uri</string>
+    <string name="view_uri_via_component">用指定页面打开Uri</string>
+    <string name="uri">Uri</string>
 </resources>

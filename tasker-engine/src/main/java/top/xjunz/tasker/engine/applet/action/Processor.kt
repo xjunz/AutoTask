@@ -27,12 +27,12 @@ class Processor<V, R>(
         }
     }
 
-    override suspend fun doWithArgs(
-        args: Array<Any?>,
+    override suspend fun doAction(
+        refs: Array<Any?>,
         value: V?,
         runtime: TaskRuntime
     ): AppletResult {
-        val ret = processor(args, value, runtime)
+        val ret = processor(refs, value, runtime)
         return if (ret != null) AppletResult.succeeded(ret) else AppletResult.EMPTY_FAILURE
     }
 
