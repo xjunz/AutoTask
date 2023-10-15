@@ -35,6 +35,8 @@ object Preferences {
 
     var enableWakeLock by global.primitive("enable_wake_lock", false)
 
+    var recordedVersionCode by global.primitive("recorded_version_code", -1)
+
     private fun <T> SharedPreferences.nullable(
         name: String,
         defValue: T?

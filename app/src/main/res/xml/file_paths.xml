@@ -3,11 +3,7 @@
   -->
 
 <paths>
-    <files-path
-        name="exported"
-        path="/" />
-
-    <external-files-path
-        name="exported"
-        path="/" />
+    <cache-path
+        name="shared_files"
+        path="share/" />
 </paths>

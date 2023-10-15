@@ -27,7 +27,12 @@ import kotlinx.coroutines.withContext
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskLogBinding
 import top.xjunz.tasker.engine.task.TaskSnapshot
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.applySystemInsets
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.observeConfirmation
+import top.xjunz.tasker.ktx.observeError
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -52,9 +57,11 @@ class SnapshotLogDialog : BaseDialogFragment<DialogTaskLogBinding>(),
         fun saveLogToStorage(contentResolver: ContentResolver, uri: Uri) {
             viewModelScope.async {
                 withContext(Dispatchers.IO) {
-                    contentResolver.openOutputStream(uri)?.bufferedWriter()?.use {
-                        it.write(snapshot.log)
-                        it.flush()
+                    contentResolver.openOutputStream(uri)?.use {
+                        it.bufferedWriter().apply {
+                            write(snapshot.log)
+                            flush()
+                        }
                     }
                 }
                 toast(R.string.saved_to_storage)

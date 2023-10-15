@@ -20,6 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -dontwarn **
+-dontobfuscate
 -keep class top.xjunz.tasker.Preferences{
    *;
 }

@@ -18,6 +18,6 @@ class ElseStopship : Else() {
 
     override fun onPostApply(runtime: TaskRuntime) {
         super.onPostApply(runtime)
-        runtime.halt()
+        runtime.shouldStop = true
     }
 }

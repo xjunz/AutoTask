@@ -212,7 +212,7 @@
                 android:columnCount="2">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/tv_click_mode"
+                    android:id="@+id/tv_click_automation"
                     style="?materialIconButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

@@ -17,9 +17,9 @@ import kotlin.time.DurationUnit
 /**
  * @author xjunz 2023/07/06
  */
-class PauseUntilTomorrow : Action<Unit>(VAL_TYPE_IRRELEVANT) {
+class PauseUntilTomorrow : Action() {
 
-    override suspend fun doAction(value: Unit?, runtime: TaskRuntime): AppletResult {
+    override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val calender = Calendar.getInstance()
         calender.timeInMillis = System.currentTimeMillis()
         val hour = calender.get(Calendar.HOUR_OF_DAY)

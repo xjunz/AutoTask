@@ -52,18 +52,23 @@ object ShizukuAutomatorServiceController : ShizukuServiceController<ShizukuAutom
             remote.connect(Preferences.enableWakeLock, object : ResultReceiver(null) {
                 override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
                     if (resultCode < 0) {
-                        remote.destroy()
                         listener?.onError(resultData?.getString(ShizukuAutomatorService.KEY_CONNECTION_ERROR))
+                        remote.destroy()
                     } else {
-                        remote.setPremiumContextStoragePath(PremiumMixin.premiumContextStoragePath)
-                        remote.loadPremiumContext()
-                        if (Build.VERSION.SDK_INT >= 31) {
-                            val field =
-                                Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
-                            field.isAccessible = true
-                            remote.setSystemTypefaceSharedMemory(field.get(null) as SharedMemory)
+                        try {
+                            remote.setPremiumContextStoragePath(PremiumMixin.premiumContextStoragePath)
+                            remote.loadPremiumContext()
+                            if (Build.VERSION.SDK_INT >= 31) {
+                                val field =
+                                    Typeface::class.java.getDeclaredField("sSystemFontMapSharedMemory")
+                                field.isAccessible = true
+                                remote.setSystemTypefaceSharedMemory(field.get(null) as SharedMemory)
+                            }
+                            doFinally(remote)
+                        } catch (e: Throwable) {
+                            listener?.onError(e)
+                            remote.destroy()
                         }
-                        doFinally(remote)
                     }
                 }
             })

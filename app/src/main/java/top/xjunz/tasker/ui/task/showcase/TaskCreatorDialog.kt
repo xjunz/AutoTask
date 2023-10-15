@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
@@ -17,23 +18,19 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import top.xjunz.shared.trace.logcatStackTrace
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogTaskCreatorBinding
-import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.*
-import top.xjunz.tasker.task.applet.option.AppletOptionFactory
-import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.ktx.observeTransient
+import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
+import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.TaskMetadataEditor
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
 /**
  * @author xjunz 2022/12/14
@@ -82,14 +79,17 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         binding.containerResident.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str)
+            metadata.version = BuildConfig.VERSION_CODE
             TaskMetadataEditor().init(metadata) {
                 viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
         }
         binding.containerOneshot.setNoDoubleClickListener {
             val metadata = XTask.Metadata(R.string.unnamed_task.str, XTask.TYPE_ONESHOT)
+            metadata.version = BuildConfig.VERSION_CODE
             TaskMetadataEditor().init(metadata) {
                 viewModel.onMetadataEdited.value = metadata
             }.show(childFragmentManager)
@@ -97,10 +97,11 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
         binding.containerImportTasks.setNoDoubleClickListener {
             selectTaskFromSAFLauncher.launch("")
         }
-        binding.tvClickMode.setNoDoubleClickListener {
+        binding.tvClickAutomation.setNoDoubleClickListener {
             REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_CLICK_AUTOMATION
             viewModel.onMetadataEdited.value =
                 XTask.Metadata(R.string.click_automation.str, XTask.TYPE_ONESHOT)
+            dismiss()
         }
         binding.tvRecordGesture.setNoDoubleClickListener {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -110,11 +111,13 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
             REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_GESTURE_RECORDER
             viewModel.onMetadataEdited.value =
                 XTask.Metadata(R.string.perform_custom_gestures.str, XTask.TYPE_ONESHOT)
+            dismiss()
         }
         binding.btnAutoClick.setNoDoubleClickListener {
             REQUESTED_QUICK_TASK_CREATOR = QUICK_TASK_CREATOR_AUTO_CLICK
             viewModel.onMetadataEdited.value =
                 XTask.Metadata(R.string.auto_click.str, XTask.TYPE_RESIDENT)
+            dismiss()
         }
         binding.containerPreloadTasks.setNoDoubleClickListener {
             TaskCollectionSelectorDialog().show(requireActivity().supportFragmentManager)
@@ -123,7 +126,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
             val task = XTask()
             task.metadata = metadata
             FlowEditorDialog().initBase(task, false).doOnTaskEdited {
-                parentViewModel.requestAddNewTask.value = task
+                parentViewModel.requestAddNewTasks.value = listOf(task)
             }.show(parentFragmentManager)
         }
         observeTransient(parentViewModel.onNewTaskAdded) {
@@ -131,46 +134,7 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun onActivityResult(result: Intent?) {
-        if (result == null) return
-        // Collect Uris
-        val uris = arrayListOf(result.data)
-        val clipData = result.clipData
-        if (clipData != null) {
-            for (i in 0 until clipData.itemCount) {
-                uris.add(clipData.getItemAt(i)?.uri)
-            }
-        }
-        val tasks = arrayListOf<XTask>()
-        // Collect data
-        for (uri in uris) {
-            val path = uri?.path ?: continue
-            try {
-                if (path.endsWith(TaskStorage.X_TASK_FILE_SUFFIX)) {
-                    requireActivity().contentResolver.openInputStream(uri)?.use {
-                        val dto = Json.decodeFromStream<XTaskDTO>(it)
-                        tasks.add(dto.toXTask(AppletOptionFactory, true))
-                    }
-                } else if (path.endsWith(TaskStorage.X_TASK_FILE_ARCHIVE_SUFFIX)) {
-                    ZipInputStream(requireActivity().contentResolver.openInputStream(uri)).use {
-                        var entry: ZipEntry? = it.nextEntry
-                        while (entry != null) {
-                            val dto = Json.decodeFromStream<XTaskDTO>(it)
-                            tasks.add(dto.toXTask(AppletOptionFactory, true))
-                            entry = it.nextEntry
-                        }
-                    }
-                }
-            } catch (t: Throwable) {
-                t.logcatStackTrace()
-            }
-        }
-        if (tasks.isEmpty()) {
-            toast(R.string.error_unsupported_file)
-        } else {
-            TaskListDialog().setTaskList(tasks).setTitle(R.string.import_tasks.text)
-                .show(childFragmentManager)
-        }
+        peekMainViewModel().requestImportTask.value = result
     }
 }

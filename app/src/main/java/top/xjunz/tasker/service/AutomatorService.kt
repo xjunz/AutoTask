@@ -15,7 +15,8 @@ import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.event.A11yEventDispatcher
 import top.xjunz.tasker.task.event.MetaEventDispatcher
-import top.xjunz.tasker.task.event.TickEventDispatcher
+import top.xjunz.tasker.task.event.NetworkEventDispatcher
+import top.xjunz.tasker.task.event.PollEventDispatcher
 import top.xjunz.tasker.task.runtime.ITaskCompletionCallback
 import top.xjunz.tasker.task.runtime.OneshotTaskScheduler
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
@@ -58,7 +59,8 @@ interface AutomatorService {
 
     fun initEventDispatcher() {
         eventDispatcher.registerEventDispatcher(a11yEventDispatcher)
-        eventDispatcher.registerEventDispatcher(TickEventDispatcher(looper))
+        eventDispatcher.registerEventDispatcher(PollEventDispatcher(looper))
+        eventDispatcher.registerEventDispatcher(NetworkEventDispatcher())
         //eventDispatcher.registerEventDispatcher(ClipboardEventDispatcher())
         eventDispatcher.addCallback(residentTaskScheduler)
         eventDispatcher.addCallback(oneshotTaskScheduler)

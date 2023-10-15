@@ -20,7 +20,7 @@ class UiObjectMatches : ScopeFlow<UiObjectTarget>() {
     }
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
-        val referentNode = runtime.getReferentOf(this, 0) as AccessibilityNodeInfo
+        val referentNode = runtime.getReferenceArgument(this, 0) as AccessibilityNodeInfo
         referentNode.ensureRefresh()
         runtime.target.source = referentNode
         return super.applyFlow(runtime)

@@ -11,21 +11,21 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 import top.xjunz.tasker.task.event.ClipboardEventDispatcher
+import top.xjunz.tasker.task.event.NetworkEventDispatcher
 
 /**
  * @author xjunz 2022/08/25
  */
-class EventFilter(eventType: Int) : Applet() {
+class EventFilter(private val eventType: Int) : Applet() {
 
-    init {
-        value = eventType
-    }
+    @Deprecated("Only for compatibility use.")
+    override val isValueInnate: Boolean = true
 
-    override val valueType: Int = VAL_TYPE_INT
+    override var relation: Int = REL_OR
 
     override suspend fun apply(runtime: TaskRuntime): AppletResult {
         val hit = runtime.events?.find {
-            it.type == value
+            it.type == eventType
         }
         return if (hit == null) {
             AppletResult.EMPTY_FAILURE
@@ -41,6 +41,10 @@ class EventFilter(eventType: Int) : Applet() {
 
                 Event.EVENT_ON_TICK -> {
                     AppletResult.EMPTY_SUCCESS
+                }
+
+                Event.EVENT_ON_WIFI_CONNECTED, Event.EVENT_ON_WIFI_DISCONNECTED -> {
+                    AppletResult.succeeded(hit.getExtra(NetworkEventDispatcher.EXTRA_WIFI_SSID))
                 }
 
                 else -> ComponentInfoWrapper.wrap(hit.componentInfo).asResult()

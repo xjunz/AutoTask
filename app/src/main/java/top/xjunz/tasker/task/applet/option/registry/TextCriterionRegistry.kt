@@ -5,10 +5,9 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
-import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.criterion.Criterion
-import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion
+import top.xjunz.tasker.engine.applet.criterion.createCriterion
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 
 /**
@@ -17,7 +16,7 @@ import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 class TextCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private inline fun textCriterion(crossinline block: (String, String) -> Boolean): Criterion<*, *> {
-        return LambdaCriterion<String, String>(Applet.VAL_TYPE_TEXT) { t, v ->
+        return createCriterion<String, String> { t, v ->
             AppletResult.resultOf(t) { block(it, v) }
         }
     }

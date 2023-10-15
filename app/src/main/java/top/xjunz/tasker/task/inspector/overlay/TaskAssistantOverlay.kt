@@ -38,9 +38,7 @@ class TaskAssistantOverlay(inspector: FloatingInspector) :
 
     private fun initTasks() {
         tasks.clear()
-        tasks.addAll(TaskStorage.getAllTasks().filter {
-            it.isOneshot
-        })
+        tasks.addAll(TaskStorage.getOneshotTasks())
     }
 
     override fun modifyLayoutParams(base: WindowManager.LayoutParams) {

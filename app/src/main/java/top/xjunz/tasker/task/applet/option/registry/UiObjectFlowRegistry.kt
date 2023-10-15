@@ -9,7 +9,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.flow.ContainsUiObject
 import top.xjunz.tasker.task.applet.flow.UiObjectMatches
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 
 /**
  * @author xjunz 2023/03/13
@@ -22,7 +22,7 @@ class UiObjectFlowRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.target, R.string.empty)
         .withResult<AccessibilityNodeInfo>(R.string.ui_object)
         .withResult<String>(R.string.ui_object_text)
-        .withResult<Int>(R.string.ui_object_center_coordinate, VariantType.INT_COORDINATE)
+        .withResult<Int>(R.string.ui_object_center_coordinate, VariantArgType.INT_COORDINATE)
         .withScopeRegistryId(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
         .hasCompositeTitle()
 
@@ -32,7 +32,7 @@ class UiObjectFlowRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
         .withResult<AccessibilityNodeInfo>(R.string.matched_ui_object)
         .withResult<String>(R.string.ui_object_text)
-        .withResult<Int>(R.string.ui_object_center_coordinate, VariantType.INT_COORDINATE)
+        .withResult<Int>(R.string.ui_object_center_coordinate, VariantArgType.INT_COORDINATE)
         .withScopeRegistryId(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
         .hasCompositeTitle()
 }

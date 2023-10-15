@@ -5,25 +5,24 @@
 package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
+import top.xjunz.tasker.engine.applet.action.Break
+import top.xjunz.tasker.engine.applet.action.Continue
 import top.xjunz.tasker.engine.applet.action.Repeat
 import top.xjunz.tasker.engine.applet.action.Suspension
-import top.xjunz.tasker.engine.applet.action.pureAction
-import top.xjunz.tasker.engine.applet.base.Break
-import top.xjunz.tasker.engine.applet.base.Continue
+import top.xjunz.tasker.engine.applet.action.emptyArgOptimisticAction
 import top.xjunz.tasker.engine.applet.base.If
 import top.xjunz.tasker.engine.applet.base.WaitFor
 import top.xjunz.tasker.engine.applet.base.WaitUntil
-import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.action.PauseFor
 import top.xjunz.tasker.task.applet.action.PauseUntilTomorrow
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.LongDuration
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.task.runtime.LocalTaskManager
+import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.util.formatMinSecMills
 
 /**
@@ -37,39 +36,38 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x00_01)
     val waitUntilAction = appletOption(R.string.wait_until) {
         WaitUntil()
-    }.withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+    }.withValueArgument<Int>(R.string.wait_timeout, VariantArgType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
-        .withValueDescriber<Int> {
+        .withSingleValueDescriber<Int> {
             R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x0002)
     val waitForFlow = appletOption(R.string.wait_for_event) {
         WaitFor()
-    }.withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+    }.withValueArgument<Int>(R.string.wait_timeout, VariantArgType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
-        .withValueDescriber<Int> {
+        .withSingleValueDescriber<Int> {
             R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x00_03)
     val suspension = appletOption(R.string.delay) {
         Suspension()
-    }.withValueArgument<Int>(R.string.delay_interval, VariantType.INT_INTERVAL)
+    }.withValueArgument<Int>(R.string.delay_interval, VariantArgType.INT_INTERVAL)
         .withDescriber<Int> { applet, t ->
-            R.string.format_delay.formatSpans(formatMinSecMills(t!!).foreColored().clickable {
-                AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE, applet)
-            })
+            R.string.format_delay.formatSpans(
+                formatMinSecMills(t!!).foreColored().clickToEdit(applet)
+            )
         }.descAsTitle()
 
     @AppletOrdinal(0x00_04)
     val repeatFlow = appletOption(R.string.loop) {
         Repeat()
     }.withDescriber<Int> { applet, t ->
-        R.string.format_repeat.formatSpans(t.toString().foreColored().clickable {
-            AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE, applet)
-        })
-    }.descAsTitle().withHelperText(R.string.input_repeat_count)
+        R.string.format_repeat.formatSpans(t.toString().foreColored().clickToEdit(applet))
+    }.descAsTitle()
+        .withValueArgument<Int>(R.string.loop_count)
         .withResult<Repeat>(R.string.loop)
         .withResult<Int>(R.string.repeated_count)
         .withResult<String>(R.string.repeated_count)
@@ -86,15 +84,16 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0010)
     val stopshipTask = appletOption(R.string.stopship_current_task) {
-        pureAction {
+        emptyArgOptimisticAction {
             it.shouldStop = true
         }
     }
 
     @AppletOrdinal(0x0011)
     val disableTask = appletOption(R.string.disable_current_task) {
-        pureAction {
+        emptyArgOptimisticAction {
             LocalTaskManager.removeTask(it.attachingTask)
+            TaskStorage.toggleTaskFilename(it.attachingTask)
         }
     }
 
@@ -106,7 +105,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0020)
     val pauseFor = appletOption(R.string.pause_for) {
         PauseFor()
-    }.withValueArgument<Long>(R.string.specified_duration, VariantType.BITS_LONG_DURATION)
+    }.withValueArgument<Long>(R.string.specified_duration, VariantArgType.BITS_LONG_DURATION)
         .withDescriber<Long> { _, duration ->
             checkNotNull(duration)
             val parsed = LongDuration.parse(duration)

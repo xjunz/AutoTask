@@ -20,16 +20,19 @@ import top.xjunz.tasker.databinding.ItemTaskListBinding
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.applySystemInsets
 import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.invokeOnError
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.toastUnexpectedError
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.BaseBottomSheetDialog
 import top.xjunz.tasker.ui.base.inlineAdapter
+import top.xjunz.tasker.ui.main.ColorScheme
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 
 /**
@@ -77,8 +80,9 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
     private val adapter: Adapter<*> by lazy {
         inlineAdapter(viewModel.taskList.require(), ItemTaskListBinding::class.java, {
             binding.btnAdd.setNoDoubleClickListener {
-                parentViewModel.requestAddNewTask.value =
+                parentViewModel.requestAddNewTasks.value = listOf(
                     viewModel.taskList.require()[adapterPosition].clone(AppletOptionFactory)
+                )
             }
         }) { binding, _, task ->
             binding.btnAdd.isEnabled = !TaskStorage.getAllTasks().contains(task)
@@ -88,7 +92,11 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
                 binding.btnAdd.text = R.string.imported.text
             }
             binding.tvTaskName.text = task.metadata.title
-            binding.tvTaskDesc.text = task.metadata.spannedDescription
+            binding.tvTaskDesc.text = if (task.metadata.description.isNullOrEmpty()) {
+                R.string.no_desc_provided.str.foreColored(ColorScheme.textColorDisabled)
+            } else {
+                task.metadata.spannedDescription
+            }
             if (task.isResident) {
                 binding.ivTaskType.setImageResource(R.drawable.ic_hourglass_bottom_24px)
             } else if (task.isOneshot) {
@@ -107,6 +115,16 @@ class TaskListDialog : BaseBottomSheetDialog<DialogTaskListBinding>() {
         }
         binding.rvTaskList.applySystemInsets { v, insets ->
             v.updatePadding(bottom = insets.bottom)
+        }
+        binding.btnImportAll.setNoDoubleClickListener {
+            val exportable = viewModel.taskList.value?.filter { task ->
+                !TaskStorage.getAllTasks().contains(task)
+            }?.map { task ->
+                task.clone(AppletOptionFactory)
+            }
+            if (!exportable.isNullOrEmpty()) {
+                parentViewModel.requestAddNewTasks.value = exportable
+            }
         }
         observe(viewModel.taskList) {
             if (it.isNotEmpty()) {

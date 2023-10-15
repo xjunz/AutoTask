@@ -16,8 +16,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class WaitUntil : If() {
 
-    override val valueType: Int = VAL_TYPE_INT
-
     companion object {
         const val POLL_INTERVAL = 100L
     }
@@ -27,7 +25,7 @@ class WaitUntil : If() {
     override val defaultValue: Int = 5_000
 
     private val timeout by lazy {
-        value?.casted<Int>() ?: defaultValue
+        values[0]?.casted<Int>() ?: defaultValue
     }
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {

@@ -68,7 +68,7 @@
         <item>十一月</item>
         <item>十二月</item>
     </string-array>
-    <string-array name="days_in_week">
+    <string-array name="days_of_week">
         <item>周日</item>
         <item>周一</item>
         <item>周二</item>

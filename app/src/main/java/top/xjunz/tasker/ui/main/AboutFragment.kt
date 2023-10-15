@@ -4,14 +4,30 @@
 
 package top.xjunz.tasker.ui.main
 
+import android.app.Activity
+import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.Preferences
 import top.xjunz.tasker.R
@@ -19,9 +35,13 @@ import top.xjunz.tasker.app
 import top.xjunz.tasker.autostart.AutoStartUtil
 import top.xjunz.tasker.databinding.FragmentAboutBinding
 import top.xjunz.tasker.databinding.ItemMainOptionBinding
+import top.xjunz.tasker.ktx.compress
+import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.observeError
 import top.xjunz.tasker.ktx.show
 import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.currentService
@@ -29,6 +49,10 @@ import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isFloatingInspectorShown
 import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.service.serviceController
+import top.xjunz.tasker.task.storage.TaskStorage
+import top.xjunz.tasker.task.storage.TaskStorage.X_TASK_FILE_ARCHIVE_SUFFIX
+import top.xjunz.tasker.task.storage.TaskStorage.fileOnStorage
+import top.xjunz.tasker.task.storage.TaskStorage.getFileName
 import top.xjunz.tasker.ui.base.BaseFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
 import top.xjunz.tasker.ui.main.MainViewModel.Companion.peekMainViewModel
@@ -36,11 +60,42 @@ import top.xjunz.tasker.ui.purchase.PurchaseDialog
 import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.Feedbacks
+import top.xjunz.tasker.util.formatCurrentTime
+import java.util.zip.ZipOutputStream
 
 /**
  * @author xjunz 2023/03/01
  */
-class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
+class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget,
+    ActivityResultCallback<Uri?> {
+
+    private class InnerViewModel : ViewModel() {
+
+        val onSaveToStorageError = MutableLiveData<Throwable>()
+
+        fun saveTasksArchiveToStorage(contentResolver: ContentResolver, uri: Uri) {
+            viewModelScope.async {
+                withContext(Dispatchers.IO) {
+                    contentResolver.openOutputStream(uri)?.use {
+                        ZipOutputStream(it).use { zip ->
+                            TaskStorage.getAllTasks().forEach { task ->
+                                zip.compress(task.fileOnStorage, task.getFileName(false))
+                            }
+                        }
+                    }
+                }
+                toast(R.string.saved_to_storage)
+            }.invokeOnCompletion {
+                if (it != null && it !is CancellationException) {
+                    onSaveToStorageError.postValue(it)
+                }
+            }
+        }
+    }
+
+    private val viewModel by viewModels<InnerViewModel>()
+
+    private lateinit var saveToSAFLauncher: ActivityResultLauncher<String>
 
     private val adapter by lazy {
         inlineAdapter(MainOption.ALL_OPTIONS, ItemMainOptionBinding::class.java, {
@@ -66,6 +121,22 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        saveToSAFLauncher =
+            registerForActivityResult(object : ActivityResultContract<String, Uri?>() {
+                override fun createIntent(context: Context, input: String): Intent {
+                    return Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("*/*").putExtra(Intent.EXTRA_TITLE, input)
+                }
+
+                override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
+                    if (resultCode == Activity.RESULT_CANCELED) toast(R.string.cancelled)
+                    return intent?.data
+                }
+            }, this)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvOption.adapter = adapter
@@ -89,6 +160,7 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                 MainOption.ALL_OPTIONS.indexOf(MainOption.VersionInfo), true
             )
         }
+        observeError(viewModel.onSaveToStorageError)
     }
 
     private fun onOptionClicked(view: View, option: MainOption) {
@@ -173,10 +245,22 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget {
                 updateOption()
             }
 
+            MainOption.ExportTasks -> {
+                saveToSAFLauncher.launch(
+                    R.string.format_task_archive_name.format(
+                        formatCurrentTime(), X_TASK_FILE_ARCHIVE_SUFFIX
+                    )
+                )
+            }
         }
     }
 
     override fun getScrollTarget(): RecyclerView? {
         return if (isAdded) binding.rvOption else null
+    }
+
+    override fun onActivityResult(result: Uri?) {
+        if (result == null) return
+        viewModel.saveTasksArchiveToStorage(requireActivity().contentResolver, result)
     }
 }

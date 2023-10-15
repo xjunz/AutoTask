@@ -8,6 +8,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import top.xjunz.shared.ktx.requireParcelable
 import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
@@ -40,6 +41,13 @@ class XTaskDTO(
         return task
     }
 
+    fun toXTaskPrevVersionCode16(factory: AppletFactory): XTask {
+        val task = XTask()
+        task.flow = flow.toAppletPreVersionCode16(factory) as RootFlow
+        task.metadata = metadata
+        return task
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(flow, flags)
         parcel.writeParcelable(metadata, flags)
@@ -63,4 +71,9 @@ class XTaskDTO(
 
 fun XTask.toDTO(): XTaskDTO {
     return XTaskDTO(requireFlow().toDTO(), metadata)
+}
+
+val XTaskJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = false
 }

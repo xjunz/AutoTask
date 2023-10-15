@@ -23,8 +23,6 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     inline val requiredSize get() = if (minSize == maxSize) minSize else -1
 
-    override val valueType: Int = VAL_TYPE_IRRELEVANT
-
     /**
      * Whether the applets are repeated executed.
      */

@@ -36,6 +36,7 @@ data class ComponentInfoWrapper(
 
     override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
+            0 -> this
             1 -> packageName
             2 -> label
             else -> super.getReferredValue(which, runtime)

@@ -11,10 +11,6 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 open class When : ControlFlow() {
 
-    final override val maxSize: Int = 1
-
-    final override val minSize: Int = 1
-
     override val requiredIndex: Int = 1
 
     override fun staticCheckMyself(): Int {
@@ -28,7 +24,7 @@ open class When : ControlFlow() {
         super.onPostApply(runtime)
         runtime.ifSuccessful = runtime.isSuccessful
         if (!runtime.isSuccessful) {
-            runtime.halt()
+            runtime.shouldStop = true
         }
     }
 }

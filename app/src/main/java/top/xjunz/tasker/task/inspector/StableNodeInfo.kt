@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.ImageView
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.ktx.dup
 import top.xjunz.tasker.ktx.getVisibleBoundsIn
@@ -48,7 +47,6 @@ class StableNodeInfo constructor(val source: AccessibilityNodeInfo) {
                 children.trimToSize()
                 node.children = children
             }
-            AccessibilityNodeInfoCompat.wrap(this).recycle()
             return node
         }
     }

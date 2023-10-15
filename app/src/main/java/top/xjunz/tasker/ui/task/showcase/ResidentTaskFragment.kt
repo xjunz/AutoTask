@@ -6,8 +6,10 @@ package top.xjunz.tasker.ui.task.showcase
 
 import android.os.Bundle
 import android.view.View
+import androidx.recyclerview.widget.DiffUtil
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
+import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.task.storage.TaskStorage
 
 /**
@@ -15,8 +17,16 @@ import top.xjunz.tasker.task.storage.TaskStorage
  */
 class ResidentTaskFragment : BaseTaskShowcaseFragment() {
 
+    private val taskComparator = Comparator<XTask> { o1, o2 ->
+        var ret = o1.isEnabled.compareTo(o2.isEnabled)
+        if (ret == 0) {
+            ret = -o1.metadata.modificationTimestamp.compareTo(o2.metadata.modificationTimestamp)
+        }
+        return@Comparator ret
+    }
+
     override fun initTaskList(): List<XTask> {
-        return TaskStorage.getAllTasks().filter { it.isResident }
+        return TaskStorage.getResidentTasks().sortedWith(taskComparator)
     }
 
     override val index: Int = 1
@@ -30,11 +40,43 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
             if (it.metadata.taskType != XTask.TYPE_RESIDENT) return@observeTransient
             taskList.add(it)
             if (taskList.size == 1) togglePlaceholder(false)
-            adapter.notifyItemInserted(taskList.lastIndex)
+            // adapter.notifyItemInserted(taskList.lastIndex)
             notifyBadgeNumberChanged()
+            updateList(it)
         }
         observeTransient(viewModel.onTaskToggled) {
-            adapter.notifyItemChanged(taskList.indexOf(it), true)
+            updateList(it)
         }
     }
+
+    private fun updateList(task: XTask) {
+        val oldList = ArrayList(taskList)
+        taskList.sortWith(taskComparator)
+        val diffCallback = object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int {
+                return oldList.size
+            }
+
+            override fun getNewListSize(): Int {
+                return taskList.size
+            }
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition] === taskList[newItemPosition]
+            }
+
+            override fun areContentsTheSame(
+                oldItemPosition: Int,
+                newItemPosition: Int
+            ): Boolean {
+                return oldList[oldItemPosition] !== task
+            }
+
+            override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any {
+                return true
+            }
+        }
+        DiffUtil.calculateDiff(diffCallback, true).dispatchUpdatesTo(adapter)
+    }
+
 }

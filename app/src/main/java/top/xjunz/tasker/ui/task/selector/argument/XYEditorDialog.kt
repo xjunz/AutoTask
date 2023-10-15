@@ -17,9 +17,16 @@ import kotlinx.coroutines.launch
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.DialogCoordinateEditorBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.setOnEnterListener
+import top.xjunz.tasker.ktx.setSelectionToEnd
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.textString
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.util.IntValueUtil
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -36,7 +43,7 @@ class XYEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
 
     private class InnerViewModel : ViewModel() {
 
-        var type: Int = VariantType.INT_COORDINATE
+        var type: Int = VariantArgType.INT_COORDINATE
 
         var title: CharSequence? = null
 
@@ -94,7 +101,7 @@ class XYEditorDialog : BaseDialogFragment<DialogCoordinateEditorBinding>() {
 
     private fun initViews() {
         binding.tvTitle.text = viewModel.title
-        if (viewModel.type == VariantType.INT_COORDINATE) {
+        if (viewModel.type == VariantArgType.INT_COORDINATE) {
             val size = DisplayManagerBridge.size
             binding.tvHelp.text = R.string.format_screen_width_height.format(size.x, size.y)
             binding.cvContainer.isVisible = true

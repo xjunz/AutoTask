@@ -2,11 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <queries>
         <intent>
@@ -45,6 +46,36 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*.xtsk" />
+                <data android:pathPattern="/.*..*.xtsk" />
+                <data android:pathPattern="/.*..*..*.xtsk" />
+                <data android:pathPattern="/.*..*..*..*.xtsk" />
+                <data android:pathPattern="/.*..*..*..*..*.xtsk" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*.xtsks" />
+                <data android:pathPattern="/.*..*.xtsks" />
+                <data android:pathPattern="/.*..*..*.xtsks" />
+                <data android:pathPattern="/.*..*..*..*.xtsks" />
+                <data android:pathPattern="/.*..*..*..*..*.xtsks" />
+            </intent-filter>
         </activity>
 
         <provider
@@ -57,7 +88,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="top.xjunz.tasker.provider.file"
+            android:authorities="${applicationId}.provider.file"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -12,9 +12,11 @@ import top.xjunz.tasker.task.applet.option.registry.ApplicationCriterionRegistry
 import top.xjunz.tasker.task.applet.option.registry.BootstrapOptionRegistry
 import top.xjunz.tasker.task.applet.option.registry.ControlActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.EventCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.FileActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.GestureActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.GlobalActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.GlobalCriterionRegistry
+import top.xjunz.tasker.task.applet.option.registry.NetworkCriterionRegistry
 import top.xjunz.tasker.task.applet.option.registry.ShellCmdActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.TextActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.TextCriterionRegistry
@@ -43,13 +45,17 @@ object AppletOptionFactory : AppletFactory {
     val uiObjectRegistry =
         UiObjectCriterionRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_CRITERION_REGISTRY)
 
-    val timeRegistry = TimeCriterionRegistry(BootstrapOptionRegistry.ID_TIME_CRITERION_REGISTRY)
+    private val timeRegistry =
+        TimeCriterionRegistry(BootstrapOptionRegistry.ID_TIME_CRITERION_REGISTRY)
 
     private val globalInfoRegistry =
         GlobalCriterionRegistry(BootstrapOptionRegistry.ID_GLOBAL_CRITERION_REGISTRY)
 
     private val textRegistry =
         TextCriterionRegistry(BootstrapOptionRegistry.ID_TEXT_CRITERION_REGISTRY)
+
+    private val networkRegistry =
+        NetworkCriterionRegistry(BootstrapOptionRegistry.ID_NETWORK_CRITERION_REGISTRY)
 
     private val globalActionRegistry =
         GlobalActionRegistry(BootstrapOptionRegistry.ID_GLOBAL_ACTION_REGISTRY)
@@ -72,6 +78,9 @@ object AppletOptionFactory : AppletFactory {
     private val shellCmdActionRegistry =
         ShellCmdActionRegistry(BootstrapOptionRegistry.ID_SHELL_CMD_ACTION_REGISTRY)
 
+    private val fileActionRegistry =
+        FileActionRegistry(BootstrapOptionRegistry.ID_FILE_ACTION_REGISTRY)
+
     val uiObjectFlowRegistry =
         UiObjectFlowRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_FLOW_REGISTRY)
 
@@ -85,6 +94,7 @@ object AppletOptionFactory : AppletFactory {
         timeRegistry,
         globalInfoRegistry,
         textRegistry,
+        networkRegistry,
         /* action */
         controlActionRegistry,
         globalActionRegistry,
@@ -93,6 +103,7 @@ object AppletOptionFactory : AppletFactory {
         textActionRegistry,
         appActionRegistry,
         shellCmdActionRegistry,
+        fileActionRegistry,
         /* control */
         uiObjectFlowRegistry,
     )

@@ -17,20 +17,18 @@ class BoundsCriterion<T : Any>(
     private inline val bounds: (target: T, scope: Int, unit: Int) -> Float
 ) : Criterion<T, Distance>() {
 
-    override val valueType: Int = VAL_TYPE_LONG
-
     override fun matchTarget(target: T, value: Distance): AppletResult {
         return AppletResult.resultOf(bounds(target, value.scope, value.unit)) {
             NumberRangeUtil.contains(value.rangeStart, value.rangeEnd, it)
         }
     }
 
-    override fun serializeValueToString(value: Any): String {
-        value as Distance
-        return value.compose().toString(16)
+    override fun serializeArgumentToString(which: Int, rawType: Int, arg: Any): String {
+        arg as Distance
+        return arg.compose().toString(16)
     }
 
-    override fun deserializeValueFromString(src: String): Any {
+    override fun deserializeArgumentFromString(which: Int, rawType: Int, src: String): Any {
         return Distance.parse(src.toLong(16))
     }
 }

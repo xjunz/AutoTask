@@ -35,7 +35,7 @@
     <string name="is_launcher">%s是桌面</string>
     <string name="not_is_launcher">%s不是桌面</string>
 
-    <string name="with_type">控件类型为</string>
+    <string name="with_ui_object_type">控件类型为</string>
     <string name="with_text">文本内容是</string>
     <string name="not_with_text">文本内容不是</string>
     <string name="in_length_range">文本长度范围</string>
@@ -66,7 +66,7 @@
     <string name="node_depth">在布局树中的深度</string>
     <string name="node_index_in_tree">在布局树中的位置</string>
     <string name="node_index_in_parent">在父布局中的位置</string>
-    <string name="with_id">控件ID为</string>
+    <string name="with_ui_object_id">控件ID为</string>
 
     <string name="in_time_range">在指定时间范围</string>
     <string name="not_in_time_range">不在指定时间范围</string>
@@ -117,7 +117,7 @@
     <string name="notification_matches">通知内容满足正则表达式</string>
     <string name="not_notification_matches">通知内容不满足正则表达式</string>
     <string name="on_status_bar_notification_received">收到状态栏通知时</string>
-    <string name="on_toast_notification_received">收到吐司通知时</string>
+    <string name="on_toast_notification_received">显示吐司通知时</string>
     <string name="open_notification_shade">下拉通知栏</string>
     <string name="lock_screen">熄灭屏幕</string>
 </resources>

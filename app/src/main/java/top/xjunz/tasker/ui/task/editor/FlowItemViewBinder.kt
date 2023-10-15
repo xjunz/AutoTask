@@ -66,8 +66,8 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
             tvTitle.isEnabled = !vm.isReadyOnly
             bullet.isVisible = false
             // Don't show innate value
-            var desc = if (option.isValueInnate) null else option.describe(applet)
-            var title = option.loadTitle(applet) ?: applet.comment
+            var desc = option.describe(applet)
+            var title = option.loadSpannedTitle(applet) ?: applet.comment
             tvTitle.isVisible = true
             if (option.descAsTitle) {
                 title = desc
@@ -134,7 +134,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                     }
                 }
             } else {
-                if (option.arguments.isNotEmpty() || (applet.value != null && !option.isValueInnate)) {
+                if (option.arguments.isNotEmpty() || applet.values.isNotEmpty()) {
                     ibAction.tag = ACTION_EDIT
                     ibAction.setIconResource(R.drawable.ic_edit_24dp)
                     ibAction.setContentDescriptionAndTooltip(R.string.edit.text)
@@ -148,7 +148,7 @@ class FlowItemViewBinder(private val vm: FlowEditorViewModel) {
                 title = title?.toString()
                 val ahead = !vm.referentAnchor.isAttached || applet.isAheadOf(vm.referentAnchor)
                 // When selecting ref, only enable valid targets
-                val refs = if (!ahead) emptyList() else option.findResults(vm.referentDescriptor)
+                val refs = if (!ahead) emptyList() else option.matchReferents(vm.referentDescriptor)
                 if (applet.isContainer && depth == 3) {
                     root.isEnabled = ahead && vm.hasCandidateReferents(applet as Flow)
                     containerReferents.isVisible = false

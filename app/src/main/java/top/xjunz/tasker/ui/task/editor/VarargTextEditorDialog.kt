@@ -18,7 +18,19 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.DialogVarargTextEditorBinding
 import top.xjunz.tasker.databinding.ItemVarargTextBinding
 import top.xjunz.tasker.engine.applet.base.Applet
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.beginAutoTransition
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.foreColored
+import top.xjunz.tasker.ktx.italic
+import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.peekParentViewModel
+import top.xjunz.tasker.ktx.scrollPositionToCenterVertically
+import top.xjunz.tasker.ktx.setDrawableStart
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.inlineAdapter
@@ -50,7 +62,7 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
         fun setInitialApplet(initial: Applet) {
             applet = initial
             val refNames = initial.references.values.toList()
-            val texts = initial.value?.casted<String>()?.split("%s")
+            val texts = initial.values.values.firstOrNull()?.casted<String>()?.split("%s")
             if (texts != null) {
                 var index = 0
                 var exhuasted = false
@@ -127,6 +139,7 @@ class VarargTextEditorDialog : BaseDialogFragment<DialogVarargTextEditorBinding>
                                 viewModel.args.add(adapterPosition, emptyArg)
                                 adapter.notifyItemInserted(adapterPosition)
                             }
+
                             R.string.add_after.str -> {
                                 if (adapterPosition == viewModel.args.lastIndex) {
                                     viewModel.args.add(emptyArg)

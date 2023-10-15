@@ -28,7 +28,7 @@ open class ContainsUiObject : ScopeFlow<UiObjectTarget>() {
     }
 
     protected open fun getUiObjectSearchRoot(runtime: TaskRuntime): AccessibilityNodeInfo {
-        return runtime.getReferentOf(this, 0) as AccessibilityNodeInfo
+        return runtime.getReferenceArgument(this, 0) as AccessibilityNodeInfo
     }
 
     protected open suspend fun matchUiObject(

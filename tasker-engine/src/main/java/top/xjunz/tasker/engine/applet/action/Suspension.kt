@@ -5,10 +5,12 @@
 package top.xjunz.tasker.engine.applet.action
 
 import android.util.ArrayMap
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import java.lang.ref.WeakReference
@@ -16,23 +18,26 @@ import java.lang.ref.WeakReference
 /**
  * @author xjunz 2022/11/15
  */
-class Suspension : Action<Int>(VAL_TYPE_INT) {
+class Suspension : SingleArgAction<Int>() {
 
-    private val scopes = ArrayMap<Long, WeakReference<CoroutineScope>>()
+    private val scopes = ArrayMap<Long, WeakReference<Job>>()
 
     override val defaultValue: Int = 0
 
-    override suspend fun doAction(value: Int?, runtime: TaskRuntime): AppletResult {
-        check(value != null)
+    override suspend fun doAction(arg: Int?, runtime: TaskRuntime): AppletResult {
+        check(arg != null)
         val fingerprint = runtime.fingerprint
         // Remove and cancel existent scope if there is one with an identical fingerprint
-        scopes.remove(fingerprint)?.get()?.cancel()
+        scopes.remove(fingerprint)?.get()?.cancel("Suspension interrupted by peer!")
         coroutineScope {
-            scopes[fingerprint] = WeakReference(this)
-            runtime.isSuspending = true
-            delay(value.toLong())
-            runtime.isSuspending = false
-            scopes.remove(fingerprint)
+            val job = launch(start = CoroutineStart.LAZY) {
+                runtime.isSuspending = true
+                delay(arg.toLong())
+                runtime.isSuspending = false
+                scopes.remove(fingerprint)
+            }
+            scopes[fingerprint] = WeakReference(job)
+            job.join()
         }
         return AppletResult.EMPTY_SUCCESS
     }

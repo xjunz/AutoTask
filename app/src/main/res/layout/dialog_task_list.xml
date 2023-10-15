@@ -31,8 +31,16 @@
             android:requiresFadingEdge="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constrainedHeight="true"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btn_import_all"
             app:layout_constraintTop_toBottomOf="@id/tv_title"
             tools:listitem="@layout/item_task_list" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_import_all"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/import_all"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -44,7 +44,7 @@ class TaskShowcaseViewModel : ViewModel() {
     /**
      * Request adding a new task.
      */
-    val requestAddNewTask = MutableLiveData<XTask>()
+    val requestAddNewTasks = MutableLiveData<List<XTask>>()
 
     /**
      * When a new task is added.
@@ -76,16 +76,28 @@ class TaskShowcaseViewModel : ViewModel() {
         }
     }
 
-    fun addRequestedTask() {
-        val task = requestAddNewTask.require()
-        if (TaskStorage.getAllTasks().contains(task)) {
-            toast(R.string.prompt_repeated_task)
-            return
-        }
+    fun addRequestedTasks() {
         viewModelScope.async {
-            TaskStorage.persistTask(task)
-            onNewTaskAdded.value = task
-            toast(R.string.format_new_task_added.format(task.metadata.title))
+            val tasks = requestAddNewTasks.require()
+            val duplicated = mutableListOf<XTask>()
+            val succeeded = mutableListOf<XTask>()
+            tasks.forEach {
+                if (TaskStorage.getAllTasks().contains(it)) {
+                    duplicated.add(it)
+                } else {
+                    TaskStorage.persistTask(it)
+                    TaskStorage.addTask(it)
+                    onNewTaskAdded.value = it
+                    succeeded.add(it)
+                }
+            }
+            if (duplicated.size == 1 && succeeded.size == 0) {
+                toast(R.string.prompt_repeated_task)
+            } else if (duplicated.size == 0) {
+                toast(R.string.format_import_tasks_succeeded.format(succeeded.size))
+            } else {
+                toast(R.string.format_import_tasks_failed.format(duplicated.size, succeeded.size))
+            }
         }.invokeOnError {
             it.logcatStackTrace()
             toastUnexpectedError(it)
@@ -110,6 +122,7 @@ class TaskShowcaseViewModel : ViewModel() {
             if (!removed) return@launch
             try {
                 TaskStorage.persistTask(task)
+                TaskStorage.addTask(task)
                 LocalTaskManager.updateTask(prevChecksum, task)
                 toast(R.string.task_updated)
                 onTaskUpdated.value = task

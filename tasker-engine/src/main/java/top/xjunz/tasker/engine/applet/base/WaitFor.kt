@@ -23,14 +23,12 @@ class WaitFor : If() {
 
     override val requiredIndex: Int = -1
 
-    override val valueType: Int = VAL_TYPE_INT
-
     private var waitingJob: WeakReference<Job>? = null
 
     override val defaultValue: Int = 5_000
 
     private val timeout by lazy {
-        value?.casted<Int>() ?: defaultValue
+        values[0]?.casted<Int>() ?: defaultValue
     }
 
     fun remind() {

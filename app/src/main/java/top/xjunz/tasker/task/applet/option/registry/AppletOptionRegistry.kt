@@ -6,6 +6,7 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.shared.utils.unsupportedOperation
 import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.AppletOption.Companion.TITLE_NONE
@@ -26,10 +27,13 @@ abstract class AppletOptionRegistry(val id: Int) {
             val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
+            option.name = it.name
             // There may be preset appletId
             val appletId = if (option.appletId != -1) option.appletId
             else it.name.hashCode() and 0xFFFF
-            check(registeredId.add(appletId))
+            check(registeredId.add(appletId)) {
+                "Duplicated option in $javaClass(${it.name})"
+            }
             option.appletId = appletId
             option.categoryId = anno.ordinal
             it.isAccessible = accessible
@@ -57,7 +61,13 @@ abstract class AppletOptionRegistry(val id: Int) {
         return AppletOption(id, title, TITLE_NONE, creator)
     }
 
-    lateinit var allOptions: List<AppletOption>
+    protected fun CharSequence.clickToEdit(applet: Applet): CharSequence {
+        return clickable {
+            AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE, applet)
+        }
+    }
+
+    private lateinit var allOptions: List<AppletOption>
 
     val categorizedOptions: List<AppletOption> by lazy {
         val ret = ArrayList<AppletOption>()

@@ -4,8 +4,14 @@
 
 package top.xjunz.tasker.engine.applet.util
 
-import top.xjunz.tasker.engine.applet.action.LambdaAction
-import top.xjunz.tasker.engine.applet.base.*
+import top.xjunz.tasker.engine.applet.action.emptyArgAction
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.AppletResult
+import top.xjunz.tasker.engine.applet.base.Do
+import top.xjunz.tasker.engine.applet.base.DslFlow
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.RootFlow
 import top.xjunz.tasker.engine.applet.criterion.DslCriterion
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 
@@ -32,7 +38,7 @@ internal fun Flow.Then(block: Do.() -> Unit) {
 
 @FlowDsl
 internal fun Do.Action(block: () -> Boolean) {
-    add(LambdaAction<Any>(Applet.VAL_TYPE_IRRELEVANT) { _, _ ->
+    add(emptyArgAction {
         block()
     })
 }
@@ -91,19 +97,11 @@ internal fun <T : Any, V : Any> DslCriterion<T, V>.Matcher(block: (T, V) -> Bool
     matcher = block
 }
 
-@FlowDsl
-internal fun <T : Any, V : Any> DslCriterion<T, V>.Value(what: V, isInverted: Boolean = false) {
-    value = what
-    this.isInverted = isInverted
-}
-
 internal class DSLApplet(id: Int = NO_ID) : Applet() {
 
     init {
         this.id = id
     }
-
-    override val valueType: Int = VAL_TYPE_IRRELEVANT
 
     override suspend fun apply(runtime: TaskRuntime): AppletResult {
         return AppletResult.EMPTY_SUCCESS

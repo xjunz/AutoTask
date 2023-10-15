@@ -6,6 +6,7 @@ package top.xjunz.tasker.ui.task.showcase
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.observeTransient
 import top.xjunz.tasker.task.runtime.LocalTaskManager
@@ -24,6 +25,9 @@ class EnabledTaskFragment : BaseTaskShowcaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnPresetTasksShortcut.let {
+            (it.parent as ViewGroup).removeView(it)
+        }
         observeTransient(viewModel.onTaskToggled) {
             if (it.isEnabled) {
                 taskList.add(it)

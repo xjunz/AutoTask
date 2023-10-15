@@ -54,14 +54,14 @@
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
                 android:maxLength="4"
-                app:layout_constraintBottom_toBottomOf="@+id/btn_no_min_limit"
-                app:layout_constraintEnd_toStartOf="@+id/btn_no_min_limit"
+                app:layout_constraintBottom_toBottomOf="@+id/btn_clear_min"
+                app:layout_constraintEnd_toStartOf="@+id/btn_clear_min"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="@+id/tv_subtitle_min"
-                app:layout_constraintTop_toTopOf="@+id/btn_no_min_limit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_clear_min" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_no_min_limit"
+                android:id="@+id/btn_clear_min"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -105,14 +105,14 @@
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
                 android:maxLength="4"
-                app:layout_constraintBottom_toBottomOf="@+id/btn_no_max_limit"
-                app:layout_constraintEnd_toStartOf="@+id/btn_no_max_limit"
+                app:layout_constraintBottom_toBottomOf="@+id/btn_clear_max"
+                app:layout_constraintEnd_toStartOf="@+id/btn_clear_max"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="@+id/tv_subtitle_max"
-                app:layout_constraintTop_toTopOf="@+id/btn_no_max_limit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_clear_max" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_no_max_limit"
+                android:id="@+id/btn_clear_max"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -18,6 +18,4 @@ internal class DslCriterion<T : Any, V : Any> : Criterion<T, V>() {
             matcher(it, value)
         }
     }
-
-    override var valueType: Int = VAL_TYPE_IRRELEVANT
 }

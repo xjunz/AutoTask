@@ -8,13 +8,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.runtimeException
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.app
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.engine.dto.AppletChecksum.calculateChecksum
 import top.xjunz.tasker.engine.dto.XTaskDTO
+import top.xjunz.tasker.engine.dto.XTaskJson
 import top.xjunz.tasker.engine.dto.toDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
@@ -60,14 +62,18 @@ object TaskStorage {
 
     private val storageDir: File = app.getExternalFilesDir("xtsk")!!
 
-    private fun getTaskFileOnStorage(task: XTask, isEnabled: Boolean): File {
+    private fun getTaskFileOnStorage(metadata: XTask.Metadata, isEnabled: Boolean): File {
         val flag = if (isEnabled) "1" else "0"
-        return File(storageDir, task.metadata.identifier + flag + X_TASK_FILE_SUFFIX)
+        return File(storageDir, metadata.identifier + flag + X_TASK_FILE_SUFFIX)
+    }
+
+    fun XTask.getFileName(isEnabled: Boolean): String {
+        return getTaskFileOnStorage(metadata, isEnabled).name
     }
 
     val XTask.fileOnStorage: File
         get() {
-            return getTaskFileOnStorage(this, isEnabled)
+            return getTaskFileOnStorage(metadata, isEnabled)
         }
 
     fun removeTask(task: XTask) {
@@ -81,57 +87,63 @@ object TaskStorage {
     }
 
     fun toggleTaskFilename(task: XTask): Boolean {
-        val file = getTaskFileOnStorage(task, !task.isEnabled)
+        val file = getTaskFileOnStorage(task.metadata, !task.isEnabled)
         if (file.exists()) {
-            file.renameTo(getTaskFileOnStorage(task, task.isEnabled))
+            file.renameTo(getTaskFileOnStorage(task.metadata, task.isEnabled))
             return true
         }
         return false
     }
 
     @OptIn(ExperimentalSerializationApi::class)
+    private suspend fun loadAssetTasks(
+        factory: AppletFactory,
+        assetName: String,
+        into: MutableList<XTask>
+    ) {
+        withContext(Dispatchers.IO) {
+            ZipInputStream(app.assets.open(assetName)).use {
+                var entry = it.nextEntry
+                while (entry != null) {
+                    val dto = XTaskJson.decodeFromStream<XTaskDTO>(it)
+                    val prevVC16 = dto.metadata.version < 16
+                    check(dto.verifyChecksum()) {
+                        "Checksum mismatch for xtsk ${dto.metadata.title}"
+                    }
+                    val task: XTask
+                    if (prevVC16) {
+                        task = dto.toXTaskPrevVersionCode16(factory)
+                        task.updatePrevVersion16()
+                    } else {
+                        task = dto.toXTask(factory, false)
+                    }
+                    task.metadata.isPreload = true
+                    into.add(task)
+                    entry = it.nextEntry
+                }
+            }
+            into.sortBy { it.title }
+        }
+    }
+
     suspend fun loadPresetTasks(factory: AppletFactory) {
-        withContext(Dispatchers.IO) {
-            ZipInputStream(app.assets.open("prextsks.zip")).use {
-                var entry = it.nextEntry
-                while (entry != null) {
-                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory, false)
-                    task.metadata.isPreload = true
-                    presets.add(task)
-                    entry = it.nextEntry
-                }
-            }
-            presetTaskLoaded = true
-            presets.sortBy { it.title }
-        }
+        loadAssetTasks(factory, "presets.xtsks", presets)
+        presetTaskLoaded = true
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     suspend fun loadExampleTasks(factory: AppletFactory) {
-        withContext(Dispatchers.IO) {
-            ZipInputStream(app.assets.open("extsks.zip")).use {
-                var entry = it.nextEntry
-                while (entry != null) {
-                    val task = Json.decodeFromStream<XTaskDTO>(it).toXTask(factory, false)
-                    task.metadata.isPreload = true
-                    examples.add(task)
-                    entry = it.nextEntry
-                }
-            }
-            exampleTaskLoaded = true
-            examples.sortBy { it.title }
-        }
+        loadAssetTasks(factory, "examples.zip", examples)
+        exampleTaskLoaded = true
     }
 
-    suspend fun persistTask(task: XTask) {
+    private suspend fun persistTask(dto: XTaskDTO, isEnabled: Boolean) {
         withContext(Dispatchers.IO) {
-            val file = task.fileOnStorage
+            val file = getTaskFileOnStorage(dto.metadata, isEnabled)
             if (file.parentFile?.exists() == true || file.parentFile?.mkdirs() == true) {
                 if (file.exists() || file.createNewFile()) {
                     file.outputStream().bufferedWriter().use {
-                        it.write(Json.encodeToString(task.toDTO()))
+                        it.write(XTaskJson.encodeToString(dto))
                     }
-                    all.add(task)
                 } else {
                     runtimeException("Failed to create new file!")
                 }
@@ -139,6 +151,14 @@ object TaskStorage {
                 runtimeException("Failed to mkdirs!")
             }
         }
+    }
+
+    fun addTask(task: XTask) {
+        all.add(task)
+    }
+
+    suspend fun persistTask(task: XTask) {
+        persistTask(task.toDTO(), task.isEnabled)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -157,12 +177,22 @@ object TaskStorage {
                 val isEnabled = if (flag == 0) false else if (flag == 1) true else return@forEach
                 file.inputStream().use {
                     runCatching {
-                        val task = Json.decodeFromStream<XTaskDTO>(it).apply {
-                            check(verifyChecksum()) {
-                                "Checksum mismatch for xtsk file $file?!"
-                            }
-                        }.toXTask(AppletOptionFactory, true)
-                        all.add(task)
+                        val dto = XTaskJson.decodeFromStream<XTaskDTO>(it)
+                        val prevVC16 = dto.metadata.version < 16
+                        check(dto.verifyChecksum()) {
+                            "Checksum mismatch for xtsk file ${file.path}(${dto.metadata.title})!"
+                        }
+                        val task: XTask
+                        if (prevVC16) {
+                            task = dto.toXTaskPrevVersionCode16(AppletOptionFactory)
+                            // Mark outdated task files with '.pv16' suffix
+                            file.renameTo(File(file.parentFile, file.name + ".pv16"))
+                            // Persist the updated task file
+                            persistTask(task.updatePrevVersion16(), isEnabled)
+                        } else {
+                            task = dto.toXTask(AppletOptionFactory, true)
+                        }
+                        addTask(task)
                         if (isEnabled) {
                             LocalTaskManager.enableResidentTask(task)
                         }
@@ -177,8 +207,16 @@ object TaskStorage {
         }
     }
 
-    private fun findTask(checksum: Long): XTask? {
-        return all.find { it.checksum == checksum }
+    /**
+     * Update the [XTask.Metadata.version] and [XTask.Metadata.checksum] for pv16 tasks.
+     */
+    private fun XTask.updatePrevVersion16(): XTaskDTO {
+        metadata.version = BuildConfig.VERSION_CODE
+        val dto = toDTO()
+        val newChecksum = dto.calculateChecksum()
+        dto.metadata.checksum = newChecksum
+        metadata.checksum = newChecksum
+        return dto
     }
 
     fun getResidentTasks(): List<XTask> {

@@ -162,7 +162,7 @@ class TaskRuntime private constructor() {
     }
 
     fun halt() {
-        runtimeScope?.cancel()
+        runtimeScope?.cancel("The runtime is halt manually!")
     }
 
     /**
@@ -183,22 +183,15 @@ class TaskRuntime private constructor() {
         }
     }
 
-    fun getReferentOf(applet: Applet, which: Int): Any? {
+    fun getReferenceArgument(applet: Applet, which: Int): Any? {
+        check(applet.references.containsKey(which)) {
+            "Argument $which is not referring to anything!"
+        }
         val name = applet.references[which]
-        if (name != null) {
-            return getReferentByName(name)
+        checkNotNull(name) {
+            "Argument $which is referring a null referent name!"
         }
-        return null
-    }
-
-    fun getAllReferentOf(applet: Applet): Array<Any?> {
-        return if (applet.references.isEmpty()) {
-            emptyArray()
-        } else {
-            Array(applet.references.size) {
-                getReferentByName(applet.references[it])
-            }
-        }
+        return getReferentByName(name)
     }
 
     fun registerReferent(referent: Any?) {

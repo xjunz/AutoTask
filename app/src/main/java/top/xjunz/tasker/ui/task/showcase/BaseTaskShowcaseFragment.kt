@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import top.xjunz.tasker.R
+import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
 import top.xjunz.tasker.databinding.ItemTaskShowcaseBinding
 import top.xjunz.tasker.engine.task.XTask
@@ -86,10 +87,12 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             binding.ibShare.setNoDoubleClickListener {
                 val task = taskList[adapterPosition]
                 val origin = task.fileOnStorage
-                val target =
-                    File(requireActivity().noBackupFilesDir, task.title + X_TASK_FILE_SUFFIX)
+                val target = File(
+                    app.getSharedFileCacheDir(),
+                    task.title.replace('/', '\\') + X_TASK_FILE_SUFFIX
+                )
                 origin.copyRecursively(target, true)
-                mvm.currentSharedFile.value = target
+                mvm.requestShareFile.value = target
             }
         }
     }
@@ -201,6 +204,9 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvTaskList)
+        binding.btnPresetTasksShortcut.setNoDoubleClickListener {
+            TaskCollectionSelectorDialog().show(requireActivity().supportFragmentManager)
+        }
         observe(mvm.appbarHeight) {
             binding.rvTaskList.updatePadding(top = it)
         }

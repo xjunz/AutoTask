@@ -27,9 +27,8 @@ import top.xjunz.tasker.task.applet.flow.ElseStopship
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.flow.TimeFlow
-import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.util.formatMinSecMills
 
 open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY) {
@@ -44,6 +43,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         const val ID_NOTIFICATION_CRITERION_REGISTRY = 0x14
         const val ID_TEXT_CRITERION_REGISTRY = 0x15
         const val ID_UI_OBJECT_CRITERION_REGISTRY = 0x16
+        const val ID_NETWORK_CRITERION_REGISTRY = 0x17
 
         const val ID_GLOBAL_ACTION_REGISTRY = 0x50
         const val ID_UI_OBJECT_ACTION_REGISTRY = 0x51
@@ -52,6 +52,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         const val ID_TEXT_ACTION_REGISTRY = 0x54
         const val ID_GESTURE_ACTION_REGISTRY = 0x55
         const val ID_SHELL_CMD_ACTION_REGISTRY = 0x56
+        const val ID_FILE_ACTION_REGISTRY = 0x57
 
         const val ID_UI_OBJECT_FLOW_REGISTRY = 0x60
     }
@@ -105,7 +106,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             uiObjectFlows,
             textCriteria,
             timeCriteria,
-            globalCriteria
+            globalCriteria,
+            networkCriteria
         )
     }
 
@@ -117,7 +119,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             gestureActions,
             textActions,
             appActions,
-            shellCmdActions
+            shellCmdActions,
+            fileActions
         )
     }
 
@@ -138,7 +141,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     @AppletOrdinal(0x0001)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
-        .withResult<ComponentInfoWrapper>(R.string.current_top_app)
+        .withResult<String>(R.string.current_top_app, VariantArgType.TEXT_PACKAGE_NAME)
         .withResult<String>(R.string.current_package_name)
         .withResult<String>(R.string.current_package_label)
         .withResult<AccessibilityNodeInfo>(R.string.current_window)
@@ -164,17 +167,17 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     @AppletOrdinal(0x0008)
     val waitUntilFlow = flowOption<WaitUntil>(R.string.wait_until)
-        .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+        .withValueArgument<Int>(R.string.wait_timeout, VariantArgType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
-        .withValueDescriber<Int> {
+        .withSingleValueDescriber<Int> {
             R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
     @AppletOrdinal(0x0009)
     val waitForFlow = flowOption<WaitFor>(R.string.wait_for_event)
-        .withValueArgument<Int>(R.string.wait_timeout, VariantType.INT_INTERVAL)
+        .withValueArgument<Int>(R.string.wait_timeout, VariantArgType.INT_INTERVAL)
         .withHelperText(R.string.tip_wait_timeout)
-        .withValueDescriber<Int> {
+        .withSingleValueDescriber<Int> {
             R.string.format_max_wait_duration.formatSpans(formatMinSecMills(it).foreColored())
         }
 
@@ -210,6 +213,10 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         ID_TEXT_CRITERION_REGISTRY, R.string.text_criteria
     )
 
+    @AppletOrdinal(0x0016)
+    val networkCriteria =
+        flowOptionWithId<PhantomFlow>(ID_NETWORK_CRITERION_REGISTRY, R.string.network_status)
+
     @AppletOrdinal(0x0020)
     val globalActions =
         flowOptionWithId<PhantomFlow>(ID_GLOBAL_ACTION_REGISTRY, R.string.global_actions)
@@ -241,4 +248,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x0040)
     val shellCmdActions =
         flowOptionWithId<PhantomFlow>(ID_SHELL_CMD_ACTION_REGISTRY, R.string.shell_cmd)
+
+    @AppletOrdinal(0x0041)
+    val fileActions =
+        flowOptionWithId<PhantomFlow>(ID_FILE_ACTION_REGISTRY, R.string.file_operations)
 }

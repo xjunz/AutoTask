@@ -6,14 +6,15 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
-import top.xjunz.tasker.engine.applet.action.LambdaReferenceAction.Companion.referenceAction
-import top.xjunz.tasker.engine.applet.action.Processor.Companion.unaryArgProcessor
-import top.xjunz.tasker.engine.applet.action.unaryArgValueAction
+import top.xjunz.tasker.engine.applet.action.createProcessor
+import top.xjunz.tasker.engine.applet.action.optimisticVarRefAction
+import top.xjunz.tasker.engine.applet.action.singleNonNullArgAction
 import top.xjunz.tasker.ktx.firstGroupValue
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
+import top.xjunz.tasker.task.applet.value.VariantArgType
 
 /**
  * @author xjunz 2023/01/06
@@ -22,15 +23,11 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val logcatText = appletOption(R.string.logcat_text) {
-        referenceAction<String> { args, value, runtime ->
-            runtime.snapshot?.logcat(value?.format(*args))
-            true
+        optimisticVarRefAction<String> { value, refs, runtime ->
+            runtime.snapshot?.logcat(value.format(*refs))
         }
-    }.withUnaryArgument<String>(
-        name = R.string.log_text,
-        isRef = false,
-        isCollection = true
-    ).withResult<String>(R.string.displayed_text)
+    }.withValueArgument<String>(R.string.logcat_text, VariantArgType.TEXT_FORMAT)
+        .withResult<String>(R.string.displayed_text)
         .withDescriber<String> { applet, t ->
             val bolds = applet.references.values.map {
                 ("\${$it}").foreColored()
@@ -40,8 +37,10 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0001)
     val extractText = appletOption(R.string.format_extract_text) {
-        unaryArgProcessor<String, String> { arg, v ->
-            if (v == null) null else arg?.firstGroupValue(v)
+        createProcessor { args, _ ->
+            val src = args[0] as? String
+            val regex = args[1] as? String
+            if (regex == null) null else src?.firstGroupValue(regex)
         }
     }.withRefArgument<String>(R.string.text)
         .withValueArgument<String>(R.string.regex)
@@ -51,7 +50,7 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0002)
     val copyText = appletOption(R.string.format_copy_text) {
-        unaryArgValueAction<String> { text ->
+        singleNonNullArgAction<String> { text ->
             ClipboardManagerBridge.copyToClipboard(text)
             true
         }
@@ -59,21 +58,17 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
         .hasCompositeTitle()
 
     @AppletOrdinal(0x0003)
-    val makeToast = appletOption(R.string.format_make_toast) {
-        referenceAction<String> { args, value, _ ->
-            currentService.overlayToastBridge.showOverlayToast(value?.format(*args))
-            true
+    val makeToast = appletOption(R.string.make_toast) {
+        optimisticVarRefAction<String> { value, refs, _ ->
+            val text = value.format(*refs)
+            currentService.overlayToastBridge.showOverlayToast(text)
         }
-    }.withUnaryArgument<String>(
-        name = R.string.msg_to_toast,
-        substitution = R.string.text_message,
-        isRef = false,
-        isCollection = true
-    ).withResult<String>(R.string.displayed_text)
+    }.withValueArgument<String>(R.string.msg_to_toast, VariantArgType.TEXT_FORMAT)
+        .withResult<String>(R.string.displayed_text)
         .withDescriber<String> { applet, t ->
             val bolds = applet.references.values.map {
                 ("\${$it}").foreColored()
             }.toTypedArray()
             t?.formatSpans(*bolds)
-        }.hasCompositeTitle()
+        }
 }

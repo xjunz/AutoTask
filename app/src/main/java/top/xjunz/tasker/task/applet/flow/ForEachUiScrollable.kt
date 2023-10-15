@@ -5,7 +5,6 @@
 package top.xjunz.tasker.task.applet.flow
 
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.engine.applet.base.Loop
 import top.xjunz.tasker.engine.runtime.Referent
@@ -19,10 +18,8 @@ import top.xjunz.tasker.task.applet.value.ScrollMetrics
  */
 class ForEachUiScrollable : Loop(), Referent {
 
-    override val valueType: Int = VAL_TYPE_LONG
-
     private val metrics by lazy {
-        ScrollMetrics.parse(value as Long)
+        ScrollMetrics.parse(firstValue as Long)
     }
 
     private var currentChild: AccessibilityNodeInfo? = null
@@ -39,23 +36,19 @@ class ForEachUiScrollable : Loop(), Referent {
     }
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
-        val referentNode = runtime.getReferentOf(this, 0) as AccessibilityNodeInfo
+        val referentNode = runtime.getReferenceArgument(this, 0) as AccessibilityNodeInfo
         val scrollable = uiDevice.wrapUiScrollable(metrics.isVertical, referentNode)
         var hitBottomCount = 0
         do {
             referentNode.ensureRefresh()
             for (i in 0 until referentNode.childCount) {
                 val child = referentNode.getChild(i) ?: continue
-                try {
-                    child.ensureRefresh()
-                    if (!child.isVisibleToUser) continue
-                    currentChild = child
-                    runtime.getTarget<UiObjectTarget>().source = child
-                    super.applyFlow(runtime)
-                    currentCount++
-                } finally {
-                    AccessibilityNodeInfoCompat.wrap(child).recycle()
-                }
+                child.ensureRefresh()
+                if (!child.isVisibleToUser) continue
+                currentChild = child
+                runtime.getTarget<UiObjectTarget>().source = child
+                super.applyFlow(runtime)
+                currentCount++
                 if (shouldBreak) break
             }
             if (!scrollable.scrollForward(metrics.steps)) {

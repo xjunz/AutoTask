@@ -15,11 +15,11 @@ import top.xjunz.tasker.engine.applet.util.isAheadOf
 import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.engine.task.TaskSnapshot
 import top.xjunz.tasker.task.editor.AppletReferenceEditor
-import java.util.*
+import java.util.WeakHashMap
 
 /**
  * A global view model serving all [FlowEditorDialog]s, this view model is expected to
- * be hosted in a [FlowEditorViewModel] whose [FlowEditorViewModel.isBase] is true.
+ * be hosted in a [FlowEditorViewModel] whose [FlowEditorViewModel.isRoot] is true.
  *
  * @author xjunz 2022/11/26
  */

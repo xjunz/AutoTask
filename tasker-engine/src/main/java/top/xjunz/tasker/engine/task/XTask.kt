@@ -134,7 +134,7 @@ class XTask : ValueRegistry() {
 
     private fun resetCache() {
         pauseFor = -1L
-        pauseStartTime = 1L
+        pauseStartTime = -1L
         onPausedListener?.onTaskPauseStateChanged(checksum)
         previousArgumentHash = -1
         previousLaunchTime = -1L
@@ -282,8 +282,7 @@ class XTask : ValueRegistry() {
     }
 
     fun isOverheat(argumentHash: Int): Boolean {
-        return argumentHash == previousArgumentHash && previousLaunchTime != -1L
-                && SystemClock.uptimeMillis() - previousLaunchTime <= RATE_LIMIT
+        return argumentHash == previousArgumentHash && previousLaunchTime != -1L && SystemClock.uptimeMillis() - previousLaunchTime <= RATE_LIMIT
     }
 
     fun interface OnTaskPausedStateChangedListener {
@@ -354,7 +353,14 @@ class XTask : ValueRegistry() {
 
         @SerialName("a") var author: String? = null,
 
-        @SerialName("p") var isPreload: Boolean = false
+        @SerialName("p") var isPreload: Boolean = false,
+
+        /**
+         * Do not set the default version to BuildConfig.VERSION_CODE, because old version
+         * task may not have this field. Setting to zero helps us to tell whether it is a
+         * legacy task.
+         */
+        @SerialName("v") var version: Int = 0,
     ) : Parcelable {
 
         inline val identifier get() = checksum.toString().md5.substring(0, 7)
@@ -369,7 +375,8 @@ class XTask : ValueRegistry() {
             parcel.readLong(),
             parcel.readLong(),
             parcel.readString(),
-            parcel.readByte() != 0.toByte()
+            parcel.readByte() != 0.toByte(),
+            parcel.readInt()
         )
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -381,6 +388,7 @@ class XTask : ValueRegistry() {
             parcel.writeLong(checksum)
             parcel.writeString(author)
             parcel.writeByte(if (isPreload) 1 else 0)
+            parcel.writeInt(version)
         }
 
         override fun describeContents(): Int {

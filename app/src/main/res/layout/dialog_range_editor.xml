@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -54,14 +53,26 @@
                 android:hint="@string/no_limit"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
-                app:layout_constraintBottom_toBottomOf="@+id/btn_no_min_limit"
-                app:layout_constraintEnd_toStartOf="@+id/btn_no_min_limit"
-                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintBottom_toBottomOf="@+id/btn_clear_min"
+                app:layout_constraintEnd_toStartOf="@+id/btn_make_equal_min"
                 app:layout_constraintStart_toStartOf="@+id/tv_subtitle_min"
-                app:layout_constraintTop_toTopOf="@+id/btn_no_min_limit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_clear_min" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_no_min_limit"
+                android:id="@+id/btn_make_equal_min"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_weight="0"
+                android:contentDescription="@{@string/make_equal}"
+                app:icon="@drawable/ic_baseline_link_24"
+                app:layout_constraintEnd_toStartOf="@id/btn_clear_min"
+                app:layout_constraintStart_toEndOf="@+id/et_minimum"
+                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_min" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_clear_min"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,8 +81,7 @@
                 android:contentDescription="@{@string/clear_all}"
                 app:icon="@drawable/ic_baseline_close_24"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/et_minimum"
+                app:layout_constraintStart_toEndOf="@+id/btn_make_equal_min"
                 app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_min" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -104,14 +114,27 @@
                 android:layout_weight="1"
                 android:hint="@string/no_limit"
                 android:importantForAutofill="no"
-                app:layout_constraintBottom_toBottomOf="@+id/btn_no_max_limit"
-                app:layout_constraintEnd_toStartOf="@+id/btn_no_max_limit"
-                app:layout_constraintHorizontal_bias="0.5"
+                android:inputType="numberDecimal"
+                app:layout_constraintBottom_toBottomOf="@+id/btn_clear_max"
+                app:layout_constraintEnd_toStartOf="@+id/btn_make_equal_max"
                 app:layout_constraintStart_toStartOf="@+id/tv_subtitle_max"
-                app:layout_constraintTop_toTopOf="@+id/btn_no_max_limit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_clear_max" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_no_max_limit"
+                android:id="@+id/btn_make_equal_max"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_weight="0"
+                android:contentDescription="@{@string/make_equal}"
+                app:icon="@drawable/ic_baseline_link_24"
+                app:layout_constraintEnd_toStartOf="@id/btn_clear_max"
+                app:layout_constraintStart_toEndOf="@+id/et_maximum"
+                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_max" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_clear_max"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -121,6 +144,7 @@
                 app:icon="@drawable/ic_baseline_close_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_make_equal_max"
                 app:layout_constraintTop_toBottomOf="@+id/tv_subtitle_max" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

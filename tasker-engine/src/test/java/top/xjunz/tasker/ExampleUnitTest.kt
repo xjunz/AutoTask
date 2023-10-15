@@ -17,4 +17,11 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test
+    fun testCastNullable() {
+        val a: Any? = null
+        println(a as Int?)
+        println(a as? Int)
+    }
 }

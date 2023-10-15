@@ -25,16 +25,22 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.*
 import top.xjunz.tasker.databinding.ActivityMainBinding
 import top.xjunz.tasker.engine.applet.util.hierarchy
+import top.xjunz.tasker.engine.dto.XTaskDTO
 import top.xjunz.tasker.engine.task.XTask
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.floatingInspector
 import top.xjunz.tasker.service.isPremium
 import top.xjunz.tasker.service.serviceController
+import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
@@ -49,8 +55,11 @@ import top.xjunz.tasker.ui.task.showcase.*
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
 import top.xjunz.tasker.util.ClickListenerUtil.setOnDoubleClickListener
 import top.xjunz.tasker.util.ShizukuUtil
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeoutException
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 /**
  * @author xjunz 2021/6/20 21:05
@@ -95,7 +104,11 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         }
     }
 
+    private var currentOperatingFile: File? = null
+
     private lateinit var fileShareLauncher: ActivityResultLauncher<Intent>
+
+    private lateinit var saveToSAFLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,12 +117,18 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             || (!lightTheme && Preferences.nightMode == AppCompatDelegate.MODE_NIGHT_NO)
         ) {
             AppCompatDelegate.setDefaultNightMode(Preferences.nightMode)
-            return
-        }
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            mainViewModel.currentSharedFile.value?.delete()
+            return // recreate
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        fileShareLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                currentOperatingFile?.delete()
+                currentOperatingFile = null
+            }
+        saveToSAFLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                currentOperatingFile?.delete()
+            }
         app.setAppTheme(theme)
         setContentView(binding.root)
         initViews()
@@ -119,13 +138,15 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         if (BuildConfig.DEBUG) {
             binding.tvTitle.setOnDoubleClickListener {
                 PremiumMixin.clearPremium()
-                toast("Premium cleared!")
             }
         }
         if (!Preferences.privacyPolicyAcknowledged) {
             PrivacyPolicyDialog().show(supportFragmentManager)
         }
         mainViewModel.checkForUpdates()
+        if (intent.action == Intent.ACTION_VIEW && intent.scheme == "content") {
+            mainViewModel.requestImportTask.value = intent
+        }
     }
 
     private var isExited = false
@@ -227,8 +248,8 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                 }
             }
         }
-        observeTransient(viewModel.requestAddNewTask) {
-            viewModel.addRequestedTask()
+        observeTransient(viewModel.requestAddNewTasks) {
+            viewModel.addRequestedTasks()
         }
         observeTransient(viewModel.onTaskDeleted) {
             fabBehaviour.slideUp(binding.fabAction)
@@ -291,12 +312,21 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
                     }.setNegativeButton(android.R.string.cancel, null).show()
             }
         }
-        observeNotNull(mainViewModel.currentSharedFile) {
+        observeTransient(mainViewModel.requestShareFile) {
+            currentOperatingFile = it
             fileShareLauncher.launch(
-                Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, it.makeContentUri())
-                    .setType("*/*")
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                Intent.createChooser(
+                    Intent(Intent.ACTION_SEND)
+                        .addCategory(Intent.CATEGORY_DEFAULT)
+                        .putExtra(Intent.EXTRA_STREAM, it.makeContentUri())
+                        .setType("*/*")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
+                    R.string.share_this_task.str
+                )
             )
+        }
+        observeTransient(mainViewModel.requestImportTask) {
+            handleImportTask(it)
         }
         mainViewModel.taskNumbers.forEachIndexed { index, ld ->
             observeNotNull(ld) {
@@ -374,7 +404,11 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         // will be no active observers.
         lifecycleScope.launch {
             lifecycle.withStarted {
-                mainViewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
+                if (intent.action == Intent.ACTION_VIEW && intent.scheme == "content") {
+                    mainViewModel.requestImportTask.value = intent
+                } else {
+                    mainViewModel.onNewIntent.setValueIfObserved(intent.data to EventCenter.fetchTransientValue())
+                }
             }
         }
     }
@@ -386,4 +420,46 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         ColorScheme.release()
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun handleImportTask(result: Intent?) {
+        if (result == null) return
+        // Collect Uris
+        val uris = arrayListOf(result.data)
+        val clipData = result.clipData
+        if (clipData != null) {
+            for (i in 0 until clipData.itemCount) {
+                uris.add(clipData.getItemAt(i)?.uri)
+            }
+        }
+        val tasks = arrayListOf<XTask>()
+        // Collect data
+        for (uri in uris) {
+            if (uri == null) continue
+            try {
+                runCatching {
+                    contentResolver.openInputStream(uri)?.use {
+                        val dto = Json.decodeFromStream<XTaskDTO>(it)
+                        tasks.add(dto.toXTask(AppletOptionFactory, true))
+                    }
+                }.onFailure {
+                    ZipInputStream(contentResolver.openInputStream(uri)).use {
+                        var entry: ZipEntry? = it.nextEntry
+                        while (entry != null) {
+                            val dto = Json.decodeFromStream<XTaskDTO>(it)
+                            tasks.add(dto.toXTask(AppletOptionFactory, true))
+                            entry = it.nextEntry
+                        }
+                    }
+                }
+            } catch (t: Throwable) {
+                t.logcatStackTrace()
+            }
+        }
+        if (tasks.isEmpty()) {
+            toast(R.string.error_unsupported_file)
+        } else {
+            TaskListDialog().setTaskList(tasks).setTitle(R.string.import_tasks.text)
+                .show(supportFragmentManager)
+        }
+    }
 }

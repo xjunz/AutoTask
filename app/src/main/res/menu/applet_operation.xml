@@ -3,21 +3,28 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/add_rules" />
+    <group android:id="@+id/group_insertion">
 
-    <item
-        android:id="@+id/item_add_inside"
-        android:title="@string/add_inside" />
-    <item
-        android:id="@+id/item_add_before"
-        android:title="@string/add_before" />
-    <item
-        android:id="@+id/item_add_after"
-        android:title="@string/add_after" />
+        <item android:title="@string/add_rules" />
+
+        <item
+            android:id="@+id/item_add_inside"
+            android:title="@string/add_inside" />
+        <item
+            android:id="@+id/item_add_before"
+            android:title="@string/add_before" />
+        <item
+            android:id="@+id/item_add_after"
+            android:title="@string/add_after" />
+
+    </group>
     <item android:title="@string/operation" />
     <item
         android:id="@+id/item_split"
         android:title="@string/split_merged_rules" />
+    <item
+        android:id="@+id/item_replace_with"
+        android:title="@string/replace_with" />
     <item
         android:id="@+id/item_edit"
         android:title="@string/edit" />

@@ -70,16 +70,11 @@ suspend fun AccessibilityNodeInfo.findFirst(
     for (i in 0 until childCount) {
         val child = getChild(i) ?: continue
         if (!child.isVisibleToUser) continue
-        try {
-            if (condition(child)) {
-                return child
-            } else if (child.childCount > 0) {
-                val ret = child.findFirst(false, condition)
-                if (ret != null) return ret
-            }
-        } finally {
-            @Suppress("DEPRECATION")
-            child.recycle()
+        if (condition(child)) {
+            return child
+        } else if (child.childCount > 0) {
+            val ret = child.findFirst(false, condition)
+            if (ret != null) return ret
         }
     }
     return null
@@ -87,6 +82,10 @@ suspend fun AccessibilityNodeInfo.findFirst(
 
 
 fun AccessibilityNodeInfo.ensureRefresh() {
+    if (className == null) {
+        // This node is not even sealed. This happens on some devices.
+        return
+    }
     check(refresh()) {
         "This node is stale!"
     }

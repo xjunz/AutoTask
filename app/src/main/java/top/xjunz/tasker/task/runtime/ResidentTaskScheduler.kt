@@ -54,11 +54,11 @@ class ResidentTaskScheduler(private val taskManager: TaskManager<*, *>) : EventD
                 "Unsupported task type!"
             }
             if (!task.isExecuting || task.isSuspending) {
-                val eventsHash = arg.contentHashCode()
+                val argHash = arg.contentHashCode()
                 // Too hot, do not touch it now!
-                if (task.isOverheat(eventsHash)) continue
+                if (task.isOverheat(argHash)) continue
                 launch {
-                    task.previousArgumentHash = eventsHash
+                    task.previousArgumentHash = argHash
                     task.setStateListener(listener)
                     task.launch(obtainTaskRuntime(task, registry, arg))
                 }

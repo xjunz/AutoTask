@@ -7,11 +7,11 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.BatteryManagerBridge
 import top.xjunz.tasker.bridge.DisplayManagerBridge
-import top.xjunz.tasker.engine.applet.criterion.PropertyCriterion
+import top.xjunz.tasker.engine.applet.criterion.booleanCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.simpleNumberRangeCriterion
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 
 /**
  * @author xjunz 2022/11/10
@@ -20,7 +20,7 @@ class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val isScreenPortrait = invertibleAppletOption(R.string.screen_orientation_portrait) {
-        PropertyCriterion<Any> {
+        booleanCriterion {
             val realSize = DisplayManagerBridge.size
             realSize.x < realSize.y
         }
@@ -28,7 +28,7 @@ class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0010)
     val isBatteryCharging = invertibleAppletOption(R.string.is_charging) {
-        PropertyCriterion<Any> {
+        booleanCriterion {
             BatteryManagerBridge.isCharging
         }
     }
@@ -39,9 +39,8 @@ class GlobalCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             BatteryManagerBridge.capacity
         }
     }.withValueArgument<Int>(
-        R.string.in_battery_capacity_range,
-        VariantType.INT_RANGE
-    ).withValueDescriber<Collection<Int?>> {
+        R.string.in_battery_capacity_range, VariantArgType.INT_PERCENT, true
+    ).withSingleValueDescriber<Collection<Int?>> {
         val first = it.firstOrNull()
         val last = it.lastOrNull()
         if (first == null && last != null) {

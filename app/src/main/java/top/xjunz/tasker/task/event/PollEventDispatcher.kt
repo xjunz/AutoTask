@@ -12,7 +12,7 @@ import top.xjunz.tasker.engine.task.EventDispatcher
 /**
  * @author xjunz 2023/09/11
  */
-class TickEventDispatcher(looper: Looper) : EventDispatcher() {
+class PollEventDispatcher(looper: Looper) : EventDispatcher() {
 
     companion object {
         const val EXTRA_TICK_TIME_MILLS = 0
@@ -36,7 +36,7 @@ class TickEventDispatcher(looper: Looper) : EventDispatcher() {
             val sec = uptime / 1000
             if (sec != previousSec) {
                 previousSec = sec
-                event.putExtra(EXTRA_TICK_TIME_MILLS, uptime - uptime % 1000)
+                event.putExtra(EXTRA_TICK_TIME_MILLS, uptime)
                 dispatchEvents(event)
             }
             tickHandler.postDelayed(tikTok, 900L)

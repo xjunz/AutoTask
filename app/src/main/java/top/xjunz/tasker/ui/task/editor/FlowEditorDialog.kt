@@ -77,7 +77,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
         savedInstanceState: Bundle?
     ): View? {
         if (vm.isSelectingReferent && !vm.hasCandidateReferents(vm.flow)) {
-            toast(R.string.format_no_candidate_referent.format(vm.referentDescriptor.name))
+            toast(R.string.format_no_candidate_referent)
             dismiss()
             return null
         }
@@ -215,9 +215,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 binding.tvHeaderTitle.isVisible = false
                 binding.ibHeaderAction.isVisible = false
                 binding.tvHeaderDesc.setTextColor(ColorScheme.textColorPrimary)
-                binding.tvHeaderDesc.setText(R.string.tip_selecting_referents)
+                binding.tvHeaderDesc.text = R.string.format_tip_selecting_referents.formatSpans(
+                    R.string.highlight_color.str.foreColored()
+                )
             }
-        } else if (vm.isBase) {
+        } else if (vm.isRoot) {
             binding.tvTitle.setNoDoubleClickListener {
                 TaskMetadataEditor().init(vm.metadata) {
                     vm.selectionLiveData.notifySelfChanged()
@@ -229,9 +231,11 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
                 menuHelper.triggerMenuItem(null, (vm.flow[1] as Flow)[0], R.id.item_add_before)
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
                 binding.fabAction.performClick()
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
                 if (!vm.isSelectingReferent) {
                     menuHelper.triggerMenuItem(null, (vm.flow[2] as Flow), R.id.item_add_inside)
@@ -339,7 +343,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
                 val name = vm.referentDescriptor.name
                 binding.tvTitle.text = R.string.format_select.formatSpans(name.foreColored())
             } else if (it.isEmpty()) {
-                if (vm.isBase) {
+                if (vm.isRoot) {
                     if (!vm.isReadyOnly) {
                         binding.tvTitle.setDrawableEnd(R.drawable.ic_chevron_right_24px)
                     }
@@ -450,7 +454,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             if (vm.isMultiSelected(it)) {
                 vm.toggleMultiSelection(it)
             } else {
-                if (it is Action<*> && Preferences.showToggleRelationTip) {
+                if (it is Action && Preferences.showToggleRelationTip) {
                     PreferenceHelpDialog().init(
                         R.string.tip,
                         R.string.tip_applet_relation
@@ -478,7 +482,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
             FlowEditorDialog().init(vm.task, gvm.root, true, gvm)
                 .setArgumentToSelect(applet, arg, referent)
                 .doOnArgumentSelected { newReferent ->
-                    gvm.referenceEditor.setReference(applet, arg, whichArg, newReferent)
+                    gvm.referenceEditor.setReference(applet, whichArg, newReferent)
                     vm.clearStaticErrorIfNeeded(applet, StaticError.PROMPT_RESET_REFERENCE)
                     gvm.referenceEditor.getReferenceChangedApplets().forEach { changed ->
                         vm.onAppletChanged.value = changed
@@ -499,7 +503,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
     override fun onBackPressed(): Boolean {
         if (vm.isInMultiSelectionMode) {
             vm.clearSelections()
-        } else if (vm.isBase && !vm.isReadyOnly && vm.calculateChecksum() != vm.task.checksum) {
+        } else if (vm.isRoot && !vm.isReadyOnly && vm.calculateChecksum() != vm.task.checksum) {
             vm.showQuitConfirmation.value = true
         } else {
             dismiss()
@@ -585,7 +589,7 @@ class FlowEditorDialog : BaseDialogFragment<DialogFlowEditorBinding>() {
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        if (!confirmed && !vm.isReadyOnly && !vm.isBase) {
+        if (!confirmed && !vm.isReadyOnly && !vm.isRoot) {
             vm.onFlowCompleted(true, gvm.unmodifiedRoots.getValue(vm.flow))
         }
     }

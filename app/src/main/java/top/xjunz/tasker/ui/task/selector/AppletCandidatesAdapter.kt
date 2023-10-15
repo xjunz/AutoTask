@@ -90,7 +90,7 @@ class AppletCandidatesAdapter(
             val showRelation = position != 0 && applet.index != 0
             val option = AppletOptionFactory.requireOption(applet)
             var title = if (option.descAsTitle) option.describe(applet)
-            else option.loadTitle(applet)
+            else option.loadSpannedTitle(applet)
             if (title != null && showRelation) {
                 title = AppletOption.makeRelationSpan(title, applet)
             }
@@ -117,7 +117,7 @@ class AppletCandidatesAdapter(
                 }
             } else {
                 it.ibAction.isVisible = applet.isInvertible
-                if (applet.valueType == Applet.VAL_TYPE_TEXT) {
+                if (applet.singleValueType == Applet.ARG_TYPE_TEXT) {
                     it.tvDesc.setTypeface(null, Typeface.ITALIC)
                 } else {
                     it.tvDesc.setTypeface(null, Typeface.NORMAL)

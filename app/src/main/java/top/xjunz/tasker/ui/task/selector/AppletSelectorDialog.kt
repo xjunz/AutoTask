@@ -97,7 +97,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                 rightAdapter.notifyItemChanged(adapterPosition, true)
             }
         }) { binding, position, option ->
-            var title = option.loadDummyTitle(null)
+            var title = option.loadUnspannedTitle(null)
             val m = option.titleModifier
             if (m != null) title = title?.plus(
                 " ($m)".foreColored(ColorScheme.textColorDisabled).relativeSize(.9F)
@@ -150,7 +150,12 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         AppletCandidatesAdapter(viewModel, optionClickListener)
     }
 
-    fun init(origin: Flow, doOnCompletion: (List<Applet>) -> Unit) = doWhenCreated {
+    fun init(
+        origin: Flow,
+        substitutionMode: Boolean = false,
+        doOnCompletion: (List<Applet>) -> Unit
+    ) = doWhenCreated {
+        viewModel.isSubstitutionMode = substitutionMode
         viewModel.onCompletion = doOnCompletion
         viewModel.setScope(origin)
         viewModel.flow = ContainerFlow().also {
@@ -201,6 +206,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     gestureOption to AppletOptionFactory.gestureActionRegistry
                         .categorizedOptions.indexOf(gestureOption)
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
                 viewModel.selectFlowRegistry(
                     viewModel.registryOptions.indexOf(AppletOptionFactory.flowRegistry.gestureActions)
@@ -210,6 +216,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
                     gestureOption to AppletOptionFactory.gestureActionRegistry
                         .categorizedOptions.indexOf(gestureOption)
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
                 FloatingInspectorDialog().setMode(InspectorMode.UI_OBJECT)
                     .show(childFragmentManager)
@@ -261,9 +268,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         observeTransient(viewModel.requestAppendOption) {
             val applet = it.first.yield()
             optionClickListener.onClick(applet, it.first) {
-                if (viewModel.appendApplet(applet)) {
-                    viewModel.onAppletAdded.value = it.second
-                }
+                viewModel.notifyOptionClicked(applet, it.second)
             }
         }
         observeDangerousConfirmation(
@@ -273,7 +278,7 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
         doOnEventReceived<Applet>(AppletOption.EVENT_TOGGLE_RELATION) {
             it.toggleRelation()
-            if (it is Action<*>) {
+            if (it is Action) {
                 PreferenceHelpDialog().init(
                     R.string.tip, R.string.tip_applet_relation, Preferences.showToggleRelationTip
                 ) { noMore ->

@@ -38,13 +38,6 @@
             app:layout_constraintStart_toStartOf="@+id/iv_placeholder"
             app:layout_constraintTop_toBottomOf="@+id/iv_placeholder" />
 
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/group_placeholder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:constraint_referenced_ids="tv_placeholder,iv_placeholder"
-            tools:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_task_list"
@@ -56,5 +49,25 @@
             tools:listitem="@layout/item_task_showcase"
             tools:paddingTop="60dp"
             tools:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_preset_tasks_shortcut"
+            style="@style/Widget.Material3.Button.TextButton.Dialog.Flush"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_to_import_preset_tasks"
+            app:icon="@drawable/ic_import_24dp"
+            app:iconGravity="start"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_placeholder" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="tv_placeholder,iv_placeholder,btn_preset_tasks_shortcut"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

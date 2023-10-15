@@ -5,7 +5,6 @@
 package top.xjunz.tasker.engine.runtime
 
 import android.util.SparseArray
-import androidx.annotation.IntDef
 import androidx.core.util.forEach
 import top.xjunz.shared.ktx.casted
 
@@ -63,6 +62,18 @@ class Event private constructor(
 
         const val EVENT_ON_TOAST_RECEIVED = 8
 
+        const val EVENT_ON_FILE_CREATED = 9
+
+        const val EVENT_ON_FILE_DELETED = 10
+
+        const val EVENT_ON_WIFI_CONNECTED = 11
+
+        const val EVENT_ON_WIFI_DISCONNECTED = 12
+
+        const val EVENT_ON_NETWORK_AVAILABLE = 13
+
+        const val EVENT_ON_NETWORK_UNAVAILABLE = 14
+
         fun obtain(
             eventType: Int,
             pkgName: String? = null,
@@ -76,19 +87,6 @@ class Event private constructor(
     fun <V> getExtra(key: Int): V {
         return extras[key].casted()
     }
-
-    @IntDef(
-        EVENT_UNDEFINED,
-        EVENT_ON_PACKAGE_ENTERED,
-        EVENT_ON_PACKAGE_EXITED,
-        EVENT_ON_CONTENT_CHANGED,
-        EVENT_ON_NOTIFICATION_RECEIVED,
-        EVENT_ON_NEW_WINDOW,
-        EVENT_ON_PRIMARY_CLIP_CHANGED,
-        EVENT_ON_TICK,
-        EVENT_ON_TOAST_RECEIVED
-    )
-    annotation class EventType
 
     override fun toString(): String {
         val typeName = when (type) {

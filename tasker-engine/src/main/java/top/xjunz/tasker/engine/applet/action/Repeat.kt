@@ -14,16 +14,15 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 class Repeat : Loop(), Referent {
 
-    override val valueType: Int = VAL_TYPE_INT
-
     override val isRepetitive: Boolean = true
 
     private val count by lazy {
-        value as Int
+        values[0] as Int
     }
 
     override fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
         return when (which) {
+            0 -> this
             1 -> currentCount
             2 -> currentCount.toString()
             else -> super.getReferredValue(which, runtime)
@@ -31,7 +30,7 @@ class Repeat : Loop(), Referent {
     }
 
     override fun staticCheckMyself(): Int {
-        check(value != null && (value as Int) > 0) {
+        check(values[0] != null && (values[0] as Int) > 0) {
             "Repeat count must be specified!"
         }
         return super.staticCheckMyself()

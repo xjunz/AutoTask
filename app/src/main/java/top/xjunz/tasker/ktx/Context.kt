@@ -41,21 +41,7 @@ fun Context.peekActivity(): AppCompatActivity? {
 }
 
 fun File.makeContentUri(): Uri {
-    return FileProvider.getUriForFile(app, "top.xjunz.automator.provider.file", this)
-}
-
-fun Context.shareFile(file: File) {
-    val intent = Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, file.makeContentUri())
-        .setType("*/*")
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    launchIntentSafely(intent)
-}
-
-fun Context.viewFile(file: File) {
-    val intent = Intent(Intent.ACTION_VIEW, file.makeContentUri())
-        .addCategory(Intent.CATEGORY_DEFAULT)
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    launchIntentSafely(intent)
+    return FileProvider.getUriForFile(app, "top.xjunz.tasker.provider.file", this)
 }
 
 fun Context.launchIntentSafely(intent: Intent): Boolean {

@@ -13,15 +13,13 @@ import top.xjunz.tasker.uiautomator.CoroutineUiObject
  */
 class ClickUiObjectWithText : PerformActionIfUiObjectExistsInCurrentWindow() {
 
-    override val valueType: Int = VAL_TYPE_TEXT
-
     override val isCriterionSpecified: Boolean = true
 
     private var specifiedText: String? = null
 
     override fun onPrepareApply(runtime: TaskRuntime) {
         super.onPrepareApply(runtime)
-        specifiedText = (runtime.getReferentOf(this, 0) ?: value)?.toString()
+        specifiedText = getArgument(0, runtime)?.toString()
     }
 
     override suspend fun performActionIfFound(runtime: TaskRuntime, target: CoroutineUiObject) {

@@ -25,7 +25,7 @@ import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.editor.AppletReferenceEditor
 import top.xjunz.tasker.ui.task.editor.FlowViewModel
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
-import java.util.*
+import java.util.Collections
 
 /**
  * @author xjunz 2022/10/22
@@ -38,7 +38,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
 
     var title: CharSequence? = null
 
-    var isScoped = false
+    private var isScoped = false
 
     lateinit var onCompletion: (List<Applet>) -> Unit
 
@@ -53,6 +53,8 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     val onAppletAdded = MutableLiveData<Int>()
 
     val requestAppendOption = MutableLiveData<Pair<AppletOption, Int>>()
+
+    var isSubstitutionMode = false
 
     /**
      * The nearest non-container parent of this applet, may be itself.
@@ -95,7 +97,7 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         (selectedFlowRegistry as MutableLiveData).value = index
     }
 
-    fun appendApplet(applet: Applet): Boolean {
+    private fun appendApplet(applet: Applet): Boolean {
         val flowOption = factory.requireRegistryOption(applet.registryId)
         val last = flow.lastOrNull()
         if (last !is Flow || (flowOption.appletId != last.appletId)) {
@@ -118,19 +120,19 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     fun acceptAppletsFromAutoClick(applets: List<Applet>) {
         val containsUiObject = factory.uiObjectFlowRegistry.containsUiObject.yield() as Flow
         val editor = AppletReferenceEditor(false)
-        editor.setReference(containsUiObject, null, 0, R.string.current_window.str)
+        editor.setReference(containsUiObject, 0, R.string.current_window.str)
         editor.setReferent(containsUiObject, 0, R.string.matched_ui_object.str)
         if (flow.isEmpty()) {
             val comp = a11yAutomatorService.a11yEventDispatcher.getCurrentComponentInfo()
-            val isCertainApp = factory.applicationRegistry.isCertainApp.yield(comp.packageName)
-            editor.setReference(isCertainApp, null, 0, R.string.current_top_app.str)
+            val isCertainApp = factory.applicationRegistry.isCertainApp.yield(1 to comp.packageName)
+            editor.setReference(isCertainApp, 0, R.string.current_top_app.str)
             flow.add(isCertainApp)
             comp.getComponentName()?.flattenToShortString()?.let {
                 val inActivityCollection =
                     factory.applicationRegistry.activityCollection.yield(
-                        Collections.singletonList(it)
+                        1 to Collections.singleton(it)
                     )
-                editor.setReference(inActivityCollection, null, 0, R.string.current_top_app.str)
+                editor.setReference(inActivityCollection, 0, R.string.current_top_app.str)
                 flow.add(inActivityCollection)
             }
         } else {
@@ -208,5 +210,21 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
     override fun onCleared() {
         super.onCleared()
         TaskCreatorDialog.REQUESTED_QUICK_TASK_CREATOR = -1
+    }
+
+    fun notifyOptionClicked(applet: Applet, index: Int) {
+        if (isSubstitutionMode) {
+            if (flow.isEmpty()) {
+                flow.add(applet)
+            } else {
+                flow[0] = applet
+            }
+            notifyFlowChanged()
+            onAppletAdded.value = index
+        } else {
+            if (appendApplet(applet)) {
+                onAppletAdded.value = index
+            }
+        }
     }
 }

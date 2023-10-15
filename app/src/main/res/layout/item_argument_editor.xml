@@ -14,50 +14,34 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp">
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_value"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_badge"
-            android:backgroundTint="?colorPrimary"
-            android:gravity="center"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-            android:textColor="?colorOnPrimary"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_value"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_value"
-            tools:text="文本" />
-
-        <TextView
-            android:id="@+id/tv_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="?selectableItemBackground"
-            android:drawablePadding="8dp"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:maxLines="5"
-            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-            app:drawableTint="?colorPrimary"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_title"
+            android:hint="@string/task_name"
+            app:hintTextColor="?colorPrimary"
             app:layout_constraintTop_toTopOf="parent"
-            tools:drawableStartCompat="@drawable/ic_baseline_link_24"
-            tools:text="控件1（文本）" />
+            tools:layout_editor_absoluteX="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:drawablePadding="8dp"
+                android:drawableTint="?colorPrimary"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_refer"
             style="@style/Widget.Material3.Button.OutlinedButton.Icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/refer_to"
             android:textColor="?android:textColorPrimary"
@@ -67,15 +51,14 @@
             app:iconTint="?colorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/btn_specify"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_value"
-            app:strokeColor="@color/material_on_surface_stroke" />
+            app:layout_constraintTop_toBottomOf="@+id/til_value" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_specify"
             style="@style/Widget.Material3.Button.OutlinedButton.Icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/edit"
             android:textColor="?android:textColorPrimary"
             app:icon="@drawable/ic_edit_24dp"
@@ -84,8 +67,7 @@
             app:iconTint="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_refer"
-            app:layout_constraintTop_toBottomOf="@+id/tv_value"
-            app:strokeColor="@color/material_on_surface_stroke" />
+            app:layout_constraintTop_toBottomOf="@+id/til_value" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

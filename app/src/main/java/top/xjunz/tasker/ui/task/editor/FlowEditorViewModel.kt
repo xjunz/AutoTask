@@ -8,13 +8,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.Repeat
-import top.xjunz.tasker.engine.applet.action.Suspension
-import top.xjunz.tasker.engine.applet.base.*
-import top.xjunz.tasker.engine.applet.util.*
+import top.xjunz.tasker.engine.applet.base.Applet
+import top.xjunz.tasker.engine.applet.base.Do
+import top.xjunz.tasker.engine.applet.base.Flow
+import top.xjunz.tasker.engine.applet.base.If
+import top.xjunz.tasker.engine.applet.base.RootFlow
+import top.xjunz.tasker.engine.applet.base.StaticError
+import top.xjunz.tasker.engine.applet.base.When
+import top.xjunz.tasker.engine.applet.util.clone
+import top.xjunz.tasker.engine.applet.util.depth
+import top.xjunz.tasker.engine.applet.util.isAheadOf
+import top.xjunz.tasker.engine.applet.util.isAttached
+import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.engine.dto.AppletChecksum
 import top.xjunz.tasker.engine.dto.AppletDTO.Serializer.toDTO
 import top.xjunz.tasker.engine.task.XTask
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.eq
+import top.xjunz.tasker.ktx.notifySelfChanged
+import top.xjunz.tasker.ktx.require
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
@@ -61,7 +74,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
 
     val showClearSnapshotsConfirmation = MutableLiveData<Boolean>()
 
-    val isBase: Boolean get() = flow is RootFlow
+    val isRoot: Boolean get() = flow is RootFlow
 
     val selectedApplet = MutableLiveData<Applet>()
 
@@ -217,7 +230,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     }
 
     fun complete(): Boolean {
-        if (isBase) {
+        if (isRoot) {
             val checksum = calculateChecksum()
             // Task modified
             if (checksum != task.checksum) {
@@ -251,7 +264,7 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
     private fun Applet.hasResultWithDescriptor(): Boolean {
         val option = factory.findOption(this)
         if (option != null
-            && option.findResults(referentDescriptor).isNotEmpty()
+            && option.matchReferents(referentDescriptor).isNotEmpty()
             // If not attached, do not check isAheadOf
             && (!referentAnchor.isAttached || isAheadOf(referentAnchor))
         ) {
@@ -300,6 +313,13 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
         notifyFlowChanged()
     }
 
+    fun replaceWith(target: Applet, replacement: Applet) {
+        val parent = target.requireParent()
+        parent[target.index] = replacement
+        replacement.index = target.index
+        notifyFlowChanged()
+    }
+
     fun addAfter(target: Applet, peers: List<Applet>) {
         val parent = target.requireParent()
         if (target.index == parent.lastIndex) {
@@ -338,14 +358,17 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
             TaskCreatorDialog.QUICK_TASK_CREATOR_GESTURE_RECORDER -> {
                 /* no-op */
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_CLICK_AUTOMATION -> {
-                val repeat = factory.controlActionRegistry.repeatFlow.yield(10) as Repeat
+                val repeat =
+                    factory.controlActionRegistry.repeatFlow.yieldWithFirstValue(10) as Repeat
                 repeat.comment = R.string.comment_click_automation_repeat_count.str
-                val delay = factory.controlActionRegistry.suspension.yield(200) as Suspension
+                val delay = factory.controlActionRegistry.suspension.yieldWithFirstValue(200)
                 delay.comment = R.string.comment_click_automation_delay_mills.str
                 repeat.add(delay)
                 root.add(repeat)
             }
+
             TaskCreatorDialog.QUICK_TASK_CREATOR_AUTO_CLICK -> {
                 val whenFlow = factory.flowRegistry.whenFlow.yield() as When
                 whenFlow.add(factory.eventRegistry.contentChanged.yield())
@@ -358,9 +381,10 @@ class FlowEditorViewModel(states: SavedStateHandle) : FlowViewModel(states) {
                 val doFlow = factory.flowRegistry.doFlow.yield() as Do
                 root.add(doFlow)
                 val click = factory.uiObjectActionRegistry.click.yield()
-                editor.setReference(click, null, 0, R.string.matched_ui_object.str)
+                editor.setReference(click, 0, R.string.matched_ui_object.str)
                 doFlow.add(click)
             }
+
             else -> {
                 if (taskType == XTask.TYPE_RESIDENT) {
                     val whenFlow = factory.flowRegistry.whenFlow.yield() as When

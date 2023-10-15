@@ -25,7 +25,7 @@ private val dateFormat
     }
 
 private val dateFormatNoMills
-    get() = localDateFormat.getOrSet {
+    get() = localDateFormatNoMills.getOrSet {
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
     }
 

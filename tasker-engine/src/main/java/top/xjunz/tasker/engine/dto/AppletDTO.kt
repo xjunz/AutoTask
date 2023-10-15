@@ -14,6 +14,9 @@ import top.xjunz.shared.ktx.writeBool
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.factory.AppletFactory
+import top.xjunz.tasker.engine.dto.AppletArgumentSerializer.deserializeArgumentsPreVersionCode16
+import top.xjunz.tasker.engine.dto.AppletArgumentSerializer.deserializeValues
+import top.xjunz.tasker.engine.dto.AppletArgumentSerializer.valuesToStringMap
 import java.util.zip.CRC32
 
 /**
@@ -32,9 +35,12 @@ class AppletDTO(
     @SerialName("i")
     private val isInverted: Boolean = false,
     @SerialName("v")
+    @Deprecated("No longer used after version code 15, preserved for compatibility reason.")
     private val serialized: String? = null,
     @SerialName("c")
     private val comment: String? = null,
+    @SerialName("vs")
+    private val values: Map<Int, String>? = null,
     @SerialName("rft")
     private val referents: Map<Int, String>? = null,
     @SerialName("rfc")
@@ -63,20 +69,28 @@ class AppletDTO(
         parcel.readString(),
         parcel.readMap(),
         parcel.readMap(),
+        parcel.readMap(),
     ) {
         elements = parcel.createTypedArray(CREATOR)
     }
 
     private fun Boolean.toInt(): Int = if (this) 1 else 0
 
-    internal fun calculateChecksum(crc32: CRC32) {
+    internal fun calculateChecksum(crc32: CRC32, prevVersionCode16: Boolean) {
         crc32.apply {
             update(id)
             update(relation)
             update(isEnabled.toInt())
             update(isInverted.toInt())
-            serialized?.let {
-                update(it.toByteArray())
+            if (prevVersionCode16) {
+                serialized?.let {
+                    update(it.toByteArray())
+                }
+            } else {
+                values?.forEach { (t, u) ->
+                    update(t)
+                    update(u.toByteArray())
+                }
             }
             referents?.forEach { (t, u) ->
                 update(t)
@@ -90,7 +104,7 @@ class AppletDTO(
                 update(it.toByteArray())
             }
             elements?.forEach {
-                it.calculateChecksum(crc32)
+                it.calculateChecksum(crc32, prevVersionCode16)
             }
         }
     }
@@ -107,8 +121,8 @@ class AppletDTO(
          */
         fun Applet.toDTO(): AppletDTO {
             val dto = AppletDTO(
-                id, relation, isEnabled, isInverted, serializeValue(), comment,
-                referents.emptyToNull(), references.emptyToNull(),
+                id, relation, isEnabled, isInverted, null, comment,
+                valuesToStringMap(), referents.emptyToNull(), references.emptyToNull(),
             )
             if (this is Flow) {
                 dto.elements = if (size == 0) null else Array(size) {
@@ -119,20 +133,37 @@ class AppletDTO(
         }
     }
 
-    fun toApplet(registry: AppletFactory, compatMode: Boolean): Applet {
-        val prototype = registry.createAppletById(id, compatMode)
+    fun toAppletPreVersionCode16(factory: AppletFactory): Applet {
+        val prototype = factory.createAppletById(id, false)
         prototype.relation = relation
         prototype.isEnabled = isEnabled
         prototype.isInverted = isInverted
         prototype.referents = referents ?: emptyMap()
         prototype.references = references ?: emptyMap()
         prototype.comment = comment
+        if (serialized != null) prototype.deserializeArgumentsPreVersionCode16(serialized)
         if (prototype is Flow) {
             elements?.forEach {
-                prototype.add(it.toApplet(registry, compatMode))
+                prototype.add(it.toAppletPreVersionCode16(factory))
             }
         }
-        if (serialized != null) prototype.deserializeValue(serialized)
+        return prototype
+    }
+
+    fun toApplet(factory: AppletFactory, compatMode: Boolean): Applet {
+        val prototype = factory.createAppletById(id, compatMode)
+        prototype.relation = relation
+        prototype.isEnabled = isEnabled
+        prototype.isInverted = isInverted
+        prototype.referents = referents ?: emptyMap()
+        prototype.references = references ?: emptyMap()
+        prototype.comment = comment
+        prototype.deserializeValues(values)
+        if (prototype is Flow) {
+            elements?.forEach {
+                prototype.add(it.toApplet(factory, compatMode))
+            }
+        }
         return prototype
     }
 
@@ -141,8 +172,10 @@ class AppletDTO(
         parcel.writeInt(relation)
         parcel.writeBool(isEnabled)
         parcel.writeBool(isInverted)
-        parcel.writeString(serialized)
-        parcel.writeString(comment)
+        parcel.writeString(null)
+        // Ignore comment on transaction
+        parcel.writeString(null)
+        parcel.writeMap(values)
         parcel.writeMap(referents)
         parcel.writeMap(references)
         parcel.writeTypedArray(elements, flags)

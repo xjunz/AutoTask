@@ -20,14 +20,12 @@ import top.xjunz.tasker.task.applet.value.ScrollMetrics
  */
 class ScrollIntoUiObject : ScopeFlow<UiObjectTarget>() {
 
-    override val valueType: Int = VAL_TYPE_LONG
-
     companion object {
         const val MAX_SCROLL_INTO_STEPS = 30
     }
 
     private val metrics by lazy {
-        ScrollMetrics.parse(value as Long)
+        ScrollMetrics.parse(firstValue as Long)
     }
 
     override fun initializeTarget(runtime: TaskRuntime): UiObjectTarget {
@@ -35,7 +33,7 @@ class ScrollIntoUiObject : ScopeFlow<UiObjectTarget>() {
     }
 
     override suspend fun applyFlow(runtime: TaskRuntime): AppletResult {
-        val resultNode: AccessibilityNodeInfo? = runtime.getReferentOf(this, 0)
+        val resultNode: AccessibilityNodeInfo? = runtime.getReferenceArgument(this, 0)
             ?.casted<AccessibilityNodeInfo>()?.scrollIntoView(runtime)
         return if (resultNode != null) {
             UiObjectReferent(resultNode).asResult()

@@ -8,6 +8,7 @@ import android.annotation.SuppressLint
 import android.view.View
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
+import top.xjunz.shared.ktx.arrayMapOf
 import top.xjunz.shared.ktx.casted
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
@@ -16,6 +17,7 @@ import top.xjunz.tasker.engine.applet.util.isAttached
 import top.xjunz.tasker.ktx.*
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.ui.main.EventCenter
 import java.util.*
 
@@ -49,30 +51,42 @@ class AppletOption(
 
         const val TITLE_NONE = -1
 
-        private val DEFAULT_DESCRIBER: (Applet?, Any?) -> CharSequence? = { _, value ->
-            if (value is Boolean) {
-                if (value) R.string._true.text else R.string._false.text
-            } else {
-                value?.toString()
+        private val DEFAULT_SINGLE_VALUE_DESCRIBER: (Applet?, Map<Int, Any>) -> CharSequence? =
+            { _, values ->
+                if (values.isEmpty()) {
+                    null
+                } else {
+                    val value = values.values.single()
+                    if (value is Boolean) {
+                        if (value) R.string._true.text else R.string._false.text
+                    } else {
+                        value.toString()
+                    }
+                }
             }
-        }
 
-        private val DEFAULT_RANGE_FORMATTER: (Applet?, Any?) -> CharSequence? = { _, range ->
-            range as Collection<*>
-            check(range.size == 2)
-            val first = range.firstOrNull()
-            val last = range.lastOrNull()
-            check(first != null || last != null)
-            if (first == last) {
-                first.toString()
-            } else if (first == null) {
-                R.string.format_less_than.format(last)
-            } else if (last == null) {
-                R.string.format_larger_than.format(first)
-            } else {
-                R.string.format_range.format(first, last)
+        private val DEFAULT_RANGE_FORMATTER: (Applet?, Map<Int, Any>) -> CharSequence? =
+            { _, values ->
+                if (values.isEmpty()) {
+                    null
+                } else {
+                    val range = values.values.single()
+                    range as Collection<*>
+                    check(range.size == 2)
+                    val first = range.firstOrNull()
+                    val last = range.lastOrNull()
+                    check(first != null || last != null)
+                    if (first == last) {
+                        first.toString()
+                    } else if (first == null) {
+                        R.string.format_less_than.format(last)
+                    } else if (last == null) {
+                        R.string.format_larger_than.format(first)
+                    } else {
+                        R.string.format_range.format(first, last)
+                    }
+                }
             }
-        }
 
         fun deliverEvent(view: View, action: String, value: Any) {
             deliveringEvent = action
@@ -102,10 +116,6 @@ class AppletOption(
             }.foreColored().backColored().underlined()
         }
 
-        fun makeAppletIdentifier(registryId: Int, appletId: Int): Int {
-            return registryId shl 16 or appletId
-        }
-
     }
 
     var appletId: Int = -1
@@ -127,7 +137,10 @@ class AppletOption(
         return this
     }
 
-    private var describer: (Applet?, Any?) -> CharSequence? = DEFAULT_DESCRIBER
+    var name: String? = null
+
+    private var describer: (Applet?, Map<Int, Any>) -> CharSequence? =
+        DEFAULT_SINGLE_VALUE_DESCRIBER
 
     private var helpTextRes: Int = -1
 
@@ -190,12 +203,6 @@ class AppletOption(
     val rawTitle: CharSequence?
         get() = if (titleResource == TITLE_NONE) null else titleResource.text
 
-    /**
-     * The applet's value is innate and hence not modifiable.
-     */
-    var isValueInnate: Boolean = false
-        private set
-
     private var titleModifierRes: Int = -1
 
     var titleModifier: String? = null
@@ -211,6 +218,7 @@ class AppletOption(
                 check(id != 0) { "Resource id 'R.string.$invertedResName' not found!" }
                 id
             }
+
             TITLE_NONE -> TITLE_NONE
             else -> invertedTitleRes
         }
@@ -219,21 +227,16 @@ class AppletOption(
     private val invertedTitle: CharSequence?
         get() = if (invertedTitleResource == TITLE_NONE) null else invertedTitleResource.text
 
-    /**
-     * Non-spanned title considering inversion status of the [applet].
-     */
-    fun loadDummyTitle(applet: Applet?): CharSequence? {
-        return loadTitle(
-            null, if (applet == null || !applet.isAttached) isInverted else applet.isInverted
-        )
-    }
-
-    fun findResults(argument: ArgumentDescriptor): List<ValueDescriptor> {
+    fun matchReferents(argument: ArgumentDescriptor): List<ValueDescriptor> {
+        val shouldIgnoreVariantType =
+            VariantArgType.shouldIgnoreVariantTypeWhenMatching(argument.variantType)
+        val argVariantType =
+            if (shouldIgnoreVariantType) VariantArgType.NONE else argument.variantType
         return results.filter {
-            if (argument.referenceClass == null) {
-                it.valueClass == argument.valueClass && it.variantValueType == argument.variantValueType
+            if (it.isCollection != argument.isCollection) {
+                false
             } else {
-                it.valueClass == argument.referenceClass
+                argVariantType == it.variantType && it.valueType == argument.referenceType
             }
         }
     }
@@ -245,8 +248,14 @@ class AppletOption(
         return if (isInverted) invertedTitle else rawTitle
     }
 
-    fun loadTitle(applet: Applet): CharSequence? {
+    fun loadSpannedTitle(applet: Applet): CharSequence? {
         return loadTitle(applet, applet.isInverted)
+    }
+
+    fun loadUnspannedTitle(applet: Applet?): CharSequence? {
+        return loadTitle(
+            null, if (applet == null || !applet.isAttached) isInverted else applet.isInverted
+        )
     }
 
     fun shizukuOnly(): AppletOption {
@@ -264,12 +273,7 @@ class AppletOption(
         return this
     }
 
-    fun hasInnateValue(): AppletOption {
-        isValueInnate = true
-        return this
-    }
-
-    fun describe(applet: Applet): CharSequence? = describer(applet, applet.value)
+    fun describe(applet: Applet): CharSequence? = describer(applet, applet.values)
 
     fun toggleInversion() {
         isInverted = !isInverted
@@ -280,37 +284,66 @@ class AppletOption(
         return this
     }
 
-    fun yield(initialValue: Any? = null): Applet {
+    fun yieldWithFirstValue(value: Any): Applet {
+        return yield(0 to value)
+    }
+
+    fun yieldCriterion(inverted: Boolean): Applet {
+        return yield().also { it.isInverted = inverted }
+    }
+
+    fun yield(vararg values: Pair<Int, Any>): Applet {
         check(isValid) {
             "Invalid applet option unable to yield an applet!"
         }
         return rawCreateApplet().also {
-            it.id = makeAppletIdentifier(registryId, appletId)
+            it.id = registryId shl 16 or appletId
+            it.name = name
             it.isInverted = isInverted
             it.isInvertible = isInvertible
-            if (!isValueInnate) {
-                if (initialValue != null) it.value = initialValue else it.value = it.defaultValue
+            if (values.isNotEmpty()) {
+                it.values = arrayMapOf(*values)
+            }
+            it.argumentTypes = IntArray(arguments.size) { index ->
+                val arg = arguments[index]
+                if (arg.isReferenceOnly) {
+                    Applet.ARG_TYPE_REFERENCE
+                } else {
+                    val type = Applet.judgeValueType(arg.valueType)
+                    if (arg.isCollection) Applet.collectionTypeOf(type) else type
+                }
             }
         }
     }
 
-    fun <T : Any> withValueDescriber(block: (T) -> CharSequence): AppletOption {
-        describer = { _, value ->
-            if (value == null) {
+    fun <T : Any> withSingleValueDescriber(block: (T) -> CharSequence): AppletOption {
+        describer = { _, values ->
+            if (values.isEmpty()) {
                 null
             } else {
-                block(value.casted())
+                block(values.values.single().casted())
             }
         }
         return this
     }
 
     fun <T : Any> withDescriber(block: (Applet, T?) -> CharSequence?): AppletOption {
-        describer = { applet, value ->
+        describer = { applet, values ->
             if (applet == null) {
                 null
             } else {
-                block(applet, value?.casted())
+                block(applet, values.values.singleOrNull()?.casted())
+            }
+        }
+        return this
+    }
+
+    fun withValuesDescriber(block: (Applet, values: Map<Int, Any>) -> CharSequence?): AppletOption {
+        describer = { applet, values ->
+            if (applet == null) {
+                null
+            } else {
+                block(applet, values)
             }
         }
         return this
@@ -329,14 +362,14 @@ class AppletOption(
             val s = split[i]
             val index = i - 1
             val arg = arguments[index]
+            val value = applet.values[index]
             val ref = applet.references[index]
             val sub = when {
                 arg.isReferenceOnly -> makeReferenceText(applet, ref) ?: arg.substitution
                 arg.isValueOnly -> arg.substitution
                 else -> when {
-                    applet.value == null && ref == null -> arg.substitution
-                    applet.value == null && ref != null -> makeReferenceText(applet, ref)!!
                     ref == null -> arg.substitution
+                    value == null -> makeReferenceText(applet, ref)!!
                     else -> error("Value and reference both specified!")
                 }
             }
@@ -371,7 +404,7 @@ class AppletOption(
 
     inline fun <reified T> withResult(
         @StringRes name: Int,
-        variantType: Int = -1,
+        variantType: Int = VariantArgType.NONE,
         isCollection: Boolean = false
     ): AppletOption {
         requireResults().add(ValueDescriptor(name, T::class.java, variantType, isCollection))
@@ -384,7 +417,7 @@ class AppletOption(
     inline fun <reified V> withUnaryArgument(
         @StringRes name: Int,
         @StringRes substitution: Int = -1,
-        variantType: Int = -1,
+        variantType: Int = VariantArgType.NONE,
         isRef: Boolean? = null,
         isCollection: Boolean = false,
     ): AppletOption {
@@ -399,31 +432,11 @@ class AppletOption(
         )
     }
 
-    /**
-     * An argument whose value and argument are of different types.
-     */
-    inline fun <reified V, reified Ref> withBinaryArgument(
-        @StringRes name: Int,
-        @StringRes substitution: Int = -1,
-        variantValueType: Int = -1,
-        isCollection: Boolean = false,
-    ): AppletOption {
-        return withArgument(
-            name,
-            substitution,
-            V::class.java,
-            Ref::class.java,
-            variantValueType,
-            null,
-            isCollection
-        )
-    }
-
     fun withArgument(
         @StringRes name: Int,
         @StringRes substitution: Int,
         valueType: Class<*>,
-        referenceType: Class<*>?,
+        refType: Class<*>?,
         variantType: Int,
         isRef: Boolean?,
         isCollection: Boolean
@@ -434,7 +447,7 @@ class AppletOption(
                 name,
                 substitution,
                 valueType,
-                referenceType,
+                refType,
                 variantType,
                 isRef,
                 isCollection
@@ -443,12 +456,9 @@ class AppletOption(
         return this
     }
 
-    /**
-     * Describe [Applet.value] as an argument.
-     */
     inline fun <reified V> withValueArgument(
         @StringRes name: Int,
-        variantValueType: Int = -1,
+        variantValueType: Int = VariantArgType.NONE,
         isCollection: Boolean = false
     ): AppletOption {
         return withUnaryArgument<V>(
@@ -460,16 +470,43 @@ class AppletOption(
         )
     }
 
+    inline fun <reified V> withAnonymousSingleValueArgument(
+        variantValueType: Int = VariantArgType.NONE,
+        isCollection: Boolean = false
+    ): AppletOption {
+        check(arguments.isEmpty()) {
+            "Only one anonymous value is allowed!"
+        }
+        return withUnaryArgument<V>(-1, -1, variantValueType, false, isCollection)
+    }
+
     /**
      * An argument which is a reference.
      */
     inline fun <reified Ref> withRefArgument(
         @StringRes name: Int,
         @StringRes substitution: Int = -1,
-        variantValueType: Int = -1,
+        variantType: Int = VariantArgType.NONE,
+        isCollection: Boolean = false
+    ): AppletOption {
+        return withUnaryArgument<Ref>(name, substitution, variantType, true, isCollection)
+    }
+
+    inline fun <reified Ref, reified V> withBinaryArgument(
+        @StringRes name: Int,
+        @StringRes substitution: Int = -1,
+        variantType: Int = VariantArgType.NONE,
         isCollection: Boolean = false,
     ): AppletOption {
-        return withUnaryArgument<Ref>(name, substitution, variantValueType, true, isCollection)
+        return withArgument(
+            name,
+            substitution,
+            V::class.java,
+            Ref::class.java,
+            variantType,
+            null,
+            isCollection
+        )
     }
 
     fun withHelperText(@StringRes res: Int): AppletOption {

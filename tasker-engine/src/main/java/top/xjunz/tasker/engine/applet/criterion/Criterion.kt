@@ -19,7 +19,7 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  *
  * @author xjunz 2022/08/06
  */
-abstract class Criterion<T : Any, V : Any> : Applet() {
+abstract class Criterion<T, V> : Applet() {
 
     protected val isScoped by lazy {
         var p = parent
@@ -29,28 +29,45 @@ abstract class Criterion<T : Any, V : Any> : Applet() {
         p is ScopeFlow<*>
     }
 
+    /**
+     * Get the match target.
+     *
+     * If this applet [isScoped], returns the target from its scope. Otherwise, by default, we expect
+     * the match target to be the first reference. If the match target is not from arguments, this
+     * returns a [Unit]. For example, as for a criterion checking whether the device is charging, the
+     * match target (charging status) is obtained from a system API directly.
+     *
+     */
     private fun getMatchTarget(runtime: TaskRuntime): T {
-        if (isScoped) {
-            return runtime.getTarget()
-        }
-        val arg = runtime.getReferentOf(this, 0)?.casted<T>()
-        if (arg != null) {
-            return arg
+        if (isScoped) return runtime.getTarget()
+        val target = runtime.getReferenceArgument(this, 0)?.casted<T>()
+        if (target != null) {
+            return target
         }
         return Unit.casted()
     }
 
     /**
-     * The default value when [value] is null.
+     * Get the match value.
+     *
+     * We expect the first value to be the match value. If the first value is null, then this returns
+     * the default value (from [getDefaultMatchValue]).
      */
-    open fun getDefaultValue(runtime: TaskRuntime): V {
+    private fun getMatchValue(runtime: TaskRuntime): V {
+        return values.values.firstOrNull()?.casted() ?: getDefaultMatchValue(runtime)
+    }
+
+    /**
+     * The default value when [getMatchValue] is null.
+     */
+    open fun getDefaultMatchValue(runtime: TaskRuntime): V {
         throw NotImplementedError("Default value is not defined while value is null!")
     }
 
     final override suspend fun apply(runtime: TaskRuntime): AppletResult {
-        val expected = value?.casted() ?: getDefaultValue(runtime)
+        val value = getMatchValue(runtime)
         val target = getMatchTarget(runtime)
-        val raw = matchTarget(target, expected)
+        val raw = matchTarget(target, value)
         runtime.updateFingerprint(raw.actual)
         val result: AppletResult
         if (isInverted) {

@@ -14,12 +14,10 @@ import top.xjunz.tasker.uiautomator.CoroutineUiObject
  */
 class InputTextToFirstTextField : PerformActionIfUiObjectExistsInCurrentWindow() {
 
-    override val valueType: Int = VAL_TYPE_TEXT
-
     override val isCriterionSpecified: Boolean = true
 
     override suspend fun performActionIfFound(runtime: TaskRuntime, target: CoroutineUiObject) {
-        val text = (runtime.getReferentOf(this, 0) ?: value) as CharSequence
+        val text = getArgument(0, runtime) as CharSequence
         target.setText(text)
     }
 

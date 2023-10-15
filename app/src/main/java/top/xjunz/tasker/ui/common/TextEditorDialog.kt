@@ -22,7 +22,7 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.textString
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -193,7 +193,7 @@ class TextEditorDialog : BaseDialogFragment<DialogTextEditorBinding>() {
             }
             return@l false
         }
-        binding.cvContainer.isVisible = viewModel.variantType == VariantType.TEXT_ACTIVITY
+        binding.cvContainer.isVisible = viewModel.variantType == VariantArgType.TEXT_ACTIVITY
         binding.cvContainer.setNoDoubleClickListener {
             FloatingInspectorDialog().setMode(InspectorMode.COMPONENT).show(childFragmentManager)
         }

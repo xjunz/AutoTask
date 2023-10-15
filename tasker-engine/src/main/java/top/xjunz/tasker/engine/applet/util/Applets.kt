@@ -232,23 +232,23 @@ fun <T : Applet> T.clone(factory: AppletFactory, cloneHierarchyInfo: Boolean = t
     clone.id = id
     clone.relation = relation
     clone.isEnabled = isEnabled
-    clone.value = value
     clone.isInverted = isInverted
     clone.isInvertible = isInvertible
     clone.comment = comment
     clone.cloneSource = this
-    if (referents.isEmpty()) {
-        clone.referents = emptyMap()
-    } else {
-        clone.referents = ArrayMap<Int, String>().apply {
-            putAll(referents)
+    if (values.isNotEmpty()) {
+        clone.values = ArrayMap<Int, Any>().also {
+            it.putAll(values)
         }
     }
-    if (references.isEmpty()) {
-        clone.references = emptyMap()
-    } else {
-        clone.references = ArrayMap<Int, String>().apply {
-            putAll(references)
+    if (referents.isNotEmpty()) {
+        clone.referents = ArrayMap<Int, String>().also {
+            it.putAll(referents)
+        }
+    }
+    if (references.isNotEmpty()) {
+        clone.references = ArrayMap<Int, String>().also {
+            it.putAll(references)
         }
     }
     if (cloneHierarchyInfo) {

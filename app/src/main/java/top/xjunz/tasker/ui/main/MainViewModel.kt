@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.main
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -78,7 +79,9 @@ class MainViewModel : ViewModel(), ServiceController.ServiceStateListener {
 
     var showUpdateDialog = true
 
-    val currentSharedFile = MutableLiveData<File>()
+    val requestShareFile = MutableLiveData<File>()
+
+    val requestImportTask = MutableLiveData<Intent>()
 
     init {
         AppletOptionFactory.preloadIfNeeded()

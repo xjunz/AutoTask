@@ -12,8 +12,10 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.AppletResult
-import top.xjunz.tasker.engine.applet.criterion.*
-import top.xjunz.tasker.engine.applet.criterion.LambdaCriterion.Companion.equalCriterion
+import top.xjunz.tasker.engine.applet.criterion.Criterion
+import top.xjunz.tasker.engine.applet.criterion.createCriterion
+import top.xjunz.tasker.engine.applet.criterion.equalCriterion
+import top.xjunz.tasker.engine.applet.criterion.propertyCriterion
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -21,7 +23,7 @@ import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.criterion.NumberRangeCriterion.Companion.numberRangeCriterion
 import top.xjunz.tasker.task.applet.flow.UiObjectTarget
 import top.xjunz.tasker.task.applet.value.Distance
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 
 /**
  * @author xjunz 2022/09/27
@@ -37,8 +39,9 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }
 
-    private inline fun nodeTextCriterion(crossinline matcher: (String?, String) -> Boolean?): Criterion<UiObjectTarget, String> {
-        return LambdaCriterion(Applet.judgeValueType<String>()) { t, v ->
+    private inline fun nodeTextCriterion(crossinline matcher: (String?, String) -> Boolean?)
+            : Criterion<UiObjectTarget, String> {
+        return createCriterion { t, v ->
             AppletResult.resultOf(t.source.text?.toString()) {
                 matcher(it, v) == true
             }
@@ -46,8 +49,8 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     }
 
     private inline fun nodePropertyCriterion(crossinline matcher: (AccessibilityNodeInfo) -> Boolean)
-            : PropertyCriterion<UiObjectTarget> {
-        return PropertyCriterion {
+            : Applet {
+        return propertyCriterion<UiObjectTarget> {
             matcher(it.source)
         }
     }
@@ -68,6 +71,7 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
                         else -> illegalArgument("direction", direction)
                     }
                 }
+
                 Distance.SCOPE_PARENT -> {
                     parentRect = Rect()
                     node.parent.getBoundsInScreen(parentRect)
@@ -79,6 +83,7 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
                         else -> illegalArgument("direction", direction)
                     }
                 }
+
                 Distance.SCOPE_SCREEN -> when (direction) {
                     Gravity.START -> childRect.left
                     Gravity.END -> childRect.right
@@ -86,6 +91,7 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
                     Gravity.BOTTOM -> childRect.bottom
                     else -> illegalArgument("direction", direction)
                 }
+
                 else -> illegalArgument("scope", scope)
             }.toFloat()
             when (unit) {
@@ -116,8 +122,10 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             val value = when {
                 start == null && stop != null ->
                     R.string.format_less_than.format(stop.toIntOrKeep())
+
                 stop == null && start != null ->
                     R.string.format_larger_than.format(start.toIntOrKeep())
+
                 start == stop -> R.string.format_equals_to.format(start!!.toIntOrKeep())
                 else -> R.string.format_range.format(start!!.toIntOrKeep(), stop!!.toIntOrKeep())
             }
@@ -145,19 +153,20 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     // Type
     @AppletOrdinal(0x00_00)
-    val isType = appletOption(R.string.with_type) {
+    val isType = appletOption(R.string.with_ui_object_type) {
         nodeEqualCriterion {
             it.className?.toString()
         }
     }.withPresetArray(R.array.a11y_class_names, R.array.a11y_class_full_names)
+        .withAnonymousSingleValueArgument<String>()
 
     // ID
     @AppletOrdinal(0x00_01)
-    val withId = appletOption(R.string.with_id) {
+    val withId = appletOption(R.string.with_ui_object_id) {
         nodeEqualCriterion {
             it.viewIdResourceName
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     // Text
     @AppletOrdinal(0x01_00)
@@ -165,28 +174,28 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         nodeEqualCriterion {
             it.text?.toString()
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     @AppletOrdinal(0x01_01)
     val textStartsWith = invertibleAppletOption(R.string.text_starts_with) {
         nodeTextCriterion { t, v ->
             t?.startsWith(v)
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     @AppletOrdinal(0x01_02)
     val textEndsWith = invertibleAppletOption(R.string.text_ends_with) {
         nodeTextCriterion { t, v ->
             t?.endsWith(v)
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     @AppletOrdinal(0x01_03)
     val textLengthRange = appletOption(R.string.in_length_range) {
         numberRangeCriterion<UiObjectTarget, Int> {
             it.source.text?.length ?: -1
         }
-    }.withValueArgument<Int>(R.string.in_length_range, VariantType.INT_RANGE)
+    }.withValueArgument<Int>(R.string.in_length_range, VariantArgType.INT_QUANTITY, true)
         .withDefaultRangeDescriber()
 
     @AppletOrdinal(0x01_04)
@@ -194,14 +203,14 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         nodeTextCriterion { t, v ->
             t?.contains(v)
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     @AppletOrdinal(0x01_05)
     val textPattern = invertibleAppletOption(R.string.text_matches_pattern) {
         nodeTextCriterion { t, v ->
             t?.matches(Regex(v))
         }
-    }
+    }.withAnonymousSingleValueArgument<String>()
 
     @AppletOrdinal(0x01_06)
     val contentDesc = appletOption(R.string.content_desc) {
@@ -209,6 +218,7 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             it.contentDescription?.toString()
         }
     }.withTitleModifier("Content Description")
+        .withAnonymousSingleValueArgument<String>()
 
     // Properties
     @AppletOrdinal(0x02_00)
@@ -272,46 +282,52 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         numberRangeCriterion<UiObjectTarget, Int> {
             it.source.childCount
         }
-    }.withValueArgument<Int>(R.string.not_child_node_count_in_range,VariantType.INT_RANGE)
+    }.withValueArgument<Int>(R.string.not_child_node_count_in_range, VariantArgType.INT_QUANTITY, true)
         .withDefaultRangeDescriber()
 
     // Position
     @AppletOrdinal(0x0300)
     val left = appletOption(R.string.left_margin) {
         uiObjectBoundsCriterion(Gravity.START)
-    }.withValueDescriber(distanceDescriber)
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.left_margin, VariantArgType.BITS_BOUNDS)
 
     @AppletOrdinal(0x0301)
     val right = appletOption(R.string.right_margin) {
         uiObjectBoundsCriterion(Gravity.END)
-    }.withValueDescriber(distanceDescriber)
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.right_margin, VariantArgType.BITS_BOUNDS)
 
     @AppletOrdinal(0x0302)
     val top = appletOption(R.string.top_margin) {
         uiObjectBoundsCriterion(Gravity.TOP)
-    }.withValueDescriber(distanceDescriber)
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.top_margin, VariantArgType.BITS_BOUNDS)
 
     @AppletOrdinal(0x0303)
     val bottom = appletOption(R.string.bottom_margin) {
         uiObjectBoundsCriterion(Gravity.BOTTOM)
-    }.withValueDescriber(distanceDescriber)
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.bottom_margin, VariantArgType.BITS_BOUNDS)
 
     @AppletOrdinal(0x0304)
     val width = appletOption(R.string.width) {
         uiObjectBoundsCriterion(Gravity.FILL_HORIZONTAL)
-    }.withValueDescriber(distanceDescriber)
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.width, VariantArgType.BITS_BOUNDS)
 
     @AppletOrdinal(0x0305)
     val height = appletOption(R.string.height) {
         uiObjectBoundsCriterion(Gravity.FILL_VERTICAL)
-    }.withValueDescriber(distanceDescriber)
-/*
-    @AppletCategory(0x0400)
-    val depth = NotInvertibleAppletOption(ID_DEPTH, R.string.node_depth) {
-        BaseCriterion<UiObjectContext, Int> { t, v ->
+    }.withSingleValueDescriber(distanceDescriber)
+        .withValueArgument<Long>(R.string.height, VariantArgType.BITS_BOUNDS)
+    /*
+        @AppletCategory(0x0400)
+        val depth = NotInvertibleAppletOption(ID_DEPTH, R.string.node_depth) {
+            BaseCriterion<UiObjectContext, Int> { t, v ->
 
-        }
-    }*/
+            }
+        }*/
 
     override val categoryNames: IntArray =
         intArrayOf(R.string.type, R.string.text, R.string.property, R.string.position)

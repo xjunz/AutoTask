@@ -14,7 +14,7 @@ object AppletChecksum {
 
     fun calculateChecksum(appletDto: AppletDTO, metadata: XTask.Metadata): Long {
         val crc32 = CRC32()
-        appletDto.calculateChecksum(crc32)
+        appletDto.calculateChecksum(crc32, metadata.version < 16)
         crc32.update(metadata.title.toByteArray())
         metadata.description?.let {
             crc32.update(it.toByteArray())

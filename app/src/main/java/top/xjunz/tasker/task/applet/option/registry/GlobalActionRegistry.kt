@@ -8,11 +8,10 @@ import android.accessibilityservice.AccessibilityService
 import android.os.Build
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PowerManagerBridge
-import top.xjunz.tasker.engine.applet.action.pureAction
-import top.xjunz.tasker.engine.applet.action.simpleAction
-import top.xjunz.tasker.engine.applet.action.singleValueAction
+import top.xjunz.tasker.engine.applet.action.emptyArgAction
+import top.xjunz.tasker.engine.applet.action.emptyArgOptimisticAction
+import top.xjunz.tasker.engine.applet.action.singleNonNullArgAction
 import top.xjunz.tasker.ktx.array
-import top.xjunz.tasker.ktx.clickable
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
 import top.xjunz.tasker.service.uiAutomation
@@ -20,7 +19,7 @@ import top.xjunz.tasker.service.uiAutomatorBridge
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.util.IntValueUtil
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.util.formatMinSecMills
 
 /**
@@ -30,7 +29,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     private fun globalActionOption(title: Int, action: Int): AppletOption {
         return appletOption(title) {
-            simpleAction {
+            emptyArgAction {
                 uiAutomation.performGlobalAction(action)
             }
         }
@@ -38,13 +37,13 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val waitForIdle = appletOption(R.string.wait_for_idle) {
-        singleValueAction<Int> {
+        singleNonNullArgAction<Int> {
             val xy = IntValueUtil.parseXY(it)
             uiAutomatorBridge.waitForIdle(xy.x.toLong(), xy.y.toLong())
         }
     }.withValueArgument<Int>(
-        R.string.wait_for_idle, variantValueType = VariantType.INT_INTERVAL_XY
-    ).withHelperText(R.string.tip_wait_for_idle).withValueDescriber<Int> {
+        R.string.wait_for_idle, variantValueType = VariantArgType.INT_INTERVAL_XY
+    ).withHelperText(R.string.tip_wait_for_idle).withSingleValueDescriber<Int> {
         val xy = IntValueUtil.parseXY(it)
         R.string.format_wait_for_idle_desc.formatSpans(
             formatMinSecMills(xy.x).foreColored(), formatMinSecMills(xy.y).foreColored()
@@ -78,7 +77,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0006)
     val takeScreenshot = appletOption(R.string.take_screenshot) {
-        simpleAction {
+        emptyArgAction {
             uiAutomation.performGlobalAction(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
                 else -1
@@ -89,19 +88,19 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0007)
     val setRotation = appletOption(R.string.rotate_screen) {
-        singleValueAction<Int> {
+        singleNonNullArgAction<Int> {
             uiAutomatorBridge.setRotation(it)
         }
-    }.withValueArgument<Int>(R.string.rotation_direction, VariantType.INT_ROTATION).shizukuOnly()
+    }.withValueArgument<Int>(R.string.rotation_direction, VariantArgType.INT_ROTATION).shizukuOnly()
         .withDescriber<Int> { applet, t ->
-            R.string.format_desc_rotation_screen.formatSpans(R.array.rotations.array[t!!].clickable {
-                AppletOption.deliverEvent(it, AppletOption.EVENT_EDIT_VALUE, applet)
-            })
+            R.string.format_desc_rotation_screen.formatSpans(
+                R.array.rotations.array[t!!].clickToEdit(applet)
+            )
         }.descAsTitle()
 
     @AppletOrdinal(0x0008)
     val wakeUpScreen = appletOption(R.string.wake_up_screen) {
-        pureAction {
+        emptyArgOptimisticAction {
             PowerManagerBridge.wakeUpScreen()
         }
     }

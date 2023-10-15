@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.option.registry
 import top.xjunz.tasker.R
 import top.xjunz.tasker.task.applet.action.ShellCmdAction
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 
 /**
  * @author xjunz 2023/04/03
@@ -24,7 +24,7 @@ class ShellCmdActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0002)
     val executeShFile = appletOption(R.string.execute_sh_file) {
         ShellCmdAction(true)
-    }.withValueArgument<String>(R.string.file_path, VariantType.TEXT_FILE_PATH)
+    }.withValueArgument<String>(R.string.file_path, VariantArgType.TEXT_FILE_PATH)
         .shizukuOnly()
         .premiumOnly()
 }

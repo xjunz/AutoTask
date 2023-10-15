@@ -6,6 +6,7 @@ package top.xjunz.tasker.task.inspector.overlay
 
 import android.annotation.SuppressLint
 import android.view.WindowManager
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.ItemNodeInfoBinding
@@ -52,8 +53,9 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
             }
         }) { b, _, applet ->
             val option = AppletOptionFactory.requireOption(applet)
-            b.tvAttrName.text = option.loadDummyTitle(applet)
+            b.tvAttrName.text = option.loadSpannedTitle(applet)
             b.tvAttrValue.text = option.describe(applet)
+            b.tvAttrValue.isVisible = !b.tvAttrValue.text.isNullOrEmpty()
             b.checkbox.isChecked = !uncheckedApplets.contains(applet)
         }
     }
@@ -61,45 +63,49 @@ class NodeInfoOverlay(inspector: FloatingInspector) :
     private fun collectProperties() {
         val node = vm.highlightNode.require().source
         if (node.className != null)
-            allApplets.add(uiObjectRegistry.isType.yield(node.className))
+            allApplets.add(uiObjectRegistry.isType.yieldWithFirstValue(node.className))
 
         if (node.viewIdResourceName != null)
-            allApplets.add(uiObjectRegistry.withId.yield(node.viewIdResourceName))
+            allApplets.add(uiObjectRegistry.withId.yieldWithFirstValue(node.viewIdResourceName))
 
         if (node.text != null)
-            allApplets.add(uiObjectRegistry.textEquals.yield(node.text))
+            allApplets.add(uiObjectRegistry.textEquals.yieldWithFirstValue(node.text))
 
         if (node.contentDescription != null)
-            allApplets.add(uiObjectRegistry.contentDesc.yield(node.contentDescription))
+            allApplets.add(uiObjectRegistry.contentDesc.yieldWithFirstValue(node.contentDescription))
 
         if (node.isClickable)
-            allApplets.add(uiObjectRegistry.isClickable.yield(true))
+            allApplets.add(uiObjectRegistry.isClickable.yield())
 
         if (node.isLongClickable)
-            allApplets.add(uiObjectRegistry.isLongClickable.yield(true))
+            allApplets.add(uiObjectRegistry.isLongClickable.yield())
 
         if (!node.isEnabled)
-            allApplets.add(uiObjectRegistry.isEnabled.yield(node.isEnabled))
+            allApplets.add(uiObjectRegistry.isEnabled.yieldCriterion(true))
 
         if (node.isCheckable)
-            allApplets.add(uiObjectRegistry.isCheckable.yield(true))
+            allApplets.add(uiObjectRegistry.isCheckable.yield())
 
         if (node.isChecked || node.isCheckable)
-            allApplets.add(uiObjectRegistry.isChecked.yield(node.isChecked))
+            allApplets.add(uiObjectRegistry.isChecked.yield())
 
         if (node.isEditable)
-            allApplets.add(uiObjectRegistry.isEditable.yield(true))
+            allApplets.add(uiObjectRegistry.isEditable.yield())
 
-        allApplets.add(uiObjectRegistry.isSelected.yield(node.isSelected))
+        allApplets.add(uiObjectRegistry.isSelected.yieldCriterion(!node.isSelected))
         if (!node.isSelected)
             uncheckedApplets.add(allApplets.last())
 
-        allApplets.add(uiObjectRegistry.isScrollable.yield(node.isScrollable))
+        allApplets.add(uiObjectRegistry.isScrollable.yieldCriterion(!node.isScrollable))
         if (!node.isScrollable) {
             uncheckedApplets.add(allApplets.last())
         }
 
-        allApplets.add(uiObjectRegistry.childCount.yield(listOf(node.childCount, node.childCount)))
+        allApplets.add(
+            uiObjectRegistry.childCount.yieldWithFirstValue(
+                listOf(node.childCount, node.childCount)
+            )
+        )
         uncheckedApplets.add(allApplets.last())
     }
 

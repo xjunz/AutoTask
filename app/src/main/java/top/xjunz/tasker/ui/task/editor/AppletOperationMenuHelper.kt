@@ -14,9 +14,16 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.StaticError
+import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.engine.applet.util.isDescendantOf
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.configHeaderTitle
+import top.xjunz.tasker.ktx.configInputType
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.indexOf
+import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.option.AppletOptionFactory
 import top.xjunz.tasker.ui.common.PreferenceHelpDialog
 import top.xjunz.tasker.ui.common.TextEditorDialog
@@ -26,7 +33,7 @@ import top.xjunz.tasker.ui.demo.SwipeToRemoveDemo
 import top.xjunz.tasker.ui.task.selector.AppletOptionClickHandler
 import top.xjunz.tasker.ui.task.selector.AppletSelectorDialog
 import top.xjunz.tasker.ui.widget.PopupListMenu
-import java.util.*
+import java.util.Collections
 
 /**
  * @author xjunz 2022/11/08
@@ -60,82 +67,71 @@ class AppletOperationMenuHelper(
         )
         val menu = popup.menu
         val parent = applet.requireParent()
-        if (parent.requiredSize == 1) {
-            val registry = viewModel.factory.requireRegistryById(applet.registryId)
-            menu.add(R.string.replace_with)
-            registry.allOptions.forEachIndexed { index, appletOption ->
-                menu.add(0, index + 1, index, appletOption.rawTitle)
+        popup.inflate(R.menu.applet_operation)
+        if (applet.parent is When) {
+            menu.removeItem(R.id.item_toggle_ability)
+        }
+        // Not container
+        if (!applet.isContainer) {
+            menu.removeItem(R.id.item_split)
+        }
+        // Not invertible
+        if (!applet.isInvertible) {
+            menu.removeItem(R.id.item_invert)
+        }
+        val option = factory.requireOption(applet)
+        // Not editable
+        if (option.arguments.isEmpty()) {
+            menu.removeItem(R.id.item_edit)
+        }
+        // Not removable
+        if (applet.requiredIndex != -1) {
+            menu.removeItem(R.id.item_remove)
+            menu.removeItem(R.id.item_move)
+            // Disabled item is regarded as removed, so remove ability toggle
+            menu.removeItem(R.id.item_toggle_ability)
+        }
+        // Not movable
+        if (applet is ControlFlow || applet.parent?.size == 1) {
+            menu.removeItem(R.id.item_move)
+        }
+        // Not child addable
+        if (applet !is Flow || applet.size == applet.maxSize) {
+            menu.removeItem(R.id.item_add_inside)
+        }
+        if (!Preferences.showDragToMoveTip) {
+            menu.removeItem(R.id.item_move)
+        }
+        if (!Preferences.showSwipeToRemoveTip) {
+            menu.removeItem(R.id.item_remove)
+        }
+        if (!Preferences.showLongClickToSelectTip) {
+            menu.removeItem(R.id.item_select)
+        }
+        if (applet !is Flow || applet.maxSize == 0) {
+            menu.removeGroup(R.id.group_more)
+        }
+        if (applet is ControlFlow) {
+            if (factory.flowRegistry.getPeerOptions(applet, true).isEmpty()) {
+                menu.removeItem(R.id.item_add_before)
             }
-            popup.setOnMenuItemClickListener l@{
-                val index = menu.indexOf(it) - 1
-                if (index >= 0) {
-                    val newApplet = registry.allOptions[index].yield()
-                    parent[applet.index] = newApplet
-                    viewModel.regenerateApplets()
-                    viewModel.onAppletChanged.value = newApplet
-                }
-                return@l true
-            }
-        } else {
-            popup.inflate(R.menu.applet_operation)
-            // Not container
-            if (!applet.isContainer) {
-                menu.removeItem(R.id.item_split)
-            }
-            // Not invertible
-            if (!applet.isInvertible) {
-                menu.removeItem(R.id.item_invert)
-            }
-            val option = factory.requireOption(applet)
-            // Not editable
-            if (applet.valueType == Applet.VAL_TYPE_IRRELEVANT && option.arguments.isEmpty()) {
-                menu.removeItem(R.id.item_edit)
-            }
-            // Not removable
-            if (applet.requiredIndex != -1) {
-                menu.removeItem(R.id.item_remove)
-                menu.removeItem(R.id.item_move)
-                // Disabled item is regarded as removed, so remove ability toggle
-                menu.removeItem(R.id.item_toggle_ability)
-            }
-            // Not movable
-            if (applet is ControlFlow || applet.parent?.size == 1) {
-                menu.removeItem(R.id.item_move)
-            }
-            // Not child addable
-            if (applet !is Flow || applet.size == applet.maxSize) {
-                menu.removeItem(R.id.item_add_inside)
-            }
-            if (!Preferences.showDragToMoveTip) {
-                menu.removeItem(R.id.item_move)
-            }
-            if (!Preferences.showSwipeToRemoveTip) {
-                menu.removeItem(R.id.item_remove)
-            }
-            if (!Preferences.showLongClickToSelectTip) {
-                menu.removeItem(R.id.item_select)
-            }
-            if (applet !is Flow) {
-                menu.removeGroup(R.id.group_more)
-            }
-            if (applet is ControlFlow) {
-                if (factory.flowRegistry.getPeerOptions(applet, true).isEmpty()) {
-                    menu.removeItem(R.id.item_add_before)
-                }
-                if (factory.flowRegistry.getPeerOptions(applet, false).isEmpty()) {
-                    menu.removeItem(R.id.item_add_after)
-                }
-            }
-            if (applet.comment != null) {
-                menu.findItem(R.id.item_add_comment).title = R.string.edit_comment.text
-            }
-            if (!applet.isEnabled) {
-                menu.findItem(R.id.item_toggle_ability).title = R.string.enable.text
-            }
-            popup.setOnMenuItemClickListener {
-                triggerMenuItem(anchor, applet, it.itemId, it.title)
+            if (factory.flowRegistry.getPeerOptions(applet, false).isEmpty()) {
+                menu.removeItem(R.id.item_add_after)
             }
         }
+        if (parent.size == parent.maxSize) {
+            menu.removeGroup(R.id.group_insertion)
+        }
+        if (applet.comment != null) {
+            menu.findItem(R.id.item_add_comment).title = R.string.edit_comment.text
+        }
+        if (!applet.isEnabled) {
+            menu.findItem(R.id.item_toggle_ability).title = R.string.enable.text
+        }
+        popup.setOnMenuItemClickListener {
+            triggerMenuItem(anchor, applet, it.itemId, it.title)
+        }
+        // }
         return popup
     }
 
@@ -150,6 +146,7 @@ class AppletOperationMenuHelper(
             } else {
                 viewModel.showMergeConfirmation.value = true
             }
+
             R.id.item_enable, R.id.item_disable -> applets.forEach {
                 if (it.requiredIndex != -1) return@forEach
                 it.isEnabled = id == R.id.item_enable
@@ -159,18 +156,21 @@ class AppletOperationMenuHelper(
                     viewModel.onAppletChanged.value = it
                 }
             }
+
             R.id.item_invert -> applets.forEach {
                 if (it.isInvertible) {
                     it.toggleInversion()
                     viewModel.onAppletChanged.value = it
                 }
             }
+
             R.id.item_remove ->
                 PreferenceHelpDialog().init(R.string.tip, R.string.tip_swipe_to_remove) {
                     Preferences.showSwipeToRemoveTip = !it
                 }.setDemonstration {
                     SwipeToRemoveDemo(it)
                 }.show(fm)
+
             R.id.item_add_comment -> {
                 val defText = applets.map { it.comment }.distinct()
                 TextEditorDialog().init(title, defText.singleOrNull()) { comment ->
@@ -184,6 +184,7 @@ class AppletOperationMenuHelper(
                     it.maxLines = 10
                 }.show(fm)
             }
+
             else -> return false
         }
         return true
@@ -242,10 +243,12 @@ class AppletOperationMenuHelper(
                 }
                 dialog.show(fm)
             }
+
             R.id.item_split -> viewModel.splitContainerFlow(applet as Flow)
             R.id.item_edit -> optionOnClickListener.onClick(applet) {
                 viewModel.onAppletChanged.value = applet
             }
+
             R.id.item_toggle_ability -> {
                 applet.toggleAbility()
                 if (applet is Flow) {
@@ -254,11 +257,13 @@ class AppletOperationMenuHelper(
                     viewModel.onAppletChanged.value = applet
                 }
             }
+
             R.id.item_move -> PreferenceHelpDialog().init(R.string.tip, R.string.tip_drag_to_move) {
                 Preferences.showDragToMoveTip = !it
             }.setDemonstration {
                 DragToMoveDemo(it)
             }.show(fm)
+
             R.id.item_select -> PreferenceHelpDialog().init(
                 R.string.tip, R.string.tip_long_click_to_select
             ) {
@@ -277,6 +282,14 @@ class AppletOperationMenuHelper(
                     viewModel.addInside(flow, it)
                 }.show(fm)
             }
+
+            R.id.item_replace_with -> {
+                AppletSelectorDialog().init(applet.requireParent(), true) {
+                    check(it.size == 1)
+                    viewModel.replaceWith(applet, it.single())
+                }.show(fm)
+            }
+
             R.id.item_add_before, R.id.item_add_after -> {
                 val addBefore = id == R.id.item_add_before
                 if (applet is ControlFlow) {

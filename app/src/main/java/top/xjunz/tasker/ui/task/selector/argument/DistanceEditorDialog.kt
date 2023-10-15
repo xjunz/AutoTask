@@ -16,7 +16,17 @@ import top.xjunz.shared.utils.illegalArgument
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.DisplayManagerBridge
 import top.xjunz.tasker.databinding.DialogDistanceEditorBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.array
+import top.xjunz.tasker.ktx.doWhenCreated
+import top.xjunz.tasker.ktx.dp
+import top.xjunz.tasker.ktx.format
+import top.xjunz.tasker.ktx.setEntries
+import top.xjunz.tasker.ktx.setHelp
+import top.xjunz.tasker.ktx.shake
+import top.xjunz.tasker.ktx.str
+import top.xjunz.tasker.ktx.text
+import top.xjunz.tasker.ktx.textString
+import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.applet.value.Distance
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -50,10 +60,10 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
         binding.btnCancel.setOnClickListener {
             dismiss()
         }
-        binding.btnNoMinLimit.setOnClickListener {
+        binding.btnClearMin.setOnClickListener {
             binding.etMinimum.text.clear()
         }
-        binding.btnNoMaxLimit.setOnClickListener {
+        binding.btnClearMax.setOnClickListener {
             binding.etMaximum.text.clear()
         }
         binding.menuUnit.setEntries(R.array.distance_units, true) {
@@ -94,10 +104,8 @@ class DistanceEditorDialog : BaseDialogFragment<DialogDistanceEditorBinding>() {
             if (max != null && min != null && max < min) {
                 binding.root.rootView.shake()
                 toast(
-                    R.string.format_error_min_greater_than_max.format(
-                        R.string.minimum.str,
-                        R.string.maximum.str
-                    )
+                    R.string.format_error_min_greater_than_max
+                        .format(R.string.minimum.str, R.string.maximum.str)
                 )
                 return@setNoDoubleClickListener
             }

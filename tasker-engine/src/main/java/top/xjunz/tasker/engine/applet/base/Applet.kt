@@ -49,35 +49,44 @@ abstract class Applet {
 
         const val MAX_REFERENCE_ID_LENGTH = 12
 
-        const val VAL_TYPE_IRRELEVANT = 0
-        const val VAL_TYPE_TEXT = 1
+        const val ARG_TYPE_REFERENCE = 0
+        const val ARG_TYPE_TEXT = 1
 
-        const val VAL_TYPE_INT = 3
-        const val VAL_TYPE_FLOAT = 4
-        const val VAL_TYPE_LONG = 5
-
-        private val SEPARATOR = Char(0).toString()
-
-        private const val SERIALIZED_NULL_VALUE_IN_COLLECTION = ""
+        const val ARG_TYPE_INT = 3
+        const val ARG_TYPE_FLOAT = 4
+        const val ARG_TYPE_LONG = 5
 
         /**
          * Bit mask for collection value type.
          */
-        internal const val MASK_VAL_TYPE_COLLECTION = 1 shl 8
+        private const val MASK_ARG_TYPE_COLLECTION = 1 shl 8
 
-        fun collectionTypeOf(type: Int) = type or MASK_VAL_TYPE_COLLECTION
+        fun collectionTypeOf(type: Int) = type or MASK_ARG_TYPE_COLLECTION
 
-        inline fun <reified T> judgeValueType(): Int {
-            return when (val clz = T::class.java) {
-                Int::class.java, Int::class.javaObjectType -> VAL_TYPE_INT
-                String::class.java -> VAL_TYPE_TEXT
-                Float::class.java, Float::class.javaObjectType -> VAL_TYPE_FLOAT
-                Long::class.java, Long::class.javaObjectType -> VAL_TYPE_LONG
-                Unit::class.java -> VAL_TYPE_IRRELEVANT
+        fun judgeValueType(clz: Class<*>): Int {
+            return when (clz) {
+                Int::class.java, Int::class.javaObjectType -> ARG_TYPE_INT
+                String::class.java -> ARG_TYPE_TEXT
+                Float::class.java, Float::class.javaObjectType -> ARG_TYPE_FLOAT
+                Long::class.java, Long::class.javaObjectType -> ARG_TYPE_LONG
                 else -> illegalArgument("type", clz)
             }
         }
+
+        inline fun <reified T> judgeValueType(): Int {
+            return judgeValueType(T::class.java)
+        }
+
+        fun isCollectionArg(argType: Int): Boolean {
+            return argType and MASK_ARG_TYPE_COLLECTION != 0
+        }
+
+        fun getRawArgType(argType: Int): Int {
+            return argType and MASK_ARG_TYPE_COLLECTION.inv()
+        }
     }
+
+    var name: String? = null
 
     val isAnd: Boolean get() = relation == REL_AND
 
@@ -109,17 +118,41 @@ abstract class Applet {
 
     var index: Int = -1
 
-    var value: Any? = null
+    val singleValue: Any? get() = values.values.singleOrNull()
 
     /**
-     * References to other [Applet]s as input.
+     * References to other [Applet]s as input arguments.
      */
     var references: Map<Int, String> = emptyMap()
 
     /**
-     * Referents exposed to other [Applet]s as output.
+     * Non-reference input arguments.
+     */
+    var values: Map<Int, Any> = emptyMap()
+
+    /**
+     * Referents exposed to other [Applet]s as output results.
      */
     var referents: Map<Int, String> = emptyMap()
+
+    @Deprecated("Only for compatibility use.")
+    /**
+     * Whether the value argument is innate (not assignable)
+     */
+    open val isValueInnate = false
+
+    /**
+     * Store argument masked types, which are helpful when serializing and deserializing [values].
+     * **The size of this does not actually determine how many arguments will be present, because
+     * there may be a vararg argument type, which allows unspecific numbers of arguments.**
+     *
+     * The masked type of value is composed as following:
+     *
+     * |0|│|0000 0000|
+     * |  :----: |:----: | :----:  |
+     * |is collection|│|raw type(non-reference type)|
+     */
+    lateinit var argumentTypes: IntArray
 
     /**
      * Whether the result is inverted, only takes effect when the applet is [invertible][isInvertible].
@@ -140,40 +173,23 @@ abstract class Applet {
     open val supportsAnywayRelation: Boolean = false
 
     /**
-     * Unmasked raw type.
-     *
-     * @see MASK_VAL_TYPE_COLLECTION
-     * @see Applet.valueType
-     */
-    val rawType: Int
-        get() = valueType and MASK_VAL_TYPE_COLLECTION.inv()
-
-    /**
      * Get the id of the registry where the applet is created.
      */
     inline val registryId get() = id ushr 16 and 0xFF
 
     /**
-     * Get the type id of this applet.
+     * Get the type id of this applet without registry info.
      */
     inline val appletId get() = id and 0xFFFF
 
+    val singleValueType: Int?
+        get() = argumentTypes.singleOrNull {
+            it != ARG_TYPE_REFERENCE
+        }
+
+    val firstValue get() = values.values.first()
+
     open val defaultValue: Any? = null
-
-    /**
-     * Whether its value is a [Collection].
-     */
-    private val isCollectionValue: Boolean
-        get() = valueType and MASK_VAL_TYPE_COLLECTION != 0
-
-    /**
-     * The masked type of value for `serialization`, which is composed as following:
-     *
-     * |0|│|0000 0000|
-     * |  :----: |:----: | :----:  |
-     * |is collection|│|raw type|
-     */
-    abstract val valueType: Int
 
     private var cloneSourceRef: WeakReference<Applet>? = null
 
@@ -205,18 +221,12 @@ abstract class Applet {
         "Parent not found!"
     }
 
-    fun isSuccess(any: Any?): Boolean {
-        return any != null
-    }
-
     open fun toggleRelation() {
         relation = if (supportsAnywayRelation) {
-            if (isAnd) {
-                REL_OR
-            } else if (isOr) {
-                REL_ANYWAY
-            } else {
-                REL_AND
+            when {
+                isAnd -> REL_OR
+                isOr -> REL_ANYWAY
+                else -> REL_AND
             }
         } else {
             if (relation == REL_AND) REL_OR else REL_AND
@@ -231,38 +241,22 @@ abstract class Applet {
         isEnabled = !isEnabled
     }
 
-    protected open fun serializeValueToString(value: Any): String {
-        return value.toString()
+    open fun serializeArgumentToString(which: Int, rawType: Int, arg: Any): String {
+        check(!isCollectionArg(rawType)) {
+            "Require a non-collection type!"
+        }
+        return arg.toString()
     }
 
-    internal fun serializeValue(): String? {
-        val value = this.value
-        if (value != null && rawType == VAL_TYPE_IRRELEVANT) {
-            throw IllegalArgumentException("Type value of [$this] should not be irrelevant!")
+    open fun deserializeArgumentFromString(which: Int, rawType: Int, src: String): Any {
+        check(!isCollectionArg(rawType)) {
+            "Require a non-collection type!"
         }
-        return when {
-            value == null -> null
-            rawType == VAL_TYPE_IRRELEVANT -> null
-            isCollectionValue ->
-                (value as Collection<*>).joinToString(SEPARATOR) {
-                    if (it == null) {
-                        SERIALIZED_NULL_VALUE_IN_COLLECTION
-                    } else {
-                        serializeValueToString(it)
-                    }
-                }
-
-            else -> serializeValueToString(value)
-        }
-    }
-
-    protected open fun deserializeValueFromString(src: String): Any? {
         return when (rawType) {
-            VAL_TYPE_IRRELEVANT -> null
-            VAL_TYPE_TEXT -> src
-            VAL_TYPE_FLOAT -> src.toFloat()
-            VAL_TYPE_INT -> src.toInt()
-            VAL_TYPE_LONG -> src.toLong()
+            ARG_TYPE_TEXT -> src
+            ARG_TYPE_FLOAT -> src.toFloat()
+            ARG_TYPE_INT -> src.toInt()
+            ARG_TYPE_LONG -> src.toLong()
             else -> illegalArgument("value type", rawType)
         }
     }
@@ -295,20 +289,21 @@ abstract class Applet {
         /* no-op */
     }
 
-    internal fun deserializeValue(src: String?) {
-        value = if (src == null) null else if (isCollectionValue) {
-            val split = src.split(SEPARATOR)
-            split.mapTo(ArrayList(split.size)) {
-                if (it == SERIALIZED_NULL_VALUE_IN_COLLECTION) null
-                else deserializeValueFromString(it)
-            }
-        } else {
-            deserializeValueFromString(src)
+    protected fun getArgument(index: Int, runtime: TaskRuntime): Any? {
+        if (values.containsKey(index)) {
+            return values[index]
         }
+        if (references.containsKey(index)) {
+            return runtime.getReferenceArgument(this, index)
+        }
+        throw RuntimeException("Argument $index is not specified!")
     }
 
     override fun toString(): String {
-        return javaClass.simpleName + "@${System.identityHashCode(this).toString(16)}"
+        if (name != null) {
+            return name!!
+        }
+        return super.toString()
     }
 
 }

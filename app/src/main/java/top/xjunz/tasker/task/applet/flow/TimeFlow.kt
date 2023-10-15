@@ -7,7 +7,7 @@ package top.xjunz.tasker.task.applet.flow
 import top.xjunz.tasker.engine.applet.base.ScopeFlow
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.runtime.TaskRuntime
-import top.xjunz.tasker.task.event.TickEventDispatcher
+import top.xjunz.tasker.task.event.PollEventDispatcher
 import java.util.Calendar
 
 /**
@@ -18,9 +18,10 @@ class TimeFlow : ScopeFlow<Calendar>() {
     override fun initializeTarget(runtime: TaskRuntime): Calendar {
         val calendar = Calendar.getInstance()
         val current = runtime.events?.find { it.type == Event.EVENT_ON_TICK }
-            ?.getExtra<Long>(TickEventDispatcher.EXTRA_TICK_TIME_MILLS)
+            ?.getExtra<Long>(PollEventDispatcher.EXTRA_TICK_TIME_MILLS)
             ?: System.currentTimeMillis()
-        calendar.timeInMillis = current
+        // Prune milliseconds
+        calendar.timeInMillis = current - current % 1000
         return calendar
     }
 }

@@ -32,6 +32,9 @@ sealed class MainOption(
         }
     })
 
+    object ExportTasks :
+        MainOption(R.string.export_all_tasks, R.drawable.ic_baseline_output_24)
+
     object AutoStart :
         MainOption(R.string.auto_start_after_boot, R.drawable.ic_restart_alt_24px, desc = {
             if (AutoStartUtil.isAutoStartEnabled) {
@@ -81,9 +84,9 @@ sealed class MainOption(
 
     companion object {
         val ALL_OPTIONS = if (upForGrabs) {
-            arrayOf(AutoStart, WakeLock, NightMode, Feedback, VersionInfo, About)
+            arrayOf(ExportTasks, AutoStart, WakeLock, NightMode, Feedback, VersionInfo, About)
         } else {
-            arrayOf(PremiumStatus, AutoStart, NightMode, Feedback, VersionInfo, About)
+            arrayOf(PremiumStatus, ExportTasks, AutoStart, NightMode, Feedback, VersionInfo, About)
         }
     }
 }

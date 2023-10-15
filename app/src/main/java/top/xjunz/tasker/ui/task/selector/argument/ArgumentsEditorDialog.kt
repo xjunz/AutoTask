@@ -35,6 +35,7 @@ import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.ktx.underlined
+import top.xjunz.tasker.task.applet.criterion.BoundsCriterion
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.option.descriptor.ArgumentDescriptor
 import top.xjunz.tasker.task.applet.option.descriptor.ValueDescriptor
@@ -42,7 +43,7 @@ import top.xjunz.tasker.task.applet.util.IntValueUtil
 import top.xjunz.tasker.task.applet.value.LongDuration
 import top.xjunz.tasker.task.applet.value.ScrollMetrics
 import top.xjunz.tasker.task.applet.value.SwipeMetrics
-import top.xjunz.tasker.task.applet.value.VariantType
+import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.task.gesture.SerializableInputEvent
 import top.xjunz.tasker.task.inspector.FloatingInspector
 import top.xjunz.tasker.task.inspector.InspectorMode
@@ -80,7 +81,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
         fun checkForUnspecifiedArgument(): Int {
             option.arguments.forEachIndexed { which, arg ->
-                val isValueSet = applet.value != null
+                val isValueSet = applet.values[which] != null
                 if (arg.isValueOnly && !isValueSet) {
                     return which
                 }
@@ -106,6 +107,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
     private val gvm get() = pvm.global
 
+
+    @Suppress("UNCHECKED_CAST")
     private fun showValueInputDialog(standalone: Boolean, which: Int, arg: ArgumentDescriptor) {
         val fragmentManager = if (standalone) parentFragmentManager else childFragmentManager
 
@@ -117,9 +120,30 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 vm.onItemChanged.value = arg
             }
         }
-        when (arg.variantValueType) {
-            VariantType.INT_COORDINATE -> {
-                val point = applet.value?.let {
+
+        val value = applet.values[which]
+        val title = option.loadUnspannedTitle(applet)
+
+        fun showSimpleIntRangeEditor(
+            limits: IntRange,
+            defStart: Int? = null,
+            defStop: Int? = null
+        ) {
+            if (arg.isCollection) {
+                value as Collection<Int>?
+                RangeEditorDialog().setRange(
+                    value?.firstOrNull(), value?.lastOrNull(), defStart, defStop
+                ).setType(Applet.ARG_TYPE_INT).setTitle(title).doOnCompletion { start, end ->
+                    updateValue(listOf(start, end))
+                }.setLimits(limits).show(fragmentManager)
+            } else {
+                TODO()
+            }
+        }
+
+        when (arg.variantType) {
+            VariantArgType.INT_COORDINATE -> {
+                val point = value?.let {
                     IntValueUtil.parseXY(it.casted())
                 }
                 XYEditorDialog().init(arg.name, point) { x, y ->
@@ -127,80 +151,114 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 }.show(fragmentManager)
             }
 
-            VariantType.INT_INTERVAL -> {
+            VariantArgType.INT_INTERVAL -> {
                 TimeIntervalEditorDialog().init(
-                    arg.name, (applet.value ?: applet.defaultValue) as Int
+                    arg.name, (value ?: applet.defaultValue) as Int
                 ) {
                     updateValue(it)
                 }.show(fragmentManager)
             }
 
-            VariantType.INT_INTERVAL_XY -> {
-                val point = applet.value?.let {
+            VariantArgType.INT_INTERVAL_XY -> {
+                val point = value?.let {
                     IntValueUtil.parseXY(it.casted())
                 }
-                XYEditorDialog().init(arg.name, point ?: Point(500, 5000)) { x, y ->
+                XYEditorDialog().init(arg.name, point ?: Point(500, 500)) { x, y ->
                     updateValue(IntValueUtil.composeXY(x, y))
                 }.setVariantType(
-                    VariantType.INT_INTERVAL_XY,
+                    VariantArgType.INT_INTERVAL_XY,
                     R.string.idle_threshold,
                     R.string.max_wait_for_idle_duration
                 ).setHelp(option.helpText).show(fragmentManager)
             }
 
-            VariantType.INT_RANGE -> {
-                val value = applet.value?.casted<Collection<Number>>()
-                RangeEditorDialog().doOnCompletion { start, end ->
-                    updateValue(listOf(start, end))
-                }.setType(applet.rawType, arg.variantValueType).setRange(
-                    value?.firstOrNull(), value?.lastOrNull()
-                ).setTitle(option.loadDummyTitle(applet)).show(fragmentManager)
-            }
-
-            VariantType.INT_ROTATION -> {
+            VariantArgType.INT_ROTATION ->
                 EnumSelectorDialog().setSingleSelectionMode()
                     .setSpanCount(2)
-                    .setInitialSelections(applet.value?.let { Collections.singleton(it as Int) })
+                    .setInitialSelections(value?.let { Collections.singleton(it as Int) })
                     .init(arg.name, R.array.rotations) {
                         updateValue(it.single())
                     }.show(fragmentManager)
-            }
 
-            VariantType.INT_TIME_IN_DAY -> {
-                val value = applet.value as? Int
-                TimeRangeEditorDialog().setRange(
-                    value, null,
-                    defStart = IntValueUtil.composeTime(8, 0, 0)
-                ).setTitle(option.loadTitle(applet)).doOnCompletion { start, _ ->
-                    updateValue(start)
-                }.asUnary().setUnarySubtitle(arg.name).show(fragmentManager)
-            }
-
-            VariantType.LONG_TIME -> {
-                val value = applet.value as? Long
-                DateTimeRangeEditorDialog().setRange(
-                    value, null, defStart = System.currentTimeMillis()
-                ).setType(Applet.VAL_TYPE_LONG).setTitle(option.loadTitle(applet))
-                    .doOnCompletion { start, _ ->
+            VariantArgType.INT_TIME_OF_DAY -> {
+                if (arg.isCollection) {
+                    value as Collection<Int>?
+                    TimeRangeEditorDialog().setRange(
+                        value?.firstOrNull(), value?.lastOrNull(),
+                        0, IntValueUtil.composeTime(23, 59, 59)
+                    ).setTitle(title).doOnCompletion { start, end ->
+                        updateValue(listOf(start, end))
+                    }.show(fragmentManager)
+                } else {
+                    value as Int?
+                    TimeRangeEditorDialog().setRange(
+                        value, null,
+                        defStart = IntValueUtil.composeTime(8, 0, 0)
+                    ).setTitle(title).doOnCompletion { start, _ ->
                         updateValue(start)
                     }.asUnary().setUnarySubtitle(arg.name).show(fragmentManager)
+                }
             }
 
-            VariantType.BITS_SWIPE ->
-                BitsValueEditorDialog().init(
-                    arg.name,
-                    applet.value as? Long,
-                    SwipeMetrics.COMPOSER
-                ) {
+            VariantArgType.INT_DAY_OF_MONTH -> {
+                val days = Array(31) { i ->
+                    (i + 1).toString()
+                }
+                EnumSelectorDialog().init(title, days) {
+                    updateValue(it)
+                }.setSpanCount(4).setInitialSelections(value?.casted()).show(fragmentManager)
+            }
+
+            VariantArgType.INT_MONTH ->
+                EnumSelectorDialog().init(title, R.array.months) {
+                    updateValue(it)
+                }.setInitialSelections(value?.casted()).show(fragmentManager)
+
+            VariantArgType.INT_DAY_OF_WEEK ->
+                EnumSelectorDialog().init(title, R.array.days_of_week) {
+                    updateValue(it)
+                }.setInitialSelections(value?.casted()).show(fragmentManager)
+
+            VariantArgType.INT_HOUR_OF_DAY -> showSimpleIntRangeEditor(0..23)
+
+            VariantArgType.INT_MIN_OR_SEC -> showSimpleIntRangeEditor(0..59, 30, 30)
+
+            VariantArgType.INT_PERCENT -> showSimpleIntRangeEditor(0..100)
+
+            VariantArgType.INT_QUANTITY -> showSimpleIntRangeEditor(0..999)
+
+            VariantArgType.LONG_TIME -> {
+                if (arg.isCollection) {
+                    value as Collection<Long>?
+                    DateTimeRangeEditorDialog().setRange(
+                        value?.firstOrNull(), value?.lastOrNull(),
+                        System.currentTimeMillis(), System.currentTimeMillis()
+                    ).setType(Applet.ARG_TYPE_LONG).setTitle(title)
+                        .doOnCompletion { start, end ->
+                            updateValue(listOf(start, end))
+                        }.show(fragmentManager)
+                } else {
+                    value as Long?
+                    DateTimeRangeEditorDialog().setRange(
+                        value, null, defStart = System.currentTimeMillis()
+                    ).setType(Applet.ARG_TYPE_LONG).setTitle(title)
+                        .doOnCompletion { start, _ ->
+                            updateValue(start)
+                        }.asUnary().setUnarySubtitle(arg.name).show(fragmentManager)
+                }
+            }
+
+            VariantArgType.BITS_SWIPE ->
+                BitsValueEditorDialog().init(arg.name, value as? Long, SwipeMetrics.COMPOSER) {
                     updateValue(it)
                 }.setEnums(0, R.array.swipe_directions)
                     .setHints(R.array.swipe_metrics_hints)
                     .show(fragmentManager)
 
-            VariantType.BITS_SCROLL ->
+            VariantArgType.BITS_SCROLL ->
                 BitsValueEditorDialog().init(
                     arg.name,
-                    (applet.value as? Long) ?: ScrollMetrics.COMPOSER.compose(3, 50),
+                    (value as? Long) ?: ScrollMetrics.COMPOSER.compose(3, 50),
                     ScrollMetrics.COMPOSER
                 ) {
                     updateValue(it)
@@ -208,38 +266,44 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     .setHints(R.array.scroll_metrics_hints)
                     .show(fragmentManager)
 
-            VariantType.BITS_LONG_DURATION -> {
+            VariantArgType.BITS_LONG_DURATION ->
                 BitsValueEditorDialog().init(
-                    arg.name,
-                    (applet.value as? Long) ?: LongDuration.COMPOSER.compose(1, 0, 0, 0),
+                    arg.name, (value as? Long) ?: LongDuration.COMPOSER.compose(1, 0, 0, 0),
                     LongDuration.COMPOSER
                 ) {
                     updateValue(it)
                 }.setHints(R.array.long_duration_units)
                     .show(fragmentManager)
-            }
 
-            VariantType.TEXT_PACKAGE_NAME -> {
+            VariantArgType.BITS_BOUNDS ->
+                DistanceEditorDialog().setArguments(title) {
+                    updateValue(it)
+                }.setDistance(value?.casted())
+                    .setDirection((applet as BoundsCriterion<*>).direction)
+                    .show(fragmentManager)
+
+
+            VariantArgType.TEXT_PACKAGE_NAME -> {
                 val singleSelection = !arg.isCollection
-                val value: Collection<String>? = if (singleSelection) applet.value?.let {
+                val pkgs: Collection<String>? = if (singleSelection) value?.let {
                     Collections.singleton(it as String)
-                } else applet.value?.casted()
-                ComponentSelectorDialog().setSelectedPackages(value ?: emptyList())
+                } else value?.casted()
+                ComponentSelectorDialog().setSelectedPackages(pkgs ?: emptyList())
                     .doOnCompleted {
                         updateValue(if (singleSelection) it.single() else it)
                     }
                     .setSingleSelection(singleSelection)
-                    .setTitle(option.loadDummyTitle(applet))
+                    .setTitle(title)
                     .show(fragmentManager)
             }
 
-            VariantType.TEXT_ACTIVITY -> {
+            VariantArgType.TEXT_ACTIVITY -> {
                 val singleSelection = !arg.isCollection
-                val value: Collection<String>? = if (singleSelection) applet.value?.let {
+                val comps: Collection<String>? = if (singleSelection) value?.let {
                     Collections.singleton(it as String)
-                } else applet.value?.casted()
-                ComponentSelectorDialog().setTitle(option.loadDummyTitle(applet))
-                    .setSelectedActivities(value ?: emptyList())
+                } else value?.casted()
+                ComponentSelectorDialog().setTitle(title)
+                    .setSelectedActivities(comps ?: emptyList())
                     .doOnCompleted {
                         updateValue(if (singleSelection) it.single() else it)
                     }
@@ -248,8 +312,8 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     .show(fragmentManager)
             }
 
-            VariantType.TEXT_GESTURES -> {
-                val events: List<SerializableInputEvent> = applet.value?.casted() ?: emptyList()
+            VariantArgType.TEXT_GESTURES -> {
+                val events: List<SerializableInputEvent> = value?.casted() ?: emptyList()
                 FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER).doOnSucceeded {
                     if (events.isNotEmpty()) {
                         EventCenter.sendEvent(FloatingInspector.EVENT_REQUEST_EDIT_GESTURES, events)
@@ -260,23 +324,24 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                 }.show(childFragmentManager)
             }
 
-            else -> if (arg.isCollection) {
-                VarargTextEditorDialog().init(arg.name, applet, arg) { value, referents ->
-                    updateValue(value)
+            VariantArgType.TEXT_FORMAT ->
+                VarargTextEditorDialog().init(arg.name, applet, arg) { format, referents ->
+                    updateValue(format)
                     gvm.referenceEditor.setVarargReferences(applet, referents)
                 }.show(fragmentManager)
-            } else {
+
+            else ->
                 TextEditorDialog().configEditText { et ->
-                    et.configInputType(arg.valueClass, true)
+                    et.configInputType(arg.valueType, true)
                     et.maxLines = 10
-                }.setVariantType(arg.variantValueType)
-                    .init(arg.name, applet.value?.toString()) init@{
+                }.setVariantType(arg.variantType)
+                    .init(title, value?.toString()) init@{
                         updateValue(
                             arg.parseValueFromInput(it) ?: return@init R.string.error_mal_format.str
                         )
                         return@init null
-                    }.show(fragmentManager)
-            }
+                    }.setHint(if (arg.isAnonymous) null else arg.name)
+                    .show(fragmentManager)
         }
     }
 
@@ -294,7 +359,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         FlowEditorDialog().init(pvm.task, gvm.root, true, gvm)
             .setArgumentToSelect(applet, arg, id)
             .doOnArgumentSelected { referent ->
-                gvm.referenceEditor.setReference(applet, arg, whichArg, referent)
+                gvm.referenceEditor.setReference(applet, whichArg, referent)
                 if (standalone) {
                     vm.doOnCompletion.invoke()
                 } else {
@@ -317,42 +382,48 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             binding.btnSpecify.setNoDoubleClickListener {
                 showValueInputDialog(false, adapterPosition, option.arguments[adapterPosition])
             }
-            binding.tvValue.setNoDoubleClickListener {
+            binding.etValue.setNoDoubleClickListener {
                 val position = adapterPosition
+                if (applet.values.containsKey(position)) {
+                    binding.btnSpecify.performClick()
+                    return@setNoDoubleClickListener
+                }
                 val arg = option.arguments[position]
-                val referent = applet.references.getValue(position)
+                val ref = applet.references.getValue(position)
                 TextEditorDialog().setCaption(R.string.prompt_set_referent.text).configEditText {
                     it.setMaxLength(Applet.MAX_REFERENCE_ID_LENGTH)
-                }.init(R.string.edit_referent_name.text, referent) {
-                    if (it == referent) return@init null
+                }.init(R.string.edit_referent_name.text, ref) {
+                    if (it == ref) return@init null
                     if (!gvm.isReferentLegalForSelections(it)) {
                         return@init R.string.error_tag_exists.text
                     }
                     // This applet may not be attached to the root
                     gvm.referenceEditor.renameReference(applet, position, it)
-                    gvm.renameReferentInRoot(Collections.singleton(referent), it)
+                    gvm.renameReferentInRoot(Collections.singleton(ref), it)
                     vm.onItemChanged.value = arg
                     return@init null
                 }.show(childFragmentManager)
             }
         }) { binding, pos, arg ->
-            binding.tvTitle.text = arg.name
-            binding.tvValue.isEnabled = true
-            binding.tvValue.isClickable = false
+            binding.tilValue.hint = arg.name
+            binding.etValue.isEnabled = true
+            val value = applet.values[pos]
             if (!arg.isValueOnly && applet.references.containsKey(pos)) {
                 val referent = applet.references.getValue(pos)
                 // Not value only and the reference is available
-                binding.tvValue.text = referent.underlined().foreColored().italic()
-                binding.tvValue.setDrawableStart(R.drawable.ic_baseline_link_24)
-                binding.tvValue.isClickable = true
-            } else if (!arg.isReferenceOnly && applet.value != null) {
+                binding.etValue.setText(referent.underlined().foreColored().italic())
+                binding.etValue.setDrawableStart(R.drawable.ic_baseline_link_24)
+            } else if (!arg.isReferenceOnly && value != null) {
                 // Not reference only and the value is available
-                binding.tvValue.text = option.describe(applet)
-                binding.tvValue.setDrawableStart(R.drawable.ic_text_fields_24px)
+                // TODO: More elegant way to show description of multi-arg applets
+                binding.etValue.setText(
+                    if (applet.argumentTypes.size == 1) option.describe(applet) else value.toString()
+                )
+                binding.etValue.setDrawableStart(R.drawable.ic_text_fields_24px)
             } else {
-                binding.tvValue.text = R.string.unspecified.text.italic()
-                binding.tvValue.setDrawableStart(View.NO_ID)
-                binding.tvValue.isEnabled = false
+                binding.etValue.setText(R.string.unspecified.text.italic())
+                binding.etValue.setDrawableStart(View.NO_ID)
+                binding.etValue.isEnabled = false
             }
             binding.btnRefer.isVisible = !arg.isValueOnly
             binding.btnSpecify.isVisible = !arg.isReferenceOnly
@@ -388,7 +459,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvArgument.adapter = adapter
-        binding.tvTitle.text = option.loadDummyTitle(applet)
+        binding.tvTitle.text = option.loadUnspannedTitle(applet)
         binding.tvHelp.isVisible = option.helpText != null
         binding.tvHelp.text = option.helpText
         binding.btnCancel.setOnClickListener {
@@ -416,7 +487,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         doOnEventRoutedWithValue<List<SerializableInputEvent>>(FloatingInspector.EVENT_GESTURES_RECORDED) {
             if (vm.updateGesture == null) {
                 val index = vm.option.arguments.indexOfFirst { descriptor ->
-                    descriptor.variantValueType == VariantType.TEXT_GESTURES
+                    descriptor.variantType == VariantArgType.TEXT_GESTURES
                 }
                 if (index >= 0) {
                     gvm.referenceEditor.setValue(applet, index, it)

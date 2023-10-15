@@ -12,9 +12,6 @@ import top.xjunz.tasker.engine.applet.base.AppletResult
 interface Referent {
 
     fun getReferredValue(which: Int, runtime: TaskRuntime): Any? {
-        if (which == 0) {
-            return this
-        }
         throw NullPointerException("Field $which is not found!")
     }
 
