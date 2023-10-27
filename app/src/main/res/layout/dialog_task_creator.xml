@@ -15,9 +15,12 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
             android:text="@string/add_task"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             android:textColor="?colorPrimary"
+            app:drawableStartCompat="@drawable/baseline_add_circle_outline_24"
+            app:drawableTint="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -47,6 +50,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?colorPrimary"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -85,9 +89,9 @@
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="2dp"
                     android:layout_weight="1"
-                    app:dividerColor="@color/material_on_surface_stroke" />
+                    app:dividerColor="?colorSurfaceVariant" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -99,14 +103,14 @@
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="2dp"
                     android:layout_weight="1"
-                    app:dividerColor="@color/material_on_surface_stroke" />
+                    app:dividerColor="?colorSurfaceVariant" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_auto_click"
-                style="?materialIconButtonOutlinedStyle"
+                style="@style/Widget.Material3.Button.Icon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
@@ -116,12 +120,9 @@
                 app:icon="@drawable/ic_ads_click_24px"
                 app:iconGravity="textStart"
                 app:iconPadding="8dp"
-                app:iconTint="?colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ll_divider_resident"
-                app:strokeColor="@color/material_on_surface_stroke"
-                app:strokeWidth="1dp" />
+                app:layout_constraintTop_toBottomOf="@id/ll_divider_resident" />
 
         </LinearLayout>
 
@@ -149,6 +150,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?colorPrimary"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -184,9 +186,9 @@
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="2dp"
                     android:layout_weight="1"
-                    app:dividerColor="@color/material_on_surface_stroke" />
+                    app:dividerColor="?colorSurfaceVariant" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -198,9 +200,9 @@
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="2dp"
                     android:layout_weight="1"
-                    app:dividerColor="@color/material_on_surface_stroke" />
+                    app:dividerColor="?colorSurfaceVariant" />
             </LinearLayout>
 
             <GridLayout
@@ -213,7 +215,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/tv_click_automation"
-                    style="?materialIconButtonOutlinedStyle"
+                    style="@style/Widget.Material3.Button.Icon"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
@@ -222,14 +224,11 @@
                     android:text="@string/click_automator"
                     app:icon="@drawable/ic_touch_app_24px"
                     app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    app:iconTint="?colorPrimary"
-                    app:strokeColor="@color/material_on_surface_stroke"
-                    app:strokeWidth="1dp" />
+                    app:iconPadding="8dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/tv_record_gesture"
-                    style="?materialIconButtonOutlinedStyle"
+                    style="@style/Widget.Material3.Button.Icon"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
@@ -237,10 +236,7 @@
                     android:text="@string/record_gesture"
                     app:icon="@drawable/ic_gesture_24px"
                     app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    app:iconTint="?colorPrimary"
-                    app:strokeColor="@color/material_on_surface_stroke"
-                    app:strokeWidth="1dp" />
+                    app:iconPadding="8dp" />
             </GridLayout>
         </LinearLayout>
 
@@ -265,6 +261,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:tint="?colorPrimary"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -313,6 +310,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:tint="?colorPrimary"
                 tools:ignore="ContentDescription" />
 
             <TextView

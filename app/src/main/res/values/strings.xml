@@ -629,7 +629,7 @@
     <string name="on_file_created">当文件被创建时</string>
     <string name="on_file_deleted">当文件被删除时</string>
     <string name="tap_to_import_preset_tasks">点击此处导入预置任务</string>
-    <string name="export_all_tasks">导出所有任务</string>
+    <string name="export_all_tasks">备份所有任务</string>
     <string name="format_task_archive_name">[任务备份]%s%s</string>
     <string name="import_all">导入全部</string>
     <string name="format_import_tasks_succeeded">%d个任务导入成功</string>
@@ -667,4 +667,7 @@
     <string name="format_simple_vibration_pattern">震动时长:%s 震动强度:%s</string>
     <string name="custom_vibrate_pattern">已设置自定义震动模式</string>
     <string name="select_export_path">请选择导出位置</string>
+    <string name="format_disable_package">冻结%s</string>
+    <string name="format_enable_package">取消冻结%s</string>
+    <string name="tip_turn_on_gesture_recorder">启用悬浮助手以录制手势</string>
 </resources>

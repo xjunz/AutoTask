@@ -110,4 +110,38 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
         R.string.specified_app, variantValueType = VariantArgType.TEXT_PACKAGE_NAME
     ).withValueArgument<String>(R.string.uri)
 
+    @AppletOrdinal(0x0005)
+    val disablePackage = appletOption(R.string.format_disable_package) {
+        simpleSingleNonNullArgAction<Any> {
+            val pkg = if (it is ComponentInfoWrapper) it.packageName else it.toString()
+            PackageManagerBridge.disablePackage(pkg)
+            true
+        }
+    }.withBinaryArgument<ComponentInfoWrapper, String>(
+        R.string.app,
+        R.string.specified_app,
+        VariantArgType.TEXT_PACKAGE_NAME
+    ).hasCompositeTitle()
+        .withSingleValueDescriber<Any> {
+            val pkg = if (it is ComponentInfoWrapper) it.packageName else it.toString()
+            PackageManagerBridge.loadLabelOfPackage(pkg)
+        }
+        .shizukuOnly()
+
+    @AppletOrdinal(0x0006)
+    val enablePackage = appletOption(R.string.format_enable_package) {
+        simpleSingleNonNullArgAction<Any> {
+            val pkg = if (it is ComponentInfoWrapper) it.packageName else it.toString()
+            PackageManagerBridge.enablePackage(pkg)
+            true
+        }
+    }.withBinaryArgument<ComponentInfoWrapper, String>(
+        R.string.app,
+        R.string.specified_app,
+        VariantArgType.TEXT_PACKAGE_NAME
+    ).withSingleValueDescriber<Any> {
+        val pkg = if (it is ComponentInfoWrapper) it.packageName else it.toString()
+        PackageManagerBridge.loadLabelOfPackage(pkg)
+    }.hasCompositeTitle()
+        .shizukuOnly()
 }

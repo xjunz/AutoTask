@@ -33,10 +33,10 @@ sealed class MainOption(
     })
 
     object ExportTasks :
-        MainOption(R.string.export_all_tasks, R.drawable.ic_baseline_output_24)
+        MainOption(R.string.export_all_tasks, R.drawable.baseline_backup_24)
 
     object AutoStart :
-        MainOption(R.string.auto_start_after_boot, R.drawable.ic_restart_alt_24px, desc = {
+        MainOption(R.string.auto_start_after_boot, R.drawable.baseline_restart_alt_24, desc = {
             if (AutoStartUtil.isAutoStartEnabled) {
                 R.string.is_enabled
             } else {
@@ -58,7 +58,7 @@ sealed class MainOption(
             longDesc = R.string.tip_wake_lock
         )
 
-    object NightMode : MainOption(R.string.night_mode, R.drawable.ic_nights_stay_24px, desc = {
+    object NightMode : MainOption(R.string.night_mode, R.drawable.baseline_nights_stay_24, desc = {
         when (Preferences.nightMode) {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.turn_on
             AppCompatDelegate.MODE_NIGHT_NO -> R.string.turn_off
@@ -66,9 +66,9 @@ sealed class MainOption(
         }
     })
 
-    object Feedback : MainOption(R.string.feedback_and_communicate, R.drawable.ic_chat_24px)
+    object Feedback : MainOption(R.string.feedback_and_communicate, R.drawable.baseline_chat_24)
 
-    object VersionInfo : MainOption(R.string.version_info, R.drawable.ic_info_24px, desc = {
+    object VersionInfo : MainOption(R.string.version_info, R.drawable.baseline_info_24, desc = {
         if (app.updateInfo.value?.hasUpdates() == true) {
             R.string.new_version_detected
         } else {

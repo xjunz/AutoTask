@@ -315,6 +315,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
 
             VariantArgType.TEXT_GESTURES -> {
                 val events: List<SerializableInputEvent> = value?.casted() ?: emptyList()
+                toast(R.string.tip_turn_on_gesture_recorder)
                 FloatingInspectorDialog().setMode(InspectorMode.GESTURE_RECORDER).doOnSucceeded {
                     if (events.isNotEmpty()) {
                         EventCenter.sendEvent(FloatingInspector.EVENT_REQUEST_EDIT_GESTURES, events)

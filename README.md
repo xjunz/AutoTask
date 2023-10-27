@@ -7,7 +7,7 @@
 
 本应用专注于帮助您执行自动任务，相比于其他同类产品，本应用具有以下特点：
 
-- 支持多种启动模式（Shizuku和辅助功能）
+- 支持多种启动模式（**Shizuku**和辅助功能）
 - 支持自定义常驻任务任务和一次性任务
 - 支持手势录制，审查布局树等
 - 不需要刻意保活便可常驻后台（两种模式默认系统保活）
@@ -26,10 +26,10 @@
 
 利用Shizuku授予特权，使用安卓内置的 [UiAutomation](https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomation.java)框架用于任务执行，详见 [ShizukuAutomatorService](https://github.com/xjunz/AutoTask/blob/master/app/src/main/java/top/xjunz/tasker/service/ShizukuAutomatorService.kt)。
 
-> **注: **因为安卓系统只能注册一个`UiAutomation`服务，所以当自动任务服务激活时，其他`UiAutomation`会注册失败。如果您有需要（如自动化测试），请先停止自动任务服务。
+> **注: **因为安卓系统只能注册一个`UiAutomation`服务，所以当自动任务服务激活时，其他`UiAutomation`会注册失败。如果您有需要（如自动化测试、Thanox），请先停止自动任务服务。反之亦然。
 ### 辅助功能模式
 
-使用辅助功能自带的API框架用于实现任务执行，详见[A11yAutomatorService.kt](https://github.com/xjunz/AutoTask/blob/master/app/src/main/java/top/xjunz/tasker/service/A11yAutomatorService.kt)。
+使用辅助功能自带的API框架用于实现任务执行，详见[A11yAutomatorService](https://github.com/xjunz/AutoTask/blob/master/app/src/main/java/top/xjunz/tasker/service/A11yAutomatorService.kt)。
 
 ## 构建
 
@@ -42,8 +42,12 @@ keyAlias=xxx
 keyPassword=xxx
 ```
 
+## 注意事项
+
+本项目仅供学习交流使用，禁止用于商业用途或非法用途！
+
 ## License
 
-> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 / Copyright 2023 XJUNZ
->
+本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 。
 
+*Copyright 2023 XJUNZ*

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
+import top.xjunz.tasker.BuildConfig
 import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.databinding.FragmentTaskShowcaseBinding
@@ -191,7 +192,12 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             val metadata = task.metadata
             val b = holder.binding
             b.tvTaskName.text = metadata.title
-            b.tvAuthor.text = metadata.author
+            if (BuildConfig.DEBUG) {
+                b.tvAuthor.isVisible = true
+                b.tvAuthor.text = task.fileOnStorage.name
+            }else{
+                b.tvAuthor.text = metadata.author
+            }
             if (metadata.description.isNullOrEmpty()) {
                 b.tvTaskDesc.text = R.string.no_desc_provided.text
                 b.tvTaskDesc.isEnabled = false
@@ -255,7 +261,7 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             if (taskList.isEmpty()) togglePlaceholder(true)
         }
         observe(mvm.isServiceRunning) {
-            adapter.notifyItemRangeChanged(0, taskList.size, true)
+            adapter.notifyItemRangeChanged(0, taskList.size, PAYLOAD_ENABLED_STATUS)
         }
         observeTransient(viewModel.onTaskDeleted) {
             val index = taskList.indexOf(it)

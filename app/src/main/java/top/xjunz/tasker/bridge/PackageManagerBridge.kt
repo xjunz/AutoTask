@@ -10,7 +10,9 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import rikka.shizuku.SystemServiceHelper
 import top.xjunz.shared.trace.logcatStackTrace
+import top.xjunz.tasker.ktx.execShellCmd
 import top.xjunz.tasker.ui.model.PackageInfoWrapper.Companion.wrapped
 
 /**
@@ -20,6 +22,16 @@ object PackageManagerBridge {
 
     private val packageManager by lazy {
         ContextBridge.getContext().packageManager
+    }
+
+    fun disablePackage(pkgName: String) {
+        SystemServiceHelper.getSystemService("package")
+            .execShellCmd("disable-user", pkgName)
+    }
+
+    fun enablePackage(pkgName: String) {
+        SystemServiceHelper.getSystemService("package")
+            .execShellCmd("enable", pkgName)
     }
 
     fun getLaunchIntentFor(pkgName: String): Intent? {
@@ -34,7 +46,6 @@ object PackageManagerBridge {
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
             )
         } else {
-            @Suppress("DEPRECATION")
             packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
         }
         return resolveInfo?.activityInfo?.packageName
@@ -48,7 +59,6 @@ object PackageManagerBridge {
                     pkgName, PackageManager.PackageInfoFlags.of(flags.toLong())
                 )
             } else {
-                @Suppress("DEPRECATION")
                 packageManager.getPackageInfo(pkgName, flags)
             }
         }.onFailure {
@@ -67,7 +77,6 @@ object PackageManagerBridge {
                 PackageManager.PackageInfoFlags.of(PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong())
             )
         } else {
-            @Suppress("DEPRECATION")
             packageManager.getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES)
         }
     }
@@ -79,7 +88,6 @@ object PackageManagerBridge {
                     ComponentName(pkgName, actName), PackageManager.ComponentInfoFlags.of(0)
                 )
             } else {
-                @Suppress("DEPRECATION")
                 packageManager.getActivityInfo(ComponentName(pkgName, actName), 0)
             }
         }.isSuccess

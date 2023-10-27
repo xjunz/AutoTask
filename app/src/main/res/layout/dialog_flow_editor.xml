@@ -28,7 +28,7 @@
                 android:background="@drawable/bg_solid_circle"
                 android:contentDescription="@string/nothing_here"
                 android:padding="16dp"
-                android:src="@drawable/ic_playlist_add_24px"
+                android:src="@drawable/baseline_hourglass_empty_24"
                 app:tint="?colorPrimary" />
 
             <TextView

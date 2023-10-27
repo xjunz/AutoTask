@@ -132,7 +132,7 @@ object TaskStorage {
     }
 
     suspend fun loadExampleTasks(factory: AppletFactory) {
-        loadAssetTasks(factory, "examples.zip", examples)
+        loadAssetTasks(factory, "examples.xtsks", examples)
         exampleTaskLoaded = true
     }
 

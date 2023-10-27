@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 xjunz. All rights reserved.
   -->
 
@@ -16,11 +15,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:drawablePadding="8dp"
             android:text="@string/enable_floating_inspector"
             android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
+            android:textColor="?colorPrimary"
+            app:drawableStartCompat="@drawable/ic_twotone_layers_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:drawableTint="?colorPrimary" />
 
         <LinearLayout
             android:id="@+id/ll_overlay_permission"
@@ -77,9 +80,9 @@
 
             <RadioGroup
                 android:id="@+id/rg_modes"
-                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:orientation="vertical">
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
