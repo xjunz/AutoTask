@@ -249,7 +249,7 @@
     <string name="move">移动</string>
     <string name="tip_drag_to_move">长按某一规则，然后上下拖动便可移动其位置哦！</string>
     <string name="event">触发事件</string>
-    <string name="error_not_removable">无法移除此规则！</string>
+    <string name="error_not_removable">此项无法被移除</string>
     <string name="not_removable">不可移除</string>
     <string name="resident_task">常驻任务</string>
     <string name="desc_long_running_task">创建长期在后台运行的轻量级任务，常驻任务由事件驱动</string>
@@ -653,6 +653,18 @@
     <string name="network_status">网络状态</string>
     <string name="format_move_file">移动%s到%s</string>
     <string name="tip_copy_file">源文件将会被复制到目标文件的位置</string>
-    <string name="tip_move_file">源文件将会被移动到目标文件的位置。如果目标文件是文件夹，那么源文件将会被移动到改文件夹下。</string>
+    <string name="tip_move_file">源文件将会被移动到目标文件的位置。如果目标文件是文件夹，那么源文件将会被移动到该文件夹下。</string>
     <string name="format_rename_file">重命名文件</string>
+    <string name="format_delete">删除%s</string>
+    <string name="perform_vibrate">执行震动</string>
+    <string name="vibrate">设备震动</string>
+    <string name="vibration_duration">震动时长</string>
+    <string name="vibration_strength">震动强度</string>
+    <string name="error_vibration_strength">震动强度应该在1至255</string>
+    <string name="error_vibration_duration">请输入震动时长</string>
+    <string name="tip_vibration_pattern">震动将按照列表从上往下依次执行。\n震动时长的单位为毫秒（1秒=1000毫秒），震动强度的范围为1至255。</string>
+    <string name="vibration_pattern">震动模式</string>
+    <string name="format_simple_vibration_pattern">震动时长:%s 震动强度:%s</string>
+    <string name="custom_vibrate_pattern">已设置自定义震动模式</string>
+    <string name="select_export_path">请选择导出位置</string>
 </resources>

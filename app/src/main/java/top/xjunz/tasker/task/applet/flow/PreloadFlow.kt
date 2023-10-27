@@ -10,6 +10,7 @@ import top.xjunz.tasker.engine.runtime.Referent
 import top.xjunz.tasker.engine.runtime.TaskRuntime
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.uiAutomation
+import top.xjunz.tasker.util.formatCurrentTime
 
 /**
  * PreloadFlow initialize global referents at [onPrepareApply].
@@ -36,6 +37,7 @@ class PreloadFlow : ControlFlow(), Referent {
             2 -> currentService.getCurrentComponentInfo().label
             3 -> uiAutomation.rootInActiveWindow
             4 -> uiAutomation.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            5 -> formatCurrentTime()
             else -> super.getReferredValue(which, runtime)
         }
     }

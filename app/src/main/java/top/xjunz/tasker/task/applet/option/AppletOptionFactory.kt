@@ -24,6 +24,7 @@ import top.xjunz.tasker.task.applet.option.registry.TimeCriterionRegistry
 import top.xjunz.tasker.task.applet.option.registry.UiObjectActionRegistry
 import top.xjunz.tasker.task.applet.option.registry.UiObjectCriterionRegistry
 import top.xjunz.tasker.task.applet.option.registry.UiObjectFlowRegistry
+import top.xjunz.tasker.task.applet.option.registry.VibrationActionRegistry
 
 
 /**
@@ -81,6 +82,9 @@ object AppletOptionFactory : AppletFactory {
     private val fileActionRegistry =
         FileActionRegistry(BootstrapOptionRegistry.ID_FILE_ACTION_REGISTRY)
 
+    private val vibrationActionRegistry =
+        VibrationActionRegistry(BootstrapOptionRegistry.ID_VIBRATION_ACTION_REGISTRY)
+
     val uiObjectFlowRegistry =
         UiObjectFlowRegistry(BootstrapOptionRegistry.ID_UI_OBJECT_FLOW_REGISTRY)
 
@@ -104,6 +108,7 @@ object AppletOptionFactory : AppletFactory {
         appActionRegistry,
         shellCmdActionRegistry,
         fileActionRegistry,
+        vibrationActionRegistry,
         /* control */
         uiObjectFlowRegistry,
     )

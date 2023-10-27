@@ -10,7 +10,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.engine.applet.action.createProcessor
 import top.xjunz.tasker.engine.applet.action.doubleArgsAction
 import top.xjunz.tasker.engine.applet.action.emptyArgOptimisticAction
-import top.xjunz.tasker.engine.applet.action.singleArgAction
+import top.xjunz.tasker.engine.applet.action.simpleSingleArgAction
 import top.xjunz.tasker.engine.applet.base.AppletResult
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.ktx.array
@@ -51,7 +51,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
         crossinline block: suspend (AccessibilityNodeInfo) -> Boolean
     ): AppletOption {
         return appletOption(title) {
-            singleArgAction<AccessibilityNodeInfo> {
+            simpleSingleArgAction<AccessibilityNodeInfo> {
                 requireNotNull(it) {
                     "The node is not captured!"
                 }
@@ -144,7 +144,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
     }.withRefArgument<AccessibilityNodeInfo>(R.string.ui_object)
         .withUnaryArgument<Int>(
             R.string.specified_coordinate,
-            variantType = VariantArgType.INT_COORDINATE
+            variantValueType = VariantArgType.INT_COORDINATE
         )
         .withSingleValueDescriber<Int> {
             val p = IntValueUtil.parseXY(it)
@@ -265,7 +265,7 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0150)
     val drawNodeBounds = appletOption(R.string.format_draw_node_bounds) {
-        singleArgAction<AccessibilityNodeInfo> {
+        simpleSingleArgAction<AccessibilityNodeInfo> {
             if (it != null) {
                 currentService.overlayToastBridge.drawAccessibilityBounds(it)
                 true

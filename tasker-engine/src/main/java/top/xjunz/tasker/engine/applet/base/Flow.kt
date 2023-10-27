@@ -21,7 +21,7 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
 
     open val maxSize = MAX_FLOW_CHILD_COUNT
 
-    inline val requiredSize get() = if (minSize == maxSize) minSize else -1
+    private inline val requiredSize get() = if (minSize == maxSize) minSize else -1
 
     /**
      * Whether the applets are repeated executed.
@@ -35,8 +35,8 @@ open class Flow(private val elements: MutableList<Applet> = ArrayList()) : Apple
             applet.onPreApply(runtime)
             // Always execute the first applet in a flow and skip an applet if its relation to
             // previous peer applet does not meet the previous execution result.
-            if (runtime.shouldSkip()
-                || applet.shouldSkip(runtime)
+            if (applet.shouldBeSkipped(runtime)
+                || runtime.shouldSkip()
                 || !applet.isEnabled
                 || (index != 0 && !applet.isAnyway && applet.isAnd != runtime.isSuccessful)
             ) {

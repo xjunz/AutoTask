@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2022 xjunz. All rights reserved.
+  ~ Copyright (c) 2023 xjunz. All rights reserved.
   -->
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -9,19 +8,18 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tv_title"
-            style="@style/TextAppearance.Material3.ActionBar.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
             android:textColor="?colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="复制文本到剪贴板" />
+            tools:text="@string/vibration_pattern" />
 
         <TextView
             android:id="@+id/tv_help"
@@ -34,56 +32,55 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
+            android:text="@string/tip_vibration_pattern"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="?colorOnPrimary"
-            app:drawableStartCompat="@drawable/ic_baseline_help_outline_24"
-            app:drawableTint="?colorOnPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_title"
-            tools:text="@string/tip_continue_loop" />
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_argument"
+            android:id="@+id/rv_pattern"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:overScrollMode="never"
+            android:layout_marginTop="12dp"
+            android:fadingEdge="vertical"
+            android:fadingEdgeLength="8dp"
+            android:requiresFadingEdge="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constrainedHeight="true"
-            app:layout_constraintBottom_toTopOf="@+id/btn_complete"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btn_cancel"
+            app:layout_constraintHeight_max="300dp"
             app:layout_constraintTop_toBottomOf="@+id/tv_help"
             app:layout_constraintVertical_chainStyle="packed"
-            app:layout_goneMarginTop="16dp"
-            tools:itemCount="3"
-            tools:listitem="@layout/item_argument_editor" />
+            tools:layout_editor_absoluteX="16dp"
+            tools:listitem="@layout/item_vibration_pattern" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancel"
-            style="?materialButtonOutlinedStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@android:string/cancel"
-            app:layout_constraintEnd_toStartOf="@+id/btn_complete"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/btn_complete" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_complete"
-            style="@style/Widget.Material3.Button"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/complete"
+            android:layout_marginEnd="8dp"
+            android:text="@android:string/cancel"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_ok"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rv_pattern"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_ok"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_cancel"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btn_cancel"
-            app:layout_constraintTop_toBottomOf="@+id/rv_argument" />
+            app:layout_constraintStart_toEndOf="@id/btn_cancel"
+            app:layout_constraintTop_toTopOf="@+id/btn_cancel" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

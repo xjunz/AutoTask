@@ -20,16 +20,20 @@ abstract class SingleArgAction<Arg> : ArgumentAction() {
     abstract suspend fun doAction(arg: Arg?, runtime: TaskRuntime): AppletResult
 }
 
-fun <Arg> singleArgAction(block: suspend (Arg?) -> Boolean): Action {
+fun <Arg> singleArgAction(block: suspend (Arg?) -> AppletResult): Action {
     return object : SingleArgAction<Arg>() {
         override suspend fun doAction(arg: Arg?, runtime: TaskRuntime): AppletResult {
-            return AppletResult.emptyResult(block(arg))
+            return block(arg)
         }
     }
 }
 
-fun <Arg> singleNonNullArgAction(block: suspend (Arg) -> Boolean): Action {
-    return singleArgAction<Arg> {
+fun <Arg> simpleSingleArgAction(block: suspend (Arg?) -> Boolean): Action {
+    return singleArgAction<Arg> { AppletResult.emptyResult(block(it)) }
+}
+
+fun <Arg> simpleSingleNonNullArgAction(block: suspend (Arg) -> Boolean): Action {
+    return simpleSingleArgAction<Arg> {
         block(it!!)
     }
 }

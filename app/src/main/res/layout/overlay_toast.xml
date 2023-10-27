@@ -11,6 +11,8 @@
         app:boundsStrokeColor="@android:color/holo_red_dark"
         app:boundsStrokeWidth="4dp">
 
+        <!--lineBreakWordStyle must be specified on api 34 and above, otherwise the TextView will
+         find the system default setting, which causes an error when the TextView is in non-app process.-->
         <TextView
             android:id="@+id/tv_toast"
             android:layout_width="wrap_content"
@@ -20,11 +22,13 @@
             android:layout_marginBottom="64dp"
             android:background="@drawable/bg_tinted_chip"
             android:elevation="2dp"
+            android:lineBreakWordStyle="phrase"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:textColor="?colorOnPrimaryContainer"
             android:visibility="gone"
+            tools:ignore="UnusedAttribute"
             tools:text="@tools:sample/lorem"
             tools:visibility="visible" />
     </top.xjunz.tasker.ui.widget.DrawBoundsFrameLayout>

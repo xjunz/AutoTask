@@ -27,6 +27,7 @@ import top.xjunz.tasker.task.applet.flow.ElseStopship
 import top.xjunz.tasker.task.applet.flow.PhantomFlow
 import top.xjunz.tasker.task.applet.flow.PreloadFlow
 import top.xjunz.tasker.task.applet.flow.TimeFlow
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.option.AppletOption
 import top.xjunz.tasker.task.applet.value.VariantArgType
 import top.xjunz.tasker.util.formatMinSecMills
@@ -53,6 +54,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         const val ID_GESTURE_ACTION_REGISTRY = 0x55
         const val ID_SHELL_CMD_ACTION_REGISTRY = 0x56
         const val ID_FILE_ACTION_REGISTRY = 0x57
+        const val ID_VIBRATION_ACTION_REGISTRY = 0x58
 
         const val ID_UI_OBJECT_FLOW_REGISTRY = 0x60
     }
@@ -120,7 +122,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
             textActions,
             appActions,
             shellCmdActions,
-            fileActions
+            fileActions,
+            vibrationActions
         )
     }
 
@@ -141,11 +144,12 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
 
     @AppletOrdinal(0x0001)
     val preloadFlow = flowOption<PreloadFlow>(R.string.global)
-        .withResult<String>(R.string.current_top_app, VariantArgType.TEXT_PACKAGE_NAME)
+        .withResult<ComponentInfoWrapper>(R.string.current_top_app)
         .withResult<String>(R.string.current_package_name)
         .withResult<String>(R.string.current_package_label)
         .withResult<AccessibilityNodeInfo>(R.string.current_window)
         .withResult<AccessibilityNodeInfo>(R.string.current_focus_input)
+        .withResult<String>(R.string.current_time)
 
     @AppletOrdinal(0x0002)
     val whenFlow = flowOption<When>(R.string._when)
@@ -252,4 +256,8 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
     @AppletOrdinal(0x0041)
     val fileActions =
         flowOptionWithId<PhantomFlow>(ID_FILE_ACTION_REGISTRY, R.string.file_operations)
+
+    @AppletOrdinal(0x0042)
+    val vibrationActions =
+        flowOptionWithId<PhantomFlow>(ID_VIBRATION_ACTION_REGISTRY, R.string.vibrate)
 }

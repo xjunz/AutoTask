@@ -10,6 +10,7 @@ import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
 import top.xjunz.tasker.task.applet.criterion.EventFilter
 import top.xjunz.tasker.task.applet.criterion.FileEventCriterion
+import top.xjunz.tasker.task.applet.flow.ref.ComponentInfoWrapper
 import top.xjunz.tasker.task.applet.flow.ref.NotificationReferent
 import top.xjunz.tasker.task.applet.value.VariantArgType
 
@@ -24,20 +25,20 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val pkgEntered = eventFilterOption(Event.EVENT_ON_PACKAGE_ENTERED, R.string.on_package_entered)
-        .withResult<String>(R.string.app_entered, VariantArgType.TEXT_PACKAGE_NAME)
+        .withResult<ComponentInfoWrapper>(R.string.app_entered)
         .withResult<String>(R.string.pkg_name_of_app_entered)
         .withResult<String>(R.string.name_of_app_entered)
 
     @AppletOrdinal(0x0001)
     val pkgExited = eventFilterOption(Event.EVENT_ON_PACKAGE_EXITED, R.string.on_package_left)
-        .withResult<String>(R.string.app_left, VariantArgType.TEXT_PACKAGE_NAME)
+        .withResult<ComponentInfoWrapper>(R.string.app_left)
         .withResult<String>(R.string.pkg_name_of_app_exited)
         .withResult<String>(R.string.name_of_app_exited)
 
     @AppletOrdinal(0x0002)
     val contentChanged =
         eventFilterOption(Event.EVENT_ON_CONTENT_CHANGED, R.string.on_content_changed)
-            .withResult<String>(R.string.current_app, VariantArgType.TEXT_PACKAGE_NAME)
+            .withResult<ComponentInfoWrapper>(R.string.current_app)
 
     @AppletOrdinal(0x0003)
     val notificationReceived =
@@ -46,14 +47,14 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             R.string.on_status_bar_notification_received
         ).withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
-            .withResult<String>(R.string.notification_owner_app, VariantArgType.TEXT_PACKAGE_NAME)
+            .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
 
     @AppletOrdinal(0x0004)
     val toastReceived =
         eventFilterOption(Event.EVENT_ON_TOAST_RECEIVED, R.string.on_toast_notification_received)
             .withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
-            .withResult<String>(R.string.notification_owner_app, VariantArgType.TEXT_PACKAGE_NAME)
+            .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
 
     @AppletOrdinal(0x0005)
     val newWindow = eventFilterOption(Event.EVENT_ON_NEW_WINDOW, R.string.on_new_window)

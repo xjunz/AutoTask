@@ -65,7 +65,13 @@ object VariantArgType {
     const val TEXT_FORMAT =
         6 shl 16 or Applet.ARG_TYPE_TEXT or MASK_IGNORE_VARIANT_TYPE_WHEN_MATCHING
 
+    const val TEXT_VIBRATION_PATTERN = 7 shl 16 or Applet.ARG_TYPE_TEXT
+
     fun shouldIgnoreVariantTypeWhenMatching(type: Int): Boolean {
         return type == NONE || type and MASK_IGNORE_VARIANT_TYPE_WHEN_MATCHING != 0
+    }
+
+    fun getRawType(variantType: Int): Int {
+        return variantType and 0xFFFF
     }
 }

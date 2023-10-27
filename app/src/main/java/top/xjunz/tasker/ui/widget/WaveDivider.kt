@@ -80,23 +80,29 @@ class WaveDivider @JvmOverloads constructor(
 
     private var shouldFadeIn = false
 
-    private fun performFadeOut() {
+    private fun performFadeOut(animate: Boolean) {
         if (waveMaxHeight == 0F) return
         if (shouldFadeOut) return
-        shouldFadeOut = true
-        fadeAnimator.doOnEnd {
-            offsetAnimator.cancel()
-            shouldFadeOut = false
+        if (animate) {
+            shouldFadeOut = true
+            fadeAnimator.doOnEnd {
+                offsetAnimator.cancel()
+                shouldFadeOut = false
+            }
+            fadeAnimator.doOnCancel {
+                shouldFadeOut = false
+            }
+            startFading()
+        } else {
+            waveMaxHeight = 0F
+            paint.color = waveStrokeColor
+            invalidate()
         }
-        fadeAnimator.doOnCancel {
-            shouldFadeOut = false
-        }
-        startFading()
     }
 
-    fun fadeOut() {
+    fun fadeOut(animate: Boolean) {
         post {
-            performFadeOut()
+            performFadeOut(animate)
         }
     }
 
@@ -241,7 +247,7 @@ class WaveDivider @JvmOverloads constructor(
             if (state.shouldFadeIn) {
                 fadeIn()
             } else if (state.shouldFadeOut) {
-                fadeOut()
+                fadeOut(false)
             }
         }
     }

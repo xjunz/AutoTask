@@ -12,8 +12,8 @@ import top.xjunz.tasker.bridge.ActivityManagerBridge
 import top.xjunz.tasker.bridge.ContextBridge
 import top.xjunz.tasker.bridge.PackageManagerBridge
 import top.xjunz.tasker.engine.applet.action.doubleArgsAction
-import top.xjunz.tasker.engine.applet.action.singleArgAction
-import top.xjunz.tasker.engine.applet.action.singleNonNullArgAction
+import top.xjunz.tasker.engine.applet.action.simpleSingleArgAction
+import top.xjunz.tasker.engine.applet.action.simpleSingleNonNullArgAction
 import top.xjunz.tasker.isPrivilegedProcess
 import top.xjunz.tasker.service.ensurePremium
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -27,7 +27,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val forceStopApp = appletOption(R.string.format_force_stop) {
-        singleArgAction<ComponentInfoWrapper> {
+        simpleSingleArgAction<ComponentInfoWrapper> {
             checkNotNull(it)
             if (isPrivilegedProcess) {
                 ActivityManagerBridge.forceStopPackage(it.packageName)
@@ -36,15 +36,15 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
                 false
             }
         }
-    }.withUnaryArgument<String>(
-        R.string.specified_app, variantType = VariantArgType.TEXT_PACKAGE_NAME
+    }.withBinaryArgument<ComponentInfoWrapper, String>(
+        R.string.specified_app, variantValueType = VariantArgType.TEXT_PACKAGE_NAME
     ).withSingleValueDescriber<String> {
         PackageManagerBridge.loadLabelOfPackage(it)
     }.hasCompositeTitle().shizukuOnly()
 
     @AppletOrdinal(0x0001)
     val launchApp = appletOption(R.string.format_launch) {
-        singleArgAction<Any?> {
+        simpleSingleArgAction<Any?> {
             requireNotNull(it)
             val pkg = if (it is String) it else (it as ComponentInfoWrapper).packageName
             ActivityManagerBridge.startComponent(
@@ -55,8 +55,8 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             true
         }
     }.hasCompositeTitle()
-        .withUnaryArgument<String>(
-            R.string.specified_app, variantType = VariantArgType.TEXT_PACKAGE_NAME
+        .withBinaryArgument<ComponentInfoWrapper, String>(
+            R.string.specified_app, variantValueType = VariantArgType.TEXT_PACKAGE_NAME
         )
         .withSingleValueDescriber<String> {
             PackageManagerBridge.loadLabelOfPackage(it)
@@ -64,7 +64,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0002)
     val launchActivity = appletOption(R.string.launch_activity) {
-        singleNonNullArgAction<String> {
+        simpleSingleNonNullArgAction<String> {
             ensurePremium()
             ActivityManagerBridge.startComponent(it)
             true
@@ -79,7 +79,7 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0003)
     val viewUri = appletOption(R.string.view_uri) {
-        singleNonNullArgAction<String> {
+        simpleSingleNonNullArgAction<String> {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.data = Uri.parse(it)
@@ -106,8 +106,8 @@ class ApplicationActionRegistry(id: Int) : AppletOptionRegistry(id) {
             ContextBridge.getContext().startActivity(intent)
             true
         }
-    }.withUnaryArgument<String>(
-        R.string.specified_app, variantType = VariantArgType.TEXT_PACKAGE_NAME
+    }.withBinaryArgument<ComponentInfoWrapper, String>(
+        R.string.specified_app, variantValueType = VariantArgType.TEXT_PACKAGE_NAME
     ).withValueArgument<String>(R.string.uri)
 
 }

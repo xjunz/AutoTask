@@ -55,6 +55,7 @@ import top.xjunz.tasker.ui.main.EventCenter.doOnEventRoutedWithValue
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorViewModel
 import top.xjunz.tasker.ui.task.editor.VarargTextEditorDialog
+import top.xjunz.tasker.ui.task.editor.VibrationPatternEditorDialog
 import top.xjunz.tasker.ui.task.inspector.FloatingInspectorDialog
 import top.xjunz.tasker.ui.task.showcase.TaskCreatorDialog
 import top.xjunz.tasker.util.ClickListenerUtil.setNoDoubleClickListener
@@ -141,7 +142,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
             }
         }
 
-        when (arg.variantType) {
+        when (arg.variantValueType) {
             VariantArgType.INT_COORDINATE -> {
                 val point = value?.let {
                     IntValueUtil.parseXY(it.casted())
@@ -330,11 +331,17 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
                     gvm.referenceEditor.setVarargReferences(applet, referents)
                 }.show(fragmentManager)
 
+            VariantArgType.TEXT_VIBRATION_PATTERN -> {
+                VibrationPatternEditorDialog().init(value?.casted(), arg.name) {
+                    updateValue(it)
+                }.show(fragmentManager)
+            }
+
             else ->
                 TextEditorDialog().configEditText { et ->
                     et.configInputType(arg.valueType, true)
                     et.maxLines = 10
-                }.setVariantType(arg.variantType)
+                }.setVariantType(arg.variantValueType)
                     .init(title, value?.toString()) init@{
                         updateValue(
                             arg.parseValueFromInput(it) ?: return@init R.string.error_mal_format.str
@@ -487,7 +494,7 @@ class ArgumentsEditorDialog : BaseDialogFragment<DialogArgumentsEditorBinding>()
         doOnEventRoutedWithValue<List<SerializableInputEvent>>(FloatingInspector.EVENT_GESTURES_RECORDED) {
             if (vm.updateGesture == null) {
                 val index = vm.option.arguments.indexOfFirst { descriptor ->
-                    descriptor.variantType == VariantArgType.TEXT_GESTURES
+                    descriptor.variantValueType == VariantArgType.TEXT_GESTURES
                 }
                 if (index >= 0) {
                     gvm.referenceEditor.setValue(applet, index, it)

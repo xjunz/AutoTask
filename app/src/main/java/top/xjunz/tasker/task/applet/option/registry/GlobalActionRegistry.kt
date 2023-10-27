@@ -10,7 +10,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.PowerManagerBridge
 import top.xjunz.tasker.engine.applet.action.emptyArgAction
 import top.xjunz.tasker.engine.applet.action.emptyArgOptimisticAction
-import top.xjunz.tasker.engine.applet.action.singleNonNullArgAction
+import top.xjunz.tasker.engine.applet.action.simpleSingleNonNullArgAction
 import top.xjunz.tasker.ktx.array
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
@@ -37,7 +37,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0000)
     val waitForIdle = appletOption(R.string.wait_for_idle) {
-        singleNonNullArgAction<Int> {
+        simpleSingleNonNullArgAction<Int> {
             val xy = IntValueUtil.parseXY(it)
             uiAutomatorBridge.waitForIdle(xy.x.toLong(), xy.y.toLong())
         }
@@ -88,7 +88,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0007)
     val setRotation = appletOption(R.string.rotate_screen) {
-        singleNonNullArgAction<Int> {
+        simpleSingleNonNullArgAction<Int> {
             uiAutomatorBridge.setRotation(it)
         }
     }.withValueArgument<Int>(R.string.rotation_direction, VariantArgType.INT_ROTATION).shizukuOnly()

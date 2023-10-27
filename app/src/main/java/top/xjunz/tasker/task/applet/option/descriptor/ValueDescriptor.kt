@@ -12,9 +12,9 @@ import top.xjunz.tasker.ktx.text
  */
 open class ValueDescriptor(
     @StringRes
-    private val nameRes: Int,
+    protected val nameRes: Int,
     val valueType: Class<*>,
-    val variantType: Int,
+    val variantValueType: Int,
     val isCollection: Boolean,
 ) {
 

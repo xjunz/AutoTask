@@ -22,6 +22,7 @@
             android:hint="@string/task_name"
             app:hintTextColor="?colorPrimary"
             app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Large"
             tools:layout_editor_absoluteX="16dp">
 
             <com.google.android.material.textfield.TextInputEditText

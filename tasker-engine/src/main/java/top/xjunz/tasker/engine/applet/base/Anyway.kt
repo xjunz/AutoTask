@@ -17,7 +17,7 @@ class Anyway : Do() {
             field = value
         }
 
-    override fun shouldSkip(runtime: TaskRuntime): Boolean {
+    override fun shouldBeSkipped(runtime: TaskRuntime): Boolean {
         return runtime.ifSuccessful == null
     }
 }

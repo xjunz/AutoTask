@@ -2,9 +2,9 @@
 buildscript {
 
     ext {
-        compile_sdk_version = 33
+        compile_sdk_version = 34
         min_sdk_version = 24
-        target_sdk_version = 33
+        target_sdk_version = 34
         kotlin_version = "1.8.21"
         refine_version = "4.3.0"
         shizuku_version = '13.1.2'
@@ -37,6 +37,6 @@ buildscript {
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

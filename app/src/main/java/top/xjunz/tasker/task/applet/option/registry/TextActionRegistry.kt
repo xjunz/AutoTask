@@ -8,7 +8,7 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ClipboardManagerBridge
 import top.xjunz.tasker.engine.applet.action.createProcessor
 import top.xjunz.tasker.engine.applet.action.optimisticVarRefAction
-import top.xjunz.tasker.engine.applet.action.singleNonNullArgAction
+import top.xjunz.tasker.engine.applet.action.simpleSingleNonNullArgAction
 import top.xjunz.tasker.ktx.firstGroupValue
 import top.xjunz.tasker.ktx.foreColored
 import top.xjunz.tasker.ktx.formatSpans
@@ -50,7 +50,7 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
     @AppletOrdinal(0x0002)
     val copyText = appletOption(R.string.format_copy_text) {
-        singleNonNullArgAction<String> { text ->
+        simpleSingleNonNullArgAction<String> { text ->
             ClipboardManagerBridge.copyToClipboard(text)
             true
         }

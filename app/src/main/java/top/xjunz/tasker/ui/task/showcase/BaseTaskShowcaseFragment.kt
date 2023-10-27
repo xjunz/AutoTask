@@ -119,8 +119,13 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
 
         }
 
+    companion object {
+        const val PAYLOAD_ENABLED_STATUS = 1
+    }
+
 
     protected inner class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
             return TaskViewHolder(
                 ItemTaskShowcaseBinding.inflate(
@@ -129,28 +134,13 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             )
         }
 
-        override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-            val task = taskList[position]
-            val metadata = task.metadata
-            val b = holder.binding
-            b.msEnabled.isChecked = task.isEnabled
-            b.tvTaskName.text = metadata.title
-            b.tvAuthor.text = metadata.author
-            if (metadata.description.isNullOrEmpty()) {
-                b.tvTaskDesc.text = R.string.no_desc_provided.text
-                b.tvTaskDesc.isEnabled = false
-            } else {
-                b.tvTaskDesc.text = metadata.spannedDescription
-                b.tvTaskDesc.isEnabled = true
-            }
-            if (task.isOneshot) {
-                b.msEnabled.isInvisible = true
-            } else if (task.isResident) {
-                b.ibRun.isInvisible = true
-            }
-            // b.tvBadge.isVisible = task.isPreload
-            b.ibSnapshot.isVisible = false
+        private fun bindEnabledState(
+            animate: Boolean,
+            task: XTask,
+            b: ItemTaskShowcaseBinding
+        ) {
             b.container.strokeColor = com.google.android.material.R.attr.colorOutline.attrColor
+            b.msEnabled.isChecked = task.isEnabled
             if (task.isEnabled) {
                 b.msEnabled.setText(R.string.is_enabled)
                 if (serviceController.isServiceRunning) {
@@ -159,11 +149,11 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
                     b.container.strokeColor = ColorScheme.colorPrimary
                     b.container.cardElevation = 1.dpFloat
                 } else {
-                    b.wave.fadeOut()
+                    b.wave.fadeOut(animate)
                 }
             } else {
                 b.msEnabled.setText(R.string.not_is_enabled)
-                b.wave.fadeOut()
+                b.wave.fadeOut(animate)
             }
             if (task.isOneshot) {
                 b.ibSnapshot.isVisible = true
@@ -182,6 +172,41 @@ abstract class BaseTaskShowcaseFragment : BaseFragment<FragmentTaskShowcaseBindi
             } else {
                 b.tvLabel.isVisible = false
             }
+        }
+
+        override fun onBindViewHolder(
+            holder: TaskViewHolder,
+            position: Int,
+            payloads: MutableList<Any>
+        ) {
+            if (payloads.firstOrNull() == PAYLOAD_ENABLED_STATUS) {
+                bindEnabledState(true, taskList[position], holder.binding)
+            } else {
+                super.onBindViewHolder(holder, position, payloads)
+            }
+        }
+
+        override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
+            val task = taskList[position]
+            val metadata = task.metadata
+            val b = holder.binding
+            b.tvTaskName.text = metadata.title
+            b.tvAuthor.text = metadata.author
+            if (metadata.description.isNullOrEmpty()) {
+                b.tvTaskDesc.text = R.string.no_desc_provided.text
+                b.tvTaskDesc.isEnabled = false
+            } else {
+                b.tvTaskDesc.text = metadata.spannedDescription
+                b.tvTaskDesc.isEnabled = true
+            }
+            if (task.isOneshot) {
+                b.msEnabled.isInvisible = true
+            } else if (task.isResident) {
+                b.ibRun.isInvisible = true
+            }
+            // b.tvBadge.isVisible = task.isPreload
+            b.ibSnapshot.isVisible = false
+            bindEnabledState(false, task, b)
         }
 
         override fun getItemCount() = taskList.size

@@ -11,6 +11,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.animation.addListener
 import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
@@ -20,7 +21,15 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.circularreveal.CircularRevealCompat
 import top.xjunz.tasker.R
 import top.xjunz.tasker.databinding.LayoutShoppingCartBinding
-import top.xjunz.tasker.ktx.*
+import top.xjunz.tasker.ktx.applySystemInsets
+import top.xjunz.tasker.ktx.createMaterialShapeDrawable
+import top.xjunz.tasker.ktx.dp
+import top.xjunz.tasker.ktx.dpFloat
+import top.xjunz.tasker.ktx.drawToBitmapUnsafe
+import top.xjunz.tasker.ktx.observe
+import top.xjunz.tasker.ktx.requireBottomSheetBehavior
+import top.xjunz.tasker.ktx.setContentDescriptionAndTooltip
+import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ui.base.BaseDialogFragment
 import top.xjunz.tasker.ui.base.SavedStateViewModel
 import top.xjunz.tasker.ui.main.ColorScheme
@@ -168,6 +177,9 @@ class ShoppingCartIntegration(
         animator.addListener(
             CircularRevealCompat.createCircularRevealListener(circularRevealContainer)
         )
+        animator.addListener(onStart = {
+            circularRevealContainer.alpha = 0F
+        })
         animator.startDelay = 250
         animator.start()
     }

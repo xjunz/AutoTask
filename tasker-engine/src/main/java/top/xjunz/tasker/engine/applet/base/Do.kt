@@ -13,7 +13,7 @@ open class Do : ControlFlow() {
 
     override var relation: Int = REL_AND
 
-    override fun shouldSkip(runtime: TaskRuntime): Boolean {
+    override fun shouldBeSkipped(runtime: TaskRuntime): Boolean {
         return runtime.ifSuccessful != true
     }
 }

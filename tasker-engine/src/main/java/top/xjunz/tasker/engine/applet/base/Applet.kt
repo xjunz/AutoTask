@@ -73,10 +73,6 @@ abstract class Applet {
             }
         }
 
-        inline fun <reified T> judgeValueType(): Int {
-            return judgeValueType(T::class.java)
-        }
-
         fun isCollectionArg(argType: Int): Boolean {
             return argType and MASK_ARG_TYPE_COLLECTION != 0
         }
@@ -261,7 +257,13 @@ abstract class Applet {
         }
     }
 
-    internal open fun shouldSkip(runtime: TaskRuntime): Boolean {
+    /**
+     * Directly tell the runtime whether this applet should be skipped. This is prior to
+     * all other criteria.
+     *
+     * @see Flow.applyFlow
+     */
+    internal open fun shouldBeSkipped(runtime: TaskRuntime): Boolean {
         return false
     }
 
@@ -270,13 +272,20 @@ abstract class Applet {
     }
 
     /**
-     * Do something before the flow is started. At this time, [TaskRuntime.currentFlow] is
-     * not yet assigned to this flow. This is guaranteed to be called even if this is skipped.
+     * Do something before the applet is executed. At this time, [TaskRuntime.currentApplet] is
+     * not yet assigned to this applet. This is guaranteed to be called even if this is skipped.
+     *
+     * @see Flow.applyFlow
      */
-    open fun onPreApply(runtime: TaskRuntime) {}
+    open fun onPreApply(runtime: TaskRuntime) {
+        /* no-op */
+    }
 
     /**
-     * Just before the flow executing its elements.
+     * Just before the applet executes. At this time, [TaskRuntime.currentApplet] is assigned
+     * to this applet.
+     *
+     * @see Flow.applyFlow
      */
     open fun onPrepareApply(runtime: TaskRuntime) {
         /* no-op */
@@ -284,6 +293,7 @@ abstract class Applet {
 
     /**
      * Do something after the applying is completed.
+     * @see Flow.applyFlow
      */
     open fun onPostApply(runtime: TaskRuntime) {
         /* no-op */

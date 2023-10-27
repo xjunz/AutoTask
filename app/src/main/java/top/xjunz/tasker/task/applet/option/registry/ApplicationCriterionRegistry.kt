@@ -33,11 +33,9 @@ class ApplicationCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     private fun invertibleApplicationOption(
         @StringRes name: Int, creator: () -> Applet
     ): AppletOption {
-        return invertibleAppletOption(name, creator).withRefArgument<ComponentInfoWrapper>(
-            R.string.app,
-            substitution = R.string.empty,
-            variantType = VariantArgType.TEXT_PACKAGE_NAME
-        ).hasCompositeTitle()
+        return invertibleAppletOption(name, creator)
+            .withRefArgument<ComponentInfoWrapper>(R.string.app, substitution = R.string.empty)
+            .hasCompositeTitle()
     }
 
     @AppletOrdinal(0x00_00)

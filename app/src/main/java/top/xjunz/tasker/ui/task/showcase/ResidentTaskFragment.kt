@@ -73,7 +73,7 @@ class ResidentTaskFragment : BaseTaskShowcaseFragment() {
             }
 
             override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any {
-                return true
+                return PAYLOAD_ENABLED_STATUS
             }
         }
         DiffUtil.calculateDiff(diffCallback, true).dispatchUpdatesTo(adapter)

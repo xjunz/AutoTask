@@ -176,11 +176,9 @@ class AppletOption(
      */
     val categoryIndex: Int get() = categoryId ushr 8
 
-    var presetsNameRes: Int = -1
-        private set
+    private var presetsNameRes: Int = -1
 
-    var presetsValueRes: Int = -1
-        private set
+    private var presetsValueRes: Int = -1
 
     val hasPresets get() = presetsNameRes != -1 && presetsValueRes != -1
 
@@ -188,7 +186,6 @@ class AppletOption(
         private set
 
     private var isTitleComposite: Boolean = false
-        private set
 
     var isShizukuOnly = false
         private set
@@ -196,9 +193,9 @@ class AppletOption(
     var isPremiumOnly = false
         private set
 
-    var arguments: List<ArgumentDescriptor> = emptyList()
+    var arguments: List<ArgumentDescriptor> = Collections.emptyList()
 
-    var results: List<ValueDescriptor> = emptyList()
+    var results: List<ValueDescriptor> = Collections.emptyList()
 
     val rawTitle: CharSequence?
         get() = if (titleResource == TITLE_NONE) null else titleResource.text
@@ -229,14 +226,19 @@ class AppletOption(
 
     fun matchReferents(argument: ArgumentDescriptor): List<ValueDescriptor> {
         val shouldIgnoreVariantType =
-            VariantArgType.shouldIgnoreVariantTypeWhenMatching(argument.variantType)
+            VariantArgType.shouldIgnoreVariantTypeWhenMatching(argument.variantValueType)
         val argVariantType =
-            if (shouldIgnoreVariantType) VariantArgType.NONE else argument.variantType
+            if (shouldIgnoreVariantType) VariantArgType.NONE else argument.variantValueType
+        val type = argument.referenceType ?: argument.valueType
         return results.filter {
             if (it.isCollection != argument.isCollection) {
                 false
             } else {
-                argVariantType == it.variantType && it.valueType == argument.referenceType
+                if (it.valueType != type) {
+                    false
+                } else {
+                    argVariantType == VariantArgType.NONE || argVariantType == it.variantValueType
+                }
             }
         }
     }
@@ -292,7 +294,7 @@ class AppletOption(
         return yield().also { it.isInverted = inverted }
     }
 
-    fun yield(vararg values: Pair<Int, Any>): Applet {
+    fun yield(vararg initialValues: Pair<Int, Any>): Applet {
         check(isValid) {
             "Invalid applet option unable to yield an applet!"
         }
@@ -301,15 +303,19 @@ class AppletOption(
             it.name = name
             it.isInverted = isInverted
             it.isInvertible = isInvertible
-            if (values.isNotEmpty()) {
-                it.values = arrayMapOf(*values)
+            if (initialValues.isNotEmpty()) {
+                it.values = arrayMapOf(*initialValues)
             }
             it.argumentTypes = IntArray(arguments.size) { index ->
                 val arg = arguments[index]
                 if (arg.isReferenceOnly) {
                     Applet.ARG_TYPE_REFERENCE
                 } else {
-                    val type = Applet.judgeValueType(arg.valueType)
+                    val type = if (arg.variantValueType == VariantArgType.NONE) {
+                        Applet.judgeValueType(arg.valueType)
+                    } else {
+                        VariantArgType.getRawType(arg.variantValueType)
+                    }
                     if (arg.isCollection) Applet.collectionTypeOf(type) else type
                 }
             }
@@ -404,10 +410,10 @@ class AppletOption(
 
     inline fun <reified T> withResult(
         @StringRes name: Int,
-        variantType: Int = VariantArgType.NONE,
+        variantValueType: Int = VariantArgType.NONE,
         isCollection: Boolean = false
     ): AppletOption {
-        requireResults().add(ValueDescriptor(name, T::class.java, variantType, isCollection))
+        requireResults().add(ValueDescriptor(name, T::class.java, variantValueType, isCollection))
         return this
     }
 
@@ -417,7 +423,7 @@ class AppletOption(
     inline fun <reified V> withUnaryArgument(
         @StringRes name: Int,
         @StringRes substitution: Int = -1,
-        variantType: Int = VariantArgType.NONE,
+        variantValueType: Int = VariantArgType.NONE,
         isRef: Boolean? = null,
         isCollection: Boolean = false,
     ): AppletOption {
@@ -426,7 +432,7 @@ class AppletOption(
             substitution,
             V::class.java,
             null,
-            variantType,
+            variantValueType,
             isRef,
             isCollection
         )
@@ -437,7 +443,7 @@ class AppletOption(
         @StringRes substitution: Int,
         valueType: Class<*>,
         refType: Class<*>?,
-        variantType: Int,
+        variantValueType: Int,
         isRef: Boolean?,
         isCollection: Boolean
     ): AppletOption {
@@ -448,7 +454,7 @@ class AppletOption(
                 substitution,
                 valueType,
                 refType,
-                variantType,
+                variantValueType,
                 isRef,
                 isCollection
             )
@@ -486,16 +492,16 @@ class AppletOption(
     inline fun <reified Ref> withRefArgument(
         @StringRes name: Int,
         @StringRes substitution: Int = -1,
-        variantType: Int = VariantArgType.NONE,
+        variantValueType: Int = VariantArgType.NONE,
         isCollection: Boolean = false
     ): AppletOption {
-        return withUnaryArgument<Ref>(name, substitution, variantType, true, isCollection)
+        return withUnaryArgument<Ref>(name, substitution, variantValueType, true, isCollection)
     }
 
     inline fun <reified Ref, reified V> withBinaryArgument(
         @StringRes name: Int,
         @StringRes substitution: Int = -1,
-        variantType: Int = VariantArgType.NONE,
+        variantValueType: Int = VariantArgType.NONE,
         isCollection: Boolean = false,
     ): AppletOption {
         return withArgument(
@@ -503,10 +509,22 @@ class AppletOption(
             substitution,
             V::class.java,
             Ref::class.java,
-            variantType,
+            variantValueType,
             null,
             isCollection
         )
+    }
+
+    /**
+     * Make this currently last argument as a result, which means other applets could refer to this
+     * argument.
+     *
+     * @see ArgumentDescriptor.asResult
+     */
+    fun thisArgAsResult(): AppletOption {
+        check(arguments.isNotEmpty())
+        requireResults().add(arguments.last().asResult())
+        return this
     }
 
     fun withHelperText(@StringRes res: Int): AppletOption {

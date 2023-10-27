@@ -11,6 +11,8 @@ import top.xjunz.tasker.engine.runtime.TaskRuntime
  */
 open class When : ControlFlow() {
 
+    override val minSize: Int = 1
+
     override val requiredIndex: Int = 1
 
     override fun staticCheckMyself(): Int {

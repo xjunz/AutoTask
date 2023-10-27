@@ -246,6 +246,7 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget,
             }
 
             MainOption.ExportTasks -> {
+                toast(R.string.select_export_path)
                 saveToSAFLauncher.launch(
                     R.string.format_task_archive_name.format(
                         formatCurrentTime(), X_TASK_FILE_ARCHIVE_SUFFIX

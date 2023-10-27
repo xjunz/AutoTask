@@ -14,7 +14,6 @@ import top.xjunz.tasker.engine.applet.base.Applet
 import top.xjunz.tasker.engine.applet.base.ControlFlow
 import top.xjunz.tasker.engine.applet.base.Flow
 import top.xjunz.tasker.engine.applet.base.StaticError
-import top.xjunz.tasker.engine.applet.base.When
 import top.xjunz.tasker.engine.applet.util.isContainer
 import top.xjunz.tasker.engine.applet.util.isDescendantOf
 import top.xjunz.tasker.ktx.configHeaderTitle
@@ -68,8 +67,10 @@ class AppletOperationMenuHelper(
         val menu = popup.menu
         val parent = applet.requireParent()
         popup.inflate(R.menu.applet_operation)
-        if (applet.parent is When) {
-            menu.removeItem(R.id.item_toggle_ability)
+        if (parent.minSize > 0) {
+            if (applet.isEnabled && parent.count { it.isEnabled } <= parent.minSize + 1) {
+                menu.removeItem(R.id.item_toggle_ability)
+            }
         }
         // Not container
         if (!applet.isContainer) {
@@ -86,6 +87,7 @@ class AppletOperationMenuHelper(
         }
         // Not removable
         if (applet.requiredIndex != -1) {
+            menu.removeItem(R.id.item_replace_with)
             menu.removeItem(R.id.item_remove)
             menu.removeItem(R.id.item_move)
             // Disabled item is regarded as removed, so remove ability toggle
@@ -126,12 +128,11 @@ class AppletOperationMenuHelper(
             menu.findItem(R.id.item_add_comment).title = R.string.edit_comment.text
         }
         if (!applet.isEnabled) {
-            menu.findItem(R.id.item_toggle_ability).title = R.string.enable.text
+            menu.findItem(R.id.item_toggle_ability)?.title = R.string.enable.text
         }
         popup.setOnMenuItemClickListener {
             triggerMenuItem(anchor, applet, it.itemId, it.title)
         }
-        // }
         return popup
     }
 

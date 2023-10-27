@@ -28,7 +28,7 @@ class ElseIf : If() {
     /**
      * If its previous peer is skipped, do not execute it self.
      */
-    override fun shouldSkip(runtime: TaskRuntime): Boolean {
+    override fun shouldBeSkipped(runtime: TaskRuntime): Boolean {
         return runtime.ifSuccessful != false
     }
 }

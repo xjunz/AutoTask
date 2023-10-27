@@ -14,3 +14,11 @@ fun <K, V> arrayMapOf(vararg entries: Pair<K, V>): ArrayMap<K, V> {
     map.putAll(entries)
     return map
 }
+
+fun <V> MutableList<V>.insert(position: Int, value: V) {
+    if (size == 0) {
+        add(value)
+    } else {
+        add(position, value)
+    }
+}
