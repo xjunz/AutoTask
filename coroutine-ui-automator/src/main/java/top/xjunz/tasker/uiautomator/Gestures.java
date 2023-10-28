@@ -50,7 +50,7 @@ class Gestures {
      */
     public PointerGesture click(Point point) {
         // A basic click is a touch down and touch up over the same point with no delay.
-        return click(point, 0);
+        return click(point, ViewConfiguration.getPressedStateDuration());
     }
 
     /**

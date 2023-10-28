@@ -10,8 +10,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.annotation.RequiresApi
+import top.xjunz.tasker.bridge.ConnectivityManagerBridge
 import top.xjunz.tasker.bridge.ContextBridge
-import top.xjunz.tasker.bridge.WifiManagerBridge
 import top.xjunz.tasker.engine.runtime.Event
 import top.xjunz.tasker.engine.task.EventDispatcher
 
@@ -57,7 +57,7 @@ class NetworkEventDispatcher : EventDispatcher() {
 
             val prevSsid = currentWifiSSID
             val ssid = if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                WifiManagerBridge.getCurrentConnectedWifiSSID()
+                ConnectivityManagerBridge.getCurrentConnectedWifiSSID()
             } else {
                 null
             }
@@ -84,7 +84,7 @@ class NetworkEventDispatcher : EventDispatcher() {
 
     override fun onRegistered() {
         isNetworkAvailable = cm.activeNetwork != null
-        currentWifiSSID = WifiManagerBridge.getCurrentConnectedWifiSSID()
+        currentWifiSSID = ConnectivityManagerBridge.getCurrentConnectedWifiSSID()
         cm.registerDefaultNetworkCallback(networkCallback)
     }
 }

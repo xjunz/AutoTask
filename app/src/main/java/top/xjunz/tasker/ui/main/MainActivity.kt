@@ -47,6 +47,7 @@ import top.xjunz.tasker.task.runtime.LocalTaskManager.isEnabled
 import top.xjunz.tasker.task.runtime.ResidentTaskScheduler
 import top.xjunz.tasker.task.storage.TaskStorage
 import top.xjunz.tasker.ui.base.DialogStackMixin
+import top.xjunz.tasker.ui.outer.GlobalCrashHandler
 import top.xjunz.tasker.ui.purchase.PurchaseDialog.Companion.showPurchaseDialog
 import top.xjunz.tasker.ui.service.ServiceStarterDialog
 import top.xjunz.tasker.ui.task.editor.FlowEditorDialog
@@ -135,11 +136,6 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         observeData()
         initServiceController()
         DialogStackManager.setCallback(this)
-        if (BuildConfig.DEBUG) {
-            binding.tvTitle.setOnDoubleClickListener {
-                PremiumMixin.clearPremium()
-            }
-        }
         if (!Preferences.privacyPolicyAcknowledged) {
             PrivacyPolicyDialog().show(supportFragmentManager)
         }
@@ -147,6 +143,7 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
         if (intent.action == Intent.ACTION_VIEW && intent.scheme == "content") {
             mainViewModel.requestImportTask.value = intent
         }
+        GlobalCrashHandler.init()
     }
 
     private var isExited = false
@@ -342,6 +339,12 @@ class MainActivity : AppCompatActivity(), DialogStackManager.Callback {
             Preferences.showToggleRelationTip = true
             Preferences.showSwipeToRemoveTip = true
             Preferences.showLongClickToSelectTip = true
+            PremiumMixin.clearPremium()
+        }
+        if (BuildConfig.DEBUG) {
+            binding.tvTitle.setOnLongClickListener {
+                error("Crash test!")
+            }
         }
         binding.appBar.applySystemInsets { v, insets ->
             v.updatePadding(top = insets.top)

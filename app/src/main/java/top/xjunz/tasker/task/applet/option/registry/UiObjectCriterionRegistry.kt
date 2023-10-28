@@ -282,45 +282,51 @@ class UiObjectCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         numberRangeCriterion<UiObjectTarget, Int> {
             it.source.childCount
         }
-    }.withValueArgument<Int>(R.string.not_child_node_count_in_range, VariantArgType.INT_QUANTITY, true)
-        .withDefaultRangeDescriber()
+    }.withValueArgument<Int>(
+        R.string.not_child_node_count_in_range,
+        VariantArgType.INT_QUANTITY,
+        true
+    ).withDefaultRangeDescriber()
 
     // Position
     @AppletOrdinal(0x0300)
     val left = appletOption(R.string.left_margin) {
         uiObjectBoundsCriterion(Gravity.START)
-    }.withSingleValueDescriber(distanceDescriber)
-        .withValueArgument<Long>(R.string.left_margin, VariantArgType.BITS_BOUNDS)
+    }.withValueArgument<Long>(R.string.left_margin, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
 
     @AppletOrdinal(0x0301)
     val right = appletOption(R.string.right_margin) {
         uiObjectBoundsCriterion(Gravity.END)
-    }.withSingleValueDescriber(distanceDescriber)
-        .withValueArgument<Long>(R.string.right_margin, VariantArgType.BITS_BOUNDS)
+    }.withValueArgument<Long>(R.string.right_margin, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
 
     @AppletOrdinal(0x0302)
     val top = appletOption(R.string.top_margin) {
         uiObjectBoundsCriterion(Gravity.TOP)
-    }.withSingleValueDescriber(distanceDescriber)
-        .withValueArgument<Long>(R.string.top_margin, VariantArgType.BITS_BOUNDS)
+    }.withValueArgument<Long>(R.string.top_margin, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
 
     @AppletOrdinal(0x0303)
     val bottom = appletOption(R.string.bottom_margin) {
         uiObjectBoundsCriterion(Gravity.BOTTOM)
-    }.withSingleValueDescriber(distanceDescriber)
+    }
         .withValueArgument<Long>(R.string.bottom_margin, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
 
     @AppletOrdinal(0x0304)
     val width = appletOption(R.string.width) {
         uiObjectBoundsCriterion(Gravity.FILL_HORIZONTAL)
-    }.withSingleValueDescriber(distanceDescriber)
+    }
         .withValueArgument<Long>(R.string.width, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
 
     @AppletOrdinal(0x0305)
     val height = appletOption(R.string.height) {
         uiObjectBoundsCriterion(Gravity.FILL_VERTICAL)
-    }.withSingleValueDescriber(distanceDescriber)
+    }
         .withValueArgument<Long>(R.string.height, VariantArgType.BITS_BOUNDS)
+        .withSingleValueDescriber(distanceDescriber)
     /*
         @AppletCategory(0x0400)
         val depth = NotInvertibleAppletOption(ID_DEPTH, R.string.node_depth) {

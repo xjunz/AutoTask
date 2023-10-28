@@ -6,13 +6,13 @@ buildscript {
         min_sdk_version = 24
         target_sdk_version = 34
         kotlin_version = "1.8.21"
-        refine_version = "4.3.0"
-        shizuku_version = '13.1.2'
-        ktor_version = '2.3.2'
+        refine_version = '4.4.0'
+        shizuku_version = '13.1.5'
+        ktor_version = '2.3.5'
         appcompat_version = "1.6.1"
-        coroutine_version = '1.7.2'
+        coroutine_version = '1.7.3'
         serialization_version = '1.6.21'
-        ktx_version = '1.10.1'
+        ktx_version = '1.12.0'
     }
     def localProperties = new Properties()
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))

@@ -6,7 +6,6 @@ package top.xjunz.tasker.task.applet.option.registry
 
 import top.xjunz.tasker.R
 import top.xjunz.tasker.bridge.ConnectivityManagerBridge
-import top.xjunz.tasker.bridge.WifiManagerBridge
 import top.xjunz.tasker.engine.applet.criterion.booleanCriterion
 import top.xjunz.tasker.engine.applet.criterion.unaryEqualCriterion
 import top.xjunz.tasker.task.applet.anno.AppletOrdinal
@@ -40,7 +39,7 @@ class NetworkCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x0004)
     val currentWifiSsidIs = invertibleAppletOption(R.string.current_wifi_ssid_is) {
         unaryEqualCriterion {
-            WifiManagerBridge.getCurrentConnectedWifiSSID()
+            ConnectivityManagerBridge.getCurrentConnectedWifiSSID()
         }
     }.shizukuOnly()
 }

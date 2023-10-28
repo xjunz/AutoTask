@@ -55,7 +55,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val suspension = appletOption(R.string.delay) {
         Suspension()
     }.withValueArgument<Int>(R.string.delay_interval, VariantArgType.INT_INTERVAL)
-        .withDescriber<Int> { applet, t ->
+        .withSingleValueAppletDescriber<Int> { applet, t ->
             R.string.format_delay.formatSpans(
                 formatMinSecMills(t!!).foreColored().clickToEdit(applet)
             )
@@ -64,13 +64,14 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     @AppletOrdinal(0x00_04)
     val repeatFlow = appletOption(R.string.loop) {
         Repeat()
-    }.withDescriber<Int> { applet, t ->
-        R.string.format_repeat.formatSpans(t.toString().foreColored().clickToEdit(applet))
     }.descAsTitle()
         .withValueArgument<Int>(R.string.loop_count)
         .withResult<Repeat>(R.string.loop)
         .withResult<Int>(R.string.repeated_count)
         .withResult<String>(R.string.repeated_count)
+        .withSingleValueAppletDescriber<Int> { applet, t ->
+            R.string.format_repeat.formatSpans(t.toString().foreColored().clickToEdit(applet))
+        }
 
     @AppletOrdinal(0x00_05)
     val breakAction = appletOption(R.string.break_current_loop) {
@@ -106,7 +107,7 @@ class ControlActionRegistry(id: Int) : AppletOptionRegistry(id) {
     val pauseFor = appletOption(R.string.pause_for) {
         PauseFor()
     }.withValueArgument<Long>(R.string.specified_duration, VariantArgType.BITS_LONG_DURATION)
-        .withDescriber<Long> { _, duration ->
+        .withSingleValueAppletDescriber<Long> { _, duration ->
             checkNotNull(duration)
             val parsed = LongDuration.parse(duration)
             buildString {

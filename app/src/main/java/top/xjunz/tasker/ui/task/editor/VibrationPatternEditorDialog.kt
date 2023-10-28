@@ -4,6 +4,7 @@
 
 package top.xjunz.tasker.ui.task.editor
 
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import top.xjunz.shared.ktx.insert
 import top.xjunz.tasker.R
+import top.xjunz.tasker.bridge.VibratorBridge
 import top.xjunz.tasker.databinding.DialogVibrationPatternEditorBinding
 import top.xjunz.tasker.databinding.ItemVibrationPatternBinding
 import top.xjunz.tasker.ktx.doWhenCreated
@@ -37,7 +39,6 @@ class VibrationPatternEditorDialog : BaseDialogFragment<DialogVibrationPatternEd
     private class InnerViewModel : ViewModel() {
         var vibrationDurations = mutableListOf(200L)
         var vibrationStrengths = mutableListOf(100)
-        var initialRepeat = 1
         lateinit var doOnCompleted: (Vibrate.VibrationWaveForm) -> Unit
         var title: CharSequence? = null
     }
@@ -52,31 +53,43 @@ class VibrationPatternEditorDialog : BaseDialogFragment<DialogVibrationPatternEd
             dismiss()
         }
         binding.btnOk.setNoDoubleClickListener {
-            for (i in 0..viewModel.vibrationDurations.lastIndex) {
-                val d = viewModel.vibrationDurations[i]
-                val s = viewModel.vibrationStrengths[i]
-                if (d == -1L) {
-                    toast(R.string.error_vibration_duration)
-                    binding.rvPattern.scrollPositionToCenterVertically(i) {
-                        it.shake()
-                    }
-                    return@setNoDoubleClickListener
-                }
-                if (s !in 1..255) {
-                    toast(R.string.error_vibration_strength)
-                    binding.rvPattern.scrollPositionToCenterVertically(i) {
-                        it.shake()
-                    }
-                    return@setNoDoubleClickListener
-                }
-                val waveForm = Vibrate.VibrationWaveForm(
-                    viewModel.vibrationDurations.toLongArray(),
-                    viewModel.vibrationStrengths.toIntArray()
-                )
-                viewModel.doOnCompleted(waveForm)
+            getResult()?.let {
+                viewModel.doOnCompleted(it)
                 dismiss()
             }
         }
+        binding.btnTest.setNoDoubleClickListener {
+            getResult()?.let {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    VibratorBridge.performVibrate(it)
+                }
+            }
+        }
+    }
+
+    private fun getResult(): Vibrate.VibrationWaveForm? {
+        for (i in 0..viewModel.vibrationDurations.lastIndex) {
+            val d = viewModel.vibrationDurations[i]
+            val s = viewModel.vibrationStrengths[i]
+            if (d == -1L) {
+                toast(R.string.error_vibration_duration)
+                binding.rvPattern.scrollPositionToCenterVertically(i) {
+                    it.shake()
+                }
+                return null
+            }
+            if (s !in 1..255) {
+                toast(R.string.error_vibration_strength)
+                binding.rvPattern.scrollPositionToCenterVertically(i) {
+                    it.shake()
+                }
+                return null
+            }
+        }
+        return Vibrate.VibrationWaveForm(
+            viewModel.vibrationDurations.toLongArray(),
+            viewModel.vibrationStrengths.toIntArray()
+        )
     }
 
     fun init(

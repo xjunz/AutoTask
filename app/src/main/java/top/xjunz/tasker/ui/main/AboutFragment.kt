@@ -40,9 +40,9 @@ import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.observe
 import top.xjunz.tasker.ktx.observeError
 import top.xjunz.tasker.ktx.show
+import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.text
 import top.xjunz.tasker.ktx.toast
-import top.xjunz.tasker.ktx.viewUrlSafely
 import top.xjunz.tasker.premium.PremiumMixin
 import top.xjunz.tasker.service.currentService
 import top.xjunz.tasker.service.floatingInspector
@@ -126,8 +126,11 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget,
         saveToSAFLauncher =
             registerForActivityResult(object : ActivityResultContract<String, Uri?>() {
                 override fun createIntent(context: Context, input: String): Intent {
-                    return Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                        .setType("*/*").putExtra(Intent.EXTRA_TITLE, input)
+                    return Intent.createChooser(
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
+                            .setType("*/*").putExtra(Intent.EXTRA_TITLE, input),
+                        R.string.select_export_path.str
+                    )
                 }
 
                 override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
@@ -173,13 +176,9 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>(), ScrollTarget,
                 menu.inflate(R.menu.feedbacks)
                 menu.setOnMenuItemClickListener {
                     when (it.itemId) {
-                        R.id.item_feedback_email -> {
-                            Feedbacks.feedbackByEmail(null)
-                        }
+                        R.id.item_feedback_email -> Feedbacks.feedbackByEmail(null)
 
-                        R.id.item_feedback_group -> {
-                            requireContext().viewUrlSafely("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=258644994&card_type=group&source=qrcode")
-                        }
+                        R.id.item_feedback_group -> Feedbacks.addGroup()
                     }
                     return@setOnMenuItemClickListener true
                 }

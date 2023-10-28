@@ -28,7 +28,7 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withValueArgument<String>(R.string.logcat_text, VariantArgType.TEXT_FORMAT)
         .withResult<String>(R.string.displayed_text)
-        .withDescriber<String> { applet, t ->
+        .withSingleValueAppletDescriber<String> { applet, t ->
             val bolds = applet.references.values.map {
                 ("\${$it}").foreColored()
             }.toTypedArray()
@@ -65,7 +65,7 @@ class TextActionRegistry(id: Int) : AppletOptionRegistry(id) {
         }
     }.withValueArgument<String>(R.string.msg_to_toast, VariantArgType.TEXT_FORMAT)
         .withResult<String>(R.string.displayed_text)
-        .withDescriber<String> { applet, t ->
+        .withSingleValueAppletDescriber<String> { applet, t ->
             val bolds = applet.references.values.map {
                 ("\${$it}").foreColored()
             }.toTypedArray()

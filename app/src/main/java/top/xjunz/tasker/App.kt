@@ -8,21 +8,16 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.content.res.Resources.Theme
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.sui.Sui
-import top.xjunz.shared.trace.logcat
 import top.xjunz.tasker.api.UpdateInfo
 import top.xjunz.tasker.premium.PremiumMixin
-import top.xjunz.tasker.service.currentService
-import top.xjunz.tasker.service.serviceController
 import java.io.File
 import java.lang.ref.WeakReference
-import kotlin.system.exitProcess
 
 
 /**
@@ -63,17 +58,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            logcat(e.stackTraceToString(), Log.ERROR)
-            if (serviceController.isServiceRunning) {
-                runCatching {
-                    currentService.destroy()
-                }.onFailure {
-                    logcat(e.stackTraceToString(), Log.ERROR)
-                }
-            }
-            exitProcess(-1)
-        }
         Sui.init(BuildConfig.APPLICATION_ID)
         if (!BuildConfig.DEBUG) {
             AppCenter.start(

@@ -55,7 +55,7 @@ open class BaseDialogFragment<T : ViewBinding> : AppCompatDialogFragment(),
         super.onCreate(savedInstanceState)
         setStyle(
             if (isFullScreen) STYLE_NO_FRAME else STYLE_NORMAL,
-            if (isFullScreen) R.style.Base_FragmentDialog else R.style.Base_FragmentDialog_Min
+            if (isFullScreen) R.style.Base_Dialog else R.style.Base_Dialog_Min
         )
     }
 

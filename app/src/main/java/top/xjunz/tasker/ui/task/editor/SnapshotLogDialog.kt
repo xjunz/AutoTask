@@ -32,6 +32,7 @@ import top.xjunz.tasker.ktx.doWhenCreated
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.observeConfirmation
 import top.xjunz.tasker.ktx.observeError
+import top.xjunz.tasker.ktx.str
 import top.xjunz.tasker.ktx.toast
 import top.xjunz.tasker.task.runtime.LocalTaskManager
 import top.xjunz.tasker.ui.base.BaseDialogFragment
@@ -87,8 +88,11 @@ class SnapshotLogDialog : BaseDialogFragment<DialogTaskLogBinding>(),
         saveToSAFLauncher =
             registerForActivityResult(object : ActivityResultContract<String, Uri?>() {
                 override fun createIntent(context: Context, input: String): Intent {
-                    return Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                        .setType("*/*").putExtra(Intent.EXTRA_TITLE, input)
+                    return Intent.createChooser(
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
+                            .setType("*/*").putExtra(Intent.EXTRA_TITLE, input),
+                        R.string.select_export_path.str
+                    )
                 }
 
                 override fun parseResult(resultCode: Int, intent: Intent?): Uri? {

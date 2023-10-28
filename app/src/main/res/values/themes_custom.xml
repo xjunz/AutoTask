@@ -43,13 +43,13 @@
         <item name="android:windowMinWidthMinor">70%</item>
     </style>
 
-    <style name="Base.FragmentDialog">
+    <style name="Base.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackground">?colorBackgroundFloating</item>
         <item name="android:windowAnimationStyle">@style/DialogAnimationSlide</item>
     </style>
 
-    <style name="Base.FragmentDialog.Min">
+    <style name="Base.Dialog.Min">
         <item name="android:backgroundDimAmount">0.32</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowMinWidthMinor">85%</item>
@@ -57,6 +57,11 @@
         <item name="android:windowElevation">6dp</item>
         <item name="android:windowAnimationStyle">@style/DialogAnimationSade</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+    <style name="Base.Dialog.Min.CrashReport">
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:windowElevation">6dp</item>
     </style>
 
     <style name="BottomCardShape">

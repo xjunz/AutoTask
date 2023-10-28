@@ -206,6 +206,8 @@ class AppletOption(
         get() = if (titleModifierRes != -1) titleModifierRes.str else field
         private set
 
+    var expectSingleValue = false
+
     private val invertedTitleResource: Int by lazy {
         @SuppressLint("DiscouragedApi")
         when (invertedTitleRes) {
@@ -323,6 +325,7 @@ class AppletOption(
     }
 
     fun <T : Any> withSingleValueDescriber(block: (T) -> CharSequence): AppletOption {
+        expectSingleValue = true
         describer = { _, values ->
             if (values.isEmpty()) {
                 null
@@ -333,12 +336,17 @@ class AppletOption(
         return this
     }
 
-    fun <T : Any> withDescriber(block: (Applet, T?) -> CharSequence?): AppletOption {
+    fun <T : Any> withSingleValueAppletDescriber(block: (Applet, T?) -> CharSequence?): AppletOption {
+        expectSingleValue = true
         describer = { applet, values ->
             if (applet == null) {
                 null
             } else {
-                block(applet, values.values.singleOrNull()?.casted())
+                if (values.isEmpty()) {
+                    null
+                } else {
+                    block(applet, values.values.single().casted())
+                }
             }
         }
         return this

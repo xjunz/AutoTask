@@ -61,10 +61,12 @@ class TaskCreatorDialog : BaseBottomSheetDialog<DialogTaskCreatorBinding>(),
         selectTaskFromSAFLauncher = registerForActivityResult(
             object : ActivityResultContract<String, Intent?>() {
                 override fun createIntent(context: Context, input: String): Intent {
-                    return Intent(Intent.ACTION_OPEN_DOCUMENT)
-                        .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        .addCategory(Intent.CATEGORY_OPENABLE)
-                        .setType("*/*")
+                    return Intent.createChooser(
+                        Intent(Intent.ACTION_OPEN_DOCUMENT)
+                            .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                            .addCategory(Intent.CATEGORY_OPENABLE)
+                            .setType("*/*"), R.string.import_tasks.str
+                    )
                 }
 
                 override fun parseResult(resultCode: Int, intent: Intent?): Intent? {

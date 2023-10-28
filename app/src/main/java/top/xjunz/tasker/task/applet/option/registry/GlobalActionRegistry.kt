@@ -92,7 +92,7 @@ class GlobalActionRegistry(id: Int) : AppletOptionRegistry(id) {
             uiAutomatorBridge.setRotation(it)
         }
     }.withValueArgument<Int>(R.string.rotation_direction, VariantArgType.INT_ROTATION).shizukuOnly()
-        .withDescriber<Int> { applet, t ->
+        .withSingleValueAppletDescriber<Int> { applet, t ->
             R.string.format_desc_rotation_screen.formatSpans(
                 R.array.rotations.array[t!!].clickToEdit(applet)
             )

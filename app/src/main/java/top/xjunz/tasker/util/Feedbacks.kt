@@ -14,13 +14,14 @@ import top.xjunz.tasker.R
 import top.xjunz.tasker.app
 import top.xjunz.tasker.ktx.format
 import top.xjunz.tasker.ktx.launchIntentSafely
+import top.xjunz.tasker.ktx.viewUrlSafely
 
 /**
  * @author xjunz 2023/03/06
  */
 object Feedbacks {
 
-    private fun dumpEnvInfo() = buildString {
+    fun dumpEnvInfo() = buildString {
         appendLine("Basic:")
         appendLine("--version code = ${BuildConfig.VERSION_CODE}")
         appendLine("--version name = ${BuildConfig.VERSION_NAME}")
@@ -37,6 +38,10 @@ object Feedbacks {
         }
     }
 
+    fun addGroup() {
+        app.viewUrlSafely("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=258644994&card_type=group&source=qrcode")
+    }
+
     fun feedbackByEmail(file: Uri?) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).putExtra(
             Intent.EXTRA_SUBJECT, R.string.mail_subject.format(formatCurrentTime())
@@ -44,7 +49,6 @@ object Feedbacks {
             .putExtra(Intent.EXTRA_EMAIL, arrayOf("webackup.feedback@gmail.com"))
         if (file != null) {
             intent.putExtra(Intent.EXTRA_STREAM, file)
-            @Suppress("DEPRECATION")
             val resInfoList = app.packageManager.queryIntentActivities(
                 intent, PackageManager.MATCH_DEFAULT_ONLY
             )

@@ -202,8 +202,8 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
             }
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.list)
-        .withSingleValueDescriber(scrollDescriber)
         .withValueArgument<Long>(R.string.swipe_args, VariantArgType.BITS_SCROLL)
+        .withSingleValueDescriber(scrollDescriber)
 
     @AppletOrdinal(0x0121)
     val scrollToEnd = appletOption(R.string.scroll_to_end) {
@@ -219,8 +219,8 @@ class UiObjectActionRegistry(id: Int) : AppletOptionRegistry(id) {
 
         }
     }.withRefArgument<AccessibilityNodeInfo>(R.string.list)
-        .withSingleValueDescriber(scrollDescriber)
         .withValueArgument<Long>(R.string.swipe_args, VariantArgType.BITS_SCROLL)
+        .withSingleValueDescriber(scrollDescriber)
 
     @AppletOrdinal(0x0130)
     val scrollIntoUiObject = appletOption(R.string.scroll_into_ui_object) {

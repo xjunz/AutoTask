@@ -64,7 +64,7 @@ open class BootstrapOptionRegistry : AppletOptionRegistry(ID_BOOTSTRAP_REGISTRY)
         title: Int
     ): AppletOption {
         return appletOption(title) {
-            F::class.java.newInstance()
+            F::class.java.getConstructor().newInstance()
         }.also {
             it.appletId = appletId
         }

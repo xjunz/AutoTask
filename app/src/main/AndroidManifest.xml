@@ -79,6 +79,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.outer.CrashReportActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Base.Dialog.Min.CrashReport" />
+
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"

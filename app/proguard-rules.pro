@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 -dontwarn **
 -dontobfuscate
+-keepattributes LineNumberTable,SourceFile
+
 -keep class top.xjunz.tasker.Preferences{
    *;
 }

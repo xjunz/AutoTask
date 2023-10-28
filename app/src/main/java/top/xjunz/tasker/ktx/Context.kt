@@ -10,6 +10,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.FileProvider
 import top.xjunz.shared.trace.logcatStackTrace
 import top.xjunz.tasker.R
@@ -20,8 +21,12 @@ import java.io.File
 /**
  * @author xjunz 2022/07/07
  */
-fun Context.viewUrlSafely(url: String) {
-    launchIntentSafely(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+fun Context.viewUrlSafely(uri: String) {
+    launchIntentSafely(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
+}
+
+fun Context.viewUrlSafely(uri: Uri) {
+    launchIntentSafely(Intent(Intent.ACTION_VIEW, uri))
 }
 
 /**
@@ -42,6 +47,18 @@ fun Context.peekActivity(): AppCompatActivity? {
 
 fun File.makeContentUri(): Uri {
     return FileProvider.getUriForFile(app, "top.xjunz.tasker.provider.file", this)
+}
+
+/**
+ * Launch an [Activity] auto using transitions or auto adding the [Intent.FLAG_ACTIVITY_NEW_TASK] flag.
+ */
+inline fun <T : Activity> Context.launchActivity(clazz: Class<T>, block: Intent.() -> Unit = {}) {
+    if (peekActivity() == null) {
+        startActivity(Intent(this, clazz).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).also(block))
+    } else {
+        val bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this as Activity).toBundle()
+        startActivity(Intent(this, clazz).also(block), bundle)
+    }
 }
 
 fun Context.launchIntentSafely(intent: Intent): Boolean {

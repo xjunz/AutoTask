@@ -65,7 +65,7 @@
             android:layout_marginEnd="8dp"
             android:text="@android:string/cancel"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_ok"
+            app:layout_constraintEnd_toStartOf="@id/btn_test"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/rv_pattern"
             app:layout_constraintVertical_chainStyle="packed" />
@@ -78,6 +78,18 @@
             android:text="@android:string/ok"
             app:layout_constraintBottom_toBottomOf="@+id/btn_cancel"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_test"
+            app:layout_constraintTop_toTopOf="@+id/btn_cancel" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_test"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/test"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_cancel"
+            app:layout_constraintEnd_toStartOf="@id/btn_ok"
             app:layout_constraintStart_toEndOf="@id/btn_cancel"
             app:layout_constraintTop_toTopOf="@+id/btn_cancel" />
 

@@ -27,13 +27,13 @@ class GestureActionRegistry(id: Int) : AppletOptionRegistry(id) {
             val point = IntValueUtil.parseXY(it)
             uiDevice.click(point.x, point.y)
         }
-    }.withSingleValueDescriber<Int> {
-        val point = IntValueUtil.parseXY(it)
-        R.string.format_coordinate.format(point.x, point.y)
     }.withUnaryArgument<Int>(
         R.string.specified_coordinate,
         variantValueType = VariantArgType.INT_COORDINATE
-    ).hasCompositeTitle()
+    ).withSingleValueDescriber<Int> {
+        val point = IntValueUtil.parseXY(it)
+        R.string.format_coordinate.format(point.x, point.y)
+    }.hasCompositeTitle()
 
     @AppletOrdinal(0x00_01)
     val longClick = appletOption(R.string.format_long_click) {

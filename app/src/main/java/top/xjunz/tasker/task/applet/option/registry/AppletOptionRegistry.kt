@@ -27,6 +27,11 @@ abstract class AppletOptionRegistry(val id: Int) {
             val accessible = it.isAccessible
             it.isAccessible = true
             val option = it.get(this) as AppletOption
+            if (option.expectSingleValue
+                && option.arguments.count { arg -> !arg.isReferenceOnly } != 1
+            ) {
+                "${it.name} expects only one single value arg!"
+            }
             option.name = it.name
             // There may be preset appletId
             val appletId = if (option.appletId != -1) option.appletId
