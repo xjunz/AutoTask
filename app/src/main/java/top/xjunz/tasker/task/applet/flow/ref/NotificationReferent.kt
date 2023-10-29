@@ -22,6 +22,7 @@ class NotificationReferent(private val componentInfo: ComponentInfoWrapper) : Re
             1 -> componentInfo.paneTitle
             // ComponentInfo which sends the notification
             2 -> componentInfo
+            3 -> componentInfo.label
             else -> super.getReferredValue(which, runtime)
         }
     }

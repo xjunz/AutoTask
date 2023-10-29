@@ -163,6 +163,17 @@ class AppletSelectorDialog : BaseDialogFragment<DialogAppletSelectorBinding>() {
         }
     }
 
+    fun setInitialSelectionRegistryId(registryId: Int) = doWhenCreated {
+        if (registryId != -1) {
+            val initialSelection = viewModel.registryOptions.indexOfFirst {
+                it.appletId == registryId
+            }
+            if (initialSelection != -1) {
+                viewModel.selectFlowRegistry(initialSelection)
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         AppletOptionFactory.resetAll()

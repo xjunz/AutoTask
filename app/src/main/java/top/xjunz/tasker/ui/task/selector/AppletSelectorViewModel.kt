@@ -85,6 +85,12 @@ class AppletSelectorViewModel(states: SavedStateHandle) : FlowViewModel(states) 
         } else {
             isScoped = false
             registryOptions = factory.flowRegistry.getRegistryOptions(controlFlow)
+            val initialSelection = registryOptions.indexOfFirst {
+                it.appletId == origin.registryId
+            }
+            if (initialSelection >= 0) {
+                selectFlowRegistry(initialSelection)
+            }
         }
     }
 

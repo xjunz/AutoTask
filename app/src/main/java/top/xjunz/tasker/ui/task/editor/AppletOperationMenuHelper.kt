@@ -284,12 +284,11 @@ class AppletOperationMenuHelper(
                 }.show(fm)
             }
 
-            R.id.item_replace_with -> {
+            R.id.item_replace_with ->
                 AppletSelectorDialog().init(applet.requireParent(), true) {
                     check(it.size == 1)
                     viewModel.replaceWith(applet, it.single())
-                }.show(fm)
-            }
+                }.setInitialSelectionRegistryId(applet.registryId).show(fm)
 
             R.id.item_add_before, R.id.item_add_after -> {
                 val addBefore = id == R.id.item_add_before

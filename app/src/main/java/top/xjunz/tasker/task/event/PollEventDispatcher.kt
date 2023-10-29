@@ -39,7 +39,7 @@ class PollEventDispatcher(looper: Looper) : EventDispatcher() {
                 event.putExtra(EXTRA_TICK_TIME_MILLS, uptime)
                 dispatchEvents(event)
             }
-            tickHandler.postDelayed(tikTok, 900L)
+            tickHandler.postDelayed(tikTok, 1000L)
         }
     }
 

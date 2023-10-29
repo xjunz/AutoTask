@@ -643,7 +643,7 @@
     <string name="is_wifi_network">当前是WIFI网络</string>
     <string name="not_is_wifi_network">当前不是WIFI网络</string>
     <string name="is_cellular_network">当前是移动网络</string>
-    <string name="not_is_mobile_network">当前不是移动网络</string>
+    <string name="not_is_cellular_network">当前不是移动网络</string>
     <string name="on_wifi_connected">当连接到WIFI时</string>
     <string name="connected_wifi_ssid">连接到的WIFI名称</string>
     <string name="on_wifi_disconnected">当WIFI连接断开时</string>
@@ -675,4 +675,5 @@
     <string name="oops_app_crashed">很抱歉，应用崩溃了…</string>
     <string name="restart_app">重启应用</string>
     <string name="send_to">发送到…</string>
+    <string name="notification_owner_app_name">发送通知的应用名称</string>
 </resources>

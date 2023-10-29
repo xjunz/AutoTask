@@ -48,6 +48,7 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
         ).withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
             .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
+            .withResult<String>(R.string.notification_owner_app_name)
 
     @AppletOrdinal(0x0004)
     val toastReceived =
@@ -55,6 +56,7 @@ class EventCriterionRegistry(id: Int) : AppletOptionRegistry(id) {
             .withResult<NotificationReferent>(R.string.notification_received)
             .withResult<String>(R.string.notification_content)
             .withResult<ComponentInfoWrapper>(R.string.notification_owner_app)
+            .withResult<String>(R.string.notification_owner_app_name)
 
     @AppletOrdinal(0x0005)
     val newWindow = eventFilterOption(Event.EVENT_ON_NEW_WINDOW, R.string.on_new_window)
