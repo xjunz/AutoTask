@@ -1,7 +1,7 @@
 
 # AutoTask
 
-一款支持[Shizuku](https://github.com/RikkaApps/Shizuku)和辅助功能的**自动任务**工具，[点击下载体验最新版](https://www.coolapk.com/apk/935131)。
+一款支持[Shizuku](https://github.com/RikkaApps/Shizuku)和辅助功能的**自动任务**工具，[点击下载体验最新版](https://fir.xcxwo.com/tasker)。
 
 ## 简介
 
